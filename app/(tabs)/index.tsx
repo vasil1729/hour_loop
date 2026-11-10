@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -7,10 +7,21 @@ import { Button } from '../../src/components/common/Button';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
-import { currentDayKey, formatDayLabel } from '../../src/domain/shared/dateUtils';
+import { IntentionBar } from '../../src/components/intentions/IntentionBar';
+import { IntentionEditModal } from '../../src/components/intentions/IntentionEditModal';
+import {
+  currentDayKey,
+  currentMonthKey,
+  formatDayLabel,
+} from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import { listRecentLoops } from '../../src/database/repositories/loopsRepository';
 import { attachLoopMetrics, type LoopWithMetrics } from '../../src/features/loops/loopMetrics';
+import {
+  clearIntention,
+  setIntention,
+} from '../../src/features/intentions/intentionsService';
+import { useIntentions } from '../../src/hooks/useIntentions';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
@@ -23,6 +34,11 @@ export default function TodayScreen() {
   const elapsedSeconds = useLoopStore((state) => state.elapsedSeconds);
   const refreshLoop = useLoopStore((state) => state.refresh);
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
+  const { daily, monthly, refresh: refreshIntentions } = useIntentions();
+  const [editingIntention, setEditingIntention] = useState<'daily' | 'monthly' | null>(
+    null
+  );
+  const [savingIntention, setSavingIntention] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,6 +62,49 @@ export default function TodayScreen() {
 
   const todayKey = currentDayKey();
 
+  const handleSaveIntention = async (seconds: number) => {
+    if (!editingIntention) return;
+    setSavingIntention(true);
+    try {
+      await setIntention(
+        db,
+        editingIntention,
+        editingIntention === 'daily' ? daily?.periodKey ?? todayKey : monthly?.periodKey ?? currentMonthKey(),
+        seconds
+      );
+      await refreshIntentions();
+      setEditingIntention(null);
+    } catch (error) {
+      Alert.alert(
+        'Could not save intention',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingIntention(false);
+    }
+  };
+
+  const handleClearIntention = async () => {
+    if (!editingIntention) return;
+    setSavingIntention(true);
+    try {
+      await clearIntention(
+        db,
+        editingIntention,
+        editingIntention === 'daily' ? daily?.periodKey ?? todayKey : monthly?.periodKey ?? currentMonthKey()
+      );
+      await refreshIntentions();
+      setEditingIntention(null);
+    } catch (error) {
+      Alert.alert(
+        'Could not clear intention',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingIntention(false);
+    }
+  };
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -53,6 +112,23 @@ export default function TodayScreen() {
         <Text style={[styles.title, { color: colors.text }]}>
           {formatDayLabel(todayKey)}
         </Text>
+      </View>
+
+      <View style={styles.intentionsRow}>
+        {daily ? (
+          <IntentionBar
+            label="DAILY"
+            summary={daily}
+            onPress={() => setEditingIntention('daily')}
+          />
+        ) : null}
+        {monthly ? (
+          <IntentionBar
+            label="MONTHLY"
+            summary={monthly}
+            onPress={() => setEditingIntention('monthly')}
+          />
+        ) : null}
       </View>
 
       {activeLoop ? (
@@ -150,6 +226,29 @@ export default function TodayScreen() {
           </View>
         )}
       </View>
+
+      <IntentionEditModal
+        visible={editingIntention !== null}
+        title={editingIntention === 'monthly' ? 'Monthly intention' : 'Daily intention'}
+        initialSeconds={
+          editingIntention === 'monthly'
+            ? monthly?.intention?.target_duration_seconds ?? null
+            : daily?.intention?.target_duration_seconds ?? null
+        }
+        presetMinutes={
+          editingIntention === 'monthly'
+            ? [600, 1200, 2400, 3600]
+            : [30, 60, 90, 120]
+        }
+        busy={savingIntention}
+        onSave={(seconds) => {
+          void handleSaveIntention(seconds);
+        }}
+        onClear={() => {
+          void handleClearIntention();
+        }}
+        onClose={() => setEditingIntention(null)}
+      />
     </Screen>
   );
 }
@@ -168,6 +267,10 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.4,
+  },
+  intentionsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
   activeCard: {
     borderWidth: StyleSheet.hairlineWidth,
