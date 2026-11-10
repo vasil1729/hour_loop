@@ -7,17 +7,24 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
+import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import {
   DURATION_PRESETS_MINUTES,
   minutesToSeconds,
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
+import type { Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import {
+  getSuggestedCarryIn,
+  listTasks,
+  markTaskInProgress,
+} from '../../src/features/tasks/taskService';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useSettingsStore } from '../../src/store/settingsStore';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -26,6 +33,7 @@ import { radius, spacing } from '../../src/theme/tokens';
 export default function StartLoopScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
+  const params = useLocalSearchParams<{ taskId?: string }>();
   const { colors } = useTheme();
   const refreshLoop = useLoopStore((state) => state.refresh);
   const defaultDurationSeconds = useSettingsStore(
@@ -34,6 +42,12 @@ export default function StartLoopScreen() {
 
   const [focus, setFocus] = useState('');
   const [carryIn, setCarryIn] = useState('');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
+    typeof params.taskId === 'string' ? params.taskId : null
+  );
+  const [taskPickerVisible, setTaskPickerVisible] = useState(false);
+  const [suggestedCarryIn, setSuggestedCarryIn] = useState<string | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(defaultDurationSeconds);
   const [customMinutes, setCustomMinutes] = useState('');
   const [durationTouched, setDurationTouched] = useState(false);
@@ -44,6 +58,39 @@ export default function StartLoopScreen() {
       setDurationSeconds(defaultDurationSeconds);
     }
   }, [defaultDurationSeconds, durationTouched]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void listTasks(db, 'active').then((result) => {
+      if (!cancelled) setTasks(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [db]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedTaskId) {
+      setSuggestedCarryIn(null);
+      return;
+    }
+    void getSuggestedCarryIn(db, selectedTaskId).then((suggestion) => {
+      if (!cancelled) {
+        setSuggestedCarryIn(suggestion);
+        if (suggestion && !carryIn.trim()) {
+          setCarryIn(suggestion);
+        }
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // carryIn is intentionally read once per task selection.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, selectedTaskId]);
+
+  const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
 
   const selectDuration = (seconds: number) => {
     setDurationTouched(true);
@@ -69,8 +116,12 @@ export default function StartLoopScreen() {
       await loopService.startLoop(db, {
         focus,
         carryIn,
+        taskId: selectedTaskId,
         targetDurationSeconds: durationSeconds,
       });
+      if (selectedTaskId) {
+        await markTaskInProgress(db, selectedTaskId);
+      }
       await refreshLoop(db);
       router.replace('/loop/active');
     } catch (error) {
@@ -140,6 +191,43 @@ export default function StartLoopScreen() {
       </View>
 
       <View style={styles.field}>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>TASK (OPTIONAL)</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Choose a task for this loop"
+          onPress={() => setTaskPickerVisible(true)}
+          style={[
+            styles.taskSelector,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.taskSelectorText,
+              { color: selectedTask ? colors.text : colors.textSecondary },
+            ]}
+          >
+            {selectedTask ? selectedTask.title : 'No task selected'}
+          </Text>
+          <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
+            {selectedTask ? 'Change' : 'Choose'}
+          </Text>
+        </Pressable>
+        {suggestedCarryIn && !carryIn.trim() ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Use suggested carry in"
+            onPress={() => setCarryIn(suggestedCarryIn)}
+          >
+            <Text style={[styles.suggestion, { color: colors.accent }]}>
+              Use previous roll forward: {suggestedCarryIn}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>TARGET</Text>
         <View style={styles.chips}>
           {DURATION_PRESETS_MINUTES.map((minutes) => {
@@ -206,6 +294,17 @@ export default function StartLoopScreen() {
           {secondsToMinutes(durationSeconds)} minutes
         </Text>
       </View>
+
+      <TaskPicker
+        visible={taskPickerVisible}
+        tasks={tasks}
+        selectedTaskId={selectedTaskId}
+        onSelect={(taskId) => {
+          setSelectedTaskId(taskId);
+          setTaskPickerVisible(false);
+        }}
+        onClose={() => setTaskPickerVisible(false)}
+      />
 
       <Button
         label="Start loop"
@@ -295,6 +394,31 @@ const styles = StyleSheet.create({
   customSuffix: {
     fontSize: 12,
     marginLeft: spacing.xs,
+  },
+  taskSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    minHeight: 50,
+  },
+  taskSelectorText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  taskSelectorAction: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  suggestion: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '600',
   },
   summary: {
     alignItems: 'center',

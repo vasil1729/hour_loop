@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -13,10 +14,12 @@ import { Button } from '../../src/components/common/Button';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
-import type { Loop } from '../../src/domain/types';
+import type { Loop, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { listTasks } from '../../src/features/tasks/taskService';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
@@ -40,6 +43,9 @@ export default function CompleteLoopScreen() {
   const [done, setDone] = useState('');
   const [rollForward, setRollForward] = useState('');
   const [note, setNote] = useState('');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [rollForwardTaskId, setRollForwardTaskId] = useState<string | null>(null);
+  const [taskPickerVisible, setTaskPickerVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +65,7 @@ export default function CompleteLoopScreen() {
         setDone(result.loop.done ?? '');
         setRollForward(result.loop.roll_forward ?? '');
         setNote(result.loop.note ?? '');
+        setRollForwardTaskId(result.loop.roll_forward_task_id);
       } catch (caught) {
         if (!cancelled) {
           setError(caught instanceof Error ? caught.message : 'Loop not found.');
@@ -75,6 +82,16 @@ export default function CompleteLoopScreen() {
       cancelled = true;
     };
   }, [db, loopId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void listTasks(db, 'active').then((result) => {
+      if (!cancelled) setTasks(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [db]);
 
   const handleKeepLooping = async () => {
     if (!loop) return;
@@ -110,6 +127,7 @@ export default function CompleteLoopScreen() {
         carryIn,
         done,
         rollForward,
+        rollForwardTaskId,
         note,
       });
       await refreshLoop(db);
@@ -203,6 +221,36 @@ export default function CompleteLoopScreen() {
         editable={!readOnly}
         multiline
       />
+      <View style={styles.field}>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          ROLL FORWARD TASK (OPTIONAL)
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Choose a roll forward task"
+          onPress={() => setTaskPickerVisible(true)}
+          disabled={readOnly}
+          style={[
+            styles.taskSelector,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.taskSelectorText,
+              { color: colors.textSecondary },
+            ]}
+          >
+            {tasks.find((task) => task.id === rollForwardTaskId)?.title ??
+              'No task linked'}
+          </Text>
+          <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
+            {readOnly ? '' : 'Choose'}
+          </Text>
+        </Pressable>
+      </View>
+
       <Field
         label="NOTE"
         value={note}
@@ -210,6 +258,18 @@ export default function CompleteLoopScreen() {
         placeholder="Anything worth remembering?"
         editable={!readOnly}
         multiline
+      />
+
+      <TaskPicker
+        visible={taskPickerVisible}
+        tasks={tasks}
+        selectedTaskId={rollForwardTaskId}
+        title="Link a follow-up task"
+        onSelect={(taskId) => {
+          setRollForwardTaskId(taskId);
+          setTaskPickerVisible(false);
+        }}
+        onClose={() => setTaskPickerVisible(false)}
       />
 
       <Button
@@ -311,6 +371,25 @@ const styles = StyleSheet.create({
   },
   field: {
     gap: spacing.sm,
+  },
+  taskSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    minHeight: 50,
+  },
+  taskSelectorText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  taskSelectorAction: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   label: {
     fontSize: 10,
