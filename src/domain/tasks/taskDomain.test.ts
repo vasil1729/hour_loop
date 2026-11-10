@@ -124,6 +124,19 @@ describe('childProgress', () => {
     });
   });
 
+  it('ignores archived children', () => {
+    const withArchived = tasks.map((entry) =>
+      entry.id === 'child-2'
+        ? { ...entry, status: 'ARCHIVED' as const }
+        : entry
+    );
+    expect(childProgress(withArchived, 'root-a')).toEqual({
+      completed: 0,
+      total: 1,
+      ratio: 0,
+    });
+  });
+
   it('returns zero for a leaf', () => {
     expect(childProgress(tasks, 'root-b')).toEqual({
       completed: 0,

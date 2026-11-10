@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { getIntervalsForLoop } from '../database/repositories/intervalsRepository';
@@ -6,8 +7,9 @@ import { calculateElapsedSeconds } from '../domain/timer/timerEngine';
 import { useLoopStore } from '../store/loopStore';
 
 /**
- * Drives a one-second display refresh. Each tick recalculates elapsed seconds
- * from persisted intervals — it never accumulates a counter.
+ * Drives a one-second display refresh while the screen is focused. Each tick
+ * recalculates elapsed seconds from persisted intervals — it never accumulates
+ * a counter.
  */
 export function useActiveLoop() {
   const db = useSQLiteContext();
@@ -17,37 +19,40 @@ export function useActiveLoop() {
   const refresh = useLoopStore((state) => state.refresh);
   const setElapsedSeconds = useLoopStore((state) => state.setElapsedSeconds);
 
-  useEffect(() => {
-    void refresh(db);
-  }, [db, refresh]);
-
   const loopId = activeLoop?.id;
   const loopStatus = activeLoop?.status;
 
-  useEffect(() => {
-    if (!loopId || loopStatus !== 'ACTIVE') {
-      return;
-    }
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
 
-    let cancelled = false;
+      const tick = async () => {
+        if (!loopId || loopStatus !== 'ACTIVE') return;
+        const intervals = await getIntervalsForLoop(db, loopId);
+        if (!cancelled) {
+          setElapsedSeconds(calculateElapsedSeconds(intervals, new Date()));
+        }
+      };
 
-    const tick = async () => {
-      const intervals = await getIntervalsForLoop(db, loopId);
-      if (!cancelled) {
-        setElapsedSeconds(calculateElapsedSeconds(intervals, new Date()));
-      }
-    };
-
-    void tick();
-    const timer = setInterval(() => {
+      void refresh(db);
       void tick();
-    }, 1000);
 
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, [db, loopId, loopStatus, setElapsedSeconds]);
+      if (!loopId || loopStatus !== 'ACTIVE') {
+        return () => {
+          cancelled = true;
+        };
+      }
+
+      const timer = setInterval(() => {
+        void tick();
+      }, 1000);
+
+      return () => {
+        cancelled = true;
+        clearInterval(timer);
+      };
+    }, [db, loopId, loopStatus, refresh, setElapsedSeconds])
+  );
 
   return { activeLoop, elapsedSeconds, loading, refresh };
 }

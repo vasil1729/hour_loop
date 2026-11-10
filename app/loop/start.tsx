@@ -124,7 +124,7 @@ export default function StartLoopScreen() {
         () => undefined
       );
       if (selectedTaskId) {
-        await markTaskInProgress(db, selectedTaskId);
+        await markTaskInProgress(db, selectedTaskId).catch(() => undefined);
       }
       await refreshLoop(db);
       router.replace('/loop/active');

@@ -133,7 +133,9 @@ export type TaskProgress = {
 };
 
 export function childProgress(tasks: Task[], taskId: string): TaskProgress {
-  const children = tasks.filter((task) => task.parent_task_id === taskId);
+  const children = tasks.filter(
+    (task) => task.parent_task_id === taskId && task.status !== 'ARCHIVED'
+  );
   const completed = children.filter((task) => task.status === 'COMPLETED').length;
   const total = children.length;
   return {

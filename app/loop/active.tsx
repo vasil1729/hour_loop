@@ -12,6 +12,7 @@ import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
 import { TimerProgress } from '../../src/components/timer/TimerProgress';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { loopService } from '../../src/features/loops/loopService';
+import { goToToday } from '../../src/services/navigation/navigationService';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -41,6 +42,8 @@ export default function ActiveLoopScreen() {
       } finally {
         setBusy(false);
       }
+    } else {
+      await syncLoopNotification(db, activeLoop).catch(() => undefined);
     }
     router.push({
       pathname: '/loop/complete',
@@ -176,7 +179,7 @@ export default function ActiveLoopScreen() {
           void handleStop();
         }}
         onMinimize={() => {
-          router.replace('/(tabs)');
+          goToToday(router);
         }}
       />
     </Screen>

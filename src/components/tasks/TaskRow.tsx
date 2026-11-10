@@ -14,6 +14,7 @@ type TaskRowProps = {
   onToggleExpand: () => void;
   onPress: () => void;
   onToggleComplete?: () => void;
+  showChevron?: boolean;
 };
 
 export function TaskRow({
@@ -24,6 +25,7 @@ export function TaskRow({
   onToggleExpand,
   onPress,
   onToggleComplete,
+  showChevron = true,
 }: TaskRowProps) {
   const { colors } = useTheme();
   const completed = task.status === 'COMPLETED';
@@ -49,23 +51,27 @@ export function TaskRow({
         },
       ]}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
-        onPress={onToggleExpand}
-        hitSlop={8}
-        style={styles.chevron}
-      >
-        {hasChildren ? (
-          <Ionicons
-            name={isExpanded ? 'chevron-down' : 'chevron-forward'}
-            size={16}
-            color={colors.textSecondary}
-          />
-        ) : (
-          <View style={styles.chevronSpacer} />
-        )}
-      </Pressable>
+      {showChevron ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
+          onPress={onToggleExpand}
+          hitSlop={8}
+          style={styles.chevron}
+        >
+          {hasChildren ? (
+            <Ionicons
+              name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+              size={16}
+              color={colors.textSecondary}
+            />
+          ) : (
+            <View style={styles.chevronSpacer} />
+          )}
+        </Pressable>
+      ) : (
+        <View style={styles.chevronSpacer} />
+      )}
 
       <Pressable
         accessibilityRole="checkbox"

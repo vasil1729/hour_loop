@@ -19,6 +19,7 @@ import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import type { Loop, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { goToToday } from '../../src/services/navigation/navigationService';
 import {
   cancelLoopNotification,
   syncLoopNotification,
@@ -123,7 +124,7 @@ export default function CompleteLoopScreen() {
   const handleSave = async () => {
     if (!loop) return;
     if (loop.status === 'COMPLETED') {
-      router.replace('/(tabs)');
+      goToToday(router);
       return;
     }
 
@@ -139,7 +140,7 @@ export default function CompleteLoopScreen() {
       });
       await cancelLoopNotification(db, loop.id).catch(() => undefined);
       await refreshLoop(db);
-      router.replace('/(tabs)');
+      goToToday(router);
     } catch (caught) {
       Alert.alert(
         'Could not close loop',
@@ -161,7 +162,7 @@ export default function CompleteLoopScreen() {
           title="Loop not found"
           message={error ?? 'This loop is no longer available.'}
           action={
-            <Button label="Back to Today" onPress={() => router.replace('/(tabs)')} />
+            <Button label="Back to Today" onPress={() => goToToday(router)} />
           }
         />
       </Screen>

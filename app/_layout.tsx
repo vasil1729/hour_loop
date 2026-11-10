@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LoadingScreen } from '../src/components/common/LoadingScreen';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
 import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
@@ -67,11 +68,17 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
-          <AppBootstrap>
-            <RootNavigator />
-          </AppBootstrap>
-        </SQLiteProvider>
+        <Suspense fallback={<LoadingScreen message="Opening your local database…" />}>
+          <SQLiteProvider
+            databaseName={DATABASE_NAME}
+            onInit={migrateDbIfNeeded}
+            useSuspense
+          >
+            <AppBootstrap>
+              <RootNavigator />
+            </AppBootstrap>
+          </SQLiteProvider>
+        </Suspense>
       </ThemeProvider>
     </SafeAreaProvider>
   );

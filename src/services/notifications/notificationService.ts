@@ -22,6 +22,8 @@ function notificationKey(loopId: string): string {
 }
 
 export async function setupNotifications(): Promise<void> {
+  if (Platform.OS === 'web') return;
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowBanner: true,

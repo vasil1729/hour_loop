@@ -17,6 +17,7 @@ import {
   minutesToSeconds,
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
+import { recoverAppState } from '../../src/services/lifecycle/appLifecycleService';
 import {
   cancelAllLoopNotifications,
   requestNotificationPermission,
@@ -99,6 +100,9 @@ export default function SettingsScreen() {
         await cancelAllLoopNotifications(db);
       }
       await setNotificationsEnabled(db, enabled);
+      if (enabled) {
+        await recoverAppState(db, { requestPermission: true });
+      }
     } catch (error) {
       Alert.alert(
         'Could not update notifications',

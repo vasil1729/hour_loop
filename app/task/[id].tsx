@@ -14,7 +14,6 @@ import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskRow } from '../../src/components/tasks/TaskRow';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import { flattenTree, type FlatTaskNode } from '../../src/domain/tasks/taskDomain';
-import type { Task } from '../../src/domain/types';
 import {
   createTask,
   getTaskDetail,
@@ -140,6 +139,22 @@ export default function TaskDetailScreen() {
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleToggleSubtask = async (task: { id: string; status: string }) => {
+    try {
+      await setTaskStatus(
+        db,
+        task.id,
+        task.status === 'COMPLETED' ? 'NOT_STARTED' : 'COMPLETED'
+      );
+      await reload();
+    } catch (caught) {
+      Alert.alert(
+        'Could not update subtask',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      );
     }
   };
 
@@ -330,12 +345,9 @@ export default function TaskDetailScreen() {
                 isExpanded
                 onToggleExpand={() => undefined}
                 onPress={() => router.push(`/task/${row.task.id}`)}
+                showChevron={false}
                 onToggleComplete={() => {
-                  void setTaskStatus(
-                    db,
-                    row.task.id,
-                    row.task.status === 'COMPLETED' ? 'NOT_STARTED' : 'COMPLETED'
-                  ).then(reload);
+                  void handleToggleSubtask(row.task);
                 }}
               />
             ))}

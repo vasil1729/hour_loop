@@ -21,8 +21,8 @@ import {
   clearIntention,
   setIntention,
 } from '../../src/features/intentions/intentionsService';
+import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useIntentions } from '../../src/hooks/useIntentions';
-import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
@@ -30,9 +30,7 @@ export default function TodayScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
-  const activeLoop = useLoopStore((state) => state.activeLoop);
-  const elapsedSeconds = useLoopStore((state) => state.elapsedSeconds);
-  const refreshLoop = useLoopStore((state) => state.refresh);
+  const { activeLoop, elapsedSeconds } = useActiveLoop();
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
   const { daily, monthly, refresh: refreshIntentions } = useIntentions();
   const [editingIntention, setEditingIntention] = useState<'daily' | 'monthly' | null>(
@@ -45,7 +43,6 @@ export default function TodayScreen() {
       let cancelled = false;
 
       const load = async () => {
-        await refreshLoop(db);
         const recent = await listRecentLoops(db, 5);
         const withMetrics = await attachLoopMetrics(db, recent);
         if (!cancelled) {
@@ -57,7 +54,7 @@ export default function TodayScreen() {
       return () => {
         cancelled = true;
       };
-    }, [db, refreshLoop])
+    }, [db])
   );
 
   const todayKey = currentDayKey();

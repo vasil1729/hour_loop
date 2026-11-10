@@ -48,7 +48,7 @@ export function TaskFormModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.backdrop, { backgroundColor: colors.overlay }]}
       >
         <View style={[styles.card, { backgroundColor: colors.surface }]}>

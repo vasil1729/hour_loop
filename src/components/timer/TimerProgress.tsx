@@ -1,8 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { progressRatio, remainingSeconds } from '../../domain/timer/timerEngine';
-import { formatDurationCompact } from '../../domain/timer/timerEngine';
+import {
+  formatDurationCompact,
+  progressRatio,
+  remainingSeconds,
+} from '../../domain/timer/timerEngine';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
