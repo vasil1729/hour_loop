@@ -42,7 +42,8 @@
         {
           "color": "#7B6EF6"
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }
