@@ -6,6 +6,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
+import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
+import { setupNotifications } from '../src/services/notifications/notificationService';
 import { useSettingsStore } from '../src/store/settingsStore';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 
@@ -14,8 +16,23 @@ function AppBootstrap({ children }: { children: React.ReactNode }) {
   const loadSettings = useSettingsStore((state) => state.load);
 
   useEffect(() => {
-    void loadSettings(db);
+    let cancelled = false;
+    void (async () => {
+      await loadSettings(db);
+      if (!cancelled) {
+        await recoverAppState(db);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [db, loadSettings]);
+
+  useEffect(() => {
+    void setupNotifications();
+    const subscription = subscribeToForeground(db);
+    return () => subscription.remove();
+  }, [db]);
 
   return <>{children}</>;
 }

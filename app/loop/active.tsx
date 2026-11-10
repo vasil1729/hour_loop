@@ -12,6 +12,7 @@ import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
 import { TimerProgress } from '../../src/components/timer/TimerProgress';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { loopService } from '../../src/features/loops/loopService';
+import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
@@ -28,7 +29,8 @@ export default function ActiveLoopScreen() {
     if (activeLoop.status === 'ACTIVE') {
       setBusy(true);
       try {
-        await loopService.pauseLoop(db, activeLoop.id);
+        const paused = await loopService.pauseLoop(db, activeLoop.id);
+        await syncLoopNotification(db, paused).catch(() => undefined);
         await refresh(db);
       } catch (error) {
         Alert.alert(
@@ -157,10 +159,18 @@ export default function ActiveLoopScreen() {
         status={isPaused ? 'PAUSED' : 'ACTIVE'}
         busy={busy}
         onPause={() => {
-          void runAction(() => loopService.pauseLoop(db, activeLoop.id));
+          void runAction(async () => {
+            const paused = await loopService.pauseLoop(db, activeLoop.id);
+            await syncLoopNotification(db, paused).catch(() => undefined);
+          });
         }}
         onResume={() => {
-          void runAction(() => loopService.resumeLoop(db, activeLoop.id));
+          void runAction(async () => {
+            const resumed = await loopService.resumeLoop(db, activeLoop.id);
+            await syncLoopNotification(db, resumed, { requestPermission: true }).catch(
+              () => undefined
+            );
+          });
         }}
         onStop={() => {
           void handleStop();

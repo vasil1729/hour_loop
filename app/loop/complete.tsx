@@ -19,6 +19,10 @@ import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import type { Loop, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import {
+  cancelLoopNotification,
+  syncLoopNotification,
+} from '../../src/services/notifications/notificationService';
 import { listTasks } from '../../src/features/tasks/taskService';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -98,7 +102,10 @@ export default function CompleteLoopScreen() {
     if (loop.status === 'PAUSED') {
       setBusy(true);
       try {
-        await loopService.resumeLoop(db, loop.id);
+        const resumed = await loopService.resumeLoop(db, loop.id);
+        await syncLoopNotification(db, resumed, { requestPermission: true }).catch(
+          () => undefined
+        );
         await refreshLoop(db);
       } catch (caught) {
         Alert.alert(
@@ -130,6 +137,7 @@ export default function CompleteLoopScreen() {
         rollForwardTaskId,
         note,
       });
+      await cancelLoopNotification(db, loop.id).catch(() => undefined);
       await refreshLoop(db);
       router.replace('/(tabs)');
     } catch (caught) {

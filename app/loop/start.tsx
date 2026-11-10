@@ -20,6 +20,7 @@ import {
 } from '../../src/constants/durationPresets';
 import type { Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import {
   getSuggestedCarryIn,
   listTasks,
@@ -113,12 +114,15 @@ export default function StartLoopScreen() {
   const handleStart = async () => {
     setBusy(true);
     try {
-      await loopService.startLoop(db, {
+      const loop = await loopService.startLoop(db, {
         focus,
         carryIn,
         taskId: selectedTaskId,
         targetDurationSeconds: durationSeconds,
       });
+      await syncLoopNotification(db, loop, { requestPermission: true }).catch(
+        () => undefined
+      );
       if (selectedTaskId) {
         await markTaskInProgress(db, selectedTaskId);
       }
