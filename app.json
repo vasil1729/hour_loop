@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Hour Loop",
+    "slug": "hour-loop",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "hourloop",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0F12"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vasil.hourloop"
+    },
+    "android": {
+      "package": "com.vasil.hourloop",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F0F12"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#7B6EF6"
+        }
+      ]
+    ]
+  }
+}
