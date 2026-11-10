@@ -35,6 +35,7 @@ Press `a` for an Android emulator, `i` for iOS, or scan the QR code with Expo Go
 
 ```bash
 npm run typecheck
+npm run lint
 npm test
 ```
 
@@ -51,6 +52,13 @@ src/components/      Reusable UI
 src/theme/           Design tokens and theme provider
 docs/                Product and architecture documentation
 ```
+
+## Documentation
+
+- [Product specification](docs/PRODUCT_SPEC.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Database schema](docs/DATABASE_SCHEMA.md)
+- [Implementation plan](IMPLEMENTATION_PLAN.md)
 
 ## Design principles
 
