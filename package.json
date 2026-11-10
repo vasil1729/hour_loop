@@ -28,7 +28,6 @@
     "react-native": "0.79.6",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "uuid": "^14.0.3",
     "zustand": "^5.1.0"
   },
   "devDependencies": {
