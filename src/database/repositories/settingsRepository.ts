@@ -33,3 +33,14 @@ export async function setSetting(
 export async function deleteSetting(db: SQLiteDatabase, key: string): Promise<void> {
   await db.runAsync('DELETE FROM settings WHERE key = ?', [key]);
 }
+
+export async function insertSetting(
+  db: SQLiteDatabase,
+  setting: Setting
+): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    [setting.key, setting.value, setting.updated_at]
+  );
+}

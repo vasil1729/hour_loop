@@ -11,12 +11,19 @@ import {
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
 import {
   DURATION_PRESETS_MINUTES,
   minutesToSeconds,
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
+import type { HourLoopBackup } from '../../src/domain/backup/backup';
+import {
+  exportBackup,
+  importBackup,
+  pickBackupFile,
+} from '../../src/features/backup/backupService';
 import { recoverAppState } from '../../src/services/lifecycle/appLifecycleService';
 import {
   cancelAllLoopNotifications,
@@ -50,9 +57,13 @@ export default function SettingsScreen() {
   const setNotificationsEnabled = useSettingsStore(
     (state) => state.setNotificationsEnabled
   );
+  const loadSettings = useSettingsStore((state) => state.load);
 
   const [customMinutes, setCustomMinutes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(
+    null
+  );
 
   const applyDuration = async (seconds: number) => {
     setSaving(true);
@@ -108,6 +119,80 @@ export default function SettingsScreen() {
         'Could not update notifications',
         error instanceof Error ? error.message : 'Please try again.'
       );
+    }
+  };
+
+  const handleExport = async () => {
+    setBackupBusy('export');
+    try {
+      await exportBackup(db);
+    } catch (error) {
+      Alert.alert(
+        'Export failed',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setBackupBusy(null);
+    }
+  };
+
+  const handleImport = async () => {
+    setBackupBusy('import');
+    try {
+      const backup = await pickBackupFile();
+      if (!backup) {
+        setBackupBusy(null);
+        return;
+      }
+      setBackupBusy(null);
+      Alert.alert(
+        'Replace all data?',
+        buildImportMessage(backup),
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Replace data',
+            style: 'destructive',
+            onPress: () => {
+              void performImport(backup);
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Import failed',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+      setBackupBusy(null);
+    }
+  };
+
+  const performImport = async (backup: HourLoopBackup) => {
+    setBackupBusy('import');
+    try {
+      await cancelAllLoopNotifications(db);
+      const result = await importBackup(db, backup);
+      await loadSettings(db);
+      await recoverAppState(db);
+
+      const pausedNote =
+        result.pausedLoops > 0
+          ? ` ${result.pausedLoops} running ${
+              result.pausedLoops === 1 ? 'loop was' : 'loops were'
+            } paused at the export time.`
+          : '';
+      Alert.alert(
+        'Backup restored',
+        `Restored ${result.tasks} tasks, ${result.loops} loops, ${result.intervals} intervals, ${result.loopItems} checklist items, and ${result.intentions} intentions.${pausedNote}`
+      );
+    } catch (error) {
+      Alert.alert(
+        'Could not restore backup',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setBackupBusy(null);
     }
   };
 
@@ -268,6 +353,38 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Backup & restore
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          Export a readable JSON backup you can keep in Files, Drive, or email.
+          Importing a backup replaces all data currently on this device.
+        </Text>
+        <View style={styles.backupActions}>
+          <Button
+            label="Export data"
+            variant="secondary"
+            onPress={() => {
+              void handleExport();
+            }}
+            loading={backupBusy === 'export'}
+            disabled={backupBusy !== null}
+            style={styles.backupButton}
+          />
+          <Button
+            label="Import data"
+            variant="secondary"
+            onPress={() => {
+              void handleImport();
+            }}
+            loading={backupBusy === 'import'}
+            disabled={backupBusy !== null}
+            style={styles.backupButton}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>About</Text>
         <View
           style={[
@@ -282,14 +399,25 @@ export default function SettingsScreen() {
             Version {Constants.expoConfig?.version ?? '1.0.0'}
           </Text>
           <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
-            All data lives in a local SQLite database on this device. No account,
-            network, or analytics are used. Data export is planned for a future
-            release.
+            All data lives in a local SQLite database on this device. Backups are
+            plain JSON files, so you can move them anywhere without an account or
+            cloud service.
           </Text>
         </View>
       </View>
     </Screen>
   );
+}
+
+function buildImportMessage(backup: HourLoopBackup): string {
+  const { counts } = backup;
+  const exportedAt = new Date(backup.exportedAt).toLocaleString();
+  const pausedNote =
+    backup.data.loops.some((loop) => loop.status === 'ACTIVE')
+      ? ' Running loops will be restored as paused at the export time.'
+      : '';
+
+  return `This backup contains ${counts.tasks} tasks, ${counts.loops} loops, ${counts.intervals} intervals, ${counts.loopItems} checklist items, and ${counts.intentions} intentions.\n\nExported ${exportedAt} from Hour Loop ${backup.appVersion}.\n\nThis replaces all current data on this device.${pausedNote}`;
 }
 
 const styles = StyleSheet.create({
@@ -370,6 +498,13 @@ const styles = StyleSheet.create({
   switchBody: {
     flex: 1,
     gap: spacing.xs,
+  },
+  backupActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  backupButton: {
+    flex: 1,
   },
   aboutCard: {
     borderWidth: StyleSheet.hairlineWidth,

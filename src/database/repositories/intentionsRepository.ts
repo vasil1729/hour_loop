@@ -88,3 +88,30 @@ export async function deleteIntention(
     [periodType, periodKey]
   );
 }
+
+export async function getAllIntentions(
+  db: SQLiteDatabase
+): Promise<Intention[]> {
+  return db.getAllAsync<Intention>(
+    `${SELECT_INTENTION} ORDER BY period_type ASC, period_key ASC`
+  );
+}
+
+export async function createIntention(
+  db: SQLiteDatabase,
+  intention: Intention
+): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO intentions (
+       id, period_type, period_key, target_duration_seconds, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      intention.id,
+      intention.period_type,
+      intention.period_key,
+      intention.target_duration_seconds,
+      intention.created_at,
+      intention.updated_at,
+    ]
+  );
+}
