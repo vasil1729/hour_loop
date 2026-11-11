@@ -19,11 +19,14 @@ import {
   getIntention,
   upsertIntention,
 } from '../../database/repositories/intentionsRepository';
+import { getDefaultIntentionSeconds } from './intentionDefaults';
 
 export type IntentionSummary = {
   periodType: IntentionPeriodType;
   periodKey: string;
   intention: Intention | null;
+  targetSeconds: number;
+  isDefault: boolean;
   actualSeconds: number;
   progress: IntentionProgress;
 };
@@ -33,17 +36,21 @@ export async function getIntentionSummary(
   periodType: IntentionPeriodType,
   periodKey: string
 ): Promise<IntentionSummary> {
-  const intention = await getIntention(db, periodType, periodKey);
-  const actualSeconds = await getActualSeconds(db, periodType, periodKey);
+  const [intention, defaultSeconds, actualSeconds] = await Promise.all([
+    getIntention(db, periodType, periodKey),
+    getDefaultIntentionSeconds(db, periodType),
+    getActualSeconds(db, periodType, periodKey),
+  ]);
+  const targetSeconds =
+    intention?.target_duration_seconds ?? defaultSeconds;
   return {
     periodType,
     periodKey,
     intention,
+    targetSeconds,
+    isDefault: intention === null && defaultSeconds > 0,
     actualSeconds,
-    progress: computeIntentionProgress(
-      intention?.target_duration_seconds ?? 0,
-      actualSeconds
-    ),
+    progress: computeIntentionProgress(targetSeconds, actualSeconds),
   };
 }
 

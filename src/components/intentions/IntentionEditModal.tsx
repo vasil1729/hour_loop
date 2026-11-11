@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { minutesToSeconds, secondsToMinutes } from '../../constants/durationPresets';
+import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 import { Button } from '../common/Button';
@@ -9,13 +10,20 @@ import { Button } from '../common/Button';
 type IntentionEditModalProps = {
   visible: boolean;
   title: string;
-  initialSeconds: number | null;
-  presetMinutes: number[];
+  initialSeconds: number;
+  presetMinutes: readonly number[];
   busy?: boolean;
+  clearDisabled?: boolean;
+  clearLabel?: string;
+  helperText?: string;
   onSave: (seconds: number) => void;
   onClear: () => void;
   onClose: () => void;
 };
+
+function presetLabel(minutes: number): string {
+  return minutes >= 60 ? `${minutes / 60}h` : `${minutes}m`;
+}
 
 export function IntentionEditModal({
   visible,
@@ -23,32 +31,43 @@ export function IntentionEditModal({
   initialSeconds,
   presetMinutes,
   busy = false,
+  clearDisabled = false,
+  clearLabel = 'Clear',
+  helperText = 'Tap a preset to add it to the target.',
   onSave,
   onClear,
   onClose,
 }: IntentionEditModalProps) {
   const { colors } = useTheme();
-  const [seconds, setSeconds] = useState(initialSeconds ?? 0);
+  const [seconds, setSeconds] = useState(Math.max(0, initialSeconds));
   const [customMinutes, setCustomMinutes] = useState(
-    initialSeconds ? String(secondsToMinutes(initialSeconds)) : ''
+    initialSeconds > 0 ? String(secondsToMinutes(initialSeconds)) : ''
   );
+  const secondsRef = useRef(Math.max(0, initialSeconds));
 
   useEffect(() => {
     if (!visible) return;
-    setSeconds(initialSeconds ?? 0);
-    setCustomMinutes(initialSeconds ? String(secondsToMinutes(initialSeconds)) : '');
+    const next = Math.max(0, initialSeconds);
+    secondsRef.current = next;
+    setSeconds(next);
+    setCustomMinutes(next > 0 ? String(secondsToMinutes(next)) : '');
   }, [initialSeconds, visible]);
 
-  const selectMinutes = (minutes: number) => {
-    setSeconds(minutesToSeconds(minutes));
-    setCustomMinutes(String(minutes));
+  const addPreset = (minutes: number) => {
+    const next = secondsRef.current + minutesToSeconds(minutes);
+    secondsRef.current = next;
+    setSeconds(next);
+    setCustomMinutes(String(secondsToMinutes(next)));
   };
 
   const handleCustom = (value: string) => {
     const digits = value.replace(/[^0-9]/g, '');
     setCustomMinutes(digits);
     const minutes = Number(digits);
-    setSeconds(Number.isFinite(minutes) && minutes > 0 ? minutesToSeconds(minutes) : 0);
+    const next =
+      Number.isFinite(minutes) && minutes > 0 ? minutesToSeconds(minutes) : 0;
+    secondsRef.current = next;
+    setSeconds(next);
   };
 
   return (
@@ -74,46 +93,60 @@ export function IntentionEditModal({
             </Pressable>
           </View>
 
+          <View
+            style={[
+              styles.totalCard,
+              { backgroundColor: colors.background, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
+              TARGET
+            </Text>
+            <Text
+              accessibilityLiveRegion="polite"
+              style={[styles.totalValue, { color: colors.text }]}
+            >
+              {formatIntentionDuration(seconds)}
+            </Text>
+          </View>
+
+          <Text style={[styles.helper, { color: colors.textSecondary }]}>
+            {helperText}
+          </Text>
+
           <View style={styles.chips}>
-            {presetMinutes.map((minutes) => {
-              const selected = seconds === minutesToSeconds(minutes);
-              return (
-                <Pressable
-                  key={minutes}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => selectMinutes(minutes)}
-                  style={[
-                    styles.chip,
-                    {
-                      backgroundColor: selected ? colors.accent : colors.background,
-                      borderColor: selected ? colors.accent : colors.border,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      { color: selected ? '#FFFFFF' : colors.text },
-                    ]}
-                  >
-                    {minutes >= 60
-                      ? `${Math.round((minutes / 60) * 10) / 10}h`
-                      : `${minutes}m`}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            {presetMinutes.map((minutes) => (
+              <Pressable
+                key={minutes}
+                accessibilityRole="button"
+                accessibilityLabel={`Add ${presetLabel(minutes)}`}
+                onPress={() => addPreset(minutes)}
+                disabled={busy}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: colors.accentSoft,
+                    borderColor: colors.accent,
+                    opacity: busy ? 0.5 : 1,
+                  },
+                ]}
+              >
+                <Text style={[styles.chipText, { color: colors.accent }]}>
+                  +{presetLabel(minutes)}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
           <View style={styles.customRow}>
             <TextInput
               value={customMinutes}
               onChangeText={handleCustom}
-              placeholder="Custom minutes"
+              placeholder="Set exact minutes"
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               maxLength={5}
+              editable={!busy}
               style={[
                 styles.input,
                 {
@@ -128,10 +161,10 @@ export function IntentionEditModal({
 
           <View style={styles.actions}>
             <Button
-              label="Clear"
+              label={clearLabel}
               variant="ghost"
               onPress={onClear}
-              disabled={busy || !initialSeconds}
+              disabled={busy || clearDisabled}
               style={styles.action}
             />
             <Button
@@ -177,6 +210,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  totalCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  totalLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  totalValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  helper: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -192,7 +249,7 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   customRow: {
     flexDirection: 'row',

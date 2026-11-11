@@ -13,12 +13,15 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
+import { IntentionEditModal } from '../../src/components/intentions/IntentionEditModal';
 import {
   DURATION_PRESETS_MINUTES,
   minutesToSeconds,
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
+import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
 import type { HourLoopBackup } from '../../src/domain/backup/backup';
+import { formatIntentionDuration } from '../../src/domain/intentions/intentionsDomain';
 import {
   exportBackup,
   importBackup,
@@ -52,11 +55,23 @@ export default function SettingsScreen() {
   const defaultDurationSeconds = useSettingsStore(
     (state) => state.defaultDurationSeconds
   );
+  const defaultDailyIntentionSeconds = useSettingsStore(
+    (state) => state.defaultDailyIntentionSeconds
+  );
+  const defaultMonthlyIntentionSeconds = useSettingsStore(
+    (state) => state.defaultMonthlyIntentionSeconds
+  );
   const themePreference = useSettingsStore((state) => state.themePreference);
   const notificationsEnabled = useSettingsStore(
     (state) => state.notificationsEnabled
   );
   const setDefaultDuration = useSettingsStore((state) => state.setDefaultDuration);
+  const setDefaultDailyIntention = useSettingsStore(
+    (state) => state.setDefaultDailyIntention
+  );
+  const setDefaultMonthlyIntention = useSettingsStore(
+    (state) => state.setDefaultMonthlyIntention
+  );
   const setThemePreference = useSettingsStore((state) => state.setThemePreference);
   const setNotificationsEnabled = useSettingsStore(
     (state) => state.setNotificationsEnabled
@@ -65,6 +80,10 @@ export default function SettingsScreen() {
 
   const [customMinutes, setCustomMinutes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingIntention, setSavingIntention] = useState(false);
+  const [editingDefaultIntention, setEditingDefaultIntention] = useState<
+    'daily' | 'monthly' | null
+  >(null);
   const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(
     null
   );
@@ -87,6 +106,26 @@ export default function SettingsScreen() {
     const minutes = Number(customMinutes);
     if (!Number.isFinite(minutes) || minutes <= 0) return;
     void applyDuration(minutesToSeconds(minutes)).then(() => setCustomMinutes(''));
+  };
+
+  const applyDefaultIntention = async (seconds: number) => {
+    if (!editingDefaultIntention) return;
+    setSavingIntention(true);
+    try {
+      if (editingDefaultIntention === 'daily') {
+        await setDefaultDailyIntention(db, seconds);
+      } else {
+        await setDefaultMonthlyIntention(db, seconds);
+      }
+      setEditingDefaultIntention(null);
+    } catch (error) {
+      Alert.alert(
+        'Could not save default intention',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingIntention(false);
+    }
   };
 
   const handleTheme = async (preference: ThemePreference) => {
@@ -297,6 +336,60 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Intentions
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          Defaults for days and months without a custom target. You can still
+          adjust individual targets from Today.
+        </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change default daily intention"
+          onPress={() => setEditingDefaultIntention('daily')}
+          style={[
+            styles.switchRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.switchBody}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Daily target
+            </Text>
+            <Text style={[styles.intentionValue, { color: colors.text }]}>
+              {defaultDailyIntentionSeconds > 0
+                ? formatIntentionDuration(defaultDailyIntentionSeconds)
+                : 'Not set'}
+            </Text>
+          </View>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change default monthly intention"
+          onPress={() => setEditingDefaultIntention('monthly')}
+          style={[
+            styles.switchRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.switchBody}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Monthly target
+            </Text>
+            <Text style={[styles.intentionValue, { color: colors.text }]}>
+              {defaultMonthlyIntentionSeconds > 0
+                ? formatIntentionDuration(defaultMonthlyIntentionSeconds)
+                : 'Not set'}
+            </Text>
+          </View>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Theme</Text>
         <View style={styles.chips}>
           {THEMES.map((entry) => {
@@ -439,6 +532,31 @@ export default function SettingsScreen() {
           </Text>
         </View>
       </View>
+
+      <IntentionEditModal
+        visible={editingDefaultIntention !== null}
+        title={
+          editingDefaultIntention === 'monthly'
+            ? 'Default monthly intention'
+            : 'Default daily intention'
+        }
+        initialSeconds={
+          editingDefaultIntention === 'monthly'
+            ? defaultMonthlyIntentionSeconds
+            : defaultDailyIntentionSeconds
+        }
+        presetMinutes={INTENTION_PRESETS_MINUTES}
+        busy={savingIntention}
+        clearLabel="Clear"
+        helperText="Tap a preset to add it. Clear removes the default target."
+        onSave={(seconds) => {
+          void applyDefaultIntention(seconds);
+        }}
+        onClear={() => {
+          void applyDefaultIntention(0);
+        }}
+        onClose={() => setEditingDefaultIntention(null)}
+      />
     </Screen>
   );
 }
@@ -480,6 +598,11 @@ const styles = StyleSheet.create({
   sectionBody: {
     fontSize: 13,
     lineHeight: 20,
+  },
+  intentionValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   chips: {
     flexDirection: 'row',

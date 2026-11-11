@@ -17,6 +17,7 @@ import { Screen } from '../../src/components/common/Screen';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
 import { IntentionBar } from '../../src/components/intentions/IntentionBar';
 import { IntentionEditModal } from '../../src/components/intentions/IntentionEditModal';
+import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
 import {
   currentDayKey,
   currentMonthKey,
@@ -344,15 +345,13 @@ export default function TodayScreen() {
         title={editingIntention === 'monthly' ? 'Monthly intention' : 'Daily intention'}
         initialSeconds={
           editingIntention === 'monthly'
-            ? monthly?.intention?.target_duration_seconds ?? null
-            : daily?.intention?.target_duration_seconds ?? null
+            ? monthly?.targetSeconds ?? 0
+            : daily?.targetSeconds ?? 0
         }
-        presetMinutes={
-          editingIntention === 'monthly'
-            ? [600, 1200, 2400, 3600]
-            : [30, 60, 90, 120]
-        }
+        presetMinutes={INTENTION_PRESETS_MINUTES}
         busy={savingIntention}
+        clearLabel="Clear"
+        helperText="Tap a preset to add it. Clear returns to your default target."
         onSave={(seconds) => {
           void handleSaveIntention(seconds);
         }}

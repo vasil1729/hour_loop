@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { formatDurationCompact } from '../../domain/timer/timerEngine';
+import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import type { IntentionSummary } from '../../features/intentions/intentionsService';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
@@ -14,7 +14,7 @@ type IntentionBarProps = {
 
 export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
   const { colors } = useTheme();
-  const hasIntention = Boolean(summary.intention);
+  const hasTarget = summary.targetSeconds > 0;
 
   return (
     <Pressable
@@ -33,18 +33,18 @@ export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
       <View style={styles.topRow}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
         <Text style={[styles.action, { color: colors.accent }]}>
-          {hasIntention ? 'Edit' : 'Set'}
+          {hasTarget ? 'Edit' : 'Set'}
         </Text>
       </View>
 
-      {hasIntention ? (
+      {hasTarget ? (
         <>
           <View style={styles.valueRow}>
             <Text style={[styles.actual, { color: colors.text }]}>
-              {formatDurationCompact(summary.actualSeconds)}
+              {formatIntentionDuration(summary.actualSeconds)}
             </Text>
             <Text style={[styles.target, { color: colors.textSecondary }]}>
-              / {formatDurationCompact(summary.intention?.target_duration_seconds ?? 0)}
+              / {formatIntentionDuration(summary.targetSeconds)}
             </Text>
             <Text
               style={[
@@ -69,9 +69,10 @@ export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
             />
           </View>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
+            {summary.isDefault ? 'Default target · ' : ''}
             {summary.progress.reached
               ? 'Intention reached'
-              : `${formatDurationCompact(summary.progress.remainingSeconds)} to go`}
+              : `${formatIntentionDuration(summary.progress.remainingSeconds)} to go`}
           </Text>
         </>
       ) : (
@@ -95,32 +96,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
   },
   label: {
+    flexShrink: 1,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,
   },
   action: {
+    flexShrink: 0,
     fontSize: 11,
     fontWeight: '700',
+    textAlign: 'right',
   },
   valueRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: spacing.xs,
+    flexWrap: 'wrap',
   },
   actual: {
+    flexShrink: 0,
     fontSize: 20,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
   target: {
+    flexShrink: 1,
+    minWidth: 0,
     fontSize: 12,
     fontWeight: '500',
-    flex: 1,
   },
   percent: {
+    flexShrink: 0,
     fontSize: 13,
     fontWeight: '700',
   },

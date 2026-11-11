@@ -3,6 +3,7 @@ import {
   actualSecondsForMonth,
   allocateIntervalsToDays,
   computeIntentionProgress,
+  formatIntentionDuration,
 } from './intentionsDomain';
 import type { IntervalRecord } from '../timer/timerEngine';
 
@@ -49,6 +50,20 @@ describe('computeIntentionProgress', () => {
   it('ignores negative actual seconds', () => {
     const progress = computeIntentionProgress(3600, -50);
     expect(progress.actualSeconds).toBe(0);
+  });
+});
+
+describe('formatIntentionDuration', () => {
+  it('formats hours and minutes without a seconds suffix', () => {
+    expect(formatIntentionDuration(5 * 3600 + 30 * 60)).toBe('5h 30min');
+    expect(formatIntentionDuration(2 * 3600)).toBe('2h');
+    expect(formatIntentionDuration(45 * 60)).toBe('45min');
+    expect(formatIntentionDuration(0)).toBe('0min');
+  });
+
+  it('floors partial minutes and ignores negative values', () => {
+    expect(formatIntentionDuration(90 * 60 + 59)).toBe('1h 30min');
+    expect(formatIntentionDuration(-10)).toBe('0min');
   });
 });
 

@@ -93,6 +93,8 @@ The service accepts injectable dependencies (clock, ID generator, time zone, rep
 ## Intentions and history
 
 - Intention targets are keyed by `period_type` + `period_key` (`YYYY-MM-DD` or `YYYY-MM`).
+- When a period has no stored target, `getIntentionSummary` falls back to `default_daily_intention_seconds` or `default_monthly_intention_seconds` from settings.
+- The intention editor treats presets as additive increments and formats the running total as a human duration.
 - Actual time is derived from intervals overlapping the local day/month bounds.
 - History day view groups interval allocations by loop to show per-loop time for the selected day.
 - Monthly summaries count unique loops and use monthly allocation for actual time.

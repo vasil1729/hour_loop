@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
 import type { IntentionSummary } from '../../features/intentions/intentionsService';
 import { useTheme } from '../../theme/ThemeContext';
@@ -14,7 +15,7 @@ type DaySummaryProps = {
 
 export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) {
   const { colors } = useTheme();
-  const hasIntention = Boolean(daily.intention);
+  const hasIntention = daily.targetSeconds > 0;
   const percent = daily.progress.percent;
 
   return (
@@ -72,9 +73,9 @@ export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) 
             />
           </View>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
-            {formatDurationCompact(daily.actualSeconds)} of{' '}
-            {formatDurationCompact(daily.intention?.target_duration_seconds ?? 0)}{' '}
-            intended
+            {daily.isDefault ? 'Default target · ' : ''}
+            {formatIntentionDuration(daily.actualSeconds)} of{' '}
+            {formatIntentionDuration(daily.targetSeconds)} intended
           </Text>
         </>
       ) : (

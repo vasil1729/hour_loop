@@ -13,6 +13,18 @@ export type IntentionProgress = {
   reached: boolean;
 };
 
+/** Human-readable duration for intention targets, e.g. "5h 30min". */
+export function formatIntentionDuration(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}min`;
+  if (hours > 0) return `${hours}h`;
+  if (minutes > 0) return `${minutes}min`;
+  return '0min';
+}
+
 export function computeIntentionProgress(
   targetSeconds: number,
   actualSeconds: number

@@ -119,6 +119,8 @@ Seeded keys:
 | Key | Default |
 |---|---|
 | `default_duration_seconds` | `3600` |
+| `default_daily_intention_seconds` | Unset until configured in Settings |
+| `default_monthly_intention_seconds` | Unset until configured in Settings |
 | `theme` | `system` |
 | `notifications_enabled` | `true` |
 | `notif_{loopId}` | Scheduled notification identifier (created at runtime) |

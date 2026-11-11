@@ -10,6 +10,7 @@ import { Screen } from '../../src/components/common/Screen';
 import { DayPickerModal } from '../../src/components/history/DayPickerModal';
 import { DaySummary } from '../../src/components/history/DaySummary';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
+import { formatIntentionDuration } from '../../src/domain/intentions/intentionsDomain';
 import {
   addDaysToDayKey,
   currentDayKey,
@@ -201,7 +202,7 @@ export default function HistoryScreen() {
                         },
                       ]}
                     >
-                      {monthHistory.monthly.intention
+                      {monthHistory.monthly.targetSeconds > 0
                         ? `${monthHistory.monthly.progress.percent}%`
                         : '—'}
                     </Text>
@@ -213,7 +214,7 @@ export default function HistoryScreen() {
                   </View>
                 </View>
 
-                {monthHistory.monthly.intention ? (
+                {monthHistory.monthly.targetSeconds > 0 ? (
                   <>
                     <View
                       style={[styles.track, { backgroundColor: colors.surfaceAlt }]}
@@ -231,10 +232,9 @@ export default function HistoryScreen() {
                       />
                     </View>
                     <Text style={[styles.monthMeta, { color: colors.textSecondary }]}>
-                      {formatDurationCompact(monthHistory.monthly.actualSeconds)} of{' '}
-                      {formatDurationCompact(
-                        monthHistory.monthly.intention.target_duration_seconds
-                      )}{' '}
+                      {monthHistory.monthly.isDefault ? 'Default target · ' : ''}
+                      {formatIntentionDuration(monthHistory.monthly.actualSeconds)} of{' '}
+                      {formatIntentionDuration(monthHistory.monthly.targetSeconds)}{' '}
                       intended
                     </Text>
                   </>

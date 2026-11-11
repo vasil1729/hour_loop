@@ -64,9 +64,12 @@ All fields are optional, with focus and carry-in pre-filled when available:
 ### Intentions
 
 - Daily and monthly focus-time targets are stored independently of loops.
+- Settings defines default daily and monthly targets. A day or month without its own target inherits the matching default.
+- The intention editor adds preset increments of 15m, 30m, 1h, 2h, 4h, and 8h. Values are displayed as human durations such as `5h 30min`.
+- Clearing an individual day/month target removes the override and returns to the configured default. Clearing a default removes it.
 - Progress is computed from actual interval time, not from loop counts.
 - An interval that crosses midnight contributes to both days, proportionally to real seconds, using the device's current time zone.
-- Intentions are editable at any time; clearing a target removes it.
+- The Today cards show actual time against the effective target; they can still open the editor for a per-day or per-month override.
 
 ### History
 
@@ -96,7 +99,7 @@ All fields are optional, with focus and carry-in pre-filled when available:
 | Tasks | Loose capsules, filterable flattened tree with expand/collapse and quick complete |
 | Task detail | Metrics, subtasks, open capsules, loop history, start loop from a subtask, edit, complete, archive |
 | History | Day navigation, day summary, loops, monthly summary |
-| Settings | Default duration, theme, notifications, version/about |
+| Settings | Default duration, default daily/monthly intentions, theme, notifications, version/about |
 
 ## Behaviour rules and assumptions
 
@@ -109,6 +112,8 @@ All fields are optional, with focus and carry-in pre-filled when available:
 7. Archived tasks are hidden from the task pool; their loops remain in history.
 8. A capsule belongs to the loop's subtask when one is selected; otherwise it is a loose capsule.
 9. Only open, uncarried capsules appear in the task pool, whether their loop is active or closed.
+10. A daily or monthly target override takes precedence over the matching default in Settings.
+11. Default intention presets are additive; the target is the running total, not the last preset tapped.
 
 ## Out of scope for MVP
 
