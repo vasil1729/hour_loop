@@ -3,6 +3,14 @@ name: Android APK
 on:
   workflow_dispatch:
     inputs:
+      architecture:
+        description: 'APK architecture: arm64 is smaller/faster, universal supports all ABIs'
+        required: true
+        default: 'arm64-v8a'
+        type: choice
+        options:
+          - arm64-v8a
+          - universal
       publish_release:
         description: 'Publish a versioned GitHub release for the app.json version'
         required: false
@@ -59,6 +67,17 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Building Hour Loop v$version"
 
+      - name: Resolve artifact names
+        id: artifact
+        run: |
+          if [[ "${{ inputs.architecture }}" == "universal" ]]; then
+            suffix="universal"
+          else
+            suffix="arm64"
+          fi
+          echo "suffix=$suffix" >> "$GITHUB_OUTPUT"
+          echo "Architecture suffix: $suffix"
+
       - name: Validate release target
         if: inputs.publish_release && github.ref != 'refs/heads/main'
         run: |
@@ -90,13 +109,15 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Build local APK
+      - name: Build versioned APK
+        env:
+          APK_ARCH: ${{ inputs.architecture }}
         run: npm run apk:local
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hour-loop-v${{ steps.version.outputs.version }}-apk
+          name: hour-loop-v${{ steps.version.outputs.version }}-${{ steps.artifact.outputs.suffix }}-apk
           path: builds/*
           if-no-files-found: error
 
@@ -105,15 +126,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
+          ARCH_SUFFIX: ${{ steps.artifact.outputs.suffix }}
+          ARCHITECTURE: ${{ inputs.architecture }}
         run: |
           tag="v${VERSION}"
           gh release create "$tag" \
-            "builds/hour-loop-v${VERSION}.apk" \
-            "builds/hour-loop-v${VERSION}.apk.sha256" \
+            "builds/hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk" \
+            "builds/hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk.sha256" \
             --target "$GITHUB_SHA" \
             --title "Hour Loop v${VERSION}" \
-            --notes "Hour Loop v${VERSION} for Android.
+            --notes "Hour Loop v${VERSION} for Android (${ARCHITECTURE}).
 
-          Install: download hour-loop-v${VERSION}.apk and allow installs from unknown sources.
+          Install: download hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk and allow installs from unknown sources.
           The APK is release-built and signed with the standard React Native debug keystore, so it is intended for direct sideloading and testing rather than Google Play distribution.
           Commit: ${GITHUB_SHA}"

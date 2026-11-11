@@ -6,6 +6,7 @@ cd "$ROOT_DIR"
 
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/builds}"
 STAGE_DIR="${STAGE_DIR:-$ROOT_DIR/.apk-build}"
+APK_ARCH="${APK_ARCH:-arm64-v8a}"
 
 die() {
   echo "error: $*" >&2
@@ -46,6 +47,31 @@ case "$VERSION" in
   *) die "Invalid expo.version in app.json: $VERSION" ;;
 esac
 
+case "$APK_ARCH" in
+  arm64 | arm64-v8a)
+    APK_ARCH="arm64-v8a"
+    ARCH_LABEL="arm64"
+    GRADLE_ARCH_ARGS=("-PreactNativeArchitectures=arm64-v8a")
+    ;;
+  armv7 | armeabi-v7a)
+    APK_ARCH="armeabi-v7a"
+    ARCH_LABEL="armv7"
+    GRADLE_ARCH_ARGS=("-PreactNativeArchitectures=armeabi-v7a")
+    ;;
+  x86_64)
+    ARCH_LABEL="x86_64"
+    GRADLE_ARCH_ARGS=("-PreactNativeArchitectures=x86_64")
+    ;;
+  universal | all)
+    APK_ARCH="universal"
+    ARCH_LABEL="universal"
+    GRADLE_ARCH_ARGS=()
+    ;;
+  *)
+    die "Unsupported APK_ARCH '$APK_ARCH'. Use arm64-v8a, armeabi-v7a, x86_64, or universal."
+    ;;
+esac
+
 if [[ ! -d "$SDK_DIR/platforms/android-35" ]]; then
   echo "warning: Android platform 35 is missing from $SDK_DIR." >&2
   echo "         Install it with: sdkmanager 'platforms;android-35'" >&2
@@ -55,9 +81,18 @@ if [[ ! -d "$SDK_DIR/build-tools/35.0.0" ]]; then
   echo "         Install it with: sdkmanager 'build-tools;35.0.0'" >&2
 fi
 
-echo "Preparing Hour Loop v$VERSION in a temporary native build directory…"
-rm -rf "$STAGE_DIR"
+if [[ "${CLEAN_BUILD_DIR:-0}" == "1" ]]; then
+  echo "Removing the reusable native build directory…"
+  rm -rf "$STAGE_DIR"
+fi
+
+# Keep the native project and Gradle outputs between runs so rebuilds are
+# incremental. Everything except `android` and `node_modules` is refreshed from
+# the working tree on each invocation.
 mkdir -p "$STAGE_DIR"
+find "$STAGE_DIR" -mindepth 1 -maxdepth 1 ! -name android ! -name node_modules \
+  -exec rm -rf {} +
+rm -f "$STAGE_DIR/node_modules"
 
 tar -cf - \
   --exclude='./node_modules' \
@@ -72,24 +107,27 @@ tar -cf - \
 
 ln -s "$ROOT_DIR/node_modules" "$STAGE_DIR/node_modules"
 
-cleanup() {
-  if [[ "${KEEP_BUILD_DIR:-0}" == "1" ]]; then
-    echo "Native build directory kept at $STAGE_DIR"
-  else
-    rm -rf "$STAGE_DIR"
-  fi
-}
-trap cleanup EXIT
-
+echo "Building Hour Loop v$VERSION for $APK_ARCH…"
 (
   cd "$STAGE_DIR"
   CI=1 npx expo prebuild --platform android --no-install
+
   cd android
-  ./gradlew :app:assembleRelease --no-daemon --console=plain
+  GRADLE_ARGS=(--build-cache --parallel --console=plain)
+  if [[ ${#GRADLE_ARCH_ARGS[@]} -gt 0 ]]; then
+    GRADLE_ARGS+=("${GRADLE_ARCH_ARGS[@]}")
+  fi
+  if [[ "${CI:-}" == "1" || "${CI:-}" == "true" ]]; then
+    GRADLE_ARGS+=(--no-daemon)
+  else
+    GRADLE_ARGS+=(--daemon)
+  fi
+  GRADLE_ARGS+=(:app:assembleRelease)
+  ./gradlew "${GRADLE_ARGS[@]}"
 )
 
 mkdir -p "$OUTPUT_DIR"
-APK_NAME="hour-loop-v${VERSION}.apk"
+APK_NAME="hour-loop-v${VERSION}-${ARCH_LABEL}.apk"
 APK_PATH="$OUTPUT_DIR/$APK_NAME"
 cp "$STAGE_DIR/android/app/build/outputs/apk/release/app-release.apk" "$APK_PATH"
 
@@ -97,6 +135,12 @@ if command -v sha256sum >/dev/null 2>&1; then
   (cd "$OUTPUT_DIR" && sha256sum "$APK_NAME" > "$APK_NAME.sha256")
 else
   (cd "$OUTPUT_DIR" && shasum -a 256 "$APK_NAME" > "$APK_NAME.sha256")
+fi
+
+if [[ "${CLEAN_BUILD_DIR:-0}" == "1" ]]; then
+  rm -rf "$STAGE_DIR"
+else
+  echo "Reusable native build directory: $STAGE_DIR"
 fi
 
 echo

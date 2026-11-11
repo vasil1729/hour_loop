@@ -31,11 +31,22 @@ npx expo start
 
 Press `a` for an Android emulator, `i` for iOS, or scan the QR code with Expo Go. Local notifications require a development build on some platforms.
 
+### Web preview (development only)
+
+Hour Loop targets native platforms. The web build exists only as a quick UI preview:
+
+```bash
+npm run web
+```
+
+Open http://localhost:8081. On a desktop browser the app renders inside a 390×844 phone frame; on a phone-sized viewport it fills the screen. `expo-sqlite` runs in the browser through WASM, so the preview is interactive, but local notifications are disabled on web.
+
+
 ## Android builds
 
 ### Build an APK locally
 
-The local builder creates a release APK in `builds/`, which is ignored by Git. It does not commit, push, or publish anything.
+The local builder creates a versioned release APK in `builds/`, which is ignored by Git. It does not commit, push, or publish anything.
 
 Prerequisites:
 
@@ -49,18 +60,34 @@ npm install
 npm run apk:local
 ```
 
-Output:
+Output for the default `arm64-v8a` build:
 
 ```text
-builds/hour-loop-v1.0.0.apk
-builds/hour-loop-v1.0.0.apk.sha256
+builds/hour-loop-v1.0.0-arm64.apk
+builds/hour-loop-v1.0.0-arm64.apk.sha256
 ```
 
-The script builds in a temporary native directory and cleans it up afterwards. Set `KEEP_BUILD_DIR=1` to keep it for debugging.
+The version comes from `expo.version` in `app.json`, so local and published builds share the same version scheme.
+
+By default the builder targets modern 64-bit phones, which keeps the APK and native compile much smaller. Use a universal build when you need every ABI:
+
+```bash
+APK_ARCH=universal npm run apk:local
+```
+
+Available targets are `arm64-v8a` (default), `armeabi-v7a`, `x86_64`, and `universal`.
+
+The builder keeps a reusable `.apk-build/` native project so Gradle can reuse compilation outputs and caches between runs. Delete it or run `CLEAN_BUILD_DIR=1 npm run apk:local` for a clean build.
+
+Build efficiency notes:
+
+- Local builds use the Gradle daemon and build cache; CI disables the daemon because each runner is disposable.
+- `arm64-v8a` avoids compiling and packaging the three other ABIs. `universal` includes `armeabi-v7a`, `arm64-v8a`, `x86`, and `x86_64`, so it is substantially larger and slower to build.
+- Expo's generated Gradle config uses a 2 GB Gradle heap, which is adequate for this project. CI raises Node's heap limit to 4 GB for Metro.
 
 ### Install a build on your phone
 
-For a local build, transfer `builds/hour-loop-v<version>.apk` to your phone. For a published build, download it from the [GitHub Releases page](https://github.com/vasil1729/hour_loop/releases/latest).
+For a local build, transfer `builds/hour-loop-v<version>-<arch>.apk` to your phone. For a published build, download it from the [GitHub Releases page](https://github.com/vasil1729/hour_loop/releases/latest).
 
 1. Open the APK on your phone.
 2. Allow installs from your browser or file manager when Android prompts.
@@ -75,9 +102,10 @@ Releases are never created automatically on push.
 1. Bump `expo.version` in `app.json`.
 2. Commit and push the version bump.
 3. Open **Actions → Android APK → Run workflow**.
-4. Enable **Publish a versioned GitHub release** and run it from `main`.
+4. Choose `arm64-v8a` or `universal`.
+5. Enable **Publish a versioned GitHub release** and run it from `main`.
 
-The workflow builds the APK, uploads it as a run artifact, and—only when requested—creates tag `v<version>` with `hour-loop-v<version>.apk` attached. The existing `android-build-1` release is the initial unversioned test build.
+The workflow builds the APK, uploads it as a run artifact, and—only when requested—creates tag `v<version>` with `hour-loop-v<version>-<arch>.apk` attached. The existing `android-build-1` release is the initial unversioned test build.
 
 ## Quality checks
 
