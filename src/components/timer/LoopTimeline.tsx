@@ -7,7 +7,7 @@ import {
   getDeviceTimeZone,
   toLocalDateKey,
 } from '../../domain/shared/dateUtils';
-import { formatDurationCompact } from '../../domain/timer/timerEngine';
+import { formatDurationWithSeconds } from '../../domain/timer/timerEngine';
 import type {
   LoopEvent,
   LoopEventKind,
@@ -96,7 +96,7 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
               : Math.max(20, Math.min(96, 12 + (segmentSeconds / 60) * 6));
           const durationLabel =
             segmentSeconds !== null && segmentSeconds > 0 && segmentState
-              ? `${formatDurationCompact(segmentSeconds)} ${
+              ? `${formatDurationWithSeconds(segmentSeconds)} ${
                   segmentState === 'paused' ? 'paused' : 'focused'
                 }`
               : null;

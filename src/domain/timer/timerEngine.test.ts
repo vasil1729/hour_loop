@@ -2,6 +2,7 @@ import {
   allocateIntervalToDays,
   allocateIntervalToMonths,
   calculateElapsedSeconds,
+  formatDurationWithSeconds,
   formatElapsed,
   localMidnightAfter,
   progressRatio,
@@ -184,6 +185,20 @@ describe('progressRatio', () => {
     expect(progressRatio(3600, 9000)).toBe(1);
     expect(progressRatio(0, 0)).toBe(0);
     expect(progressRatio(0, 10)).toBe(1);
+  });
+});
+
+describe('formatDurationWithSeconds', () => {
+  it('keeps seconds for sub-minute and minute durations', () => {
+    expect(formatDurationWithSeconds(0)).toBe('0s');
+    expect(formatDurationWithSeconds(21)).toBe('21s');
+    expect(formatDurationWithSeconds(81)).toBe('1m 21s');
+    expect(formatDurationWithSeconds(60)).toBe('1m 0s');
+  });
+
+  it('includes seconds for hour-long segments', () => {
+    expect(formatDurationWithSeconds(3661)).toBe('1h 1m 1s');
+    expect(formatDurationWithSeconds(3600)).toBe('1h 0m 0s');
   });
 });
 

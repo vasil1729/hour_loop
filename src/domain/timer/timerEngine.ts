@@ -113,6 +113,21 @@ export function formatDurationCompact(totalSeconds: number): string {
 }
 
 /**
+ * Precise duration for live session-log segments, e.g. "1m 21s" or "1h 4m 9s".
+ * Unlike formatDurationCompact, seconds are always retained so a running
+ * segment visibly advances.
+ */
+export function formatDurationWithSeconds(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
+/**
  * The UTC instant of the next local midnight in the given IANA time zone.
  */
 export function localMidnightAfter(date: Date, timeZone: string): Date {
