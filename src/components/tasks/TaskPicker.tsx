@@ -39,7 +39,14 @@ export function TaskPicker({
   const rows = useMemo(() => flattenTree(tasks, expanded), [tasks, expanded]);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={onClose}
+    >
       <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
         <View style={[styles.sheet, { backgroundColor: colors.background }]}>
           <View style={styles.header}>

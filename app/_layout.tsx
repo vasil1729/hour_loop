@@ -1,7 +1,8 @@
 import React, { Suspense, useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
-import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { SystemBars } from 'react-native-edge-to-edge';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -43,30 +44,36 @@ function AppBootstrap({ children }: { children: React.ReactNode }) {
 function RootNavigator() {
   const { colors, scheme } = useTheme();
 
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(colors.background).catch(() => undefined);
+  }, [colors.background]);
+
   return (
     <>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <SystemBars
         style={{
+          statusBar: scheme === 'dark' ? 'light' : 'dark',
           navigationBar: scheme === 'dark' ? 'light' : 'dark',
         }}
       />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="loop/start"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
-        <Stack.Screen name="loop/active" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="loop/complete" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="loop/[id]" />
-        <Stack.Screen name="task/[id]" />
-      </Stack>
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="loop/start"
+            options={{ presentation: 'modal', headerShown: false }}
+          />
+          <Stack.Screen name="loop/active" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="loop/complete" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="loop/[id]" />
+          <Stack.Screen name="task/[id]" />
+        </Stack>
+      </View>
     </>
   );
 }
@@ -92,3 +99,9 @@ export default function RootLayout() {
     </WebPhoneFrame>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
