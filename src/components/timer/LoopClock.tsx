@@ -5,92 +5,136 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import Svg, { Circle, G, Line } from 'react-native-svg';
 
-import type { Loop, LoopInterval } from '../../domain/types';
+import type { Loop } from '../../domain/types';
 import {
   formatDurationCompact,
   formatElapsed,
+  progressRatio,
   remainingSeconds,
 } from '../../domain/timer/timerEngine';
-import { buildLoopClock } from '../../features/loops/loopClock';
 import { useTheme } from '../../theme/ThemeContext';
-import { radius, spacing } from '../../theme/tokens';
+import { spacing } from '../../theme/tokens';
+
+const TICK_COUNT = 60;
 
 type LoopClockProps = {
   loop: Loop;
-  intervals: LoopInterval[];
   elapsedSeconds: number;
   targetSeconds: number;
-  referenceTime?: Date;
 };
 
 export function LoopClock({
   loop,
-  intervals,
   elapsedSeconds,
   targetSeconds,
-  referenceTime = new Date(),
 }: LoopClockProps) {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const size = Math.min(Math.max(width - 88, 220), 320);
-  const model = buildLoopClock(loop, intervals, referenceTime);
+  const center = size / 2;
+  const ratio = progressRatio(targetSeconds, elapsedSeconds);
   const remaining = remainingSeconds(targetSeconds, elapsedSeconds);
   const reached = remaining === 0;
-  const hasPaused = model.ticks.includes('paused');
+  const isPaused = loop.status === 'PAUSED';
+  const progressColor = reached ? colors.success : colors.accent;
+
+  const outerRadius = center - 4;
+  const ringRadius = outerRadius - 24;
+  const strokeWidth = Math.max(7, Math.round(size * 0.028));
+  const circumference = 2 * Math.PI * ringRadius;
+  const dashOffset = circumference * (1 - ratio);
+  const knobAngle = ratio * 2 * Math.PI - Math.PI / 2;
+  const knobX = center + ringRadius * Math.cos(knobAngle);
+  const knobY = center + ringRadius * Math.sin(knobAngle);
+  const litTicks = ratio > 0 ? Math.max(1, Math.round(ratio * TICK_COUNT)) : 0;
 
   return (
     <View
       accessible
-      accessibilityLabel={`Loop clock. ${formatElapsed(
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}
+      accessibilityLabel={`Loop progress. ${formatElapsed(
         elapsedSeconds
-      )} focused, target ${formatElapsed(targetSeconds)}.`}
+      )} focused toward a ${formatElapsed(targetSeconds)} target.`}
       style={styles.wrapper}
     >
       <View style={[styles.face, { width: size, height: size }]}>
-        {model.ticks.map((state, index) => {
-          const hourTick = index % 5 === 0;
-          const color =
-            state === 'running'
-              ? colors.success
-              : state === 'paused'
-                ? colors.danger
-                : colors.border;
-          return (
-            <View
-              key={index}
-              pointerEvents="none"
-              style={[
-                styles.tickWrapper,
-                {
-                  width: size,
-                  height: size,
-                  transform: [{ rotate: `${index * 6}deg` }],
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.tick,
-                  {
-                    height: hourTick ? 18 : state === 'idle' ? 9 : 14,
-                    width: hourTick ? 3 : state === 'idle' ? 1.5 : 2.5,
-                    marginTop: hourTick ? 8 : state === 'idle' ? 13 : 10,
-                    backgroundColor: color,
-                    opacity: state === 'idle' ? 0.8 : 1,
-                  },
-                ]}
-              />
-            </View>
-          );
-        })}
+        <Svg
+          pointerEvents="none"
+          width={size}
+          height={size}
+          style={StyleSheet.absoluteFillObject}
+        >
+          {Array.from({ length: TICK_COUNT }, (_, index) => {
+            const hourTick = index % 5 === 0;
+            const radians = ((index * 360) / TICK_COUNT - 90) * (Math.PI / 180);
+            const innerRadius = outerRadius - (hourTick ? 12 : 7);
+            const lit = index < litTicks;
 
-        <ClockMarker angle={model.startAngle} color={colors.accent} size={size} />
-        <ClockMarker
-          angle={model.endAngle}
-          color={model.isLive ? colors.success : colors.accent}
-          size={size}
-        />
+            return (
+              <Line
+                key={index}
+                x1={center + innerRadius * Math.cos(radians)}
+                y1={center + innerRadius * Math.sin(radians)}
+                x2={center + outerRadius * Math.cos(radians)}
+                y2={center + outerRadius * Math.sin(radians)}
+                stroke={lit ? progressColor : colors.border}
+                strokeWidth={hourTick ? 3 : 1.5}
+                strokeLinecap="round"
+                opacity={lit ? 1 : 0.65}
+              />
+            );
+          })}
+
+          <Circle
+            cx={center}
+            cy={center}
+            r={ringRadius}
+            stroke={colors.surfaceAlt}
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+
+          {ratio > 0 ? (
+            <G opacity={isPaused ? 0.55 : 1}>
+              <Circle
+                cx={center}
+                cy={center}
+                r={ringRadius}
+                stroke={progressColor}
+                strokeWidth={strokeWidth * 1.9}
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={[circumference, circumference]}
+                strokeDashoffset={dashOffset}
+                transform={`rotate(-90 ${center} ${center})`}
+                opacity={0.14}
+              />
+              <Circle
+                cx={center}
+                cy={center}
+                r={ringRadius}
+                stroke={progressColor}
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                fill="none"
+                strokeDasharray={[circumference, circumference]}
+                strokeDashoffset={dashOffset}
+                transform={`rotate(-90 ${center} ${center})`}
+              />
+              <Circle
+                cx={knobX}
+                cy={knobY}
+                r={strokeWidth * 0.9}
+                fill={progressColor}
+                stroke={colors.background}
+                strokeWidth={Math.max(2, strokeWidth * 0.3)}
+              />
+            </G>
+          ) : null}
+        </Svg>
 
         <View style={styles.center}>
           <Text
@@ -98,7 +142,8 @@ export function LoopClock({
               styles.elapsed,
               {
                 color: colors.text,
-                opacity: loop.status === 'PAUSED' ? 0.55 : 1,
+                fontSize: Math.max(30, Math.round(size * 0.12)),
+                opacity: isPaused ? 0.55 : 1,
               },
             ]}
           >
@@ -119,45 +164,6 @@ export function LoopClock({
           </Text>
         </View>
       </View>
-
-      {hasPaused ? (
-        <View style={styles.legend}>
-          <View style={[styles.legendDot, { backgroundColor: colors.success }]} />
-          <Text style={[styles.legendText, { color: colors.textSecondary }]}>
-            Focus
-          </Text>
-          <View style={[styles.legendDot, { backgroundColor: colors.danger }]} />
-          <Text style={[styles.legendText, { color: colors.textSecondary }]}>
-            Paused
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function ClockMarker({
-  angle,
-  color,
-  size,
-}: {
-  angle: number;
-  color: string;
-  size: number;
-}) {
-  return (
-    <View
-      pointerEvents="none"
-      style={[
-        styles.markerWrapper,
-        {
-          width: size,
-          height: size,
-          transform: [{ rotate: `${angle}deg` }],
-        },
-      ]}
-    >
-      <View style={[styles.marker, { backgroundColor: color }]} />
     </View>
   );
 }
@@ -165,33 +171,10 @@ function ClockMarker({
 const styles = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
-    gap: spacing.sm,
   },
   face: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  tickWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  tick: {
-    borderRadius: radius.full,
-  },
-  markerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  marker: {
-    width: 9,
-    height: 9,
-    borderRadius: radius.full,
   },
   center: {
     alignItems: 'center',
@@ -199,7 +182,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   elapsed: {
-    fontSize: 38,
     fontWeight: '300',
     letterSpacing: -1,
     fontVariant: ['tabular-nums'],
@@ -212,21 +194,6 @@ const styles = StyleSheet.create({
   },
   remaining: {
     fontSize: 13,
-    fontWeight: '600',
-  },
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  legendDot: {
-    width: 7,
-    height: 7,
-    borderRadius: radius.full,
-    marginLeft: spacing.sm,
-  },
-  legendText: {
-    fontSize: 11,
     fontWeight: '600',
   },
 });

@@ -256,12 +256,8 @@ export default function CompleteLoopScreen() {
 
       <LoopClock
         loop={loop}
-        intervals={intervals}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={loop.target_duration_seconds}
-        referenceTime={
-          loop.stopped_at ? new Date(loop.stopped_at) : new Date()
-        }
       />
 
       <LoopTimeline
