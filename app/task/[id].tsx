@@ -10,10 +10,13 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskRow } from '../../src/components/tasks/TaskRow';
+import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import { flattenTree, type FlatTaskNode } from '../../src/domain/tasks/taskDomain';
+import { setCapsuleDone } from '../../src/features/capsules/capsuleService';
 import {
   createTask,
   getTaskDetail,
@@ -158,6 +161,18 @@ export default function TaskDetailScreen() {
     }
   };
 
+  const handleCompleteCapsule = async (capsule: Capsule) => {
+    try {
+      await setCapsuleDone(db, capsule, true);
+      await reload();
+    } catch (caught) {
+      Alert.alert(
+        'Could not update capsule',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      );
+    }
+  };
+
   const handleArchive = async () => {
     if (!detail) return;
     setArchiveVisible(false);
@@ -187,8 +202,11 @@ export default function TaskDetailScreen() {
     );
   }
 
-  const { task, progress, loops, totalSeconds } = detail;
+  const { task, progress, loops, capsules, totalSeconds } = detail;
   const completed = task.status === 'COMPLETED';
+  const archived = task.status === 'ARCHIVED';
+  const isSubtask = task.parent_task_id !== null;
+  const canStartLoop = isSubtask && !completed && !archived;
 
   return (
     <Screen>
@@ -292,17 +310,36 @@ export default function TaskDetailScreen() {
         </View>
       </View>
 
+      {!canStartLoop ? (
+        <View
+          style={[
+            styles.hint,
+            { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.hintText, { color: colors.textSecondary }]}>
+            {archived
+              ? 'This task is archived.'
+              : isSubtask
+                ? 'Reopen this task to start another loop.'
+                : 'This is a task container. Open a subtask to start a loop.'}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.actions}>
-        <Button
-          label="Start a loop"
-          onPress={() =>
-            router.push({
-              pathname: '/loop/start',
-              params: { taskId: task.id },
-            })
-          }
-          style={styles.action}
-        />
+        {canStartLoop ? (
+          <Button
+            label="Start a loop"
+            onPress={() =>
+              router.push({
+                pathname: '/loop/start',
+                params: { taskId: task.id },
+              })
+            }
+            style={styles.action}
+          />
+        ) : null}
         <Button
           label={completed ? 'Reopen' : 'Complete'}
           variant="secondary"
@@ -354,6 +391,36 @@ export default function TaskDetailScreen() {
           </View>
         )}
       </View>
+
+      {capsules.length > 0 ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Open capsules
+            </Text>
+            <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
+              {capsules.length} open
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {capsules.map((capsule) => (
+              <LoopItemCapsule
+                key={capsule.item.id}
+                text={capsule.item.text}
+                pressAccessibilityLabel={`Complete capsule ${capsule.item.text}`}
+                onPress={() => {
+                  void handleCompleteCapsule(capsule);
+                }}
+              />
+            ))}
+          </View>
+          <Text style={[styles.muted, { color: colors.textSecondary }]}>
+            {isSubtask
+              ? 'Capsules from this task and its subtasks. Tap to complete.'
+              : 'Capsules from this container’s subtasks. Tap to complete.'}
+          </Text>
+        </View>
+      ) : null}
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Loop history</Text>
@@ -450,6 +517,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
+  hint: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  hintText: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
   metrics: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -494,9 +570,25 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.md,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
   sectionTitle: {
     fontSize: 17,
     fontWeight: '700',
+  },
+  sectionMeta: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   subtasks: {
     gap: spacing.sm,

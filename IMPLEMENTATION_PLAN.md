@@ -47,8 +47,8 @@ New Architecture is on by default in SDK 53. `expo-sqlite` JSI bridge provides s
 
 1. **Loop numbering reset**: Loops are numbered H1, H2, H3 per local calendar day (midnight reset). ✅ Assumption recorded.
 2. **One active loop constraint**: Only one ACTIVE or PAUSED loop allowed globally at MVP. ✅
-3. **Task-loop cardinality**: One loop → one optional task at MVP. Multiple loops per task is supported. ✅
-4. **Roll-forward linking**: Roll forward text is stored as free text; optional task linkage uses a FK to `tasks`. ✅
+3. **Subtask-loop cardinality**: Top-level tasks are containers; one loop → one optional subtask at MVP. Multiple loops per subtask are supported. ✅
+4. **Roll-forward linking**: Roll forward text is stored as free text; optional subtask linkage uses a FK to `tasks`. ✅
 5. **Theme default**: Dark mode default, respects device preference via `useColorScheme`. ✅
 
 ---

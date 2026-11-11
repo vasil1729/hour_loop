@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
@@ -8,12 +8,14 @@ import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { LoopControls } from '../../src/components/timer/LoopControls';
 import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
 import { TimerProgress } from '../../src/components/timer/TimerProgress';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
+import type { LoopItem } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { goToToday } from '../../src/services/navigation/navigationService';
@@ -33,6 +35,52 @@ export default function ActiveLoopScreen() {
   const [busy, setBusy] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [items, setItems] = useState<LoopItem[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loopId = activeLoop?.id;
+      if (!loopId) {
+        setItems([]);
+        return;
+      }
+      let cancelled = false;
+      void loopService
+        .getLoopItems(db, loopId)
+        .then((result) => {
+          if (!cancelled) setItems(result);
+        })
+        .catch(() => {
+          if (!cancelled) setItems([]);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }, [db, activeLoop?.id])
+  );
+
+  const toggleItem = async (item: LoopItem) => {
+    if (!activeLoop) return;
+    const nextDone = !item.done;
+    setItems((previous) =>
+      previous.map((entry) =>
+        entry.id === item.id ? { ...entry, done: nextDone } : entry
+      )
+    );
+    try {
+      await loopService.setLoopItemDone(db, activeLoop.id, item.id, nextDone);
+    } catch (error) {
+      setItems((previous) =>
+        previous.map((entry) =>
+          entry.id === item.id ? { ...entry, done: item.done } : entry
+        )
+      );
+      Alert.alert(
+        'Could not update capsule',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
 
   const handleStop = async () => {
     if (!activeLoop) return;
@@ -159,6 +207,31 @@ export default function ActiveLoopScreen() {
         targetSeconds={activeLoop.target_duration_seconds}
       />
 
+      {items.length > 0 ? (
+        <View style={styles.itemsSection}>
+          <View style={styles.itemsHeader}>
+            <Text style={[styles.itemsTitle, { color: colors.textSecondary }]}>
+              CAPSULES
+            </Text>
+            <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
+              {items.filter((item) => item.done).length}/{items.length} done
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {items.map((item) => (
+              <LoopItemCapsule
+                key={item.id}
+                text={item.text}
+                done={item.done}
+                onPress={() => {
+                  void toggleItem(item);
+                }}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       {activeLoop.focus ? (
         <View
           style={[
@@ -278,6 +351,30 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.1,
+  },
+  itemsSection: {
+    gap: spacing.sm,
+  },
+  itemsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  itemsTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  itemsCount: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   focusCard: {
     borderWidth: StyleSheet.hairlineWidth,

@@ -7,10 +7,11 @@ import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
-import type { Loop, LoopInterval } from '../../src/domain/types';
+import type { Loop, LoopInterval, LoopItem } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { cancelLoopNotification } from '../../src/services/notifications/notificationService';
@@ -28,6 +29,7 @@ export default function LoopDetailScreen() {
   const [loop, setLoop] = useState<Loop | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [intervals, setIntervals] = useState<LoopInterval[]>([]);
+  const [items, setItems] = useState<LoopItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteVisible, setDeleteVisible] = useState(false);
@@ -42,11 +44,15 @@ export default function LoopDetailScreen() {
         return;
       }
       try {
-        const result = await loopService.getLoopWithElapsed(db, loopId);
+        const [result, loopItems] = await Promise.all([
+          loopService.getLoopWithElapsed(db, loopId),
+          loopService.getLoopItems(db, loopId),
+        ]);
         if (!cancelled) {
           setLoop(result.loop);
           setElapsedSeconds(result.elapsedSeconds);
           setIntervals(result.intervals);
+          setItems(loopItems);
         }
       } catch (caught) {
         if (!cancelled) {
@@ -129,6 +135,28 @@ export default function LoopDetailScreen() {
       </View>
 
       <LoopTimeline events={buildLoopTimeline(loop, intervals)} />
+
+      {items.length > 0 ? (
+        <View style={styles.field}>
+          <View style={styles.itemsHeader}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
+              CAPSULES
+            </Text>
+            <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
+              {items.filter((item) => item.done).length}/{items.length} done
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {items.map((item) => (
+              <LoopItemCapsule
+                key={item.id}
+                text={item.text}
+                done={item.done}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       <JournalField label="FOCUS" value={loop.focus} />
       <JournalField label="CARRY IN" value={loop.carry_in} />
@@ -243,6 +271,22 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,
+  },
+  itemsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  itemsCount: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   fieldValue: {
     fontSize: 15,

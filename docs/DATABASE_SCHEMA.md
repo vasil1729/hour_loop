@@ -2,7 +2,7 @@
 
 Database: `hour-loop.db`  
 Library: `expo-sqlite`  
-Migrations: `PRAGMA user_version` (currently version 1)
+Migrations: `PRAGMA user_version` (currently version 2)
 
 All timestamps are ISO-8601 strings in UTC. Calendar keys are local civil dates (`YYYY-MM-DD`) or months (`YYYY-MM`). Durations are integer seconds.
 
@@ -66,6 +66,27 @@ The canonical timer log. Elapsed time is derived from these rows.
 Indexes: `idx_intervals_loop_id`, `idx_intervals_started_at`.
 
 At most one interval per loop should be open at any time; the loop service enforces this.
+
+## `loop_items`
+
+Capsule snapshots for a loop, shown on the start, active, complete, and detail screens.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | |
+| `loop_id` | TEXT NOT NULL | FK → loops, `ON DELETE CASCADE` |
+| `text` | TEXT NOT NULL | Trimmed capsule text |
+| `done` | INTEGER NOT NULL | 0 or 1 |
+| `sort_order` | INTEGER NOT NULL | Display order within the loop |
+| `carried_from_item_id` | TEXT | Self-FK to the previous loop's item, `ON DELETE SET NULL` |
+| `created_at` | TEXT NOT NULL | |
+| `updated_at` | TEXT NOT NULL | |
+
+Index: `idx_loop_items_loop_id`.
+
+Deleting a loop cascades to its items. Carrying an item into a new loop creates a new row with `carried_from_item_id` pointing at the source item; deleting the source loop later nulls the provenance but keeps the carried item.
+
+A capsule's task grouping comes from its loop's `task_id`: a loop attached to a subtask groups its capsules under that subtask. A loop with no task produces loose capsules. The Tasks screen reads open, not-yet-carried items from loops where `task_id IS NULL`; task detail reads the same shape for a task subtree. This derivation needs no separate capsule table.
 
 ## `intentions`
 

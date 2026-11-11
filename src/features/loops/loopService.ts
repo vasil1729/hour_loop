@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Loop, LoopInterval } from '../../domain/types';
+import type { Loop, LoopInterval, LoopItem } from '../../domain/types';
 import {
   getDeviceTimeZone,
   toLocalDateKey,
@@ -9,6 +9,8 @@ import { calculateElapsedSeconds } from '../../domain/timer/timerEngine';
 import * as loopsRepository from '../../database/repositories/loopsRepository';
 import type { LoopJournalPatch } from '../../database/repositories/loopsRepository';
 import * as intervalsRepository from '../../database/repositories/intervalsRepository';
+import * as loopItemsRepository from '../../database/repositories/loopItemsRepository';
+import * as tasksRepository from '../../database/repositories/tasksRepository';
 
 export class LoopAlreadyActiveError extends Error {
   constructor() {
@@ -31,10 +33,37 @@ export class LoopNotFoundError extends Error {
   }
 }
 
+export class LoopItemNotFoundError extends Error {
+  constructor(itemId: string) {
+    super(`Loop item ${itemId} was not found in this loop.`);
+    this.name = 'LoopItemNotFoundError';
+  }
+}
+
+export class LoopTaskNotFoundError extends Error {
+  constructor(taskId: string) {
+    super(`Task ${taskId} was not found.`);
+    this.name = 'LoopTaskNotFoundError';
+  }
+}
+
+export class LoopTaskNotSubtaskError extends Error {
+  constructor() {
+    super('Loops can only be started on a subtask.');
+    this.name = 'LoopTaskNotSubtaskError';
+  }
+}
+
+export type StartLoopItemInput = {
+  text: string;
+  carriedFromItemId?: string | null;
+};
+
 export type StartLoopInput = {
   focus?: string | null;
   taskId?: string | null;
   carryIn?: string | null;
+  items?: StartLoopItemInput[];
   targetDurationSeconds: number;
 };
 
@@ -52,6 +81,7 @@ type LoopRepositoryPort = {
   deleteLoop: typeof loopsRepository.deleteLoop;
   getLoopById: typeof loopsRepository.getLoopById;
   getActiveLoop: typeof loopsRepository.getActiveLoop;
+  getLatestCompletedLoop: typeof loopsRepository.getLatestCompletedLoop;
   getMaxSequenceForDate: typeof loopsRepository.getMaxSequenceForDate;
   updateLoopStatus: typeof loopsRepository.updateLoopStatus;
   updateLoopJournal: typeof loopsRepository.updateLoopJournal;
@@ -63,9 +93,22 @@ type IntervalRepositoryPort = {
   getIntervalsForLoop: typeof intervalsRepository.getIntervalsForLoop;
 };
 
+type LoopItemRepositoryPort = {
+  createLoopItem: typeof loopItemsRepository.createLoopItem;
+  getLoopItemById: typeof loopItemsRepository.getLoopItemById;
+  listLoopItems: typeof loopItemsRepository.listLoopItems;
+  updateLoopItemDone: typeof loopItemsRepository.updateLoopItemDone;
+};
+
+type TaskRepositoryPort = {
+  getTaskById: typeof tasksRepository.getTaskById;
+};
+
 export type LoopServiceDeps = {
   loops: LoopRepositoryPort;
   intervals: IntervalRepositoryPort;
+  items: LoopItemRepositoryPort;
+  tasks: TaskRepositoryPort;
   now: () => Date;
   newId: () => string;
   timeZone: () => string;
@@ -74,6 +117,8 @@ export type LoopServiceDeps = {
 const defaultDeps: LoopServiceDeps = {
   loops: loopsRepository,
   intervals: intervalsRepository,
+  items: loopItemsRepository,
+  tasks: tasksRepository,
   now: () => new Date(),
   newId: () => createId(),
   timeZone: getDeviceTimeZone,
@@ -91,6 +136,16 @@ export type LoopService = {
   deleteLoop: (db: SQLiteDatabase, loopId: string) => Promise<void>;
   getActiveLoop: (db: SQLiteDatabase) => Promise<Loop | null>;
   getLoop: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
+  getLoopItems: (db: SQLiteDatabase, loopId: string) => Promise<LoopItem[]>;
+  setLoopItemDone: (
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string,
+    done: boolean
+  ) => Promise<void>;
+  getPreviousLoopWithItems: (
+    db: SQLiteDatabase
+  ) => Promise<{ loop: Loop; items: LoopItem[] } | null>;
   getElapsedSeconds: (db: SQLiteDatabase, loopId: string) => Promise<number>;
   getLoopWithElapsed: (
     db: SQLiteDatabase,
@@ -124,6 +179,17 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         throw new LoopAlreadyActiveError();
       }
 
+      const taskId = input.taskId?.trim() || null;
+      if (taskId) {
+        const task = await deps.tasks.getTaskById(db, taskId);
+        if (!task) {
+          throw new LoopTaskNotFoundError(taskId);
+        }
+        if (task.parent_task_id === null) {
+          throw new LoopTaskNotSubtaskError();
+        }
+      }
+
       const now = deps.now();
       const nowIso = now.toISOString();
       const timeZone = deps.timeZone();
@@ -140,7 +206,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         roll_forward: null,
         roll_forward_task_id: null,
         note: null,
-        task_id: input.taskId ?? null,
+        task_id: taskId,
         target_duration_seconds: Math.max(1, Math.round(input.targetDurationSeconds)),
         status: 'ACTIVE',
         started_at: nowIso,
@@ -158,9 +224,25 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         created_at: nowIso,
       };
 
+      const items: LoopItem[] = (input.items ?? [])
+        .map((item, index) => ({
+          id: deps.newId(),
+          loop_id: loop.id,
+          text: item.text.trim(),
+          done: false,
+          sort_order: index,
+          carried_from_item_id: item.carriedFromItemId ?? null,
+          created_at: nowIso,
+          updated_at: nowIso,
+        }))
+        .filter((item) => item.text.length > 0);
+
       await db.withTransactionAsync(async () => {
         await deps.loops.createLoop(db, loop);
         await deps.intervals.createInterval(db, interval);
+        for (const item of items) {
+          await deps.items.createLoopItem(db, item);
+        }
       });
 
       return loop;
@@ -248,6 +330,29 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
     getLoop(db, loopId) {
       return requireLoop(db, loopId);
+    },
+
+    getLoopItems(db, loopId) {
+      return deps.items.listLoopItems(db, loopId);
+    },
+
+    async setLoopItemDone(db, loopId, itemId, done) {
+      const item = await deps.items.getLoopItemById(db, itemId);
+      if (!item || item.loop_id !== loopId) {
+        throw new LoopItemNotFoundError(itemId);
+      }
+      await deps.items.updateLoopItemDone(db, itemId, done);
+    },
+
+    async getPreviousLoopWithItems(db) {
+      const loop = await deps.loops.getLatestCompletedLoop(db);
+      if (!loop) {
+        return null;
+      }
+      return {
+        loop,
+        items: await deps.items.listLoopItems(db, loop.id),
+      };
     },
 
     getElapsedSeconds,

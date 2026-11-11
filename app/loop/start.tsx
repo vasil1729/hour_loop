@@ -7,18 +7,24 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import {
   DURATION_PRESETS_MINUTES,
   minutesToSeconds,
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
-import type { Task } from '../../src/domain/types';
+import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
+import { createId } from '../../src/domain/shared/id';
+import { isLoopTarget } from '../../src/domain/tasks/taskDomain';
+import type { Loop, LoopItem, Task } from '../../src/domain/types';
+import { listLooseCapsules } from '../../src/features/capsules/capsuleService';
 import { loopService } from '../../src/features/loops/loopService';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import {
@@ -31,6 +37,17 @@ import { useSettingsStore } from '../../src/store/settingsStore';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
+type DraftCapsule = {
+  key: string;
+  text: string;
+  carriedFromItemId: string | null;
+};
+
+type CarrySource = {
+  loop: Loop;
+  items: LoopItem[];
+};
+
 export default function StartLoopScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
@@ -41,8 +58,10 @@ export default function StartLoopScreen() {
     (state) => state.defaultDurationSeconds
   );
 
-  const [focus, setFocus] = useState('');
-  const [carryIn, setCarryIn] = useState('');
+  const [capsuleItems, setCapsuleItems] = useState<DraftCapsule[]>([]);
+  const [newCapsuleText, setNewCapsuleText] = useState('');
+  const [carrySource, setCarrySource] = useState<CarrySource | null>(null);
+  const [looseCapsules, setLooseCapsules] = useState<Capsule[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
     typeof params.taskId === 'string' ? params.taskId : null
@@ -71,6 +90,43 @@ export default function StartLoopScreen() {
   }, [db]);
 
   useEffect(() => {
+    if (!selectedTaskId || tasks.length === 0) return;
+    const selected = tasks.find((task) => task.id === selectedTaskId);
+    if (!selected || !isLoopTarget(selected)) {
+      setSelectedTaskId(null);
+    }
+  }, [selectedTaskId, tasks]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loopService
+      .getPreviousLoopWithItems(db)
+      .then((result) => {
+        if (!cancelled) setCarrySource(result);
+      })
+      .catch(() => {
+        if (!cancelled) setCarrySource(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [db]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void listLooseCapsules(db)
+      .then((result) => {
+        if (!cancelled) setLooseCapsules(result);
+      })
+      .catch(() => {
+        if (!cancelled) setLooseCapsules([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [db]);
+
+  useEffect(() => {
     let cancelled = false;
     if (!selectedTaskId) {
       setSuggestedCarryIn(null);
@@ -79,19 +135,62 @@ export default function StartLoopScreen() {
     void getSuggestedCarryIn(db, selectedTaskId).then((suggestion) => {
       if (!cancelled) {
         setSuggestedCarryIn(suggestion);
-        if (suggestion && !carryIn.trim()) {
-          setCarryIn(suggestion);
-        }
       }
     });
     return () => {
       cancelled = true;
     };
-    // carryIn is intentionally read once per task selection.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, selectedTaskId]);
 
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
+  const selectedTaskParent = selectedTask?.parent_task_id
+    ? tasks.find((task) => task.id === selectedTask.parent_task_id) ?? null
+    : null;
+  const selectedTaskLabel = selectedTask
+    ? selectedTaskParent
+      ? `${selectedTaskParent.title} / ${selectedTask.title}`
+      : selectedTask.title
+    : 'No subtask (loose capsules)';
+  const availableLooseCapsules = looseCapsules.filter(
+    (capsule) => capsule.loop.id !== carrySource?.loop.id
+  );
+
+  const carriedIds = new Set(
+    capsuleItems
+      .map((item) => item.carriedFromItemId)
+      .filter((id): id is string => id !== null)
+  );
+
+  const appendCapsule = (text: string, carriedFromItemId: string | null = null) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setCapsuleItems((previous) => [
+      ...previous,
+      { key: createId(), text: trimmed, carriedFromItemId },
+    ]);
+  };
+
+  const addTypedCapsule = () => {
+    const trimmed = newCapsuleText.trim();
+    if (!trimmed) return;
+    appendCapsule(trimmed);
+    setNewCapsuleText('');
+  };
+
+  const removeCapsule = (key: string) => {
+    setCapsuleItems((previous) => previous.filter((item) => item.key !== key));
+  };
+
+  const toggleCarryItem = (item: LoopItem) => {
+    if (item.done) return;
+    if (carriedIds.has(item.id)) {
+      setCapsuleItems((previous) =>
+        previous.filter((entry) => entry.carriedFromItemId !== item.id)
+      );
+      return;
+    }
+    appendCapsule(item.text, item.id);
+  };
 
   const selectDuration = (seconds: number) => {
     setDurationTouched(true);
@@ -115,10 +214,12 @@ export default function StartLoopScreen() {
     setBusy(true);
     try {
       const loop = await loopService.startLoop(db, {
-        focus,
-        carryIn,
         taskId: selectedTaskId,
         targetDurationSeconds: durationSeconds,
+        items: capsuleItems.map((item) => ({
+          text: item.text,
+          carriedFromItemId: item.carriedFromItemId,
+        })),
       });
       await syncLoopNotification(db, loop, { requestPermission: true }).catch(
         () => undefined
@@ -154,51 +255,92 @@ export default function StartLoopScreen() {
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>FOCUS</Text>
-        <TextInput
-          value={focus}
-          onChangeText={setFocus}
-          placeholder="What is this loop for?"
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.input,
-            {
-              color: colors.text,
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-          multiline
-          maxLength={280}
-          autoFocus
-        />
+        <Text style={[styles.label, { color: colors.textSecondary }]}>CAPSULES</Text>
+        {capsuleItems.length > 0 ? (
+          <View style={styles.capsuleWrap}>
+            {capsuleItems.map((item) => (
+              <LoopItemCapsule
+                key={item.key}
+                text={item.text}
+                carried={item.carriedFromItemId !== null}
+                onRemove={() => removeCapsule(item.key)}
+              />
+            ))}
+          </View>
+        ) : (
+          <Text style={[styles.helper, { color: colors.textSecondary }]}>
+            Break this loop into a few concrete capsules.
+          </Text>
+        )}
+        <View style={styles.addRow}>
+          <TextInput
+            value={newCapsuleText}
+            onChangeText={setNewCapsuleText}
+            placeholder="Add a capsule…"
+            placeholderTextColor={colors.textSecondary}
+            style={[
+              styles.addInput,
+              {
+                color: colors.text,
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+            returnKeyType="done"
+            onSubmitEditing={addTypedCapsule}
+            maxLength={120}
+            autoFocus
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add capsule"
+            onPress={addTypedCapsule}
+            disabled={!newCapsuleText.trim()}
+            style={[
+              styles.addButton,
+              {
+                backgroundColor: colors.accent,
+                opacity: newCapsuleText.trim() ? 1 : 0.45,
+              },
+            ]}
+          >
+            <Ionicons name="add" size={22} color="#FFFFFF" />
+          </Pressable>
+        </View>
       </View>
 
-      <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>CARRY IN</Text>
-        <TextInput
-          value={carryIn}
-          onChangeText={setCarryIn}
-          placeholder="Anything to remember from before?"
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.input,
-            {
-              color: colors.text,
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-            },
-          ]}
-          multiline
-          maxLength={280}
-        />
-      </View>
+      {carrySource && carrySource.items.length > 0 ? (
+        <View style={styles.field}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            CARRY IN FROM H{carrySource.loop.sequence_number}
+          </Text>
+          <Text style={[styles.helper, { color: colors.textSecondary }]}>
+            {carrySource.items.every((item) => item.done)
+              ? 'Everything from the previous loop is done.'
+              : 'Tap an unfinished item to carry it into this loop.'}
+          </Text>
+          <View style={styles.capsuleWrap}>
+            {carrySource.items.map((item) => (
+              <LoopItemCapsule
+                key={item.id}
+                text={item.text}
+                done={item.done}
+                selected={carriedIds.has(item.id)}
+                disabled={item.done}
+                onPress={() => toggleCarryItem(item)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>TASK (OPTIONAL)</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          SUBTASK (OPTIONAL)
+        </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a task for this loop"
+          accessibilityLabel="Choose a subtask for this loop"
           onPress={() => setTaskPickerVisible(true)}
           style={[
             styles.taskSelector,
@@ -212,24 +354,53 @@ export default function StartLoopScreen() {
               { color: selectedTask ? colors.text : colors.textSecondary },
             ]}
           >
-            {selectedTask ? selectedTask.title : 'No task selected'}
+            {selectedTaskLabel}
           </Text>
           <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
             {selectedTask ? 'Change' : 'Choose'}
           </Text>
         </Pressable>
-        {suggestedCarryIn && !carryIn.trim() ? (
+        <Text style={[styles.helper, { color: colors.textSecondary }]}>
+          {selectedTask
+            ? 'Capsules are grouped under this subtask.'
+            : 'No subtask — new capsules stay loose and appear in Tasks.'}
+        </Text>
+        {suggestedCarryIn &&
+        !capsuleItems.some((item) => item.text === suggestedCarryIn) ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Use suggested carry in"
-            onPress={() => setCarryIn(suggestedCarryIn)}
+            accessibilityLabel="Add suggested roll forward"
+            onPress={() => {
+              if (suggestedCarryIn) appendCapsule(suggestedCarryIn);
+            }}
           >
             <Text style={[styles.suggestion, { color: colors.accent }]}>
-              Use previous roll forward: {suggestedCarryIn}
+              Add previous roll forward: {suggestedCarryIn}
             </Text>
           </Pressable>
         ) : null}
       </View>
+
+      {availableLooseCapsules.length > 0 ? (
+        <View style={styles.field}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            LOOSE CAPSULES
+          </Text>
+          <Text style={[styles.helper, { color: colors.textSecondary }]}>
+            From loops without a subtask. Tap to bring one into this loop.
+          </Text>
+          <View style={styles.capsuleWrap}>
+            {availableLooseCapsules.map((capsule) => (
+              <LoopItemCapsule
+                key={capsule.item.id}
+                text={capsule.item.text}
+                selected={carriedIds.has(capsule.item.id)}
+                onPress={() => toggleCarryItem(capsule.item)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>TARGET</Text>
@@ -351,14 +522,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1.2,
   },
-  input: {
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  helper: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  addInput: {
+    flex: 1,
+    minHeight: 48,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 16,
-    minHeight: 88,
-    textAlignVertical: 'top',
+    paddingVertical: spacing.sm,
+    fontSize: 15,
+  },
+  addButton: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chips: {
     flexDirection: 'row',

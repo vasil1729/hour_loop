@@ -148,3 +148,15 @@ export function childProgress(tasks: Task[], taskId: string): TaskProgress {
 export function isTaskActive(task: Task): boolean {
   return task.status === 'NOT_STARTED' || task.status === 'IN_PROGRESS';
 }
+
+/**
+ * Top-level tasks are containers, like epics or user stories. Only a task
+ * nested underneath one of them is an actionable subtask that can own a loop.
+ */
+export function isSubtask(task: Task): boolean {
+  return task.parent_task_id !== null;
+}
+
+export function isLoopTarget(task: Task): boolean {
+  return isTaskActive(task) && isSubtask(task);
+}

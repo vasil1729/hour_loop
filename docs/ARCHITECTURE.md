@@ -80,8 +80,15 @@ The service accepts injectable dependencies (clock, ID generator, time zone, rep
 
 - Tasks form an adjacency-list hierarchy with `parent_task_id` and self-referencing `ON DELETE CASCADE`.
 - `taskDomain` provides sorting, tree building, flattening, descendant collection, cycle detection, and child progress.
+- Top-level tasks are containers; only subtasks (tasks with a parent) are valid loop targets. The task picker filters out container rows.
 - The task pool uses a flattened `FlatList`; it never recursively nests views.
 - `moveTask` validates that the new parent is not the task itself or one of its descendants.
+
+### Capsules
+
+- Loop items are presented as capsules. A loop attached to a subtask groups its capsules under that subtask.
+- Open, uncarried capsules from loops without a task are derived as loose capsules. The Tasks screen shows them above the task tree, the start-loop screen offers them as carry-in candidates, and task detail shows the capsules grouped under a task subtree.
+- The derivation is a repository query, not a separate table: it selects open items whose `carried_from_item_id` has no successor and whose loop has no `task_id`.
 
 ## Intentions and history
 

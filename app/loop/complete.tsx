@@ -15,11 +15,12 @@ import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
-import type { Loop, LoopInterval, Task } from '../../src/domain/types';
+import type { Loop, LoopInterval, LoopItem, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { goToToday } from '../../src/services/navigation/navigationService';
@@ -43,6 +44,7 @@ export default function CompleteLoopScreen() {
   const [loop, setLoop] = useState<Loop | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [intervals, setIntervals] = useState<LoopInterval[]>([]);
+  const [items, setItems] = useState<LoopItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -67,11 +69,15 @@ export default function CompleteLoopScreen() {
         return;
       }
       try {
-        const result = await loopService.getLoopWithElapsed(db, loopId);
+        const [result, loopItems] = await Promise.all([
+          loopService.getLoopWithElapsed(db, loopId),
+          loopService.getLoopItems(db, loopId),
+        ]);
         if (cancelled) return;
         setLoop(result.loop);
         setElapsedSeconds(result.elapsedSeconds);
         setIntervals(result.intervals);
+        setItems(loopItems);
         setFocus(result.loop.focus ?? '');
         setCarryIn(result.loop.carry_in ?? '');
         setDone(result.loop.done ?? '');
@@ -104,6 +110,29 @@ export default function CompleteLoopScreen() {
       cancelled = true;
     };
   }, [db]);
+
+  const toggleItem = async (item: LoopItem) => {
+    if (!loop) return;
+    const nextDone = !item.done;
+    setItems((previous) =>
+      previous.map((entry) =>
+        entry.id === item.id ? { ...entry, done: nextDone } : entry
+      )
+    );
+    try {
+      await loopService.setLoopItemDone(db, loop.id, item.id, nextDone);
+    } catch (caught) {
+      setItems((previous) =>
+        previous.map((entry) =>
+          entry.id === item.id ? { ...entry, done: item.done } : entry
+        )
+      );
+      Alert.alert(
+        'Could not update capsule',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      );
+    }
+  };
 
   const handleKeepLooping = async () => {
     if (!loop) return;
@@ -228,22 +257,53 @@ export default function CompleteLoopScreen() {
         events={buildLoopTimeline(loop, intervals, { closing: !readOnly })}
       />
 
-      <Field
-        label="FOCUS"
-        value={focus}
-        onChangeText={setFocus}
-        placeholder="What was this loop for?"
-        editable={!readOnly}
-        multiline
-      />
-      <Field
-        label="CARRY IN"
-        value={carryIn}
-        onChangeText={setCarryIn}
-        placeholder="What you brought into the loop"
-        editable={!readOnly}
-        multiline
-      />
+      {items.length > 0 ? (
+        <View style={styles.field}>
+          <View style={styles.itemsHeader}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              CAPSULES
+            </Text>
+            <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
+              {items.filter((item) => item.done).length}/{items.length} done
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {items.map((item) => (
+              <LoopItemCapsule
+                key={item.id}
+                text={item.text}
+                done={item.done}
+                onPress={
+                  readOnly
+                    ? undefined
+                    : () => {
+                        void toggleItem(item);
+                      }
+                }
+              />
+            ))}
+          </View>
+        </View>
+      ) : (
+        <>
+          <Field
+            label="FOCUS"
+            value={focus}
+            onChangeText={setFocus}
+            placeholder="What was this loop for?"
+            editable={!readOnly}
+            multiline
+          />
+          <Field
+            label="CARRY IN"
+            value={carryIn}
+            onChangeText={setCarryIn}
+            placeholder="What you brought into the loop"
+            editable={!readOnly}
+            multiline
+          />
+        </>
+      )}
       <Field
         label="DONE"
         value={done}
@@ -262,11 +322,11 @@ export default function CompleteLoopScreen() {
       />
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          ROLL FORWARD TASK (OPTIONAL)
+          ROLL FORWARD SUBTASK (OPTIONAL)
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a roll forward task"
+          accessibilityLabel="Choose a roll forward subtask"
           onPress={() => setTaskPickerVisible(true)}
           disabled={readOnly}
           style={[
@@ -282,7 +342,7 @@ export default function CompleteLoopScreen() {
             ]}
           >
             {tasks.find((task) => task.id === rollForwardTaskId)?.title ??
-              'No task linked'}
+              'No subtask linked'}
           </Text>
           <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
             {readOnly ? '' : 'Choose'}
@@ -303,7 +363,8 @@ export default function CompleteLoopScreen() {
         visible={taskPickerVisible}
         tasks={tasks}
         selectedTaskId={rollForwardTaskId}
-        title="Link a follow-up task"
+        title="Link a follow-up subtask"
+        noneLabel="No follow-up subtask"
         onSelect={(taskId) => {
           setRollForwardTaskId(taskId);
           setTaskPickerVisible(false);
@@ -467,6 +528,22 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,
+  },
+  itemsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  itemsCount: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   input: {
     borderWidth: StyleSheet.hairlineWidth,

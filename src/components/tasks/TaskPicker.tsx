@@ -10,7 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import type { Task } from '../../domain/types';
-import { flattenTree } from '../../domain/tasks/taskDomain';
+import { flattenTree, isLoopTarget } from '../../domain/tasks/taskDomain';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -19,6 +19,7 @@ type TaskPickerProps = {
   tasks: Task[];
   selectedTaskId: string | null;
   title?: string;
+  noneLabel?: string;
   onSelect: (taskId: string | null) => void;
   onClose: () => void;
 };
@@ -27,7 +28,8 @@ export function TaskPicker({
   visible,
   tasks,
   selectedTaskId,
-  title = 'Choose a task',
+  title = 'Choose a subtask',
+  noneLabel = 'No subtask (capsules stay loose)',
   onSelect,
   onClose,
 }: TaskPickerProps) {
@@ -36,7 +38,14 @@ export function TaskPicker({
     () => new Set(tasks.map((task) => task.id)),
     [tasks]
   );
-  const rows = useMemo(() => flattenTree(tasks, expanded), [tasks, expanded]);
+  const tasksById = useMemo(
+    () => new Map(tasks.map((task) => [task.id, task])),
+    [tasks]
+  );
+  const rows = useMemo(
+    () => flattenTree(tasks, expanded).filter((row) => isLoopTarget(row.task)),
+    [tasks, expanded]
+  );
 
   return (
     <Modal
@@ -75,15 +84,25 @@ export function TaskPicker({
               size={20}
               color={selectedTaskId === null ? colors.accent : colors.textSecondary}
             />
-            <Text style={[styles.noneText, { color: colors.text }]}>No task</Text>
+            <Text style={[styles.noneText, { color: colors.text }]}>
+              {noneLabel}
+            </Text>
           </Pressable>
 
           <FlatList
             data={rows}
             keyExtractor={(row) => row.task.id}
             contentContainerStyle={styles.list}
+            ListEmptyComponent={
+              <Text style={[styles.empty, { color: colors.textSecondary }]}>
+                No subtasks yet. Add a subtask to a task first.
+              </Text>
+            }
             renderItem={({ item }) => {
               const selected = selectedTaskId === item.task.id;
+              const parent = item.task.parent_task_id
+                ? tasksById.get(item.task.parent_task_id)
+                : null;
               return (
                 <Pressable
                   accessibilityRole="button"
@@ -102,12 +121,22 @@ export function TaskPicker({
                     size={20}
                     color={selected ? colors.accent : colors.textSecondary}
                   />
-                  <Text
-                    numberOfLines={1}
-                    style={[styles.taskTitle, { color: colors.text }]}
-                  >
-                    {item.task.title}
-                  </Text>
+                  <View style={styles.taskBody}>
+                    <Text
+                      numberOfLines={1}
+                      style={[styles.taskTitle, { color: colors.text }]}
+                    >
+                      {item.task.title}
+                    </Text>
+                    {parent ? (
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.taskMeta, { color: colors.textSecondary }]}
+                      >
+                        {parent.title}
+                      </Text>
+                    ) : null}
+                  </View>
                 </Pressable>
               );
             }}
@@ -163,9 +192,22 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
   },
-  taskTitle: {
+  taskBody: {
     flex: 1,
+    gap: 2,
+  },
+  taskTitle: {
     fontSize: 15,
     fontWeight: '500',
+  },
+  taskMeta: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  empty: {
+    fontSize: 13,
+    lineHeight: 19,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
   },
 });

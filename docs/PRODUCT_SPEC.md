@@ -14,7 +14,7 @@ A Loop is one focus session.
 
 - Loops are numbered `H1`, `H2`, `H3` per local calendar day, resetting at midnight.
 - Only one loop may be `ACTIVE` or `PAUSED` at a time.
-- A loop has a target duration, an optional task, optional focus text, and a completion journal.
+- A loop has a target duration, an optional subtask, capsule items, and a completion journal.
 - Elapsed time is stored as intervals (`started_at` / `ended_at`) so pause/resume and crash recovery are exact.
 - The interval log is also shown as a session log with the local start, pause, resume, and stop times.
 
@@ -39,17 +39,27 @@ All fields are optional, with focus and carry-in pre-filled when available:
 - Focus — what this loop was for.
 - Carry in — what you brought into the loop.
 - Done — what you actually accomplished.
-- Roll forward — what the next loop should pick up, optionally linked to a task.
+- Roll forward — what the next loop should pick up, optionally linked to a subtask.
 - Note — free-form observation.
 
 ### Task pool
 
-- Tasks form a hierarchy of arbitrary depth.
+- Top-level tasks are containers, roughly like epics or user stories. Tasks form a hierarchy of arbitrary depth.
+- Any task nested underneath a top-level task is a **subtask** and is the only kind of task that can be selected as a loop target. Container tasks group work and cannot own loops directly.
 - Tasks have statuses: not started, in progress, completed, archived.
 - Completing or reopening a task is manual; loops do not silently complete tasks.
 - A task detail view aggregates focus time from the task and all descendants.
-- Starting a loop from a task marks a not-started task as in progress.
-- When a new loop is started for the same task, the previous loop's roll-forward text is suggested as carry-in.
+- Starting a loop from a subtask marks a not-started subtask as in progress.
+- When a new loop is started for the same subtask, the previous loop's roll-forward text is suggested as carry-in.
+
+### Capsules
+
+- Capsules are the small checklist units added while starting a loop.
+- A loop with a subtask groups all of its capsules under that subtask.
+- A loop without a subtask creates **loose capsules**. Open loose capsules appear in the Tasks screen under **Loose capsules**, even though they were created from the loop-start screen.
+- The start-loop screen also lists loose capsules from older loops so one can be brought into the next loop.
+- Capsules that are complete, or that have been carried into a later loop, are not shown in the task pool. Tapping a loose capsule in Tasks marks it complete.
+- The task detail view shows the open capsules grouped under that task and its descendants.
 
 ### Intentions
 
@@ -80,11 +90,11 @@ All fields are optional, with focus and carry-in pre-filled when available:
 | Screen | Purpose |
 |---|---|
 | Today | Date, daily/monthly intention bars, active-loop banner with live progress and pause/resume, recent loops |
-| Start loop | Focus, carry-in, optional task, target duration |
-| Active loop | Live timer, progress, focus, session log, pause/resume/stop, back to Today, delete with confirmation |
-| Complete loop | Journal form, elapsed summary, task link for roll-forward |
-| Tasks | Filterable flattened tree with expand/collapse and quick complete |
-| Task detail | Metrics, subtasks, loop history, start loop, edit, complete, archive |
+| Start loop | Capsules, loose capsules, carry-in, optional subtask, target duration |
+| Active loop | Live timer, progress, focus, capsules, session log, pause/resume/stop, back to Today, delete with confirmation |
+| Complete loop | Journal form, capsule summary, elapsed summary, subtask link for roll-forward |
+| Tasks | Loose capsules, filterable flattened tree with expand/collapse and quick complete |
+| Task detail | Metrics, subtasks, open capsules, loop history, start loop from a subtask, edit, complete, archive |
 | History | Day navigation, day summary, loops, monthly summary |
 | Settings | Default duration, theme, notifications, version/about |
 
@@ -92,11 +102,13 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 1. Loop numbering resets at local midnight.
 2. One active or paused loop globally at MVP.
-3. One loop → zero or one optional task; a task may have many loops.
-4. Roll-forward is free text plus an optional task FK.
+3. One loop → zero or one optional subtask; a subtask may have many loops. Container tasks cannot own loops.
+4. Roll-forward is free text plus an optional subtask FK.
 5. Dark mode is the default, but the system colour scheme is respected unless overridden.
 6. Default loop duration is 60 minutes; changing it affects new loops only.
 7. Archived tasks are hidden from the task pool; their loops remain in history.
+8. A capsule belongs to the loop's subtask when one is selected; otherwise it is a loose capsule.
+9. Only open, uncarried capsules appear in the task pool, whether their loop is active or closed.
 
 ## Out of scope for MVP
 

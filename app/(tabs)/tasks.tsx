@@ -7,9 +7,15 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskTree } from '../../src/components/tasks/TaskTree';
+import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
 import type { Task } from '../../src/domain/types';
+import {
+  listLooseCapsules,
+  setCapsuleDone,
+} from '../../src/features/capsules/capsuleService';
 import {
   createTask,
   listTasks,
@@ -32,14 +38,19 @@ export default function TasksScreen() {
 
   const [filter, setFilter] = useState<TaskFilter>('active');
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [looseCapsules, setLooseCapsules] = useState<Capsule[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [addVisible, setAddVisible] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const reload = useCallback(async () => {
-    const result = await listTasks(db, filter);
+    const [result, capsules] = await Promise.all([
+      listTasks(db, filter),
+      listLooseCapsules(db),
+    ]);
     setTasks(result);
+    setLooseCapsules(capsules);
     setLoading(false);
   }, [db, filter]);
 
@@ -47,12 +58,15 @@ export default function TasksScreen() {
     useCallback(() => {
       let cancelled = false;
       setLoading(true);
-      void listTasks(db, filter).then((result) => {
-        if (!cancelled) {
-          setTasks(result);
-          setLoading(false);
+      void Promise.all([listTasks(db, filter), listLooseCapsules(db)]).then(
+        ([result, capsules]) => {
+          if (!cancelled) {
+            setTasks(result);
+            setLooseCapsules(capsules);
+            setLoading(false);
+          }
         }
-      });
+      );
       return () => {
         cancelled = true;
       };
@@ -82,6 +96,18 @@ export default function TasksScreen() {
     } catch (error) {
       Alert.alert(
         'Could not update task',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const completeCapsule = async (capsule: Capsule) => {
+    try {
+      await setCapsuleDone(db, capsule, true);
+      await reload();
+    } catch (error) {
+      Alert.alert(
+        'Could not update capsule',
         error instanceof Error ? error.message : 'Please try again.'
       );
     }
@@ -154,6 +180,34 @@ export default function TasksScreen() {
           );
         })}
       </View>
+
+      {looseCapsules.length > 0 ? (
+        <View style={styles.capsuleSection}>
+          <View style={styles.capsuleHeader}>
+            <Text style={[styles.capsuleLabel, { color: colors.textSecondary }]}>
+              LOOSE CAPSULES
+            </Text>
+            <Text style={[styles.capsuleCount, { color: colors.textSecondary }]}>
+              {looseCapsules.length} open
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {looseCapsules.map((capsule) => (
+              <LoopItemCapsule
+                key={capsule.item.id}
+                text={capsule.item.text}
+                pressAccessibilityLabel={`Complete capsule ${capsule.item.text}`}
+                onPress={() => {
+                  void completeCapsule(capsule);
+                }}
+              />
+            ))}
+          </View>
+          <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
+            From loops without a subtask. Tap to complete.
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -178,7 +232,9 @@ export default function TasksScreen() {
                 message={
                   filter === 'completed'
                     ? 'Finish a task and it will appear here.'
-                    : 'Add a task, break it into subtasks, and attach loops to it.'
+                    : looseCapsules.length > 0
+                      ? 'Loose capsules are shown above. Add a task container to group future work.'
+                      : 'Add a task container, break it into subtasks, and start loops from a subtask.'
                 }
               />
             </View>
@@ -241,6 +297,35 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  capsuleSection: {
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  capsuleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  capsuleLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  capsuleCount: {
+    fontSize: 11,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  capsuleWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  capsuleHint: {
+    fontSize: 12,
+    lineHeight: 17,
   },
   empty: {
     minHeight: 300,

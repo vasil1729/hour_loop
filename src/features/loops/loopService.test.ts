@@ -1,28 +1,35 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { Loop, LoopInterval } from '../../domain/types';
+import type { Loop, LoopInterval, LoopItem, Task } from '../../domain/types';
 import type { LoopJournalPatch } from '../../database/repositories/loopsRepository';
 import {
   createLoopService,
   InvalidStateTransitionError,
   LoopAlreadyActiveError,
+  LoopItemNotFoundError,
   LoopNotFoundError,
+  LoopTaskNotFoundError,
+  LoopTaskNotSubtaskError,
   type LoopServiceDeps,
 } from './loopService';
 
 type FakeState = {
   now: Date;
   idCounter: number;
+  tasks: Task[];
   loops: Loop[];
   intervals: LoopInterval[];
+  items: LoopItem[];
 };
 
 function createHarness() {
   const state: FakeState = {
     now: new Date('2026-01-01T10:00:00.000Z'),
     idCounter: 0,
+    tasks: [],
     loops: [],
     intervals: [],
+    items: [],
   };
 
   const db = {
@@ -43,6 +50,7 @@ function createHarness() {
       deleteLoop: async (_db, id) => {
         state.loops = state.loops.filter((loop) => loop.id !== id);
         state.intervals = state.intervals.filter((interval) => interval.loop_id !== id);
+        state.items = state.items.filter((item) => item.loop_id !== id);
       },
       getLoopById: async (_db, id) => {
         const loop = state.loops.find((entry) => entry.id === id);
@@ -54,6 +62,11 @@ function createHarness() {
         );
         return loop ? { ...loop } : null;
       },
+      getLatestCompletedLoop: async () =>
+        [...state.loops]
+          .filter((entry) => entry.status === 'COMPLETED')
+          .sort((a, b) => (b.stopped_at ?? '').localeCompare(a.stopped_at ?? ''))[0] ??
+        null,
       getMaxSequenceForDate: async (_db, localDate) =>
         Math.max(
           0,
@@ -93,6 +106,37 @@ function createHarness() {
           .filter((interval) => interval.loop_id === loopId)
           .sort((a, b) => a.started_at.localeCompare(b.started_at)),
     },
+    tasks: {
+      getTaskById: async (_db, id) => {
+        const task = state.tasks.find((entry) => entry.id === id);
+        return task ? { ...task } : null;
+      },
+    },
+    items: {
+      createLoopItem: async (_db, item) => {
+        state.items.push({ ...item });
+      },
+      getLoopItemById: async (_db, id) => {
+        const item = state.items.find((entry) => entry.id === id);
+        return item ? { ...item } : null;
+      },
+      listLoopItems: async (_db, loopId) =>
+        state.items
+          .filter((item) => item.loop_id === loopId)
+          .sort(
+            (a, b) =>
+              a.sort_order - b.sort_order ||
+              a.created_at.localeCompare(b.created_at)
+          )
+          .map((item) => ({ ...item })),
+      updateLoopItemDone: async (_db, id, done) => {
+        const item = state.items.find((entry) => entry.id === id);
+        if (item) {
+          item.done = done;
+          item.updated_at = state.now.toISOString();
+        }
+      },
+    },
   };
 
   const service = createLoopService(deps);
@@ -108,6 +152,20 @@ function createHarness() {
   };
 }
 
+function makeTask(overrides: Partial<Task> & Pick<Task, 'id' | 'title'>): Task {
+  return {
+    parent_task_id: null,
+    description: null,
+    status: 'NOT_STARTED',
+    sort_order: 0,
+    created_at: '2026-01-01T10:00:00.000Z',
+    updated_at: '2026-01-01T10:00:00.000Z',
+    completed_at: null,
+    archived_at: null,
+    ...overrides,
+  };
+}
+
 describe('loopService', () => {
   it('starts a loop with an open interval and per-day sequence number', async () => {
     const { db, service } = createHarness();
@@ -119,6 +177,48 @@ describe('loopService', () => {
     expect(loop.local_date).toBe('2026-01-01');
     expect(loop.started_at).toBe('2026-01-01T10:00:00.000Z');
     expect(await service.getElapsedSeconds(db, loop.id)).toBe(0);
+  });
+
+  it('rejects a top-level task container as a loop target', async () => {
+    const harness = createHarness();
+    harness.state.tasks.push(makeTask({ id: 'container', title: 'Container' }));
+
+    await expect(
+      harness.service.startLoop(harness.db, {
+        targetDurationSeconds: 3600,
+        taskId: 'container',
+      })
+    ).rejects.toBeInstanceOf(LoopTaskNotSubtaskError);
+  });
+
+  it('starts a loop on a subtask', async () => {
+    const harness = createHarness();
+    harness.state.tasks.push(
+      makeTask({ id: 'container', title: 'Container' }),
+      makeTask({
+        id: 'subtask',
+        title: 'Subtask',
+        parent_task_id: 'container',
+      })
+    );
+
+    const loop = await harness.service.startLoop(harness.db, {
+      targetDurationSeconds: 3600,
+      taskId: 'subtask',
+    });
+
+    expect(loop.task_id).toBe('subtask');
+  });
+
+  it('rejects a missing subtask target', async () => {
+    const harness = createHarness();
+
+    await expect(
+      harness.service.startLoop(harness.db, {
+        targetDurationSeconds: 3600,
+        taskId: 'missing',
+      })
+    ).rejects.toBeInstanceOf(LoopTaskNotFoundError);
   });
 
   it('rejects starting a second loop while one is active', async () => {
@@ -266,5 +366,66 @@ describe('loopService', () => {
     await expect(service.deleteLoop(db, 'missing-loop')).rejects.toBeInstanceOf(
       LoopNotFoundError
     );
+  });
+
+  it('starts a loop with ordered, trimmed capsules and carry provenance', async () => {
+    const { db, service } = createHarness();
+
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [
+        { text: '  Draft the outline  ' },
+        { text: 'Review notes', carriedFromItemId: 'old-item' },
+        { text: '   ' },
+      ],
+    });
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.text)).toEqual([
+      'Draft the outline',
+      'Review notes',
+    ]);
+    expect(items.map((item) => item.sort_order)).toEqual([0, 1]);
+    expect(items[1]?.carried_from_item_id).toBe('old-item');
+    expect(items.every((item) => item.done === false)).toBe(true);
+  });
+
+  it('toggles a loop item and rejects items from another loop', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'One item' }],
+    });
+    const [item] = await service.getLoopItems(db, loop.id);
+    if (!item) throw new Error('Expected an item');
+
+    await service.setLoopItemDone(db, loop.id, item.id, true);
+    expect((await service.getLoopItems(db, loop.id))[0]?.done).toBe(true);
+
+    await expect(
+      service.setLoopItemDone(db, 'another-loop', item.id, false)
+    ).rejects.toBeInstanceOf(LoopItemNotFoundError);
+  });
+
+  it('returns the latest completed loop and its items for carry-in', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+
+    const first = await service.startLoop(db, {
+      targetDurationSeconds: 600,
+      items: [{ text: 'First item' }],
+    });
+    await service.completeLoop(db, first.id, {});
+    harness.advanceSeconds(60);
+
+    const second = await service.startLoop(db, {
+      targetDurationSeconds: 600,
+      items: [{ text: 'Second item' }],
+    });
+    await service.completeLoop(db, second.id, {});
+
+    const previous = await service.getPreviousLoopWithItems(db);
+    expect(previous?.loop.id).toBe(second.id);
+    expect(previous?.items.map((item) => item.text)).toEqual(['Second item']);
   });
 });

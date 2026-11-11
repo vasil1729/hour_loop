@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { Task } from '../../domain/types';
 import type { TaskStatus } from '../../constants/loopStatus';
+import type { Capsule } from '../../domain/capsules/capsuleDomain';
 import { createId } from '../../domain/shared/id';
 import { nowUtcIso } from '../../domain/shared/dateUtils';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../../domain/tasks/taskDomain';
 import * as tasksRepository from '../../database/repositories/tasksRepository';
 import { listLoopsForTask, listLoopsForTasks } from '../../database/repositories/loopsRepository';
+import { listCapsulesForTasks } from '../../database/repositories/loopItemsRepository';
 import { attachLoopMetrics, type LoopWithMetrics } from '../loops/loopMetrics';
 
 export type TaskFilter = 'active' | 'completed' | 'all';
@@ -29,6 +31,7 @@ export type TaskDetail = {
   descendantIds: string[];
   descendantTasks: Task[];
   loops: LoopWithMetrics[];
+  capsules: Capsule[];
   totalSeconds: number;
   progress: TaskProgress;
 };
@@ -156,7 +159,10 @@ export async function getTaskDetail(
     (entry) => entry.id !== taskId && descendantIdSet.has(entry.id)
   );
   const loops = await listLoopsForTasks(db, descendantIds);
-  const loopsWithMetrics = await attachLoopMetrics(db, loops);
+  const [loopsWithMetrics, capsules] = await Promise.all([
+    attachLoopMetrics(db, loops),
+    listCapsulesForTasks(db, descendantIds),
+  ]);
   const totalSeconds = loopsWithMetrics.reduce(
     (sum, entry) => sum + entry.elapsedSeconds,
     0
@@ -168,6 +174,7 @@ export async function getTaskDetail(
     descendantIds,
     descendantTasks,
     loops: loopsWithMetrics,
+    capsules,
     totalSeconds,
     progress: childProgress(allTasks, taskId),
   };

@@ -6,6 +6,8 @@ import {
   collectDescendantIds,
   collectTaskIdsWithDescendants,
   flattenTree,
+  isLoopTarget,
+  isSubtask,
   isTaskActive,
   TaskCycleError,
 } from './taskDomain';
@@ -154,6 +156,39 @@ describe('isTaskActive', () => {
     ).toBe(true);
     expect(
       isTaskActive(task({ id: 'c', title: 'C', status: 'COMPLETED' }))
+    ).toBe(false);
+  });
+});
+
+describe('isSubtask', () => {
+  it('treats only tasks with a parent as subtasks', () => {
+    expect(isSubtask(task({ id: 'root', title: 'Root' }))).toBe(false);
+    expect(
+      isSubtask(task({ id: 'child', title: 'Child', parent_task_id: 'root' }))
+    ).toBe(true);
+    expect(
+      isSubtask(
+        task({ id: 'grandchild', title: 'Grandchild', parent_task_id: 'child' })
+      )
+    ).toBe(true);
+  });
+});
+
+describe('isLoopTarget', () => {
+  it('allows active subtasks and rejects containers or completed subtasks', () => {
+    expect(
+      isLoopTarget(task({ id: 'child', title: 'Child', parent_task_id: 'root' }))
+    ).toBe(true);
+    expect(isLoopTarget(task({ id: 'root', title: 'Root' }))).toBe(false);
+    expect(
+      isLoopTarget(
+        task({
+          id: 'done',
+          title: 'Done',
+          parent_task_id: 'root',
+          status: 'COMPLETED',
+        })
+      )
     ).toBe(false);
   });
 });
