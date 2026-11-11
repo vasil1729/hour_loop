@@ -55,7 +55,7 @@ export async function promptForExactAlarmAccess(
 
   Alert.alert(
     'Keep target alerts on time',
-    'Android may delay target notifications when "Alarms & reminders" is off. Allow it for Hour Loop so the alert arrives exactly on time.',
+    'Android may delay loop alerts when "Alarms & reminders" is off. Allow it for Hour Loop so the alert arrives exactly on time.',
     [
       { text: 'Not now', style: 'cancel' },
       {

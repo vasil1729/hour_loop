@@ -93,7 +93,7 @@ The service accepts injectable dependencies (clock, ID generator, time zone, rep
 ## Intentions and history
 
 - Intention targets are keyed by `period_type` + `period_key` (`YYYY-MM-DD` or `YYYY-MM`).
-- When a period has no stored target, `getIntentionSummary` falls back to `default_daily_intention_seconds` or `default_monthly_intention_seconds` from settings.
+- When a period has no stored target, `getIntentionSummary` falls back to `default_daily_intention_seconds` or `default_monthly_intention_seconds` from settings. Missing settings resolve to 8 hours per day and 160 hours per month; an explicit `0` disables the default.
 - The intention editor treats presets as additive increments and formats the running total as a human duration.
 - Actual time is derived from intervals overlapping the local day/month bounds.
 - History day view groups interval allocations by loop to show per-loop time for the selected day.
@@ -101,11 +101,12 @@ The service accepts injectable dependencies (clock, ID generator, time zone, rep
 
 ## Notifications
 
-- Local notifications are scheduled with a `TIME_INTERVAL` trigger for the remaining target duration.
+- A target-reached notification is scheduled with a `TIME_INTERVAL` trigger for the remaining duration.
+- An optional early warning is scheduled separately, defaulting to 5 minutes before the target. The delay is computed only when the remaining time is longer than the warning window.
 - An Android high-importance channel (`loop-targets`) is created at startup.
-- Notification IDs are persisted in `settings` as `notif_{loopId}`.
-- Scheduling is reconciled whenever the app foregrounds: cancel the old notification, re-read intervals, and reschedule only for ACTIVE loops with notifications enabled.
-- Pause, stop, and complete cancel the scheduled notification.
+- Notification IDs are persisted in `settings` as `notif_{loopId}` for the target and `notif_early_{loopId}` for the early warning.
+- Scheduling is reconciled whenever the app foregrounds: cancel both alerts, re-read intervals, and reschedule only for ACTIVE loops with notifications enabled.
+- Pause, stop, and complete cancel both scheduled notifications.
 
 ## Theme
 

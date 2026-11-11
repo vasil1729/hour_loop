@@ -20,7 +20,7 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 - **Capsules** — loop-sized checklist items. Capsules created without a subtask become loose capsules in the Tasks screen.
 - **Intentions** — daily and monthly time targets with additive presets, configurable defaults, and actual-vs-planned progress.
 - **History** — per-day and per-month breakdowns, including midnight-crossing allocation.
-- **Notifications** — local target-reached reminders, reconciled on foreground.
+- **Notifications** — configurable early warnings and target-reached reminders, reconciled on foreground.
 - **Backups** — export and restore all local data as a portable JSON file.
 - **Themes** — system, light, and dark.
 

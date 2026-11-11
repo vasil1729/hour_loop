@@ -20,6 +20,7 @@ import {
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
 import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
+import { EARLY_WARNING_PRESETS_MINUTES } from '../../src/constants/notifications';
 import type { HourLoopBackup } from '../../src/domain/backup/backup';
 import { formatIntentionDuration } from '../../src/domain/intentions/intentionsDomain';
 import {
@@ -65,6 +66,9 @@ export default function SettingsScreen() {
   const notificationsEnabled = useSettingsStore(
     (state) => state.notificationsEnabled
   );
+  const earlyWarningMinutes = useSettingsStore(
+    (state) => state.earlyWarningMinutes
+  );
   const setDefaultDuration = useSettingsStore((state) => state.setDefaultDuration);
   const setDefaultDailyIntention = useSettingsStore(
     (state) => state.setDefaultDailyIntention
@@ -75,6 +79,9 @@ export default function SettingsScreen() {
   const setThemePreference = useSettingsStore((state) => state.setThemePreference);
   const setNotificationsEnabled = useSettingsStore(
     (state) => state.setNotificationsEnabled
+  );
+  const setEarlyWarningMinutes = useSettingsStore(
+    (state) => state.setEarlyWarningMinutes
   );
   const loadSettings = useSettingsStore((state) => state.load);
 
@@ -160,6 +167,20 @@ export default function SettingsScreen() {
     } catch (error) {
       Alert.alert(
         'Could not update notifications',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const handleEarlyWarning = async (minutes: number) => {
+    try {
+      await setEarlyWarningMinutes(db, minutes);
+      if (notificationsEnabled) {
+        await recoverAppState(db, { requestPermission: true });
+      }
+    } catch (error) {
+      Alert.alert(
+        'Could not update early warning',
         error instanceof Error ? error.message : 'Please try again.'
       );
     }
@@ -432,15 +453,15 @@ export default function SettingsScreen() {
       >
         <View style={styles.switchBody}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Target notifications
+            Loop notifications
           </Text>
           <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-            Notify me when a running loop reaches its target. Paused loops do not
-            notify.
+            Notify me before and when a running loop reaches its target. Paused
+            loops do not notify.
           </Text>
         </View>
         <Switch
-          accessibilityLabel="Target notifications"
+          accessibilityLabel="Loop notifications"
           value={notificationsEnabled}
           onValueChange={(value) => {
             void handleNotifications(value);
@@ -448,6 +469,52 @@ export default function SettingsScreen() {
           trackColor={{ true: colors.accent, false: colors.surfaceAlt }}
           thumbColor="#FFFFFF"
         />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Early warning
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          Notify me before a running loop reaches its target. Off disables only
+          the early alert.
+        </Text>
+        <View style={styles.chips}>
+          {EARLY_WARNING_PRESETS_MINUTES.map((minutes) => {
+            const selected = earlyWarningMinutes === minutes;
+            return (
+              <Pressable
+                key={minutes}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected,
+                  disabled: !notificationsEnabled,
+                }}
+                disabled={!notificationsEnabled}
+                onPress={() => {
+                  void handleEarlyWarning(minutes);
+                }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? colors.accent : colors.surface,
+                    borderColor: selected ? colors.accent : colors.border,
+                    opacity: notificationsEnabled ? 1 : 0.45,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    { color: selected ? '#FFFFFF' : colors.text },
+                  ]}
+                >
+                  {minutes === 0 ? 'Off' : `${minutes}m`}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {supportsExactAlarmSettings() ? (
@@ -467,7 +534,7 @@ export default function SettingsScreen() {
               Alarm timing
             </Text>
             <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-              If target alerts arrive late, allow “Alarms & reminders” for Hour
+              If loop alerts arrive late, allow “Alarms & reminders” for Hour
               Loop in Android settings.
             </Text>
           </View>
