@@ -16,6 +16,7 @@ A Loop is one focus session.
 - Only one loop may be `ACTIVE` or `PAUSED` at a time.
 - A loop has a target duration, an optional task, optional focus text, and a completion journal.
 - Elapsed time is stored as intervals (`started_at` / `ended_at`) so pause/resume and crash recovery are exact.
+- The interval log is also shown as a session log with the local start, pause, resume, and stop times.
 
 ### Loop lifecycle
 
@@ -54,16 +55,18 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 - Daily and monthly focus-time targets are stored independently of loops.
 - Progress is computed from actual interval time, not from loop counts.
-- An interval that crosses midnight contributes to both days, proportionally to real seconds.
+- An interval that crosses midnight contributes to both days, proportionally to real seconds, using the device's current time zone.
 - Intentions are editable at any time; clearing a target removes it.
 
 ### History
 
-- Day view: previous/next navigation, total focus time, loop count, daily intention progress, and per-loop time for that day.
+- Day view: previous/next navigation, a calendar picker for jumping directly to any past date, total focus time, loop count, daily intention progress, and per-loop time for that day.
 - A loop that crosses midnight appears on both days with the correct split.
 - Monthly section: total focus time, unique loop count, and monthly intention progress.
 - Tapping a loop opens its read-only journal.
-- A loop can be permanently deleted from its journal; deletion also removes its recorded intervals and focus time.
+- A loop can be permanently deleted from its journal or, before completion, from the active loop or completion screen. Deletion asks for confirmation and also removes the loop's recorded intervals and focus time.
+- Clock times are displayed in the device's current time zone, so the app follows the user's location.
+- History and intention totals also split intervals in the device's current time zone, keeping day bounds and allocation consistent when the user travels.
 
 ### Notifications
 
@@ -76,9 +79,9 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 | Screen | Purpose |
 |---|---|
-| Today | Date, daily/monthly intention bars, active-loop banner or start CTA, recent loops |
+| Today | Date, daily/monthly intention bars, active-loop banner with live progress and pause/resume, recent loops |
 | Start loop | Focus, carry-in, optional task, target duration |
-| Active loop | Live timer, progress, focus, pause/resume/stop, back to Today |
+| Active loop | Live timer, progress, focus, session log, pause/resume/stop, back to Today, delete with confirmation |
 | Complete loop | Journal form, elapsed summary, task link for roll-forward |
 | Tasks | Filterable flattened tree with expand/collapse and quick complete |
 | Task detail | Metrics, subtasks, loop history, start loop, edit, complete, archive |

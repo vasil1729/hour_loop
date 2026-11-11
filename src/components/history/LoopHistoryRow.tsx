@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { formatShortDayLabel } from '../../domain/shared/dateUtils';
+import { formatShortDayLabel, formatTimeOfDay } from '../../domain/shared/dateUtils';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
 import type { Loop } from '../../domain/types';
 import { useTheme } from '../../theme/ThemeContext';
@@ -22,9 +22,8 @@ export function LoopHistoryRow({
 }: LoopHistoryRowProps) {
   const { colors } = useTheme();
   const title = loop.done?.trim() || loop.focus?.trim() || 'Untitled loop';
-  const stoppedAt = loop.stopped_at ? new Date(loop.stopped_at) : null;
-  const timeLabel = stoppedAt
-    ? stoppedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const timeLabel = loop.stopped_at
+    ? formatTimeOfDay(loop.stopped_at)
     : loop.status === 'PAUSED'
       ? 'Paused'
       : 'Running';

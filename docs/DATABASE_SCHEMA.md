@@ -60,7 +60,7 @@ The canonical timer log. Elapsed time is derived from these rows.
 | `loop_id` | TEXT NOT NULL | FK → loops, `ON DELETE CASCADE` |
 | `started_at` | TEXT NOT NULL | UTC |
 | `ended_at` | TEXT | Null while running |
-| `time_zone` | TEXT NOT NULL | IANA zone at interval start |
+| `time_zone` | TEXT NOT NULL | IANA zone at interval start; fallback for allocation when no display zone is supplied |
 | `created_at` | TEXT NOT NULL | |
 
 Indexes: `idx_intervals_loop_id`, `idx_intervals_started_at`.

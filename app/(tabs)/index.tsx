@@ -1,5 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -14,13 +22,18 @@ import {
   currentMonthKey,
   formatDayLabel,
 } from '../../src/domain/shared/dateUtils';
-import { formatElapsed } from '../../src/domain/timer/timerEngine';
+import { formatElapsed, progressRatio } from '../../src/domain/timer/timerEngine';
 import { listRecentLoops } from '../../src/database/repositories/loopsRepository';
-import { attachLoopMetrics, type LoopWithMetrics } from '../../src/features/loops/loopMetrics';
+import {
+  attachLoopMetrics,
+  type LoopWithMetrics,
+} from '../../src/features/loops/loopMetrics';
+import { loopService } from '../../src/features/loops/loopService';
 import {
   clearIntention,
   setIntention,
 } from '../../src/features/intentions/intentionsService';
+import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useIntentions } from '../../src/hooks/useIntentions';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -30,13 +43,14 @@ export default function TodayScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
-  const { activeLoop, elapsedSeconds } = useActiveLoop();
+  const { activeLoop, elapsedSeconds, refresh } = useActiveLoop();
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
   const { daily, monthly, refresh: refreshIntentions } = useIntentions();
   const [editingIntention, setEditingIntention] = useState<'daily' | 'monthly' | null>(
     null
   );
   const [savingIntention, setSavingIntention] = useState(false);
+  const [loopActionBusy, setLoopActionBusy] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -58,6 +72,12 @@ export default function TodayScreen() {
   );
 
   const todayKey = currentDayKey();
+  const activeProgress = activeLoop
+    ? progressRatio(activeLoop.target_duration_seconds, elapsedSeconds)
+    : 0;
+  const activeTargetReached = activeLoop
+    ? elapsedSeconds >= activeLoop.target_duration_seconds
+    : false;
 
   const handleSaveIntention = async (seconds: number) => {
     if (!editingIntention) return;
@@ -102,6 +122,28 @@ export default function TodayScreen() {
     }
   };
 
+  const handleToggleLoop = async () => {
+    if (!activeLoop || loopActionBusy) return;
+    setLoopActionBusy(true);
+    try {
+      const updated =
+        activeLoop.status === 'ACTIVE'
+          ? await loopService.pauseLoop(db, activeLoop.id)
+          : await loopService.resumeLoop(db, activeLoop.id);
+      await syncLoopNotification(db, updated, {
+        requestPermission: activeLoop.status === 'PAUSED',
+      }).catch(() => undefined);
+      await refresh(db);
+    } catch (error) {
+      Alert.alert(
+        activeLoop.status === 'ACTIVE' ? 'Could not pause loop' : 'Could not resume loop',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setLoopActionBusy(false);
+    }
+  };
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -129,41 +171,114 @@ export default function TodayScreen() {
       </View>
 
       {activeLoop ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Return to loop H${activeLoop.sequence_number}`}
-          onPress={() => router.push('/loop/active')}
-          style={({ pressed }) => [
+        <View
+          style={[
             styles.activeCard,
-            {
-              backgroundColor: colors.accentSoft,
-              borderColor: colors.accent,
-              opacity: pressed ? 0.85 : 1,
-            },
+            { backgroundColor: colors.accentSoft, borderColor: colors.accent },
           ]}
         >
-          <View style={styles.activeTop}>
-            <View style={styles.activeIdentifier}>
-              <View style={[styles.dot, { backgroundColor: colors.accent }]} />
-              <Text style={[styles.activeLabel, { color: colors.accent }]}>
-                H{activeLoop.sequence_number} ·{' '}
-                {activeLoop.status === 'PAUSED' ? 'PAUSED' : 'IN PROGRESS'}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Return to loop H${activeLoop.sequence_number}, ${Math.round(
+              activeProgress * 100
+            )}% of target complete`}
+            onPress={() => router.push('/loop/active')}
+            style={({ pressed }) => [
+              styles.activeCardBody,
+              { opacity: pressed ? 0.85 : 1 },
+            ]}
+          >
+            <View style={styles.activeTop}>
+              <View style={styles.activeIdentifier}>
+                <View style={[styles.dot, { backgroundColor: colors.accent }]} />
+                <Text style={[styles.activeLabel, { color: colors.accent }]}>
+                  H{activeLoop.sequence_number} ·{' '}
+                  {activeLoop.status === 'PAUSED' ? 'PAUSED' : 'IN PROGRESS'}
+                </Text>
+              </View>
+              <Text style={[styles.activeElapsed, { color: colors.text }]}>
+                {formatElapsed(elapsedSeconds)}
               </Text>
             </View>
-            <Text style={[styles.activeElapsed, { color: colors.text }]}>
-              {formatElapsed(elapsedSeconds)}
+            <View
+              accessibilityRole="progressbar"
+              accessibilityValue={{
+                min: 0,
+                max: 100,
+                now: Math.round(activeProgress * 100),
+              }}
+              style={[
+                styles.activeProgressTrack,
+                { backgroundColor: colors.background },
+              ]}
+            >
+              <View
+                style={[
+                  styles.activeProgressFill,
+                  {
+                    width: `${Math.round(activeProgress * 100)}%`,
+                    backgroundColor: activeTargetReached
+                      ? colors.success
+                      : colors.accent,
+                  },
+                ]}
+              />
+            </View>
+            <Text
+              numberOfLines={2}
+              style={[styles.activeFocus, { color: colors.text }]}
+            >
+              {activeLoop.focus || 'Continue your focus loop'}
             </Text>
+          </Pressable>
+
+          <View style={styles.activeFooter}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open active loop"
+              onPress={() => router.push('/loop/active')}
+              hitSlop={8}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Text style={[styles.activeCta, { color: colors.accent }]}>
+                Return to loop →
+              </Text>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                activeLoop.status === 'ACTIVE' ? 'Pause loop' : 'Resume loop'
+              }
+              accessibilityState={{
+                busy: loopActionBusy,
+                disabled: loopActionBusy,
+              }}
+              disabled={loopActionBusy}
+              onPress={() => {
+                void handleToggleLoop();
+              }}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.loopActionButton,
+                {
+                  backgroundColor: colors.surface,
+                  opacity: loopActionBusy ? 0.6 : pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              {loopActionBusy ? (
+                <ActivityIndicator size="small" color={colors.accent} />
+              ) : (
+                <Ionicons
+                  name={activeLoop.status === 'ACTIVE' ? 'pause' : 'play'}
+                  size={16}
+                  color={colors.accent}
+                />
+              )}
+            </Pressable>
           </View>
-          <Text
-            numberOfLines={2}
-            style={[styles.activeFocus, { color: colors.text }]}
-          >
-            {activeLoop.focus || 'Continue your focus loop'}
-          </Text>
-          <Text style={[styles.activeCta, { color: colors.accent }]}>
-            Return to loop →
-          </Text>
-        </Pressable>
+        </View>
       ) : (
         <View
           style={[
@@ -275,6 +390,22 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.sm,
   },
+  activeCardBody: {
+    gap: spacing.sm,
+  },
+  activeFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  loopActionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   activeTop: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -302,6 +433,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
+  activeProgressTrack: {
+    height: 4,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+  },
+  activeProgressFill: {
+    height: '100%',
+    borderRadius: radius.full,
+  },
   activeFocus: {
     fontSize: 19,
     lineHeight: 26,
@@ -310,7 +450,6 @@ const styles = StyleSheet.create({
   activeCta: {
     fontSize: 13,
     fontWeight: '700',
-    marginTop: spacing.xs,
   },
   startCard: {
     borderWidth: StyleSheet.hairlineWidth,

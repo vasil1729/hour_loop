@@ -38,12 +38,14 @@ Timing is a persisted **interval log**, not a ticking counter.
 - A one-second `setInterval` in `useActiveLoop` is only a display refresh trigger. Every tick re-reads intervals and recalculates elapsed time. It never accumulates.
 - Pause closes the open interval. Resume opens a new one. Complete closes any open interval at the stop instant.
 - Stopping from the active screen pauses the loop before navigating to the journal, so journaling time is not counted.
+- `buildLoopTimeline` derives the session log (started, paused, resumed, stopped) from the same intervals. Times are rendered in the device's current IANA zone with `Intl.DateTimeFormat`.
 
 ### Calendar allocation
 
 Focus time must be attributed to local calendar days correctly, including midnight crossings and DST.
 
-- `allocateIntervalToDays` walks the interval to each local midnight in the interval's IANA time zone.
+- `allocateIntervalToDays` walks the interval to each local midnight in the display time zone. History and intentions pass the device's current IANA zone, so day/month queries and allocation always agree even after the user changes location.
+- The recorded `time_zone` on an interval remains the fallback for callers that do not supply an explicit display zone.
 - `allocateIntervalToMonths` builds on the day allocation.
 - Civil-time to UTC conversion uses `Intl.DateTimeFormat` parts with a two-pass offset refinement for DST.
 - History and intention progress use allocation, never `loop.local_date`, so a loop crossing midnight is split correctly.

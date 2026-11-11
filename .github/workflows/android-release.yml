@@ -27,8 +27,59 @@ env:
   NODE_OPTIONS: '--max-old-space-size=4096'
 
 jobs:
+  gate:
+    name: Check automatic release eligibility
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.check.outputs.release }}
+    steps:
+      - name: Check out tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether this tag is a major or minor release
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual release requested; publishing the current app version."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          current="${GITHUB_REF_NAME#v}"
+          if ! [[ "$current" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME is not a three-part semver tag."
+            exit 1
+          fi
+
+          previous="$(git tag --list 'v[0-9]*' --sort=-v:refname \
+            | sed 's/^v//' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | grep -v "^${current}$" \
+            | head -n 1 || true)"
+
+          if [[ -z "$previous" ]]; then
+            echo "No previous semver tag; allowing the first automatic release."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          IFS=. read -r current_major current_minor current_patch <<< "$current"
+          IFS=. read -r previous_major previous_minor previous_patch <<< "$previous"
+
+          if [[ "$current_major" != "$previous_major" || "$current_minor" != "$previous_minor" ]]; then
+            echo "Version $current changes major/minor from $previous; automatic release allowed."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Version $current only changes the patch from $previous. Automatic release skipped; run Android Release manually to publish a patch."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
     name: Publish versioned release
+    needs: gate
+    if: needs.gate.outputs.release == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

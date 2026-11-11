@@ -79,8 +79,8 @@ async function getActualSeconds(
   const reference = new Date();
 
   return periodType === 'daily'
-    ? actualSecondsForDay(intervals, periodKey, reference)
-    : actualSecondsForMonth(intervals, periodKey, reference);
+    ? actualSecondsForDay(intervals, periodKey, reference, timeZone)
+    : actualSecondsForMonth(intervals, periodKey, reference, timeZone);
 }
 
 export async function setIntention(

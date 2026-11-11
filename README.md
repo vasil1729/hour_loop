@@ -14,7 +14,7 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 
 ## Features
 
-- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar on Today, and a local-time session log.
+- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar and quick pause/resume on Today, and a local-time session log.
 - **Completion journal** — capture focus, carry-in, done, roll-forward, and notes at the end of a loop.
 - **Task pool** — nested tasks with progress, associated loop history, and aggregated focus time.
 - **Intentions** — daily and monthly time targets with actual-vs-planned progress.
@@ -114,20 +114,20 @@ The **Android APK** workflow is manual only. It builds an APK and uploads it as 
 
 ### Publish a versioned release
 
-Normal commits never trigger a release. Releases are published only by the **Android Release** workflow, which runs on an explicit `v*` tag or a manual release run from `main`.
+Normal commits never trigger a release. Version numbers use three parts — `major.minor.patch`, for example `1.1.1`. Automatic releases run only for major or minor version bumps, using tags such as `v1.1.0`. A patch-only tag such as `v1.1.1` is skipped; publish patches with a manual workflow run instead.
 
 1. Bump `expo.version` in `app.json`.
 2. Commit and push the version bump to `main`.
-3. Create and push a matching tag:
+3. For a major or minor release, create and push a matching tag:
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.1.0
+git push origin v1.1.0
 ```
 
 The workflow validates that the tag matches `expo.version`, builds the APK, uploads it as a workflow artifact, and publishes a GitHub release with the APK and checksum attached.
 
-You can also run **Actions → Android Release → Run workflow** from `main` to publish the current `expo.version` without creating the tag yourself. The existing `android-build-1` release is the initial unversioned test build.
+For a patch release, do not push a tag. Run **Actions → Android Release → Run workflow** from `main` to publish the current `expo.version`, including patch-only changes. Manual runs always release the version in `app.json`. The existing `android-build-1` release is the initial unversioned test build.
 
 ## Quality checks
 

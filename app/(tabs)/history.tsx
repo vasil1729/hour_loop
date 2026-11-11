@@ -7,6 +7,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { DayPickerModal } from '../../src/components/history/DayPickerModal';
 import { DaySummary } from '../../src/components/history/DaySummary';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
 import {
@@ -35,6 +36,7 @@ export default function HistoryScreen() {
   const [dayHistory, setDayHistory] = useState<DayHistory | null>(null);
   const [monthHistory, setMonthHistory] = useState<MonthHistory | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pickerVisible, setPickerVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,9 +81,18 @@ export default function HistoryScreen() {
         </Pressable>
 
         <View style={styles.dayLabelWrap}>
-          <Text style={[styles.dayLabel, { color: colors.text }]}>
-            {formatDayLabel(selectedDay)}
-          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Selected date: ${formatDayLabel(selectedDay)}. Choose another date.`}
+            onPress={() => setPickerVisible(true)}
+            hitSlop={8}
+            style={styles.dayLabelButton}
+          >
+            <Text style={[styles.dayLabel, { color: colors.text }]}>
+              {formatDayLabel(selectedDay)}
+            </Text>
+            <Ionicons name="calendar-outline" size={14} color={colors.textSecondary} />
+          </Pressable>
           {!isToday ? (
             <Pressable
               accessibilityRole="button"
@@ -237,6 +248,17 @@ export default function HistoryScreen() {
           ) : null}
         </>
       ) : null}
+
+      <DayPickerModal
+        visible={pickerVisible}
+        selectedDay={selectedDay}
+        maxDay={today}
+        onSelect={(dayKey) => {
+          setSelectedDay(dayKey);
+          setPickerVisible(false);
+        }}
+        onClose={() => setPickerVisible(false)}
+      />
     </Screen>
   );
 }
@@ -272,6 +294,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 2,
+  },
+  dayLabelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   dayLabel: {
     fontSize: 14,

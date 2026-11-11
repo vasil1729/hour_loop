@@ -11,14 +11,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
-import type { Loop, Task } from '../../src/domain/types';
+import type { Loop, LoopInterval, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { goToToday } from '../../src/services/navigation/navigationService';
 import {
   cancelLoopNotification,
@@ -39,8 +42,11 @@ export default function CompleteLoopScreen() {
 
   const [loop, setLoop] = useState<Loop | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [intervals, setIntervals] = useState<LoopInterval[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [focus, setFocus] = useState('');
@@ -65,6 +71,7 @@ export default function CompleteLoopScreen() {
         if (cancelled) return;
         setLoop(result.loop);
         setElapsedSeconds(result.elapsedSeconds);
+        setIntervals(result.intervals);
         setFocus(result.loop.focus ?? '');
         setCarryIn(result.loop.carry_in ?? '');
         setDone(result.loop.done ?? '');
@@ -151,6 +158,25 @@ export default function CompleteLoopScreen() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!loop || deleting) return;
+    setDeleting(true);
+    try {
+      await cancelLoopNotification(db, loop.id).catch(() => undefined);
+      await loopService.deleteLoop(db, loop.id);
+      await refreshLoop(db);
+      setDeleteVisible(false);
+      goToToday(router);
+    } catch (caught) {
+      Alert.alert(
+        'Could not delete loop',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return <LoadingScreen message="Preparing your journal…" />;
   }
@@ -197,6 +223,10 @@ export default function CompleteLoopScreen() {
           </Text>
         </View>
       ) : null}
+
+      <LoopTimeline
+        events={buildLoopTimeline(loop, intervals, { closing: !readOnly })}
+      />
 
       <Field
         label="FOCUS"
@@ -298,6 +328,39 @@ export default function CompleteLoopScreen() {
           disabled={busy}
         />
       ) : null}
+
+      {!readOnly ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Delete loop"
+          disabled={deleting}
+          onPress={() => setDeleteVisible(true)}
+          style={({ pressed }) => [
+            styles.deleteAction,
+            { opacity: deleting ? 0.4 : pressed ? 0.7 : 1 },
+          ]}
+        >
+          <Text style={[styles.deleteText, { color: colors.danger }]}>
+            Delete loop
+          </Text>
+        </Pressable>
+      ) : null}
+
+      <ConfirmDialog
+        visible={deleteVisible}
+        title={`Delete H${loop.sequence_number}?`}
+        message={`This permanently removes this loop and ${formatDurationCompact(
+          elapsedSeconds
+        )} of recorded focus time. This cannot be undone.`}
+        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        destructive
+        onConfirm={() => {
+          void handleDelete();
+        }}
+        onCancel={() => {
+          if (!deleting) setDeleteVisible(false);
+        }}
+      />
     </Screen>
   );
 }
@@ -418,5 +481,13 @@ const styles = StyleSheet.create({
   },
   singleLine: {
     minHeight: 50,
+  },
+  deleteAction: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+  },
+  deleteText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

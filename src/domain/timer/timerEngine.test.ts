@@ -131,6 +131,24 @@ describe('allocateIntervalToDays', () => {
 
     expect(days['2026-03-08']).toBe(3600);
   });
+
+  it('uses an explicit display zone instead of the recorded interval zone', () => {
+    // 04:30Z–05:30Z is 10:00–11:00 in Kolkata but 23:30–00:30 in New York.
+    const days = allocateIntervalToDays(
+      interval({
+        started_at: '2026-11-12T04:30:00.000Z',
+        ended_at: '2026-11-12T05:30:00.000Z',
+        time_zone: 'Asia/Kolkata',
+      }),
+      new Date('2026-11-12T05:30:00.000Z'),
+      'America/New_York'
+    );
+
+    expect(days).toEqual({
+      '2026-11-11': 1800,
+      '2026-11-12': 1800,
+    });
+  });
 });
 
 describe('allocateIntervalToMonths', () => {

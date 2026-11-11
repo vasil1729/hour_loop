@@ -50,7 +50,7 @@ export async function getDayHistory(
   const reference = new Date();
   const secondsByLoop = new Map<string, number>();
   for (const interval of intervals) {
-    const days = allocateIntervalToDays(interval, reference);
+    const days = allocateIntervalToDays(interval, reference, timeZone);
     const seconds = days[dayKey] ?? 0;
     if (seconds <= 0) continue;
     secondsByLoop.set(

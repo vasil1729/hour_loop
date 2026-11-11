@@ -24,10 +24,13 @@ export function calculateElapsedSeconds(
 /**
  * Allocate an interval's active seconds to local calendar days.
  * Handles midnight and DST boundaries by walking to each local midnight.
+ * `timeZone` defaults to the zone recorded on the interval; history and
+ * intentions pass the device's current zone so queries and allocation agree.
  */
 export function allocateIntervalToDays(
   interval: IntervalRecord,
-  referenceTime: Date = new Date()
+  referenceTime: Date = new Date(),
+  timeZone: string = interval.time_zone
 ): DayAllocation {
   const start = new Date(interval.started_at);
   const end = interval.ended_at ? new Date(interval.ended_at) : referenceTime;
@@ -40,8 +43,8 @@ export function allocateIntervalToDays(
   let guard = 0;
 
   while (cursor < end && guard < 10_000) {
-    const dayKey = toLocalDateKey(cursor, interval.time_zone);
-    const nextMidnight = localMidnightAfter(cursor, interval.time_zone);
+    const dayKey = toLocalDateKey(cursor, timeZone);
+    const nextMidnight = localMidnightAfter(cursor, timeZone);
     const segmentEnd =
       nextMidnight.getTime() < end.getTime() ? nextMidnight : end;
     const seconds = (segmentEnd.getTime() - cursor.getTime()) / 1000;
@@ -63,9 +66,10 @@ export function allocateIntervalToDays(
 /** Allocate an interval's seconds to local months, built on the day allocation. */
 export function allocateIntervalToMonths(
   interval: IntervalRecord,
-  referenceTime: Date = new Date()
+  referenceTime: Date = new Date(),
+  timeZone: string = interval.time_zone
 ): MonthAllocation {
-  const days = allocateIntervalToDays(interval, referenceTime);
+  const days = allocateIntervalToDays(interval, referenceTime, timeZone);
   const months: MonthAllocation = {};
   for (const [day, seconds] of Object.entries(days)) {
     const monthKey = day.slice(0, 7);

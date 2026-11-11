@@ -88,4 +88,25 @@ describe('day and month allocation helpers', () => {
       '2026-02-01': 5400,
     });
   });
+
+  it('uses an explicit display zone for day totals', () => {
+    const shifted = [
+      interval({
+        started_at: '2026-11-12T04:30:00.000Z',
+        ended_at: '2026-11-12T05:30:00.000Z',
+        time_zone: 'Asia/Kolkata',
+      }),
+    ];
+    const reference = new Date('2026-11-12T05:30:00.000Z');
+
+    expect(
+      actualSecondsForDay(shifted, '2026-11-11', reference, 'America/New_York')
+    ).toBe(1800);
+    expect(
+      actualSecondsForDay(shifted, '2026-11-12', reference, 'America/New_York')
+    ).toBe(1800);
+    expect(
+      actualSecondsForDay(shifted, '2026-11-12', reference, 'Asia/Kolkata')
+    ).toBe(3600);
+  });
 });

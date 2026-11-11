@@ -21,10 +21,11 @@ export function nowUtcIso(): string {
   return new Date().toISOString();
 }
 
-/**
- * Convert a UTC instant to wall-clock parts in a specific IANA time zone.
- */
-export function getZonedParts(date: Date, timeZone: string): DateParts {
+const zonedPartsFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getZonedPartsFormatter(timeZone: string): Intl.DateTimeFormat {
+  const cached = zonedPartsFormatters.get(timeZone);
+  if (cached) return cached;
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     hourCycle: 'h23',
@@ -35,6 +36,15 @@ export function getZonedParts(date: Date, timeZone: string): DateParts {
     minute: '2-digit',
     second: '2-digit',
   });
+  zonedPartsFormatters.set(timeZone, formatter);
+  return formatter;
+}
+
+/**
+ * Convert a UTC instant to wall-clock parts in a specific IANA time zone.
+ */
+export function getZonedParts(date: Date, timeZone: string): DateParts {
+  const formatter = getZonedPartsFormatter(timeZone);
   const parts = formatter.formatToParts(date);
   const pick = (type: string): number => {
     const part = parts.find((entry) => entry.type === type);
@@ -138,6 +148,37 @@ export function addMonthsToMonthKey(monthKey: string, delta: number): string {
   return monthKeyFromParts(date.getUTCFullYear(), date.getUTCMonth() + 1);
 }
 
+/**
+ * Build a fixed six-week calendar grid for a month, starting on Sunday.
+ * Empty leading and trailing cells are null so callers can lay out rows directly.
+ */
+export function getMonthGrid(monthKey: string): (string | null)[][] {
+  if (!/^\d{4}-\d{2}$/.test(monthKey)) {
+    throw new Error(`Invalid month key: ${monthKey}`);
+  }
+  const [year, month] = monthKey.split('-').map(Number);
+  if (!year || !month || month < 1 || month > 12) {
+    throw new Error(`Invalid month key: ${monthKey}`);
+  }
+
+  const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  const dayCount = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+  const cells: (string | null)[] = Array(firstWeekday).fill(null);
+  for (let day = 1; day <= dayCount; day += 1) {
+    cells.push(dayKeyFromParts(year, month, day));
+  }
+  while (cells.length < 42) {
+    cells.push(null);
+  }
+
+  const weeks: (string | null)[][] = [];
+  for (let index = 0; index < cells.length; index += 7) {
+    weeks.push(cells.slice(index, index + 7));
+  }
+  return weeks;
+}
+
 export function localDayBounds(
   dayKey: string,
   timeZone: string = getDeviceTimeZone()
@@ -231,6 +272,35 @@ export function formatMonthLabel(monthKey: string): string {
   const [year, month] = monthKey.split('-').map(Number);
   const monthName = MONTHS[(month ?? 1) - 1] ?? '';
   return `${monthName} ${year}`;
+}
+
+const clockFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getClockFormatter(timeZone: string): Intl.DateTimeFormat {
+  const cached = clockFormatters.get(timeZone);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(undefined, {
+    timeZone,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  clockFormatters.set(timeZone, formatter);
+  return formatter;
+}
+
+/**
+ * Format a UTC instant as a clock time in the given IANA time zone.
+ * The device locale decides between 12- and 24-hour display.
+ */
+export function formatTimeOfDay(
+  instantIso: string,
+  timeZone: string = getDeviceTimeZone()
+): string {
+  const date = new Date(instantIso);
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+  return getClockFormatter(timeZone).format(date);
 }
 
 export function isSameDayKey(a: string, b: string): boolean {

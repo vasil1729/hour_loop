@@ -1,19 +1,26 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopControls } from '../../src/components/timer/LoopControls';
+import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
 import { TimerProgress } from '../../src/components/timer/TimerProgress';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
+import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import { loopService } from '../../src/features/loops/loopService';
+import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { goToToday } from '../../src/services/navigation/navigationService';
-import { syncLoopNotification } from '../../src/services/notifications/notificationService';
+import {
+  cancelLoopNotification,
+  syncLoopNotification,
+} from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
@@ -22,8 +29,10 @@ export default function ActiveLoopScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
-  const { activeLoop, elapsedSeconds, loading, refresh } = useActiveLoop();
+  const { activeLoop, elapsedSeconds, loading, refresh, intervals } = useActiveLoop();
   const [busy, setBusy] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleStop = async () => {
     if (!activeLoop) return;
@@ -63,6 +72,25 @@ export default function ActiveLoopScreen() {
       );
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!activeLoop || deleting) return;
+    setDeleting(true);
+    try {
+      await cancelLoopNotification(db, activeLoop.id).catch(() => undefined);
+      await loopService.deleteLoop(db, activeLoop.id);
+      await refresh(db);
+      setDeleteVisible(false);
+      goToToday(router);
+    } catch (error) {
+      Alert.alert(
+        'Could not delete loop',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -158,6 +186,8 @@ export default function ActiveLoopScreen() {
         </View>
       ) : null}
 
+      <LoopTimeline events={buildLoopTimeline(activeLoop, intervals)} />
+
       <LoopControls
         status={isPaused ? 'PAUSED' : 'ACTIVE'}
         busy={busy}
@@ -180,6 +210,37 @@ export default function ActiveLoopScreen() {
         }}
         onMinimize={() => {
           goToToday(router);
+        }}
+      />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Delete loop"
+        disabled={deleting}
+        onPress={() => setDeleteVisible(true)}
+        style={({ pressed }) => [
+          styles.deleteAction,
+          { opacity: deleting ? 0.4 : pressed ? 0.7 : 1 },
+        ]}
+      >
+        <Text style={[styles.deleteText, { color: colors.danger }]}>
+          Delete loop
+        </Text>
+      </Pressable>
+
+      <ConfirmDialog
+        visible={deleteVisible}
+        title={`Delete H${activeLoop.sequence_number}?`}
+        message={`This permanently removes this loop and ${formatElapsed(
+          elapsedSeconds
+        )} of recorded focus time. This cannot be undone.`}
+        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        destructive
+        onConfirm={() => {
+          void handleDelete();
+        }}
+        onCancel={() => {
+          if (!deleting) setDeleteVisible(false);
         }}
       />
     </Screen>
@@ -247,5 +308,13 @@ const styles = StyleSheet.create({
   carryText: {
     fontSize: 14,
     lineHeight: 21,
+  },
+  deleteAction: {
+    alignSelf: 'center',
+    paddingVertical: spacing.sm,
+  },
+  deleteText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

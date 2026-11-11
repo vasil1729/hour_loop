@@ -1,9 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { getIntervalsForLoop } from '../database/repositories/intervalsRepository';
 import { calculateElapsedSeconds } from '../domain/timer/timerEngine';
+import type { LoopInterval } from '../domain/types';
 import { useLoopStore } from '../store/loopStore';
 
 /**
@@ -18,6 +19,7 @@ export function useActiveLoop() {
   const loading = useLoopStore((state) => state.loading);
   const refresh = useLoopStore((state) => state.refresh);
   const setElapsedSeconds = useLoopStore((state) => state.setElapsedSeconds);
+  const [intervals, setIntervals] = useState<LoopInterval[]>([]);
 
   const loopId = activeLoop?.id;
   const loopStatus = activeLoop?.status;
@@ -27,10 +29,15 @@ export function useActiveLoop() {
       let cancelled = false;
 
       const tick = async () => {
-        if (!loopId || loopStatus !== 'ACTIVE') return;
-        const intervals = await getIntervalsForLoop(db, loopId);
-        if (!cancelled) {
-          setElapsedSeconds(calculateElapsedSeconds(intervals, new Date()));
+        if (!loopId) {
+          if (!cancelled) setIntervals([]);
+          return;
+        }
+        const nextIntervals = await getIntervalsForLoop(db, loopId);
+        if (cancelled) return;
+        setIntervals(nextIntervals);
+        if (loopStatus === 'ACTIVE') {
+          setElapsedSeconds(calculateElapsedSeconds(nextIntervals, new Date()));
         }
       };
 
@@ -54,5 +61,5 @@ export function useActiveLoop() {
     }, [db, loopId, loopStatus, refresh, setElapsedSeconds])
   );
 
-  return { activeLoop, elapsedSeconds, loading, refresh };
+  return { activeLoop, elapsedSeconds, loading, refresh, intervals };
 }

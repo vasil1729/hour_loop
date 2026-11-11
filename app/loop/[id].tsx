@@ -7,10 +7,12 @@ import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
-import type { Loop } from '../../src/domain/types';
+import type { Loop, LoopInterval } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { cancelLoopNotification } from '../../src/services/notifications/notificationService';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -25,6 +27,7 @@ export default function LoopDetailScreen() {
 
   const [loop, setLoop] = useState<Loop | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [intervals, setIntervals] = useState<LoopInterval[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteVisible, setDeleteVisible] = useState(false);
@@ -43,6 +46,7 @@ export default function LoopDetailScreen() {
         if (!cancelled) {
           setLoop(result.loop);
           setElapsedSeconds(result.elapsedSeconds);
+          setIntervals(result.intervals);
         }
       } catch (caught) {
         if (!cancelled) {
@@ -123,6 +127,8 @@ export default function LoopDetailScreen() {
         />
         <SummaryItem label="Status" value={loop.status} />
       </View>
+
+      <LoopTimeline events={buildLoopTimeline(loop, intervals)} />
 
       <JournalField label="FOCUS" value={loop.focus} />
       <JournalField label="CARRY IN" value={loop.carry_in} />
