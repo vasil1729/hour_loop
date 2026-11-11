@@ -5,10 +5,14 @@ import type { Capsule } from '../../domain/capsules/capsuleDomain';
 import type { LoopItem } from '../../domain/types';
 import { nowUtcIso } from '../../domain/shared/dateUtils';
 
-type LoopItemRow = Omit<LoopItem, 'done'> & { done: number };
-
-type CapsuleRow = Omit<LoopItem, 'done'> & {
+type LoopItemRow = Omit<LoopItem, 'done' | 'current'> & {
   done: number;
+  current: number;
+};
+
+type CapsuleRow = Omit<LoopItem, 'done' | 'current'> & {
+  done: number;
+  current: number;
   task_id: string | null;
   sequence_number: number;
   local_date: string;
@@ -17,13 +21,13 @@ type CapsuleRow = Omit<LoopItem, 'done'> & {
 };
 
 const SELECT_ITEM = `
-  SELECT id, loop_id, text, done, sort_order, carried_from_item_id,
+  SELECT id, loop_id, text, done, current, sort_order, carried_from_item_id,
          created_at, updated_at
   FROM loop_items
 `;
 
 const SELECT_OPEN_CAPSULES = `
-  SELECT li.id, li.loop_id, li.text, li.done, li.sort_order,
+  SELECT li.id, li.loop_id, li.text, li.done, li.current, li.sort_order,
          li.carried_from_item_id, li.created_at, li.updated_at,
          l.task_id, l.sequence_number, l.local_date,
          l.status AS loop_status, l.started_at
@@ -42,7 +46,11 @@ const ORDER_OPEN_CAPSULES = `
 `;
 
 function mapRow(row: LoopItemRow): LoopItem {
-  return { ...row, done: row.done === 1 };
+  return {
+    ...row,
+    done: row.done === 1,
+    current: row.current === 1,
+  };
 }
 
 function mapCapsuleRow(row: CapsuleRow): Capsule {
@@ -52,6 +60,7 @@ function mapCapsuleRow(row: CapsuleRow): Capsule {
       loop_id: row.loop_id,
       text: row.text,
       done: row.done === 1,
+      current: row.current === 1,
       sort_order: row.sort_order,
       carried_from_item_id: row.carried_from_item_id,
       created_at: row.created_at,
@@ -74,14 +83,15 @@ export async function createLoopItem(
 ): Promise<void> {
   await db.runAsync(
     `INSERT INTO loop_items (
-       id, loop_id, text, done, sort_order, carried_from_item_id,
+       id, loop_id, text, done, current, sort_order, carried_from_item_id,
        created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       item.id,
       item.loop_id,
       item.text,
       item.done ? 1 : 0,
+      item.current ? 1 : 0,
       item.sort_order,
       item.carried_from_item_id,
       item.created_at,
@@ -134,8 +144,26 @@ export async function updateLoopItemDone(
   done: boolean
 ): Promise<void> {
   await db.runAsync(
-    'UPDATE loop_items SET done = ?, updated_at = ? WHERE id = ?',
-    [done ? 1 : 0, nowUtcIso(), id]
+    `UPDATE loop_items
+     SET done = ?,
+         current = CASE WHEN ? = 1 THEN 0 ELSE current END,
+         updated_at = ?
+     WHERE id = ?`,
+    [done ? 1 : 0, done ? 1 : 0, nowUtcIso(), id]
+  );
+}
+
+export async function setCurrentLoopItem(
+  db: SQLiteDatabase,
+  loopId: string,
+  itemId: string | null
+): Promise<void> {
+  await db.runAsync(
+    `UPDATE loop_items
+     SET current = CASE WHEN id = ? THEN 1 ELSE 0 END,
+         updated_at = ?
+     WHERE loop_id = ?`,
+    [itemId, nowUtcIso(), loopId]
   );
 }
 

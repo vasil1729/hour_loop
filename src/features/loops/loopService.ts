@@ -97,6 +97,7 @@ type LoopItemRepositoryPort = {
   createLoopItem: typeof loopItemsRepository.createLoopItem;
   getLoopItemById: typeof loopItemsRepository.getLoopItemById;
   listLoopItems: typeof loopItemsRepository.listLoopItems;
+  setCurrentLoopItem: typeof loopItemsRepository.setCurrentLoopItem;
   updateLoopItemDone: typeof loopItemsRepository.updateLoopItemDone;
 };
 
@@ -142,6 +143,11 @@ export type LoopService = {
     loopId: string,
     itemId: string,
     done: boolean
+  ) => Promise<void>;
+  setCurrentLoopItem: (
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string | null
   ) => Promise<void>;
   getPreviousLoopWithItems: (
     db: SQLiteDatabase
@@ -230,6 +236,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           loop_id: loop.id,
           text: item.text.trim(),
           done: false,
+          current: false,
           sort_order: index,
           carried_from_item_id: item.carriedFromItemId ?? null,
           created_at: nowIso,
@@ -342,6 +349,21 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         throw new LoopItemNotFoundError(itemId);
       }
       await deps.items.updateLoopItemDone(db, itemId, done);
+    },
+
+    async setCurrentLoopItem(db, loopId, itemId) {
+      if (itemId) {
+        const item = await deps.items.getLoopItemById(db, itemId);
+        if (!item || item.loop_id !== loopId) {
+          throw new LoopItemNotFoundError(itemId);
+        }
+        if (item.done) {
+          throw new InvalidStateTransitionError(
+            'A completed capsule cannot be the current focus.'
+          );
+        }
+      }
+      await deps.items.setCurrentLoopItem(db, loopId, itemId);
     },
 
     async getPreviousLoopWithItems(db) {

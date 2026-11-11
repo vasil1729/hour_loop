@@ -8,6 +8,7 @@ function capsule(taskId: string | null): Capsule {
       loop_id: 'loop-1',
       text: 'Draft the outline',
       done: false,
+      current: false,
       sort_order: 0,
       carried_from_item_id: null,
       created_at: '2026-11-11T10:00:00.000Z',

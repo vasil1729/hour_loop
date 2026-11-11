@@ -33,6 +33,7 @@ export type LoopItem = {
   loop_id: string;
   text: string;
   done: boolean;
+  current: boolean;
   sort_order: number;
   carried_from_item_id: string | null;
   created_at: string;

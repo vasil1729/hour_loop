@@ -58,12 +58,16 @@ export default function ActiveLoopScreen() {
     }, [db, activeLoop?.id])
   );
 
+  const currentItem = items.find((item) => item.current) ?? null;
+
   const toggleItem = async (item: LoopItem) => {
     if (!activeLoop) return;
     const nextDone = !item.done;
     setItems((previous) =>
       previous.map((entry) =>
-        entry.id === item.id ? { ...entry, done: nextDone } : entry
+        entry.id === item.id
+          ? { ...entry, done: nextDone, current: nextDone ? false : entry.current }
+          : entry
       )
     );
     try {
@@ -71,11 +75,31 @@ export default function ActiveLoopScreen() {
     } catch (error) {
       setItems((previous) =>
         previous.map((entry) =>
-          entry.id === item.id ? { ...entry, done: item.done } : entry
+          entry.id === item.id
+            ? { ...entry, done: item.done, current: item.current }
+            : entry
         )
       );
       Alert.alert(
         'Could not update capsule',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    }
+  };
+
+  const selectItem = async (item: LoopItem) => {
+    if (!activeLoop || item.done) return;
+    const previous = items;
+    const nextId = item.current ? null : item.id;
+    setItems((current) =>
+      current.map((entry) => ({ ...entry, current: entry.id === nextId }))
+    );
+    try {
+      await loopService.setCurrentLoopItem(db, activeLoop.id, nextId);
+    } catch (error) {
+      setItems(previous);
+      Alert.alert(
+        'Could not set the current capsule',
         error instanceof Error ? error.message : 'Please try again.'
       );
     }
@@ -197,11 +221,23 @@ export default function ActiveLoopScreen() {
 
       <LoopClock
         loop={activeLoop}
-        intervals={intervals}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={activeLoop.target_duration_seconds}
-        referenceTime={new Date()}
       />
+
+      {currentItem ? (
+        <View
+          style={[
+            styles.nowCard,
+            { backgroundColor: colors.accentSoft, borderColor: colors.accent },
+          ]}
+        >
+          <Text style={[styles.nowLabel, { color: colors.accent }]}>NOW</Text>
+          <Text style={[styles.nowText, { color: colors.text }]}>
+            {currentItem.text}
+          </Text>
+        </View>
+      ) : null}
 
       {items.length > 0 ? (
         <View style={styles.itemsSection}>
@@ -213,14 +249,27 @@ export default function ActiveLoopScreen() {
               {items.filter((item) => item.done).length}/{items.length} done
             </Text>
           </View>
+          <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
+            Tap to focus · swipe right to complete
+          </Text>
           <View style={styles.capsuleWrap}>
             {items.map((item) => (
               <LoopItemCapsule
                 key={item.id}
                 text={item.text}
                 done={item.done}
+                current={item.current}
                 onPress={() => {
+                  void selectItem(item);
+                }}
+                onToggleDone={() => {
                   void toggleItem(item);
+                }}
+                onSwipeDone={() => {
+                  if (!item.done) void toggleItem(item);
+                }}
+                onSwipeUndone={() => {
+                  if (item.done) void toggleItem(item);
                 }}
               />
             ))}
@@ -368,14 +417,39 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   itemsTitle: {
+    flexShrink: 1,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,
   },
   itemsCount: {
+    flexShrink: 0,
     fontSize: 11,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+  },
+  itemsHint: {
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  nowCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  nowLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  nowText: {
+    flexShrink: 1,
+    fontSize: 14,
+    fontWeight: '600',
   },
   capsuleWrap: {
     flexDirection: 'row',

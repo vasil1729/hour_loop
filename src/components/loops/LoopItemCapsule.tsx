@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
@@ -8,84 +15,187 @@ import { radius, spacing } from '../../theme/tokens';
 type LoopItemCapsuleProps = {
   text: string;
   done?: boolean;
+  current?: boolean;
   selected?: boolean;
   carried?: boolean;
   disabled?: boolean;
   pressAccessibilityLabel?: string;
   onPress?: () => void;
+  onToggleDone?: () => void;
+  onSwipeDone?: () => void;
+  onSwipeUndone?: () => void;
   onRemove?: () => void;
 };
+
+const SWIPE_THRESHOLD = 56;
 
 export function LoopItemCapsule({
   text,
   done = false,
+  current = false,
   selected = false,
   carried = false,
   disabled = false,
   pressAccessibilityLabel,
   onPress,
+  onToggleDone,
+  onSwipeDone,
+  onSwipeUndone,
   onRemove,
 }: LoopItemCapsuleProps) {
   const { colors } = useTheme();
+  const translateX = useRef(new Animated.Value(0)).current;
+  const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone);
 
-  const backgroundColor = selected
-    ? colors.accentSoft
-    : done
-      ? colors.surfaceAlt
-      : colors.surface;
-  const borderColor = selected ? colors.accent : colors.border;
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_event, gesture) =>
+          swipeEnabled &&
+          Math.abs(gesture.dx) > 8 &&
+          Math.abs(gesture.dx) > Math.abs(gesture.dy),
+        onMoveShouldSetPanResponderCapture: (_event, gesture) =>
+          swipeEnabled &&
+          Math.abs(gesture.dx) > 8 &&
+          Math.abs(gesture.dx) > Math.abs(gesture.dy),
+        onPanResponderMove: (_event, gesture) => {
+          if (!swipeEnabled) return;
+          translateX.setValue(Math.max(-96, Math.min(96, gesture.dx)));
+        },
+        onPanResponderRelease: (_event, gesture) => {
+          if (gesture.dx > SWIPE_THRESHOLD) {
+            onSwipeDone?.();
+          } else if (gesture.dx < -SWIPE_THRESHOLD) {
+            onSwipeUndone?.();
+          }
+          Animated.spring(translateX, {
+            toValue: 0,
+            friction: 7,
+            useNativeDriver: true,
+          }).start();
+        },
+        onPanResponderTerminate: () => {
+          Animated.spring(translateX, {
+            toValue: 0,
+            friction: 7,
+            useNativeDriver: true,
+          }).start();
+        },
+      }),
+    [onSwipeDone, onSwipeUndone, swipeEnabled, translateX]
+  );
+
+  const backgroundColor =
+    current || selected
+      ? colors.accentSoft
+      : done
+        ? colors.surfaceAlt
+        : colors.surface;
+  const borderColor = current || selected ? colors.accent : colors.border;
   const textColor = done ? colors.textSecondary : colors.text;
-  const iconColor = done
+  const carriedOrDoneIcon = done
     ? colors.success
-    : selected || carried
+    : carried
       ? colors.accent
       : colors.textSecondary;
 
-  const content = (
-    <>
-      {done ? (
-        <Ionicons name="checkmark-circle" size={16} color={iconColor} />
-      ) : carried ? (
-        <Ionicons name="arrow-down-circle-outline" size={16} color={iconColor} />
-      ) : null}
-      <Text
-        style={[
-          styles.text,
-          {
-            color: textColor,
-            textDecorationLine: done ? 'line-through' : 'none',
-          },
-        ]}
-      >
-        {text}
-      </Text>
-    </>
-  );
-
   return (
-    <View
+    <Animated.View
+      {...(swipeEnabled ? panResponder.panHandlers : {})}
       style={[
         styles.capsule,
         {
           backgroundColor,
           borderColor,
           opacity: disabled ? 0.5 : 1,
+          transform: [{ translateX }],
         },
       ]}
     >
+      {onToggleDone ? (
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: done, disabled }}
+          accessibilityLabel={
+            done ? `Mark ${text} not done` : `Mark ${text} done`
+          }
+          disabled={disabled}
+          hitSlop={8}
+          onPress={onToggleDone}
+          style={styles.status}
+        >
+          <Ionicons
+            name={
+              done
+                ? 'checkmark-circle'
+                : current
+                  ? 'play-circle'
+                  : 'ellipse-outline'
+            }
+            size={18}
+            color={
+              done
+                ? colors.success
+                : current
+                  ? colors.accent
+                  : colors.textSecondary
+            }
+          />
+        </Pressable>
+      ) : null}
+
       {onPress ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={pressAccessibilityLabel ?? text}
-          accessibilityState={{ selected, disabled }}
-          disabled={disabled}
+          accessibilityLabel={
+            pressAccessibilityLabel ??
+            (current ? `${text}, current focus` : `Focus on ${text}`)
+          }
+          accessibilityState={{ selected: current || selected, disabled }}
+          disabled={disabled || done}
           onPress={onPress}
           style={styles.main}
         >
-          {content}
+          {!onToggleDone && (done || carried) ? (
+            <Ionicons
+              name={done ? 'checkmark-circle' : 'arrow-down-circle-outline'}
+              size={16}
+              color={carriedOrDoneIcon}
+            />
+          ) : null}
+          <Text
+            style={[
+              styles.text,
+              {
+                color: textColor,
+                textDecorationLine: done ? 'line-through' : 'none',
+              },
+            ]}
+          >
+            {text}
+          </Text>
         </Pressable>
       ) : (
-        <View style={styles.main}>{content}</View>
+        <View style={styles.main}>
+          {!onToggleDone && (done || carried) ? (
+            <Ionicons
+              name={done ? 'checkmark-circle' : 'arrow-down-circle-outline'}
+              size={16}
+              color={carriedOrDoneIcon}
+            />
+          ) : null}
+          <Text
+            style={[
+              styles.text,
+              {
+                color: textColor,
+                textDecorationLine: done ? 'line-through' : 'none',
+              },
+            ]}
+          >
+            {text}
+          </Text>
+        </View>
       )}
 
       {onRemove ? (
@@ -99,7 +209,7 @@ export function LoopItemCapsule({
           <Ionicons name="close" size={14} color={colors.textSecondary} />
         </Pressable>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -116,10 +226,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     gap: spacing.xs,
   },
+  status: {
+    width: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   main: {
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
+    minWidth: 0,
     gap: spacing.xs,
     paddingRight: spacing.xs,
   },

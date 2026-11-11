@@ -2,7 +2,7 @@
 
 Database: `hour-loop.db`  
 Library: `expo-sqlite`  
-Migrations: `PRAGMA user_version` (currently version 2)
+Migrations: `PRAGMA user_version` (currently version 3)
 
 All timestamps are ISO-8601 strings in UTC. Calendar keys are local civil dates (`YYYY-MM-DD`) or months (`YYYY-MM`). Durations are integer seconds.
 
@@ -77,12 +77,15 @@ Capsule snapshots for a loop, shown on the start, active, complete, and detail s
 | `loop_id` | TEXT NOT NULL | FK → loops, `ON DELETE CASCADE` |
 | `text` | TEXT NOT NULL | Trimmed capsule text |
 | `done` | INTEGER NOT NULL | 0 or 1 |
+| `current` | INTEGER NOT NULL | 0 or 1; at most one current capsule per loop |
 | `sort_order` | INTEGER NOT NULL | Display order within the loop |
 | `carried_from_item_id` | TEXT | Self-FK to the previous loop's item, `ON DELETE SET NULL` |
 | `created_at` | TEXT NOT NULL | |
 | `updated_at` | TEXT NOT NULL | |
 
 Index: `idx_loop_items_loop_id`.
+
+At most one item per loop may have `current = 1`. Selecting a capsule clears the previous current in the same loop, and marking the current item done clears it.
 
 Deleting a loop cascades to its items. Carrying an item into a new loop creates a new row with `carried_from_item_id` pointing at the source item; deleting the source loop later nulls the provenance but keeps the carried item.
 

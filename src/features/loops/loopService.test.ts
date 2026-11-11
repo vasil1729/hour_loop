@@ -133,6 +133,14 @@ function createHarness() {
         const item = state.items.find((entry) => entry.id === id);
         if (item) {
           item.done = done;
+          if (done) item.current = false;
+          item.updated_at = state.now.toISOString();
+        }
+      },
+      setCurrentLoopItem: async (_db, loopId, itemId) => {
+        for (const item of state.items) {
+          if (item.loop_id !== loopId) continue;
+          item.current = item.id === itemId;
           item.updated_at = state.now.toISOString();
         }
       },
@@ -405,6 +413,61 @@ describe('loopService', () => {
     await expect(
       service.setLoopItemDone(db, 'another-loop', item.id, false)
     ).rejects.toBeInstanceOf(LoopItemNotFoundError);
+  });
+
+  it('sets only one current capsule per loop', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    const [first, second] = await service.getLoopItems(db, loop.id);
+    if (!first || !second) throw new Error('Expected two items');
+
+    await service.setCurrentLoopItem(db, loop.id, first.id);
+    let items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.current)).toEqual([true, false]);
+
+    await service.setCurrentLoopItem(db, loop.id, second.id);
+    items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.current)).toEqual([false, true]);
+
+    await service.setCurrentLoopItem(db, loop.id, null);
+    items = await service.getLoopItems(db, loop.id);
+    expect(items.every((item) => !item.current)).toBe(true);
+  });
+
+  it('clears the current capsule when it is marked done', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Focus item' }],
+    });
+    const [item] = await service.getLoopItems(db, loop.id);
+    if (!item) throw new Error('Expected an item');
+
+    await service.setCurrentLoopItem(db, loop.id, item.id);
+    await service.setLoopItemDone(db, loop.id, item.id, true);
+
+    const [updated] = await service.getLoopItems(db, loop.id);
+    expect(updated?.done).toBe(true);
+    expect(updated?.current).toBe(false);
+  });
+
+  it('rejects selecting a completed capsule as current', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Done item' }],
+    });
+    const [item] = await service.getLoopItems(db, loop.id);
+    if (!item) throw new Error('Expected an item');
+
+    await service.setLoopItemDone(db, loop.id, item.id, true);
+
+    await expect(
+      service.setCurrentLoopItem(db, loop.id, item.id)
+    ).rejects.toBeInstanceOf(InvalidStateTransitionError);
   });
 
   it('returns the latest completed loop and its items for carry-in', async () => {
