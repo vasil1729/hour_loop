@@ -183,13 +183,13 @@ export default function StartLoopScreen() {
           placeholderTextColor={colors.textSecondary}
           style={[
             styles.input,
-            styles.singleLine,
             {
               color: colors.text,
               backgroundColor: colors.surface,
               borderColor: colors.border,
             },
           ]}
+          multiline
           maxLength={280}
         />
       </View>
@@ -359,10 +359,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 88,
     textAlignVertical: 'top',
-  },
-  singleLine: {
-    minHeight: 50,
-    textAlignVertical: 'center',
   },
   chips: {
     flexDirection: 'row',
