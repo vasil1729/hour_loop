@@ -187,6 +187,7 @@ export default function SettingsScreen() {
         `Restored ${result.tasks} tasks, ${result.loops} loops, ${result.intervals} intervals, ${result.loopItems} checklist items, and ${result.intentions} intentions.${pausedNote}`
       );
     } catch (error) {
+      await recoverAppState(db).catch(() => undefined);
       Alert.alert(
         'Could not restore backup',
         error instanceof Error ? error.message : 'Please try again.'
