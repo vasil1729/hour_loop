@@ -63,6 +63,7 @@ All fields are optional, with focus and carry-in pre-filled when available:
 - A loop that crosses midnight appears on both days with the correct split.
 - Monthly section: total focus time, unique loop count, and monthly intention progress.
 - Tapping a loop opens its read-only journal.
+- A loop can be permanently deleted from its journal; deletion also removes its recorded intervals and focus time.
 
 ### Notifications
 

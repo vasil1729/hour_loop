@@ -6,6 +6,7 @@ import {
   createLoopService,
   InvalidStateTransitionError,
   LoopAlreadyActiveError,
+  LoopNotFoundError,
   type LoopServiceDeps,
 } from './loopService';
 
@@ -38,6 +39,10 @@ function createHarness() {
     loops: {
       createLoop: async (_db, loop) => {
         state.loops.push({ ...loop });
+      },
+      deleteLoop: async (_db, id) => {
+        state.loops = state.loops.filter((loop) => loop.id !== id);
+        state.intervals = state.intervals.filter((interval) => interval.loop_id !== id);
       },
       getLoopById: async (_db, id) => {
         const loop = state.loops.find((entry) => entry.id === id);
@@ -236,5 +241,30 @@ describe('loopService', () => {
       note: 'Deep work felt good',
       status: 'COMPLETED',
     });
+  });
+
+  it('deletes a loop and its intervals', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    await service.completeLoop(db, loop.id, {});
+
+    expect(state.intervals).toHaveLength(1);
+
+    await service.deleteLoop(db, loop.id);
+
+    await expect(service.getLoop(db, loop.id)).rejects.toBeInstanceOf(
+      LoopNotFoundError
+    );
+    expect(state.loops).toHaveLength(0);
+    expect(state.intervals).toHaveLength(0);
+  });
+
+  it('rejects deleting a loop that does not exist', async () => {
+    const { db, service } = createHarness();
+
+    await expect(service.deleteLoop(db, 'missing-loop')).rejects.toBeInstanceOf(
+      LoopNotFoundError
+    );
   });
 });

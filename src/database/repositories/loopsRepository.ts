@@ -39,6 +39,13 @@ export async function createLoop(db: SQLiteDatabase, loop: Loop): Promise<void> 
   );
 }
 
+/**
+ * Deleting a loop cascades to its intervals in SQLite.
+ */
+export async function deleteLoop(db: SQLiteDatabase, id: string): Promise<void> {
+  await db.runAsync('DELETE FROM loops WHERE id = ?', [id]);
+}
+
 export async function getLoopById(
   db: SQLiteDatabase,
   id: string

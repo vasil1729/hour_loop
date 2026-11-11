@@ -49,6 +49,7 @@ export type CompleteLoopInput = {
 
 type LoopRepositoryPort = {
   createLoop: typeof loopsRepository.createLoop;
+  deleteLoop: typeof loopsRepository.deleteLoop;
   getLoopById: typeof loopsRepository.getLoopById;
   getActiveLoop: typeof loopsRepository.getActiveLoop;
   getMaxSequenceForDate: typeof loopsRepository.getMaxSequenceForDate;
@@ -87,6 +88,7 @@ export type LoopService = {
     loopId: string,
     journal: CompleteLoopInput
   ) => Promise<Loop>;
+  deleteLoop: (db: SQLiteDatabase, loopId: string) => Promise<void>;
   getActiveLoop: (db: SQLiteDatabase) => Promise<Loop | null>;
   getLoop: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
   getElapsedSeconds: (db: SQLiteDatabase, loopId: string) => Promise<number>;
@@ -233,6 +235,11 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       });
 
       return requireLoop(db, loopId);
+    },
+
+    async deleteLoop(db, loopId) {
+      await requireLoop(db, loopId);
+      await deps.loops.deleteLoop(db, loopId);
     },
 
     getActiveLoop(db) {

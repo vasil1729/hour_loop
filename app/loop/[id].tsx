@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
@@ -10,6 +11,8 @@ import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import type { Loop } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
+import { cancelLoopNotification } from '../../src/services/notifications/notificationService';
+import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
@@ -24,6 +27,9 @@ export default function LoopDetailScreen() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const refreshLoop = useLoopStore((state) => state.refresh);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +69,25 @@ export default function LoopDetailScreen() {
       </Screen>
     );
   }
+
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await cancelLoopNotification(db, loop.id).catch(() => undefined);
+      await loopService.deleteLoop(db, loop.id);
+      await refreshLoop(db);
+      setDeleteVisible(false);
+      router.replace('/');
+    } catch (caught) {
+      Alert.alert(
+        'Could not delete loop',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <Screen>
@@ -104,6 +129,39 @@ export default function LoopDetailScreen() {
       <JournalField label="DONE" value={loop.done} />
       <JournalField label="ROLL FORWARD" value={loop.roll_forward} />
       <JournalField label="NOTE" value={loop.note} />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Delete loop"
+        disabled={deleting}
+        onPress={() => setDeleteVisible(true)}
+        style={({ pressed }) => [
+          styles.deleteAction,
+          { opacity: deleting ? 0.4 : pressed ? 0.7 : 1 },
+        ]}
+      >
+        <Text style={[styles.deleteText, { color: colors.danger }]}>
+          Delete loop
+        </Text>
+      </Pressable>
+
+      <ConfirmDialog
+        visible={deleteVisible}
+        title={`Delete H${loop.sequence_number}?`}
+        message={`This permanently removes this loop and ${formatElapsed(
+          elapsedSeconds
+        )} of recorded focus time. This cannot be undone.${
+          loop.status !== 'COMPLETED' ? ' The active loop will be discarded.' : ''
+        }`}
+        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        destructive
+        onConfirm={() => {
+          void handleDelete();
+        }}
+        onCancel={() => {
+          if (!deleting) setDeleteVisible(false);
+        }}
+      />
     </Screen>
   );
 }
@@ -183,5 +241,14 @@ const styles = StyleSheet.create({
   fieldValue: {
     fontSize: 15,
     lineHeight: 22,
+  },
+  deleteAction: {
+    alignSelf: 'center',
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+  },
+  deleteText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
