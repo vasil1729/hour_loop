@@ -31,15 +31,53 @@ npx expo start
 
 Press `a` for an Android emulator, `i` for iOS, or scan the QR code with Expo Go. Local notifications require a development build on some platforms.
 
-## Install on Android
+## Android builds
 
-Download the latest APK from the [GitHub Releases page](https://github.com/vasil1729/hour_loop/releases/latest):
+### Build an APK locally
 
-1. Open the release page on your phone and download `hour-loop.apk`.
-2. Open the downloaded file and allow installs from your browser or file manager when Android prompts.
-3. Optionally verify the download against `hour-loop.apk.sha256`.
+The local builder creates a release APK in `builds/`, which is ignored by Git. It does not commit, push, or publish anything.
 
-The APK is release-built but signed with the standard React Native debug keystore, so it is intended for direct sideloading and testing rather than Google Play distribution. New APKs are built by the [Android APK workflow](.github/workflows/android-apk.yml) on every push to `main` or when triggered manually from the Actions tab.
+Prerequisites:
+
+- Node.js 22+
+- JDK 17 (the JDK bundled with Android Studio works)
+- Android SDK with platform 35 and build-tools 35.0.0
+- `ANDROID_HOME` pointing at the SDK (for example `$HOME/Android/Sdk`)
+
+```bash
+npm install
+npm run apk:local
+```
+
+Output:
+
+```text
+builds/hour-loop-v1.0.0.apk
+builds/hour-loop-v1.0.0.apk.sha256
+```
+
+The script builds in a temporary native directory and cleans it up afterwards. Set `KEEP_BUILD_DIR=1` to keep it for debugging.
+
+### Install a build on your phone
+
+For a local build, transfer `builds/hour-loop-v<version>.apk` to your phone. For a published build, download it from the [GitHub Releases page](https://github.com/vasil1729/hour_loop/releases/latest).
+
+1. Open the APK on your phone.
+2. Allow installs from your browser or file manager when Android prompts.
+3. Optionally verify the download against the matching `.sha256` file.
+
+APKs are release-built but signed with the standard React Native debug keystore, so they are intended for direct sideloading and testing rather than Google Play distribution.
+
+### Publish a versioned release
+
+Releases are never created automatically on push.
+
+1. Bump `expo.version` in `app.json`.
+2. Commit and push the version bump.
+3. Open **Actions → Android APK → Run workflow**.
+4. Enable **Publish a versioned GitHub release** and run it from `main`.
+
+The workflow builds the APK, uploads it as a run artifact, and—only when requested—creates tag `v<version>` with `hour-loop-v<version>.apk` attached. The existing `android-build-1` release is the initial unversioned test build.
 
 ## Quality checks
 

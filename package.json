@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "apk:local": "bash scripts/build-android-apk.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
