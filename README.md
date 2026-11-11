@@ -166,3 +166,9 @@ docs/                Product and architecture documentation
 1. **SQLite is the source of truth.** Timer state is derived from persisted UTC intervals; display ticks never accumulate.
 2. **Offline by default.** All features work in airplane mode.
 3. **Small, transparent layers.** Raw SQL repositories and pure domain functions keep behaviour testable and debuggable.
+
+## License
+
+Hour Loop is licensed under the **GNU Affero General Public License, version 3 or later** (`AGPL-3.0-or-later`). See [LICENSE](LICENSE) for the full license text and [NOTICE](NOTICE) for the copyright and application notice.
+
+If you run a modified version of Hour Loop as a network service, the AGPL requires you to offer users access to the corresponding source code.
