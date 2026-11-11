@@ -14,6 +14,11 @@ die() {
 
 command -v node >/dev/null 2>&1 || die "Node.js is required."
 command -v npx >/dev/null 2>&1 || die "npx is required."
+
+# Allow JAVA_HOME to provide java even when it is not on PATH.
+if [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
 command -v java >/dev/null 2>&1 || die \
   "Java 17 is required. Install a JDK (Android Studio bundles one), then set JAVA_HOME."
 [[ -d "$ROOT_DIR/node_modules" ]] || die "Dependencies are missing. Run 'npm install' first."
