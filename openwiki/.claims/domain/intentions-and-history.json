@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:56f29120b16e84d146ddbef0cd1a8f28a871dc7014116002582432aa10a7b0d0",
+  "claims": [
+    {
+      "id": "claim_91eea4a7c3424125a3a26bee9441ec7f",
+      "statement": "An intention is uniquely identified by period_type and period_key and stores a target duration in seconds; missing rows represent unset targets.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L58-L67",
+          "version": "repo-lines-v1:sha256:16d46feccc04dfb09daf4196f84a3e1f03a09bd51c12d04704ac829dfd92f938:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhOGFlNTVmMjZmODYxMTU2MzhhNDhjYjgxYTdhZjFkYjQwOTA4MmIxMGFiZWIyYmZkNTFlOWI2ZDU3ZGM0MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyOGFmMjc3OGMwYmFiMGI0YjIzNjhhODI3ZDk3ZGVkNzg3NDcwN2VhOTIzOThjZTEzZWRkYmMxMDEzZDIzZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhmNzI5ZWMzNmRhZTBmM2E2NmQyYWY5MzNiZjdiZGEwYWU0NDEzNGVjY2VmMjMwNTQ3MTMwMWVkZjFjYTgzOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyZTU0NGZjMmI0ZDRlODkyMTg5NGEwN2JmYzE1MTkxNTQ5NmNmYzg0Nzk1MWMxZDU1OGI5OWMzZmY5ZjNiZjAifQ"
+        },
+        {
+          "resource": "repo://src/database/repositories/intentionsRepository.ts#L13-L22",
+          "version": "repo-lines-v1:sha256:518e718def4d323d65b9895c9f24af3ada3a14c22487193ec3f0e1fb50f31937:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyM2YwYWFhMjE4ZDQ1MTE2YjdhYzY2MmFkN2ZlN2RkNTk2NDg0NmYzYzVjMmQ4MTRhMjQyZWFkNTcyODBhNzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc3MWFkMDQ5Y2JiZGEwMDFhMmY0MGRmMDViOGIwZTk5YWZjZGM3MTY1NjNhMWQ2OGY5NGQ5NTliZjFmMzllZjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY3NjNjMzkwZWM2OWM4ZWY2NjlhYjU0YTUwY2M4ZWEyNDk2NTE0MGY5MWVjZTBjZTcxMTM3NWQyY2M0OTE2NjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0cd80be54b8b4d44a4149f558b3ed6be",
+      "statement": "setIntention deletes the row for non-positive targets and otherwise rounds and upserts a positive target.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/intentions/intentionsService.ts#L86-L97",
+          "version": "repo-lines-v1:sha256:96f675636eafc617440c456352500699f3f064b5dbed8c8ac3f314431a73b863:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0ODNmODE4MGU2OTUyNzYzY2E2MjM0Y2I4MzRlMDMyZjk1ZDZjMDlmMjA1NDdhMGQ2MGRhZGNlZjdmMDMwNTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU0MGI3NWZjMjUxOTI5YjRlMTU3NTExYWRmMjE0MTBlMDczNmZiNjVhMzZiYzJhMmE5ZmI1YmZhNjQxOTkxMDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjYmYyOWM3MjRiY2QxZTYzMGY5NDlmZmJjYjg5MDZmM2FiYjg5OTI2ZDdiNzJhMGJhNjk0NzA1NDY3YWVkYTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2aef1713e899439bb7acc83413227a1b",
+      "statement": "Actual intention time is computed from local day or month bounds, overlapping intervals, and per-day allocation rather than from loop.local_date.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/intentions/intentionsService.ts#L107-L117",
+          "version": "repo-lines-v1:sha256:24f0709364a336415d319b53a31b706a2e2f824d0e8ece48e36fecf3bdb10398:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0NzM4MDE2YTM4Y2MyMWJhNDUyNTEzZjYzNmYxYzI4ZTE4MGMwZjFiZjhiYTY5OWMyNzhkMjhkMzhiZGFjOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/features/intentions/intentionsService.ts#L64-L84",
+          "version": "repo-lines-v1:sha256:bd415e0d30c1547f192c8df049f43031feeddd0ad743ba63c1724c4aed0ad93f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViOWRhZjUzNmFmZDYxNzBhMTEzMzEyNmZmMmIxYmYxZjUzYzllNzYzZTAzYzFlNGUwY2NjNGFmOTRiNDllMzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4NjMxMGM5ZDkwNzdhNTFmMDQyYzliNTBiY2I2ZmI1NTlhMDdiYmU3NDA1OGJhMjg5NzlmZDExODI3YWRkOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRjYjA4MWNhZGQ3MDZiMmM2MDllNmFkZmQ3ZjgxYzE3YmI1MGRiODY2ZjkxZTc0MjZjMjMzMzc1N2E5ZWFkNzQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2dca862e96eb4821ab13e496414bc469",
+      "statement": "The overlap query includes intervals that start before the range end and either have no end or end after the range start, so an open interval counts up to query time.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/intervalsRepository.ts#L73-L88",
+          "version": "repo-lines-v1:sha256:a43a51d46af6ac8182a6ec97cbc94b022824e2b84687bdc34d405c3ce25b477d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU4OTg3Njk2YzcxZTU0MmEyMDU4ZTkzYTNiMzk3MTYyMDJiYzFhN2UxYzY3NGRkNjg0NTE1M2I0MWZiNTExYjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fecd304371eb4fa0b1c380052bf5efe4",
+      "statement": "allocateIntervalToDays walks each interval to local midnights in its stored time zone and accumulates fractional seconds per day key.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L28-L61",
+          "version": "repo-lines-v1:sha256:d4b1f7b13896d330ce4c6de4c61d6c33f3d3823b0a520cc287185089e44fd61d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0Mzg1M2U1Mjk1MjAwMjFjZjAxOTY5YzI2MzJkMjhkNzJjMmJiNmUwMmNmZDRmZjg4ZTIwNTRjMGE0ZDRlNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwYTM1M2VmMTU1NzU5MzFkNGEzMThkZWU4YzkzOTUyN2YzNGNhNjg0OWVhNjRlYTBmYjQ1NDQ4ODA4ZTA0OGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0ZDllZjI5YzdhZTNlMTdjMjkzZjg0Y2E3YTE0NDkxNGRjYWY2NjFiODQxMDBmZmQ5OGNlZTNmM2FhZmI3ZDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f835e87e1a734f61b960a4343fae3cac",
+      "statement": "Monthly allocation is built from the day allocation by grouping each day key under its YYYY-MM prefix.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L63-L75",
+          "version": "repo-lines-v1:sha256:78f8d590afe7164d0b62d5b1af03baf0885969f6ee107fb95e430b54d5bd24f5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkNGNlZGQ1YThhMGI2NTUwNjI3OGQ2NWFmNDhjYjQzYWQyOTY1ZjU4NDQ2NTY0NDc1NjViMmZkNzA1ZDZiMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxNjgxNzhiYzEwNzAxMzY4NjEwOTBlOTc1ZjBkMzU5ZDdmYzdiMTMxNzQ4NGNlNzVhYzM1ZGU1MTAyMjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlYzJhNDU0N2UzMzBmNDA4MjU0YjdhNWJkYzc3MzFiMDA0ODg0MjhjYTE0ZjU4M2JlNDQ5YmM0MWQ5MGNjMjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4282f18a11d0434ab5a3a11d63f4d64b",
+      "statement": "Intention progress clamps actual and target to non-negative values, clamps ratio to one, reports remaining time, and marks reached only for positive targets with zero remaining time; a zero target yields ratio 1 only when actual time is positive.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/intentions/intentionsDomain.ts#L16-L38",
+          "version": "repo-lines-v1:sha256:a968a313fe2e345debf211aff53764dcb1b3137b70b30f0837982c8b38b122f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjZjFhMDYyZWRiYTllOGViNDFjYTAxZGY1Zjc3OWQxODVjM2FlZGUzYmFhNDY0NGVkMWVkZWNjMDExOTU5MmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0YjNmNjM2ZGM3ZTBmMTliNDYyNGQ4MjM1MTFjNzE3MjI2ZThmNmQ1Zjc1ZmU5ZjlkMDYzMjhmMDVlOGE2OGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk1OWE3NzAyMGNmYTJmYmY1YzQ4NjU4YzgxYjA5NGNlN2FhMzdhMjI3OWRmNjczYWJhOTEwNTZkMDZmZGI5MWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ace6e72ba6e14017bad18eeeab5ebb83",
+      "statement": "Day history allocates overlapping intervals to the selected day, sums seconds per loop, filters zero contributions, rounds entries, sorts by loop start, and reports contributing-loop count.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/history/historyService.ts#L38-L80",
+          "version": "repo-lines-v1:sha256:0c99ad7290671c7afc13db4fd7b4bfac5e5ab680d9a013f550bd8df1bcd16546:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMyZjkxZTIyMzFmYTgwZWY1OWVhYzE1NDM4OTM3MTc2MDY0NTI1NjIzZTE4OWZlNGI4ZTBjYmM5Y2JiMGMzNWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI4NWNhNjJmZTAyOTFlMTEyNDVjZmQyZWEzNjIwNzhjYjBhMzIwYmNiMGQwNjI5YTBlODNiNWUxZjc4MmM3NWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI1MjFkNjdmYTZiN2ExZjczZGQxNjA2MzFkNTIxMTAxYWZmODM4ZmRiZjcyMGU4ZTk2YzU4ZTFkYmE3OGRkNDUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f0aeb33cfe70492f833ea9837961238b",
+      "statement": "Month history derives total time from the monthly intention summary and counts unique loop IDs among overlapping intervals, so pause/resume intervals do not inflate the loop count.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/history/historyService.ts#L82-L102",
+          "version": "repo-lines-v1:sha256:4fa690fcee7099fb22032cdac6d2f0324dbab36f3d313aca3d8e76ca836089ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ2M2M0MGExYWE1ZjAxNjU2YTEzZGQ2ZjRkYjUwNWI1MTBjMmM5YjdhNjEzMDM2MWU3ODE4YzhjZGZlM2ViMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

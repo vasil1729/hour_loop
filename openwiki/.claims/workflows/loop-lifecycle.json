@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9a2c8fc7007226883fb0cba55ef6d3db986e8c92299645454ff53d80b80913a2",
+  "claims": [
+    {
+      "id": "claim_4b3d29eb389740d3bb63291050812423",
+      "statement": "The start modal initializes its target from the persisted default duration, supports presets and custom minutes, lists active tasks, and loads a suggested carry-in for the selected task.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/start.tsx#L234-L300",
+          "version": "repo-lines-v1:sha256:2c481df2c8d48b3d1cb4599089554c326b45b845b1394dbe075980420039cd67:eyJzZWxlY3RlZExpbmVDb3VudCI6NjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMGZiMTVjNjFmN2MxNjcxMGExYzM1ZDQzZDIzYmQ3ZGRjMjQwNDA4MjI3OTU1MzhmYTVlZmYzZDI1ZjViOTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0MzJiZWQ4ZmFlNWViMTc2ZmViZjM3ZmRhYzc0NmNjYzVmMzg5Mzg3MjM5M2M1MDUyNzk2MjNkYzRmN2IxNmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhNTMyYTQ3YmU5ZDFkM2E2ZWMwNDlmMWI3N2MwMjczMzBmMTRlZWEyZmIwOTJkOTFkMmQ4NzIxMWMzZjY5YWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY3MmQxOTlkZDNlNmIwM2EwZmFkZjJmNmI3ZGIwZjYzYTc1OWEzOTRmMTJjNTViY2ZmMjQxYzEzMzg3ZjE5ZDAifQ"
+        },
+        {
+          "resource": "repo://app/loop/start.tsx#L40-L92",
+          "version": "repo-lines-v1:sha256:f7d3c42a00d88f3ec43cd475bacc42bec53ef014980f24a74dd5d7f67e2bef70:eyJzZWxlY3RlZExpbmVDb3VudCI6NTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3NzY0OGFhMTVmMDRkYmRlN2M5ZDI0NzgwOGE5MTk0YzExNGE2Mjg0YzAxOTc1MjUyZjk0NGNkNjc3YjU0Y2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3YWY5NzQ5NjkxOTZjZDY5YzFlYWYzMDMxZWRjYmU4NzFhZmNhYWI4MjkxNzZiOTI3ODBjNGYwYThiMmU0YWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNiMTcwN2NjNmUwYjY2ZDU3N2I2MjdjMDEzY2QyYzY3MDg3NDQ2NWFmNDU4NWEwMGNkZTE0MjAxZGM5NTVlOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ0YTNiMjJmMmYwODc0MmIwYjlmOTZmZmY1OWQyMmFlZjE3NTA3ODAzOWQ2Y2FkZWI5ZTljMzc2YmYwMmI4MzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_54597b486c034d3d8e1b2c5105ec3278",
+      "statement": "Starting a loop inserts the loop and first interval through loopService, syncs a notification with a permission request, marks a selected not-started task in progress, refreshes the store, and replaces the route with the active screen.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/start.tsx#L114-L139",
+          "version": "repo-lines-v1:sha256:550366e50ee90b8cdda3abf441074b6d5b72d354d8eabe8fc256d93b45837878:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyNTUyNDdjMDAzYTFkODcwYmU0Y2FjZjgyN2RlOGViY2VkMjQ4ZWU3ODc1MWY3ZjZkZTk5N2E3MGQ1NzMzODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZTM3MjVkYTAwMmI0NmVkOGI0ZGU4ODAwM2FkOTcxMGRjYWYxOGQ1N2M0NzAxZGMzYmVmZjBiMmM1Y2IxM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzMWE3MzllZTE0NzczOGU4YmM4M2Y4M2VhMmFjNGUzZDE5MDBkMzY3ODZjZTg4NGRiNzE1NWYzNTJjNjliNzAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_49396205f7994a9fb9309f565e4830e1",
+      "statement": "Stop pauses an ACTIVE loop, syncs the notification, refreshes the store, and then pushes the completion screen with the loop ID; an already-PAUSED loop skips the pause but still syncs and navigates.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/active.tsx#L28-L52",
+          "version": "repo-lines-v1:sha256:3a760e8a189dcdd140d090ed0630ae046ff2783866a13b06df27c70e155f6fe7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzNGIzYmIyOTllMWVjYmRkMjQ5YWNjMzVlNTQ1NDMzYjBjNjFkYTY1NWJlMjc1Njg2NDQzY2U1NDFkNzY0MjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwNGVlZjM3NTY1MThjNzNlZDg1NGM1Y2RjOTM5ZDBhOGU3MGI4ODIzYzliNjIxMmE5YmI1ZTAxMzQ0Mjg2MjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhZWYxZmY4MDYzYTQxYzNjYTEwY2M1Y2UyODY0Y2JlMzg2NTkyOGQ1MzIwZmNiYmE2YTA1YmJjYWVhYmI3ZTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5899f7d390a3403993a70d3230e7eea0",
+      "statement": "The active screen's Pause and Resume actions call loopService and then sync the notification, while Minimize dismisses to Today without changing the loop.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/active.tsx#L161-L184",
+          "version": "repo-lines-v1:sha256:93a2585319c45273c4ef160ad3a5073f716b76743dcb17d7970d0d485c885d5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxMTNiMjViNWVjMjJkZDFjZDhiYThiNWJiOGQzNDM3MDJiYWQ0MTIxMDkzNTRhNjI0NjBjYjZhMTNhYjc1MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiMTA2M2M0ZGVhNjhhMzgxNjYxMTBiYWQyZDMzOGI0ZDcyZTAyZDM3YmUwODE1YTc4NDUxZTk5MzMyZDZkZmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyZTI1YzAyNzIxYzlmYjRjZTFkYWQyNzI5OWU3MzNhNjJkMTAzNGVjNDk3MzZlOWRmZDZlZTI5OTg3Njc0NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4ZDljNTRhNThkMTUzMTY2N2I5YTM1MDQ4NzRlYTcwNGEzODQwMWJiMzM3NmYyZWIwN2FmMTZlY2FmNTA5Y2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1c3d6f381bf4087893a02a594167ceb",
+      "statement": "The completion screen loads the loop with elapsed metrics and prefills focus, carry-in, done, roll-forward, roll-forward task, and note; completed loops render read-only.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/complete.tsx#L172-L199",
+          "version": "repo-lines-v1:sha256:49bd2bc77ac8339d9aee8483368055d078d38bacdd14a63ad96628a60a638af3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhiYzg2YTVmNTczNTZkMDYzNmYwODUxMjhkZmMwNTUzYzhhYzgzNzllNGVlNTJkOTNlM2FhNTBiOTk1MmVmYzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMDhlYWM3NTAyNTk5ODkwZDNkYWVmMjI3ODU4OGEzZTIwYTVlYWJiYTA3YTZkNTU2MjQ0YjNkYjhkOWZlZDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkYjNlN2NkMGMzYTYyMzA0NzY2ODE2MWQxMDRlOTlkODYyMDljYTNlNzc1NGEyNWIxMTlhNDkwNzg3ODA0MjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcyNWIyYzgxNjg3YjA3YTM0OTUzZTI5M2JjZTczNDgxZWE0OGMwOTMyNGRiMGMyYzQwMjc3MzUyMjdiYTRhZTcifQ"
+        },
+        {
+          "resource": "repo://app/loop/complete.tsx#L55-L89",
+          "version": "repo-lines-v1:sha256:037fe15f635fe474e290c60a9841ba1e7cc9b3cc7f29d609605ba6797ed84004:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5NjZmYmZhODg5OThkYTc0NjU2YzUwMTk0OTU2YzI1ZjA4NDk0NTc2NjBjMDA5ZmU2M2QxZTlmYTlkYzkzMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4NDI1MjgxNzJkZGMxMzFhYTkwODljNDI5YzlhODIzZTliNmFhYmFmOThiNDdhY2E4NjlkMDAzNmUxMWEyZjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjODJiODJiZmIyYzE1M2ZiNmMzOWE3YjVhMzlhZTlhY2ZjNDM3ZDczZTljNWVjMGZiYmRjZWFmYzczYzM0NzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZhYTU4Y2M0Njk5ZjIzOTNiZDM2ZWM5Mjc2M2NlMzRjNjgzZjVlOTkzOWIyZmZlZjk5NGY1NDk5ZDJhZDllOTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d7695b03039a4d7a88aa7012d8836e0c",
+      "statement": "Save & close calls completeLoop with the journal, cancels the loop notification, refreshes the store, and returns to Today.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/complete.tsx#L124-L152",
+          "version": "repo-lines-v1:sha256:d847d152fb42ceb53cb83c5527ffe0a303618ae32a593511bda65257014d9312:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1ZTM0NTQwZTJhOTk0YjQwMWVmYzYyMjBkZDNkOThkYjc4NGYyMjI0ODE3OTI4NDlmODhhMjJkOWM0N2IyZGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZjU3ZjFmNmI4YjdmOTM5MDgzYTg0Y2NkZjk1NjdiMzNhNTc1NzZhMzIzNmY5YjZiZDk1YzRmNmE0ZjQ5YWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhYzkyZWFiNGU0NDMxN2VhNmVhMzZjNGFmYWY4ZjQ4N2VmZjM1MzJiNmE0MTIwZWRjZGUzYjNkNzc4ODMwNmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c7b61f037b304b7eb327ec618f64b46a",
+      "statement": "Keep looping resumes a PAUSED loop, syncs the notification with a permission request, refreshes the store, and navigates back.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/complete.tsx#L101-L122",
+          "version": "repo-lines-v1:sha256:b5dc759767c716cb67b09f787af9a1151dec14efe2314548b247a612585bf9b3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3MWNkOTRkNzgwMDA0MGVmZTIxYzgzOGI1N2ZkNzcwODRlZWM3NjNhMGRhYmY1N2I2MjAwZTc2ZWIyMDQwZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwMDQ4MjJhMmU5N2M1MGZhYzY4MGQ1OGVjMWRjZDc1MzI0YTcyY2I2OWJlNjAwMWRmOTlmMDI3MWUzYzNjNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjOWJjZTBhZmYwODAyMGY4MDc4Njc4ZGY1MGY4NTUwNmY0YjU4N2MyOGRmY2FkNjQzYjhiM2Y2NjVmYmI5ZDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_00a17f7bb6d54fd1a57f0b6a62f3f12b",
+      "statement": "The journal exposes focus, carry-in, done, roll-forward, an optional roll-forward task, and a note, and saving is a single completeLoop call.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/complete.tsx#L201-L290",
+          "version": "repo-lines-v1:sha256:a258a96750250a155c4249c4be7e3a503ece61f897ef2634abd265b748c673c1:eyJzZWxlY3RlZExpbmVDb3VudCI6OTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxYjQzNzg0MDhkYmQ4Mjc1MTc3NjY5YTgyMTYwOTA2NGIzMTQ3MTMwMzZjMWI3ZTYxM2VmNjFiMGNhYmVkN2QiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiMTA2M2M0ZGVhNjhhMzgxNjYxMTBiYWQyZDMzOGI0ZDcyZTAyZDM3YmUwODE1YTc4NDUxZTk5MzMyZDZkZmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcyZTI1YzAyNzIxYzlmYjRjZTFkYWQyNzI5OWU3MzNhNjJkMTAzNGVjNDk3MzZlOWRmZDZlZTI5OTg3Njc0NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliYTNjNDFmMTk1MTU4Y2QxMTk4NDdjMDgwMWMyYzlkY2UzMGEzYTkwOTVhODhjYTQ0OWFhMWEwZjFmMDlmYmEifQ"
+        },
+        {
+          "resource": "repo://app/loop/complete.tsx#L284-L300",
+          "version": "repo-lines-v1:sha256:4ee5364f87582989eb4a309188b26610b8179617c42f3a4daa83b7ee016732ac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZjZhODA5NzQ0MWZhYTBjMjRiZThlMzZlNTZjYjM3MzNiMGM4ZmUzY2QwZGUzOGI1MmM0MTZjNzcyYzY5ZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEwMDhlYWM3NTAyNTk5ODkwZDNkYWVmMjI3ODU4OGEzZTIwYTVlYWJiYTA3YTZkNTU2MjQ0YjNkYjhkOWZlZDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY5OTdiMzM1MzA5OWIzMDA2NDc1MDY2Y2VmMmExMTYxNGM5YTY0ZTI2ODJhYmY4ZGQxZjBjMDc4NGFhYTk5MWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4ZDljNTRhNThkMTUzMTY2N2I5YTM1MDQ4NzRlYTcwNGEzODQwMWJiMzM3NmYyZWIwN2FmMTZlY2FmNTA5Y2UifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

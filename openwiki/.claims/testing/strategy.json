@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:6b655db382ca3aff027ac105f2612322069e92a7df80af48a0f321b7f47d4ef4",
+  "claims": [
+    {
+      "id": "claim_0da6a15456624e589c88196819858dbc",
+      "statement": "Jest uses the jest-expo preset, matches *.test.ts/tsx files, and collects coverage only from src/domain and src/features excluding test files.",
+      "evidence": [
+        {
+          "resource": "repo://jest.config.js#L1-L9",
+          "version": "repo-lines-v1:sha256:382b94652d9a3799d264c55129154487bf2fe8948417fca0ae8d02eaadaf70d9:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzhlNjFmZGYyMDI4YTM5NDEwZjA1MWY5N2JlMGRiNTgwYzNlZmJhYmY1YTdmMjdiNzZkNDg3ZTVkMDk5ZmIzMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWExZDFhNjMzOTAyMjljNzk4MzQ3ZTgzYTA0MDU0NDFjOTQwMDAzNTI4NGFkMTY4YzFiZjZjZGYxZDcwYTM3MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_dd7bdf7bee254e7eb53025a8e4b5d0d6",
+      "statement": "The standard quality commands are npm test, npm run typecheck, and npm run lint, with npm run doctor as an additional health check.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L123-L129",
+          "version": "repo-lines-v1:sha256:ecb18a3f44b855b38d61f922e3ead301828719b81f3747cf139e1fdcea271c05:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE5YjZlMzZjMzU5NTc0NTA3ODBjZDIwNWY5Nzg4MjYzY2JjNmIzMTVkYTAwMDE2MmRhMDAxNjMzNDVlNzBjYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDdjMDZjNTYxZDVjMzI3MzQzNjg1MjY4YTQ2YjMzOTFmMzk5OGVlZTg5MGQyYmU1MWYwZDIxY2M0YTUzYWU2ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjFiMzlmNWYyOTA2ODY4MWRlNTBhMmY2MzA0NTZhOGMzOThkZDgyOTg3YjE2YTMwNjE5Nzg4ZGY5MTc0MjU3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzEyNGYzM2Y1NjI1N2Q4ZmFiZDZjYWM2N2E2ZTVkZjIwMDU5MGJjNTkyMzFhMTQ4OTdiOGQ5MWU2OGJlMjBhZCJ9"
+        },
+        {
+          "resource": "repo://package.json#L5-L15",
+          "version": "repo-lines-v1:sha256:9ce784d2f062871311ab5db157ef189a0116bf8ad751c07327f72808e5df5c46:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0ODMzZDU5NDljMDNhNDBjYTk1MjQ5MTYxMGE2NjU5NjQ0YjNhYTQ2NjM2MmY3OTkwMjBkYmYxOTgxNTQ3ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkMGRlZDBiYWZjNzViMjU2MWMwMTVlYjllZTk4MTA0OWRkMjJmOGY5YmRhODg0YzBlYmY3ZGMwYjUwOTRiOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwNzE3NzE3MWQ2MTE2NGQ3YWQ4ZGM3OTEzYmM0NDgxZjAzZmFjNTRiNDA2YjMzMTgzNjZiNzRhY2U1MzEwNWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc5MjVmNzJlOWM1OGEzZGExN2EyMTQxNTA2MTAyZmE3YTZlYTMzNDc2MDQ1MDY4NDIyMjhhZjBlM2ZhZjFkMmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7378cb73a8f1403e833bfc8293113049",
+      "statement": "Timer domain tests cover closed, open, multiple, empty, and negative intervals plus midnight, non-UTC, DST, month, remaining, progress, formatting, and local-midnight cases.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.test.ts#L23-L199",
+          "version": "repo-lines-v1:sha256:cc35750e3d855c04de23a330150cc8a659f5ba3c3c1a914f2261ff81ee6922be:eyJzZWxlY3RlZExpbmVDb3VudCI6MTc3LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI4MjA3ZWI4OWE1NGM1NGZjZTAxMzRlZTM2YWE1MzgxY2ZkOTRmNDUzMmQ3OTE4M2RmOTUwYTQ0YWE2OGExYWU2IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkZmY3MDJiZWZlZWZjNmY3OGQxODMzZjIyZDhhZGFiNTg4MDFjMzYwMzNlYzgzOTUwMDgxMmUyNjg0NzJjMjVmIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MjA0MGUwOTVhOTRlMmFkYTc0ZTQyMWYzNzE4NzUxYTkxYTgxMGJmZDY2ZjQ4ZjRlOTM5YzdiNzQ4MGViNjcwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MiwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkODE3ZmJiNzNjOTJiMzZkNWU0ODk2ZmY1MWMxYjU4ZWVjMzMwYmJlOTYxYmEwNWZjNjIwNWY4NjdlYTFiY2Y2In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5096e79fe43d48e1b39601e29162b0b3",
+      "statement": "Task domain tests cover tree building, missing parents, flattening, descendants, cycle rejection, progress, archived children, and active classification.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/tasks/taskDomain.test.ts#L35-L157",
+          "version": "repo-lines-v1:sha256:e861e4f59606d928706c09bc2741286699bf6f5d409da61caa135e94a3af5f4a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIzLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJhYzI4NDRjNjcwYjFmMDFkMzBiY2NhYTMyNjhhMGI5ZWNlYTMwNDlhMzk5MGQ4MmFhNTJjZmM0ZTFmYTJhNTJhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI4MGM3YTYwMGI5NWM2NjBlYWU3MTc0YzhmYzM5NTdjMjYxNDhjMTk4ZTQzOWNkMzRkZjk1NzhhNTY4NGQ1ZjE2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI3NjU2ZDY3NmMyNjJiZDE5YzI4NzQ3MmYyZTRhNWIzNTViZDU4MGViNzgxYThjY2Q3ZWM1NTkzMTM1MjlhZmFmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MiwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJkODE3ZmJiNzNjOTJiMzZkNWU0ODk2ZmY1MWMxYjU4ZWVjMzMwYmJlOTYxYmEwNWZjNjIwNWY4NjdlYTFiY2Y2In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_64315c0a7ff548b696d860494047f9be",
+      "statement": "Intention domain tests cover progress percentages, target reached, zero targets, negative actual time, and day/month allocation helpers.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/intentions/intentionsDomain.test.ts#L20-L89",
+          "version": "repo-lines-v1:sha256:36844f0970e39d69b202b532970e9bf6a3ccb5575a4debfb7fc320762e99b723:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwMjgxZmMwMDVkZDFhYzBkMDllOGQ4N2IzMzE1ZWQ2ZmYzYjFiZjVjMjg3MmIxOWVlNTRiNTdjYzlmNGIxMDkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyZDExY2FmNDNlOTdlZjM2OWU2YmVlZDFhMjY4YmQwNTgzOGYyOWI5ZGQyNTRiZjY5YmE2NDg4NDE0NzIzNGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ4MTdmYmI3M2M5MmIzNmQ1ZTQ4OTZmZjUxYzFiNThlZWMzMzBiYmU5NjFiYTA1ZmM2MjA1Zjg2N2VhMWJjZjYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3218d5d4b3ee4baf9c7fd11ce669c6da",
+      "statement": "The loop service test harness injects an in-memory clock, ID generator, UTC time zone, repository ports, and a fake database whose withTransactionAsync immediately runs the callback.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.test.ts#L1-L104",
+          "version": "repo-lines-v1:sha256:b5f5e7fe930a772fb1b3c2dabf5bcc77230bf5ffd2ad26deabea5af31d044bae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTA0LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5ZDQ2ZjViOGM4NGRhN2Q4OGEwY2FmNjU5MTM1MzQ1MzIwYzE0YmQ1MThhNjcxOTdhNDBjOTM1NmI3YWMxYWZhIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiIzMzUzMjY2ZDMwNjBmMDM4MzhiODhkMmExMThjODFhMjVlMGM1MjNjODM3Nzk5ZWJmNDgwYzA5OGI0NjFiNjIzIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_63038e53d2e840b2bf22d1e909b587ea",
+      "statement": "Loop service tests cover start, duplicate-active rejection, pause/resume elapsed-time behavior, invalid pause, the full transition sequence, simulated restart, sequence increment, and journal persistence.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.test.ts#L106-L240",
+          "version": "repo-lines-v1:sha256:300d151190b21fef32953e3ce2e1b527d8bbe9532314f2fa5c8d38197b61bfd6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiNzYzMTg5M2EyYmYzYThlOWFlZDk1MDFkN2Q1ZDFjZDU4N2QzMjkzNzg2NzYyNzQ5MDBiOTEwMWU5YmZlYWViIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmNmY1YjQwYjE1ODQ1N2QxNzg2NGYyMTc5MDc4NmRkNWEyZWNkYjY0YjY2YTY1MWY3ODhkNGUyNWNkMzMwM2QyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MjA0MGUwOTVhOTRlMmFkYTc0ZTQyMWYzNzE4NzUxYTkxYTgxMGJmZDY2ZjQ4ZjRlOTM5YzdiNzQ4MGViNjcwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_76459c5eb4734f0280a3a63bbe04b54d",
+      "statement": "There is no checked-in test coverage for SQLite repositories/migrations, notifications, AppState recovery, React Native screens, or end-to-end device behavior; the four suites are domain and loop-service tests.",
+      "evidence": [
+        {
+          "resource": "repo://jest.config.js#L1-L9",
+          "version": "repo-lines-v1:sha256:382b94652d9a3799d264c55129154487bf2fe8948417fca0ae8d02eaadaf70d9:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzhlNjFmZGYyMDI4YTM5NDEwZjA1MWY5N2JlMGRiNTgwYzNlZmJhYmY1YTdmMjdiNzZkNDg3ZTVkMDk5ZmIzMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWExZDFhNjMzOTAyMjljNzk4MzQ3ZTgzYTA0MDU0NDFjOTQwMDAzNTI4NGFkMTY4YzFiZjZjZGYxZDcwYTM3MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.test.ts#L106-L240",
+          "version": "repo-lines-v1:sha256:300d151190b21fef32953e3ce2e1b527d8bbe9532314f2fa5c8d38197b61bfd6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTM1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJiNzYzMTg5M2EyYmYzYThlOWFlZDk1MDFkN2Q1ZDFjZDU4N2QzMjkzNzg2NzYyNzQ5MDBiOTEwMWU5YmZlYWViIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJmNmY1YjQwYjE1ODQ1N2QxNzg2NGYyMTc5MDc4NmRkNWEyZWNkYjY0YjY2YTY1MWY3ODhkNGUyNWNkMzMwM2QyIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5MjA0MGUwOTVhOTRlMmFkYTc0ZTQyMWYzNzE4NzUxYTkxYTgxMGJmZDY2ZjQ4ZjRlOTM5YzdiNzQ4MGViNjcwIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

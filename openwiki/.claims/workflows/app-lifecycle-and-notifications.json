@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:330e85d4a0a1837000da71ea6700e0602ff829aea65102e65410c22daf5d48a3",
+  "claims": [
+    {
+      "id": "claim_2f6d0bb82d614a4f9d00c48566181d7b",
+      "statement": "RootLayout wraps the app in SQLiteProvider with onInit migrations and suspense, then AppBootstrap loads settings before active-loop recovery and separately initializes notifications plus the foreground listener.",
+      "evidence": [
+        {
+          "resource": "repo://app/_layout.tsx#L16-L40",
+          "version": "repo-lines-v1:sha256:04b280ea0f3d7f593cb4719abe107c5cdf21684c8f3c3080538073666f82c565:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5ZDgwNGJlNTU1NjE5MDc4YzhlMWM3Y2E4MjczNzQzNDQ3NmE0ODY5ZDI4ODQxYzZmOTkzY2I0NzBjMzJjNmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzOWE1YmZjNGU4NzkzYjcwNjNmNDcxNjdjNDY5NzY1NjUyYjQzNDA3YTNkNTU3MjUyZjM1ZDYzYTQwMGQ0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjZTBlYTM0Y2NmZGY4MDU0YjhiMjNiODY2YjViYjg4YzI0YmFiM2UzOGZhZTk5MjIwNzUzMDhhZTc3OTA2NTQifQ"
+        },
+        {
+          "resource": "repo://app/_layout.tsx#L68-L87",
+          "version": "repo-lines-v1:sha256:9a1eba049649c70d76699d43bade2d03dc1a43b1c8b93d3d784e4d6d93feded2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNDViYjViMTQ1NDFkYzMxOGZhYTk2MDExNmFmMjAyYTQzZjdiYzZlNDZjMzI0ODQ1ZmZhZWYyYjhmMTRkYzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8c0b9af72b464fc89320e6ca058984d0",
+      "statement": "The settings store hydrates default duration, theme, and notifications in parallel with duration 3600, theme system, and notifications enabled as fallbacks.",
+      "evidence": [
+        {
+          "resource": "repo://src/store/settingsStore.ts#L24-L46",
+          "version": "repo-lines-v1:sha256:caaef22bfaabccd173b0340a9cb49fcef779ea95bb0710093cf211fb644a01e9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmM2M3MWY3NDAyOTJlMDliNzUxOTZmOTYxMmEyOTY3NGJhOWExNzE5NWZkNDc3NjJkNDNmOTVmNjVlZmNjZTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViOTc3ODdkODkzZmNmZGZiZTFhNzI1YTcyNDQ2YTkyM2FjYTZmM2UxODkwOTY4MTNkNTVmMGE5NTY3OTMzODYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIwZTk4ZDg1MzQ4MDEzZTFiOGRhZDVhNWRiNGM3MDZkZDAwNDI2MGRkOTU0M2QyNGMwZGNlZWVjN2FhYWY5MTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a13613ac60de45599f26b9471ea9f7ab",
+      "statement": "Foreground recovery refreshes the loop store and syncs the active loop's notification, and the AppState listener only invokes it when the app becomes active.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/lifecycle/appLifecycleService.ts#L11-L32",
+          "version": "repo-lines-v1:sha256:df87d2be074ff800c6b928a551180a53f3cc8bf15d6417c275b1b686f65e0923:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzOWJmYzcxZTY2ZTNmNzU0MmRkNzNkNGQzMjY0MWU2ZWUyMzBlOGFhZGE4NzBhNGU4MDA5NmE0ZDBkZWJkOTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhZGNjMmRiY2YyMTA3NmNjYzNlY2Q5NDJhNTg2M2E2MmU4YzNjYjRiZjEyZWU4YWUyOWYwNzBiYzAyMjQ0NmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_20f8c45ea6664481a26cb1a6ce344ec9",
+      "statement": "Notification setup no-ops on web, installs a show/sound handler on native, and creates a high-importance loop-targets Android channel.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L24-L46",
+          "version": "repo-lines-v1:sha256:a1c6fa1e6e2d980784b3254ed53c85f1f9e1e833e085f9cb01f8693156874b07:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhYTkyNmZhOGNhMWI0YzIwM2U5MGRjNmZmNTJiZjI5ZDEzYzMyM2E1ZGZhN2VkOTg3MzM1YmQ1NzYwNWI5MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMzkyOTBkY2FjNDkyNDY0OWJmNDRiN2RmN2I5MmM4YmE4Y2M5NmNiZGFkM2UyMDI1NmZjMWQ1ZDNmMmI0YzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg2MDFhYzlkODc5OTBiZGU0MzQ1MWZkZDI3NGY1ZjgwZGUyNzkyOGUyNzQyZDU2MDNmZDQ4YWY5OTBlZTY5YzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_21d12c0ba9c14dec91c9babb13cb415c",
+      "statement": "Notification permission checks return false on web, and permission requests are skipped when permission is already granted or can no longer be asked.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L48-L61",
+          "version": "repo-lines-v1:sha256:02972912b29c2d9edc221ea9854731d02445521a3361a7d14e9652fd45b3b6dd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAzYTExZjY3ZDA1NzAyNjY0ZDU2ZDU2NjU4ZTc0ZjYyNDg1YWQ3ZTgzOTlmMmNhY2EzYTIwNmVmOTA0Y2ZlODEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkODRhN2EzZDBiYmE3NTQwZmIxNmRjMzgxOWYxM2NjOWEzMjZjNGMyYWZjNTUwMjBkNTRjMzg2ZDRlNDY1Y2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4d63548b75304c2a942f6fba1370f4b0",
+      "statement": "syncLoopNotification cancels the prior notification, returns for non-ACTIVE loops, disabled notifications, or non-positive remaining time, then checks permission and schedules a rounded TIME_INTERVAL for the remaining seconds.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L98-L149",
+          "version": "repo-lines-v1:sha256:08d74404b017674e0dd32a33e24d38b9f887b0353920b790193e6b8448dbfe1d:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhhMTQxNjc0OWVjNmZlZjAyZjJiYWI1YmU2ZjA4MWEzNTFlZDE0NmRhZmI3OWQ2NWE2MjZhZTcxMTNhNzA2NTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_591d4ba4478343c6904ab03eaef3a123",
+      "statement": "Scheduled notification identifiers are stored under notif_{loopId}; cancelling one deletes that setting, and cancelling all removes every notif_ key.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L20-L22",
+          "version": "repo-lines-v1:sha256:69e2abec9141855087cc31f5466e398e8eb59c6da19c85a03b3854591c54fe5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzMwYTc4YTAxNmZmYjA2YmZhMTdkMmRiYzY0Njg5ZWM5OGQzMmE0ZTkxZjYzOTM3NWFiNmU0ZTMxNjIzNGFhOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODA1OTVmZmU1YmQyOGE3MjM4NjRkNjI3MDQ0YWIzMmNhYjU5NDNhOTg2MmFhNTVhZGFmZTBmZjE0YzVkMTdjZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjg3MjE4Mzg4NzRlYzYxYzY2MjA3ODUzMzVkODI4MzdhOTI2ODExMDViMGQyOGZiMjQzZjBlNzExYmNkYzM1OCJ9"
+        },
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L63-L92",
+          "version": "repo-lines-v1:sha256:57a49054c27485956864eb37490f21d5897330f160a61f181807744647d959a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNTk1NTY3NzkyYTlhZDg2MzJkY2I2YzU2YzA0ODIwNTg3ZDg2MDk4MGVjNTc0MjQ0NDE0MmUzODE2MTBlMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiY2QyM2U5NjBhMzBmYTc3OTJkYjdkOGI4ZGU5ZGU3ZTBhMTMwMTFjMmM1NDU1ZTc4NTA1ODlmZDQxZjAyODQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNjJlYTBhZDhjOWYxZTM0Mjk3ZTQ2Yjk3YThlZGM5MDZhZWJmZTUyMTBmMjZlYzdkNjc2MjVlNjg3MDVlMTIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ff9054ab47d34dce97ce2e545ade2714",
+      "statement": "Starting a loop syncs its notification with a permission request, pausing syncs after the pause, resuming syncs with a permission request, and completing cancels the notification.",
+      "evidence": [
+        {
+          "resource": "repo://app/loop/active.tsx#L28-L51",
+          "version": "repo-lines-v1:sha256:cd7daa977a613845bc21f7322da78accdef8cc96ddac602700a199d72ec97fc6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzNGIzYmIyOTllMWVjYmRkMjQ5YWNjMzVlNTQ1NDMzYjBjNjFkYTY1NWJlMjc1Njg2NDQzY2U1NDFkNzY0MjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyZDExY2FmNDNlOTdlZjM2OWU2YmVlZDFhMjY4YmQwNTgzOGYyOWI5ZGQyNTRiZjY5YmE2NDg4NDE0NzIzNGEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIwNGVlZjM3NTY1MThjNzNlZDg1NGM1Y2RjOTM5ZDBhOGU3MGI4ODIzYzliNjIxMmE5YmI1ZTAxMzQ0Mjg2MjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRkMmIyZjViYTQwYWE5NWE5ZjZkMzU0OTQxZGQ1MDQzNjViMjcwZjVmNmVlMDVmYjliMjVmMWJiOTkyMDU2MWQifQ"
+        },
+        {
+          "resource": "repo://app/loop/complete.tsx#L101-L143",
+          "version": "repo-lines-v1:sha256:0cad0fd135d7ffc8a66e8aba3ee547b089b4519e58bd419358f47b30e5784312:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3MWNkOTRkNzgwMDA0MGVmZTIxYzgzOGI1N2ZkNzcwODRlZWM3NjNhMGRhYmY1N2I2MjAwZTc2ZWIyMDQwZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyNDBkZTNjMGViNDE2ODhkZGY4ZTBjNDVjZTU5ZjgwMWMyNGU2ZTFlOGZmOTU3MzJhZWM4MmVhZWE5M2Q0ZjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQwMDQ4MjJhMmU5N2M1MGZhYzY4MGQ1OGVjMWRjZDc1MzI0YTcyY2I2OWJlNjAwMWRmOTlmMDI3MWUzYzNjNWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYxMDdhOTFlN2Y2ZDQyOTRkNzUxNGNjN2E2OGM3NjZhYWU1MDA1OTNhMTUxZjc3NTY5MjI2Y2NjMGFiZWIzOGIifQ"
+        },
+        {
+          "resource": "repo://app/loop/start.tsx#L115-L130",
+          "version": "repo-lines-v1:sha256:f989ba134a2c12ca6fc318b60bbb1f67f895629f039675bef24d23c3e0973369:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiMmYyY2FhNjNjYzI0M2E3NjM2NjAyNWY2MDZiNjMwYjU4ZTYwMGIyMThmZGE2NTkwYzZlNTU5ZjhiMWY3NTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwMmFiOTRjYThhY2JiYjU0NTAyYzA2MDA2ZTljOGViZTQ1YWMzNTIwZWE1MTFkMjk2NjMxNjk2OWNhYzQ3ZDYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkYmI4M2JhYTQ3NjZhZjU4Nzg4OGUzM2JiNDdlNmZlYjRlNDQ4ZGQxNDE0MmJjZmZiMzkwNzM3ZGVkYzczNTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwNjNhNDc2YzFmODU2MDYxM2UzM2M1ODJhY2M0ZDUxMTI4YmRjOGRjNGE1YTg3MTYxNTM3MjhlNmI4YjdlMzcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_699f954e80f04e8aaa819293f9be1f74",
+      "statement": "Turning notifications off cancels all scheduled loop notifications before persisting the preference; turning them on requests permission, persists, then runs recovery with a permission request.",
+      "evidence": [
+        {
+          "resource": "repo://app/(tabs)/settings.tsx#L88-L105",
+          "version": "repo-lines-v1:sha256:d00e179e199a6ab4674267357c1fec4e6aa32e9fbf64a26320f4cb2e82ea6dd8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhMjc0Y2RkYTcwM2MxY2VhYTBmM2NhYjNlZGZkMDc5YzhlYmZkODhkM2Y1MjQzZDM1ZGEyMzJmNzRjNTcwNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliNjJmNjBkODU5MGE1NzljZjQ2ZjhkNjczNzhjNGM1NzJiOTYyY2VjY2RiOTBjN2E1ZjdiNDJiOTYwNzgyYTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxZTM3MjVkYTAwMmI0NmVkOGI0ZGU4ODAwM2FkOTcxMGRjYWYxOGQ1N2M0NzAxZGMzYmVmZjBiMmM1Y2IxM2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQxZjhlYTY1MTk3MGExMGE1ZjUxY2M5ZDY4N2RkZGZhMGZkMzlhMjRmNDQzODk2MmU3YjcxOTZlMjk2NWQzYzcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

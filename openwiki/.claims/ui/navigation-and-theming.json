@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:d71d1907a4cf2e19ef291ece689f0ea98cfb0ad8e59f49d7b98138d0eabc4322",
+  "claims": [
+    {
+      "id": "claim_2a3d0a539d9c408bb0c7561586c68a36",
+      "statement": "The root navigator is a Stack with hidden headers containing the tab shell, a modal loop/start route, gesture-disabled active and complete routes, and loop/task detail routes.",
+      "evidence": [
+        {
+          "resource": "repo://app/_layout.tsx#L42-L66",
+          "version": "repo-lines-v1:sha256:4c030dc9542111266ebcfd3475234540f7b87f356ff83ada83b15775a2c8edeb:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdkZWExNWFiZjU2MWE0YzRjZTdjZWJhNWE5NTQ0NzkxMTgyYWQ0NjAwMDJiYTdhNmFmYjA4NTVkNWQ5Y2YzMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ1YWMyOGZiMWFlYTU5ZTAwMTUwNTg2ZDM1OTNjNjQ1NjA1M2Q1YTQ4MmQ5ODk4MzAyMGY5NjI3NWQwMDNkMzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZhYTc1ZTBhZWNkMTk5MzgzZjBlNTRlNDRkZDMwZTJhMzQwOTlkNzA2NDZjMDIyZmEyOWFjYjJlMTA3ZGI5ZWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ad92fd15965b4d5e80dc65b79bad988e",
+      "statement": "The tab shell exposes Today, Tasks, History, and Settings routes with Ionicons icons and theme-derived tab bar colors.",
+      "evidence": [
+        {
+          "resource": "repo://app/(tabs)/_layout.tsx#L7-L61",
+          "version": "repo-lines-v1:sha256:270e7f63b8aa75828e5f5db91e32ee531dc62a2881e21285ab222d26db103c3c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4ZTA2ZDQ3M2M2ZWNkY2U1ZWI3ZTBiN2M5Mzc3NjZmYjY1ZWJhOThlMjY2YjI0NTRmZWY0ZWQ5MGJiYzY3MTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkzNDk4NzA5YzcxMWQ2N2E1YTQ4NWE4NmVlZmY3OGE3MDQzYjM2N2M5NjRjY2RhMzFmYmViNmZjN2U2ZTZjZGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_202a84cd6c8048d18704aa7da2232cc2",
+      "statement": "The shared Screen component applies a themed SafeAreaView, defaults to the top edge, and wraps content in a ScrollView unless scroll is disabled.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/common/Screen.tsx#L15-L40",
+          "version": "repo-lines-v1:sha256:77de8ebe5d6dd6afa9831d9aa5f5f6812930e239e6d5107da06896fd0143fdbe:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZmM2JmMDNmODkyMTg5YTI5OGI0NTQxMzA2YTM0MDVlNWNjNWIyNjdmZjNkNjUyMTk4YWM4N2RjZjU1M2MzMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU3Nzk3OGNhMDg4YTdlMGEzNDdlOWI2NzA1MmEzNjliZTk5M2M5MDhiYmZmYWY3YTc5MDQ3ZWIxMmRlZjI1YTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjA2ZTZiNWMzZGQyZTAzOGFlNDE2MmU2NTYwYjlmMzRhNGRkODdmM2Q4OTI1YjlhMjIxNTlmN2IwNDFhMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7572715ccf9f4319aa46683509027a11",
+      "statement": "Button supports primary, secondary, ghost, and danger variants and exposes accessibility role, label, hint, and disabled/busy state.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/common/Button.tsx#L26-L75",
+          "version": "repo-lines-v1:sha256:0463f3b5d95873de1415233063329cd4b73a961a38b981ddb5b133255a511f74:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiYjQzMjZiZmQ4YWY2YTE0ZGI1YWEzYzhlNTk2ZTI0YTBlYzI4OWUwY2Y0MjNiZmQ5ZTIzN2M1NDM2ZDM3Y2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5MDdjYzgzYjc3MjMyNDM3ZGQyYzM4MjI3ZDM1YWQ2MjQyZDQ1ZDdlMzc2NGUwNmUxYzI2YWExNzJiZWQxOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYzMjg1YmVkZTVhODA0ZWFmYjljY2JiNDlhMDNiMmU5YzJjMjIwNjI4ZTEwNjFlODkxOGFhMzg1ZjljZmIwZDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_86ca36a684d94be1b2496f08e96ade30",
+      "statement": "ThemeProvider resolves the theme from the persisted system/light/dark preference, falling back to the platform color scheme for system, and exposes colors through useTheme.",
+      "evidence": [
+        {
+          "resource": "repo://src/theme/ThemeContext.tsx#L19-L37",
+          "version": "repo-lines-v1:sha256:0266f5afee549747af15e8ed4b254edffd828fedaa8631c24103d0b42a617a97:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4MmU3NDllNTA1YzIzMmQxMGExYmEzYjNkNjAzOGJlMzYzMjc5NzAzMGVlYWE2MWZiMTEyZThlZGNkMDdhMTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE0YzJjODJiMWY3ZWNmODkzOWU3ZTk3ZjczOTAxODU1ZjM5YWI4OGE4M2FkZTBlY2JkZTgyM2NiOTNmYjJhYTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_64f9421f0332474d898a1823de8af5dc",
+      "statement": "Design tokens define spacing, radius, font size, line height, font weight, and separate dark and light palettes covering surfaces, text, accents, status colors, borders, and overlays.",
+      "evidence": [
+        {
+          "resource": "repo://src/theme/tokens.ts#L1-L68",
+          "version": "repo-lines-v1:sha256:9c1b15c4316c1556f185d637b530b3c549b90d3880cd041bfc32f9356cfb50ee:eyJzZWxlY3RlZExpbmVDb3VudCI6NjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlMzJlMDUwMjBkNGM0NDVlMmZmMWFmM2YzZWFiYzY3MWE0N2ZlYzgyZjM5ODY5ODkyZDE5OWRlM2MxZDI3YzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhMWQxYTYzMzkwMjI5Yzc5ODM0N2U4M2EwNDA1NDQxYzk0MDAwMzUyODRhZDE2OGMxYmY2Y2RmMWQ3MGEzNzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_849d269932974f708eb676ea6ca8fa0a",
+      "statement": "goToToday dismisses all stacked or modal routes when possible and otherwise replaces the route with the root path.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/navigation/navigationService.ts#L1-L12",
+          "version": "repo-lines-v1:sha256:1e04c3db7fcb4b7f974c608ae3b675ff456af0285bda003a96a683bc3a5636af:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM3M2I4NmIxYmJlYzlkNTcwYTIyNWY5MTZkYTZiNmZkMTI3MmU0NDRkOGI1YmU0ZjI4ZDRiMjY3NzJkYTc1ZDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_297390db30654bfcb5bbcd46a93fcc03",
+      "statement": "The web phone frame is limited to web viewports at least 600 by 700 and otherwise renders children unchanged.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/common/WebPhoneFrame.tsx#L13-L36",
+          "version": "repo-lines-v1:sha256:8cb26ff571a08ad895fb527380c3a7d19c4195d9e456ffe5053bf92213d1e921:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjgxOGYwNGJmMjJmMTIxM2VjMTY3NGU1ODdmZDdlMDY0MDFlZDc1ZTIxZTYyY2YzYTBhNDgxNGRiMTZlM2M1NTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4M2U3ZTA3ZWM4YzVjNWU3MjRlM2MxNzI3NGY1MjFiNWI3YTgwMjdjMmQzMGM3YjM3ZjA0MjRlYWFlNGUyOWQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

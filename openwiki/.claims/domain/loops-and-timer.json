@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:b3400d509c24d392ecbb0d46c109e46868ad3806f1b815ebdc7f5850dbbef999",
+  "claims": [
+    {
+      "id": "claim_d8444e4807fb42ffa1b1a4fce8e3a951",
+      "statement": "Persisted loop statuses are ACTIVE, PAUSED, and COMPLETED, with IDLE present only as a UI-level status in the shared constants.",
+      "evidence": [
+        {
+          "resource": "repo://src/constants/loopStatus.ts#L1-L8",
+          "version": "repo-lines-v1:sha256:2b3fd0e055f13e58d410629dbf56430ad37efdc004e8e75e276e336011e03023:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWY3OGMxMWE3YWU5N2E4NDhjM2VjOTNmY2JkZWQwNGU2MDgzYmMyZWMxYzUyM2E1YTRlZTdkZjE5NzQ3ZTc1OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzcwZjdiMjZiZmZhZDJmNDJkNTZmYWEwYjhkMjIyN2ZkZmNkZTgxNzQxZDc0NjVlM2NmOTQ2Y2VlOTgyNWYyYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjQ4NmVhZGM2YjNmYTg2MzgzZDlkYTYwNWY0M2ZhYjRlMjY3OTNlMmJkMWNlNTM4YWY1MmVjNTFkOWFlODU3OSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f3e99665a65a4f78a2ea536a4883cd00",
+      "statement": "The loop service allows pausing only ACTIVE loops, resuming only PAUSED loops, and starting only when no ACTIVE or PAUSED loop exists, throwing typed errors otherwise.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L118-L123",
+          "version": "repo-lines-v1:sha256:b6cdbd9c1501671785e19fd3c32dc850e3ccfeb500e2215e353319cc3a959596:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk1ZmEwZjExMTdiNWVhNDA0MzQxNDBkZGUxYTM0MGM3MjBkZGJmMzI2MjEyZTE5MTgzOGQ0YjE1NmQzMTZiYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI2MmY2MGQ4NTkwYTU3OWNmNDZmOGQ2NzM3OGM0YzU3MmI5NjJjZWNjZGI5MGM3YTVmN2I0MmI5NjA3ODJhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNGQ0NzQyY2YzMjE0NmIwMTlkNWZhMDExNzFkMzliMTQxZjI3Mzc4MzQwNTcyYzZlNDMwMTMyOTUxZjg5Y2E2MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWU0NzUzOGMwOTA4YjM0YzAzNWFhNzQxMDc4ZjYwYmMzNWI4YzAxYjA4NjQ2YmFhNzIyZTg5MDE0ODUzMTUyMSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L13-L32",
+          "version": "repo-lines-v1:sha256:b351d57705ec2b3996d32bce5847f88d331d21a75e28efc8970e964efac271f2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0Zjg4YjQ0MmZhM2ExMjIwZGQwZjlkYjY3Y2FlYTYwZjI2MmUzNDc3YjQ2OGEwZjZkNjdmNDc0OTk4ZTIxNzciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlhNDBhYjc0ZjMwZjNmMDM5ZGI2NDc3YzVlNGU3MTcwODRlZmUzOWVhNmFmMzE0MjA2MDE0ODliOTEwMjRjOTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZjk1NWM0NzQxZjU1ZTJjYzdiNDQwODc1NDdkYTk4ZDAzM2YzMDY0NGU5YTNjODNkZWE1ZjFhNWYxNjE0NWUifQ"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L167-L173",
+          "version": "repo-lines-v1:sha256:0f356320877b67058051cbe5b34c9ee7f3168622bde481d3fab9aea6ff8cc987:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWI0NzljNTdjNWE4NWEzMDZjNzljYjlkMTg5ODY2NTE4NTFkOGVjODc1NDY4N2E0OTIyNDQ0ZmMxY2U2Y2I4YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI2MmY2MGQ4NTkwYTU3OWNmNDZmOGQ2NzM3OGM0YzU3MmI5NjJjZWNjZGI5MGM3YTVmN2I0MmI5NjA3ODJhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTAwNWU5Yjc1NTFlZTJiMmM3NTJlOTFkMWUzZjI2ZTkyZmY4Mjg1YmE4Nzg4ODRiNDA0NjViZTk4MmQ1YjA1MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzIzZWFhNDM0MjFjYTc4ODJjMjQzMWJlMzUxYjI3ZTY0MWNmODA5ODQ4ZDM3MDBhZjkyOWQwM2NkZjMzMmM4OSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L184-L190",
+          "version": "repo-lines-v1:sha256:667dbae57eb2f7b6ee213e3532a5c8d316257fc81cbb7fb2381ed6f8d3f0f4cd:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDg4NTA1MjZlMzczYTc1MjMxZThjYWU2YTJmMTAwYTllNGM1NzcwMDkyZDViMzI3MGM4Y2MwOTNhOTc0MjZmNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI2MmY2MGQ4NTkwYTU3OWNmNDZmOGQ2NzM3OGM0YzU3MmI5NjJjZWNjZGI5MGM3YTVmN2I0MmI5NjA3ODJhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTc5OTU0MTM1YmQzYzJmNWI1NTI1NDEwMTI2MDRlODc0OTVlZTY4NDE2OGE0N2RhODBhOGZlNDJjZjZkZjlmNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWU0NzUzOGMwOTA4YjM0YzAzNWFhNzQxMDc4ZjYwYmMzNWI4YzAxYjA4NjQ2YmFhNzIyZTg5MDE0ODUzMTUyMSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L211-L215",
+          "version": "repo-lines-v1:sha256:35d4fa22d9086f184bb94c4f76f1bfa6f7eb8feab9ef7329798df5e79db96bfe:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2IyOTIyNGM5ZjJjNDkyODM0NmU4ZGM1NmZmNGQ0MmFkMmRjOTk0MjI1ZTA3MWM5NGVhNmZjZGI0N2I5NjcyMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI2MmY2MGQ4NTkwYTU3OWNmNDZmOGQ2NzM3OGM0YzU3MmI5NjJjZWNjZGI5MGM3YTVmN2I0MmI5NjA3ODJhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTc5OTU0MTM1YmQzYzJmNWI1NTI1NDEwMTI2MDRlODc0OTVlZTY4NDE2OGE0N2RhODBhOGZlNDJjZjZkZjlmNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODU4MjIzMWVmMGFhZDA2ZDJiN2U1MDUzMDg5NTU0MGJmZGE1M2Q4MWI1ZmVlZjBkYzk1OWQ4OGFhMGM2NDYxZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ed69496877f94bc086dcf8ffb16ed4f8",
+      "statement": "Elapsed seconds are the sum of closed interval durations and the open interval up to the reference time, with negative segments clamped to zero, then floored and clamped at zero overall.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L9-L22",
+          "version": "repo-lines-v1:sha256:99c6e8cc7cf164ab0498adfc16fa3f9ad284db38dc8070a5c6252b5692aa9d03:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA3NmJjZjhkMGUyMzI1NjQxZjgxMjFlNTg4ZDhkZjM1YjUzY2E1MDY2NzI1NDY2ZDU4M2JlNTRiZDY5MjRhZjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4Nzc2OGU3YjI3NTdlMGNlNTY4NmY1NTM3ZDM5NDk3NTRhYWUyYmEwYmM0NTI3NWNmYTYxMjMyOTA4YmJhYjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgzNDM0NTcyNDUzOGVkOGJlOTNkMmNlNmI4N2FkZTQzNTEwNmQ4NzljZWZiZjYyMTI1ODBiYjU2Y2YxNWMxNzkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_57c5be60b64e44b29e18a4fa290df16a",
+      "statement": "The active screen's one-second interval is only a display refresh; each tick re-queries intervals and recalculates elapsed seconds instead of incrementing a counter.",
+      "evidence": [
+        {
+          "resource": "repo://src/hooks/useActiveLoop.ts#L9-L55",
+          "version": "repo-lines-v1:sha256:6b59ebdf8090ca7921a7f4965c444b8e5fea40bafa2f308daadc2f8755562d90:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNiZDhkODA0ZDNkNjM4NTJjM2RmNGJhNTZlZjc5NWFmMTAzMzljZTljNzUwZWNiNDhkMmFlZmE1MThhMTZkNDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhNzlmNTU1NzBjMTVkMDMyZTA0ZWI5MzllZWQ3NjA1NWQ3NDRhMTNhYThhNDUzYzMwMWFjZjZmMTA4OWQ5MDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_41d70feef734499cad8544fec753bdc6",
+      "statement": "remainingSeconds clamps at zero, progressRatio clamps to [0,1] with a special zero-target rule, and the formatters produce HH:MM:SS and compact h/m/s labels.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L77-L109",
+          "version": "repo-lines-v1:sha256:8e161de38264412d45f49a5ddcb85aaf21a242777e4a7086eab70058282142f3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkzMmE2YmU3YmYwZjI5YTFkZmRmYmQ4MzZiMDk5Njg5ZmIwMzk4NjQwYTUyMDQyYWExMjY5OTU3ZGFlZjhkYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI1NDU0ODVmNTJhMjUzYzY3OWFmNTFjMzNhZjZiNDU1ZWFhOTgyZWU1Zjc0OTg2ODNkZmRlNjZiODdhYWY3NDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjE1OTg3ZTdhNTI0ODQ1OWFiNWRlMDBkZmRkMWRkOTYzOWNjZmVhYjU2OTgzODI2MjI5OTBkNDgwNTJhODRkMjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2137d8bd8f3f40abb4957975ee798b8c",
+      "statement": "allocateIntervalToDays walks an interval to each local midnight in its stored IANA time zone, splitting real seconds per day key.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L28-L61",
+          "version": "repo-lines-v1:sha256:d4b1f7b13896d330ce4c6de4c61d6c33f3d3823b0a520cc287185089e44fd61d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0Mzg1M2U1Mjk1MjAwMjFjZjAxOTY5YzI2MzJkMjhkNzJjMmJiNmUwMmNmZDRmZjg4ZTIwNTRjMGE0ZDRlNTIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwYTM1M2VmMTU1NzU5MzFkNGEzMThkZWU4YzkzOTUyN2YzNGNhNjg0OWVhNjRlYTBmYjQ1NDQ4ODA4ZTA0OGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0ZDllZjI5YzdhZTNlMTdjMjkzZjg0Y2E3YTE0NDkxNGRjYWY2NjFiODQxMDBmZmQ5OGNlZTNmM2FhZmI3ZDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0b8dc0c0159746168848109e64f11900",
+      "statement": "Monthly allocation is derived from the day allocation by grouping each YYYY-MM-DD key under its YYYY-MM prefix.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L63-L75",
+          "version": "repo-lines-v1:sha256:78f8d590afe7164d0b62d5b1af03baf0885969f6ee107fb95e430b54d5bd24f5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkNGNlZGQ1YThhMGI2NTUwNjI3OGQ2NWFmNDhjYjQzYWQyOTY1ZjU4NDQ2NTY0NDc1NjViMmZkNzA1ZDZiMmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxNjgxNzhiYzEwNzAxMzY4NjEwOTBlOTc1ZjBkMzU5ZDdmYzdiMTMxNzQ4NGNlNzVhYzM1ZGU1MTAyMjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNlYzJhNDU0N2UzMzBmNDA4MjU0YjdhNWJkYzc3MzFiMDA0ODg0MjhjYTE0ZjU4M2JlNDQ5YmM0MWQ5MGNjMjMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2ee8e1be504b460d88c7f1a4e61fca41",
+      "statement": "Zoned civil-time conversion refines the UTC offset twice around a guessed instant to handle DST, and localMidnightAfter uses that conversion for the next local midnight.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/shared/dateUtils.ts#L53-L90",
+          "version": "repo-lines-v1:sha256:d56baaefc74af5686a3f6eaf6900f7763cf6ddc277f5e7134a1029ea4bcf55bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZTU3ODhkNWQ5ZDczZDI0YTgxZGJjMGE1YTc0YmZhODJjOWMzYjNhZjk5ZTUyYWY3OTZlOTBiNDY4YThhM2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI5MjY1YzU3ODY5YTY1ZTAwNDg2MjNlYzI3YjZjNGI5MDVlYzQ1MGZlMzc2Mjk2ZTI2N2I2NjkxM2UwNTJhNzUifQ"
+        },
+        {
+          "resource": "repo://src/domain/timer/timerEngine.ts#L111-L125",
+          "version": "repo-lines-v1:sha256:c88a6e57bfb29948509583d14a23f0d908e4e9f94c38dcf2e183a180b62c7ce4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlMjA3NWY1ZGU3ZThmMmU3OTFhODFiMWRjYjk4ZmJiNDczMGIzNzE0YzQzNzc3Y2Y4ZmM1YWQ3MTQ0OTU3ODIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d8ebcdd8e9214b008ea5ceddb603d220",
+      "statement": "Loop sequence numbers are assigned per local_date by reading the current maximum for that date and inserting max+1.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/loopsRepository.ts#L55-L63",
+          "version": "repo-lines-v1:sha256:75a49ca76065f58108c8c547d350ac8c26247a1efeb6d7d3f53976ae4a7750b9:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDU1M2MxNGU2NWRmMDRhNDU5MDg0ZjkyNjU0NTE5NDFlN2QzN2FjNWMwNjJmMDZiYTkxMmQzNTQ0MGMxMjU0MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmYwNThmYmZhYjI5NzdkNjBmZWY5ODUwZmM5MjVkMGY4NjQ5ZDNjYjk3YTJjOGZhODc4MjFjMDcyOGZmOTJmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDk0ZmMwYzE3M2QxZWMzZmM1MDFkN2RmYTkyODU1MDFjNTI3Y2ZiNDcxMjU4M2RhM2NjMzYxODA1NjZiNGJlMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWU0YzZlMjk3MTAxYWMxODVjZjQ0MjQ2OWEzOWZhNzNhMmEwOWJlZjIyMjdmZDFkZDlkMjFmZWM4Yzc0NTdjNSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L125-L133",
+          "version": "repo-lines-v1:sha256:e33e1f17e01b283ca4d134cc6852a87c0c95ff5a804abd5b09dbe14d6bacd2d8:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjhjMzIwNWYzNDdmYzI3ODRmZDI4NWNlN2NiMzg1NWMyM2UzZjI4Yjg2MTg5Y2ZmNzllNGVkZjc0ZmU4MzM0OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTAwMjVhOTQ0ODRkNWQ2YjFkYTgxYjVmZWEwYTg0ZjgwNTQxMDliYjU1MmU4MTAyMzljODRlNTNjZTNhMDhiOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWM5YzIwOTJmZjNmMTgzYjFiNDY4MTgzNTFjZDdiYjYwY2ExZDRiMmViN2YxNjQzODYxMjNiMDA0OTliODQ2ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTUxNWE3M2U0MzI5MGJmNzVlMmM1M2FjNTMzYTE1NzAyNjUwYzRjZGI2ODRmZGNhMzZiNzY4NTNjMDIwMzc0OCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_821e335bd9db4c7fa4031402f1204932",
+      "statement": "Start clamps a loop's target duration to at least one second and rounds it to a whole number of seconds.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L142-L142",
+          "version": "repo-lines-v1:sha256:5ebba4cc95be939baf0cb41f176488d1f348fc0dd9a0c060a83ce5bc6c665235:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWViYmE0Y2M5NWJlOTM5YmFmMGNiNDFmMTc2NDg4ZDFmMzQ4ZmMwZGQ5YTBjMDYwYTgzY2U1YmM2YzY2NTIzNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWViYmE0Y2M5NWJlOTM5YmFmMGNiNDFmMTc2NDg4ZDFmMzQ4ZmMwZGQ5YTBjMDYwYTgzY2U1YmM2YzY2NTIzNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzk2ZTAyMTJkYzMxYTRjOTBhMmNlOGUxOTk2YjYwYmU4ZDcyYTNlYjlhNjBlMTBhMDhmMDA4NmY1Y2ZmNTYyYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWE5M2JjYTViMDFiYmY3MTEwOGM0NjQxZGNiZjllZDkzYWUwZWFmMDFhOTIwZTZjMWU3NGNjYzBiODg3OTIxMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe6ec53d2beb4e30a60260173ec9e538",
+      "statement": "attachLoopMetrics batch-loads intervals for multiple loops and computes each loop's elapsed seconds with one shared reference time.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopMetrics.ts#L13-L41",
+          "version": "repo-lines-v1:sha256:e49c10a38ddd85e10da4af4cdbff95afb567d65a7becabd040227f731200bdd6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM1OTliZGZjNmVmYTU2OTU4MDY2MDVhMmMxMGYxZDNmMDE0M2E5MDU2MDNiOWM5ZmQxOWJjOWQ2NTMzZTk4MmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiNmE3MWZjMjAyZjMzOTMwMGUwOTY2YzNiZjBlOGU0MTUwMTkxZjZkYmNkOGY1MGU3OGZkN2JkYWZiNTI4MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

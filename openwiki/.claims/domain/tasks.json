@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9eb92de21434dc2ad75b8a6570e4977f3b883593c1cce3922ff587feb7ab18ee",
+  "claims": [
+    {
+      "id": "claim_1e41ef3cfaaf4d56bd14eecc4cb55680",
+      "statement": "Tasks use an adjacency list with a self-referencing parent_task_id foreign key that cascades on delete; loops reference tasks with ON DELETE SET NULL.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L39-L40",
+          "version": "repo-lines-v1:sha256:261e53dcb6343b5b6428e7be65ad192d3266b3efb3d3751c5db13c97fb1d3f5f:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTNjYmIxYmIzMmM4ZTliMjRkMGJmMDA0Njc2NzlmMTFiZWNhMGIxODBiMTU4Y2IxMWVkZGQyNjY5ODY2ZmE3MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzY0MzliNTJiYzBhZTZiMTU3ZmViZmZhOGYyYjI1NmNhYzY3YzFjYzg0N2YzYjIyYjgyNmE0N2Y4YWJkMzA1YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWM0Y2IxOTgzNzhiMDA5ZmI2Zjk1MTc0NmQ1MDAzZmViYjYwMjE1OWQ1NWM3ZmIyZGQxYjFjNmRiMjMzOTllOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDNiYThiODQ5NTc5YTkxM2I5YjFiZTcwZWExY2JlODc3Nzk4NzAxOGQ5MzE3OWJiMThiNTljZWViN2ZjNzk1NiJ9"
+        },
+        {
+          "resource": "repo://src/database/migrations.ts#L5-L20",
+          "version": "repo-lines-v1:sha256:e8ab371e3b48b3eeecdfe07ad2a2b7bc7fc766fd8bd25268f2a59d9e50c6132c:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4N2NlNjRlYjJkZDEzOTM2YmZjZmE5NjNjYzkyMGVjYzExZTliYTUzNWJkNTRlYjYxMTI2ZWRmNWViNzUwYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1NGRkZmE5ZjExOTQ3MzY5NDIyMDlhZWM1NjM1ZDFkNGQzNDZjYTU1NWQxZDYyYWRlODQ4NWExMjg2ODE2MTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0YWY0Nzk5MjNjMTRiYzY3ZDNkZjY4MDAzMjcyNGQzZmNhNmExYzNkNmM3MWZhYzFlZTZjYTEzYTQ1MDkxYjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhMjJlY2QwODEyMzY3ZTZiMTlmMmJlMzg1MjljNWY1ZjBhZmU2ZWNjODcyYmRiOWZhN2NmMGI4ZTEwYmE5NzEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dcfb7642a1c64332ad8f061c8edd0f77",
+      "statement": "Sibling tasks sort by sort_order then created_at, and tasks whose parent is missing or archived are treated as roots so subtrees are not hidden.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/tasks/taskDomain.ts#L22-L54",
+          "version": "repo-lines-v1:sha256:6ed94a599b834bfe4b3bd766ac6b3a9ffbebd28f26bd398e2f28048e1b2febc2:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjExNWMwNGM0ZWFlMzIwMTU4Nzg3NWFhYzFjNDU5NGRlMTliZDg0NTg3NjlmOWYwZTE4Y2QwNmYxMGEzNTIyMmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZiNTgwZTk2NGY4M2E0NzNmNDNkNDQzODQ2Mjk0OWQ2OGI1NjAwZmRhNzg3ZjE2Mzc0NWQwMGRlODljYmYzNmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFiNzUyZjYzY2EzZjgyMjM2ODFkYWNkNTk1YzAyOTkxNGYzYWNhZWY2MjQ3MzJjZTE1MDc0OWQ2MzA1ZTczNWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2f6e90b52dae4f9da5447459d0849918",
+      "statement": "flattenTree emits depth-aware rows for expanded nodes only, allowing the task UI to render one flat list instead of nested views.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/tasks/TaskTree.tsx#L20-L56",
+          "version": "repo-lines-v1:sha256:a6a49c883f62b0af8753a99a929f282f539d55d1c333ea6c27151dbc90d004aa:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzZGVhYjk1NjZmZTIyNmU2YTFlNzhhNzg1ZjIwNTUzMDcwYWJmYzQ3MmYwOTFhOTNhMTlmZTE2YWVmMzZmYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRiYmFlYzFhYWExMDI1MWY0NWVjZTI2ZThmNmJlZjc0ZGUyYzc5MjkwMzdkMjg3ZDY5ZjEzYTU0ZTk1NzY2NjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2YjA2ZTZiNWMzZGQyZTAzOGFlNDE2MmU2NTYwYjlmMzRhNGRkODdmM2Q4OTI1YjlhMjIxNTlmN2IwNDFhMjgifQ"
+        },
+        {
+          "resource": "repo://src/domain/tasks/taskDomain.ts#L56-L79",
+          "version": "repo-lines-v1:sha256:395825f70fc203d6ece853de419c624aa2cf16165513f1ffd7266708f107aacf:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiMTk0ZjA0MjgxZjdmNmNlZjgzYThlZDRhNGY3NWE2YmMxNzYyNzE1ZDc1YjJjMDg3YjRmYzhjYjc1MzliMjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwMmE3MTIzM2ZmZjdhNjcyMmExZmM2NzZjY2M1NzVjYzYzODc4YjVjODRlYjcyNTQ4YTdjMDdkOWY3OGMxNDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI4N2Q1M2U2MmNiNjRlN2Y1MjNlY2JkZjNkMTQ0NjQxNDk3NzI2MDdhMjAwYzA0ZWFlMjA5NTZhNzY1NmQzMTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_176ae0435e754dd293ecb83a6f22c35b",
+      "statement": "assertValidParent rejects moving a task under itself or under one of its descendants using a cycle-safe descendant collection.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/tasks/taskDomain.ts#L81-L127",
+          "version": "repo-lines-v1:sha256:5744990292951de5b314352cdf4c2ad60cb4e93bd2775dcff1c2074b9941757e:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU1YzkxMjk5ODIxOGIwODAyNThjODMxNDU0NTJiNjQ4OTA4NDgyMTNlZjQxY2QzYjg2MGNmZmJjNWQ3NmQ3NzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3MTY5YjI4ZGNjZWY1ZDc3ZWZhMzY3MDMzM2U3OTU2MjU0NzU5M2U3M2VkYjljMWZlZWYwOGQ3OGI5OThkOGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyMTkxNmFjMDIyMmI0MTVkOWFiNGExNzFjZmFmMDAwODFkZjgwZDM4ZDhkM2I5ZmUwNzg3MjVlMjJlMmIxMDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_445d9b55925c45609e8ded2e9182fc8f",
+      "statement": "childProgress counts only direct non-archived children and returns a zero ratio when there are no children.",
+      "evidence": [
+        {
+          "resource": "repo://src/domain/tasks/taskDomain.ts#L135-L146",
+          "version": "repo-lines-v1:sha256:43404698ea1dc2b87333189688b1cec7da18e07680e67b223b51bad03c4a3c3f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiMzUxZWExMDVhYzVlN2UzZGQ3NGI1YWQ5MjM3MmU2ZGE3MTA1NTVjM2FlNzQwODM5ZDQzNTM2MDhlYmNjNWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxNGU1NDY5NGRmMDFjZjc3ZGE3ODExODVhMTUzMjc2NWYyMmZmMGNlNTI5Mzg5ODBlMjM0MDhkMDkyYzU2NDQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNhNWUwZWM5ODJhOWFhM2Y4ZWIzMzMyZDk4Yjc0MTQ4YzY2ZDc2MzQ0OTk3MzQxMTA4MjRhMTBlNTI3YmJhYzcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_47a1bc821f564bd5ba9e2e4dbebddf78",
+      "statement": "Task listing supports active, completed, and all filters, with active meaning NOT_STARTED or IN_PROGRESS and all excluding archived tasks at the repository layer.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/tasksRepository.ts#L40-L53",
+          "version": "repo-lines-v1:sha256:bd0debc86678ad5847e4af9ad132b683d822ec3ae3167f65e9ee3e50ded48409:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5ZWI1OTg4NjdiMTQ5OWQ4NDA2ZDAzNGE3ODc1YzQ2OTYzOTRkZWI1ZjlhZWVlNzI1ZWMxZmY4ZjE1MzE5NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3YzJkNTQzYTIzZjg3ZTAyMGQxMGM3ZmQwZTFmMjdkMTE3MTkwZGY4MTVjOTNhM2NmNTEyYmUzZjM4YjRkOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc0NjY5MzkxY2JjMGJlYjU2ZWE4YWNmZTkzMmFkZjNhNzRmYmFmYmM2MDIxODg0MGY0MzAxYWE1MmE3MDJiMGMifQ"
+        },
+        {
+          "resource": "repo://src/features/tasks/taskService.ts#L36-L48",
+          "version": "repo-lines-v1:sha256:5a630f0598839fd989a855dba1930ed93aad50a31d44f3b70b0079c9d8309ccf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4NTgwZDkyZmY1MWQzNzNmMjE5N2U1NDA2YTUyNGM0YTI1MGQ4ZTAxMGI5MDkyMjE5YjZkMzdhZmJjMGQ5MDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjNTU4N2VkNjExNDZiOWM5NWExNjA4ZGI5OThjMzE3MjNkZDdlMWFhMDY2MzhkMWU5YTlhMmE4NzY5NDQyNjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ3ZDM1NmZkYmY4NWYzZWQxZTZhNTBiZDBlYjczNTFhNGViMWMyNTVkN2FjZGRkNmQ3NzcyMDU4ZDdiZDU5MjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9573139bcffc4adb9400dedbdc33e0ba",
+      "statement": "Creating a task trims and validates the title, starts it in NOT_STARTED, and appends it with sort_order max+1 among its siblings.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/tasks/taskService.ts#L50-L77",
+          "version": "repo-lines-v1:sha256:d792ddca56f04cd3beb7251ebadc5563ad06e770cb7028068bd9805f557f2b34:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjYmJhMDY4YzkwZTVlMWVmMDA4YWMxNDM2NDYxMjAwN2E0MzBiODYxNGRiM2RkMDhhNDRiOTIwZGUzYTk0Y2IiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZlYTVhNmJmYzAyODQzZDFlYjc5NGVmNGEzMWM1MDdlZGRiYmRhYWFkNGE0YzgxNmZkMzA3MDk0ZTZkMjRiMjgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZkYTQ1NjUwYzRmMjhmYmRmZTljNTg2YjcwZTQ5Y2JlOWQxMDk3YjgwYjY3NTY5ZTFjZTkyOTBmZjljN2E0NDAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_29ac761ae0d74e1c863034300302b646",
+      "statement": "moveTask validates the new parent against all tasks including archived ones and appends the moved task to the end of the new sibling list.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/tasks/taskService.ts#L121-L136",
+          "version": "repo-lines-v1:sha256:04503b827908d12732219d85e97c65bd0d772189537cab26e11a24e96c9dbd6f:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxZmIxNTczMjA2MDdlZGNmMzFmY2Q2NjEwZjgyZDU2ZmU0MDVhNmIwN2YxZGQzZDRhNGI5NzU1Y2I3ZjVlZjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM3Y2Q5OTc5ZGU1ZTExNWRmMTM0MWU1MDZiOTg2Yzk3MDk5OThjZDgxNDIxM2JiMTY2MzVmZTQzOTFmMTc2NDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJiMjNiZTUwYWUzZjRiYTgzMGE1ZjU0ZDNlNTYzYmQ1ZTExNjk4MTNmOWEyYzVkMTIzYTk4ZjcyYTc0NTZmMjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_48c27d3e090d41c1bef54784c3865cc2",
+      "statement": "Task detail includes the task, direct children, all descendants, and loops attached to the task or any descendant, summing their elapsed time.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/tasks/taskService.ts#L142-L174",
+          "version": "repo-lines-v1:sha256:643641bc95402c02429a0d898288cff9397b724b15af2e247158ac6699ca7f93:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU3Y2ZjNmZkM2E3NWI5NGRhYjQ4ZDFjNjgxNjU4OGUwNDk1ZDNkYmQzMWFjZjg5ZjVlNDdmNzE5NGQzMGQ0MzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIxNTcyNTI1NWIwYWU0OGExM2YwZmJiOGRkNTQzZDgxNGRjYTI2YjM1YzdlNzZhZWIyZjBiZDFjNjdmMDIwNzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhiNzM5YjM5YWQ5MjYxZTBlNDQ5NDM5OWE0MTUwYWRjNjE4OGQxMmJkOTY3MmIxZDI3NThhZjA2NjU4ZTQ1NWIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_31c3e315b53948d2869e8fe65e05afd8",
+      "statement": "The suggested carry-in is the roll_forward text of the most recently started completed loop for the selected task.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/loopsRepository.ts#L134-L142",
+          "version": "repo-lines-v1:sha256:fee2548eda406066591d77e5d4082a7fe7106d5b620e1e80c6c582834911710e:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjU0ZDBjMTFjZjUwMzdjZmU1YzA2NTRkNGY4MWUwMzBmYjQ1NzE5NzBiNmE4NzFmYzkxYzQ3OWU5OWI4OWFmYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDk0ZmMwYzE3M2QxZWMzZmM1MDFkN2RmYTkyODU1MDFjNTI3Y2ZiNDcxMjU4M2RhM2NjMzYxODA1NjZiNGJlMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmY0YzQ3ZjNiZTJjMWQ0ZjZmZDU1Y2ExNTJmNjMwNjcwZmFkY2EzYWQwNzJmNzBiMGU0N2I2MWUyMmVmY2RhYyJ9"
+        },
+        {
+          "resource": "repo://src/features/tasks/taskService.ts#L176-L185",
+          "version": "repo-lines-v1:sha256:b7f2fdc8b3d4a6ba93d81b8222865e0e440b97722a83780fd51dac597364a4eb:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4MzAzMDU1Y2NkZjgyZmYzNTg3ZTEwY2IxZDk4ODRmYjU0MjUxYzI1OWUxZmRkYTQ4NjJhZDk3MTczNDYwMzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

@@ -95,17 +95,30 @@ For a local build, transfer `builds/hour-loop-v<version>-<arch>.apk` to your pho
 
 APKs are release-built but signed with the standard React Native debug keystore, so they are intended for direct sideloading and testing rather than Google Play distribution.
 
+### Build remotely without releasing
+
+The **Android APK** workflow is manual only. It builds an APK and uploads it as a workflow artifact; it never creates a release.
+
+1. Open **Actions → Android APK → Run workflow**.
+2. Choose `arm64-v8a` or `universal`.
+3. Download the APK from the run's **Artifacts** section.
+
 ### Publish a versioned release
 
-Releases are never created automatically on push.
+Normal commits never trigger a release. Releases are published only by the **Android Release** workflow, which runs on an explicit `v*` tag or a manual release run from `main`.
 
 1. Bump `expo.version` in `app.json`.
-2. Commit and push the version bump.
-3. Open **Actions → Android APK → Run workflow**.
-4. Choose `arm64-v8a` or `universal`.
-5. Enable **Publish a versioned GitHub release** and run it from `main`.
+2. Commit and push the version bump to `main`.
+3. Create and push a matching tag:
 
-The workflow builds the APK, uploads it as a run artifact, and—only when requested—creates tag `v<version>` with `hour-loop-v<version>-<arch>.apk` attached. The existing `android-build-1` release is the initial unversioned test build.
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The workflow validates that the tag matches `expo.version`, builds the APK, uploads it as a workflow artifact, and publishes a GitHub release with the APK and checksum attached.
+
+You can also run **Actions → Android Release → Run workflow** from `main` to publish the current `expo.version` without creating the tag yourself. The existing `android-build-1` release is the initial unversioned test build.
 
 ## Quality checks
 
@@ -135,6 +148,7 @@ docs/                Product and architecture documentation
 - [Architecture](docs/ARCHITECTURE.md)
 - [Database schema](docs/DATABASE_SCHEMA.md)
 - [Implementation plan](IMPLEMENTATION_PLAN.md)
+- [OpenWiki quickstart](openwiki/quickstart.md)
 
 ## Design principles
 

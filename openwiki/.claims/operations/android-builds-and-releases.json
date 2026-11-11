@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:b204adc275b869eed13e226a6e10ff26099a85893a810a4d108ace8e6755e2f3",
+  "claims": [
+    {
+      "id": "claim_edab36bc78ae4092a60c3537dfe55265",
+      "statement": "The local builder reads and validates expo.version, then writes builds/hour-loop-v<version>-<arch>.apk plus a SHA-256 sidecar without committing, pushing, or publishing.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/build-android-apk.sh#L129-L151",
+          "version": "repo-lines-v1:sha256:0de9a7f89074a91d3845c2acb396057117fd89d72c7dfdadff7585d33f1dc9a1:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1OWY1M2Y2OTBmY2M0ZDk5NWZiNjJlZmU2ODliY2M2YjQ0NzhhOGRmZGRiYzIxNDMxYjE0MDQ4Y2Q5ZjQ3Y2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5MjQzYWQ4ZTAzODBkMTljN2MxZjRiYWE5MGNkZWE3MDZjZTlhMmYxZGQ4ODBlYTc5NTNhYTlhMWE0ZGI5ZTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYxODk3OTE4NDQzMWE4NTAwYzBmYjc4MzM3N2E5MmEzNzFiNmY3ZmZjZjM0OTY0ZGY2NGMyMzMwYzRlOWI4MGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://scripts/build-android-apk.sh#L44-L48",
+          "version": "repo-lines-v1:sha256:8e9610d7e93a31f3db2ae461e80515a35a2dcf16cb7d2c6c1fc1f7eee69eeee3:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjkxMmRjNzdiY2IxNzkzYzAzOWM3ODRmYmJlY2YwNjMwYzU1MjljN2Y2N2NjMWNjOWIyOGUzZTNhYzVjNjViOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzRhMmJlY2ZmOGFmYjM0ZGIyNjBkYWJjOTY5MTVmZmVjZmRlODQ4OTI5NTQxYzYxOTNkZTZkMTY0YzIxZThkYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2RmMDRmY2IzZjkxNWM3Nzc5ZjFhNTZiNGI5MzcwYjc4NjhlZGNjNmM2MTVkN2UxMjQ0ZGVlNGIwMTQ4MDRmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTk3MTk2ZDA1MzRjMmMxMDQ5OWZhMWJiMzQ2MjQxNWEzMDRiNjcwMDY3ZDRhNTI0NTlmNTM4ODkzM2U1YzM5YiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_095a4d6d832e4fc4aea08854f934ecff",
+      "statement": "The local builder refreshes a reusable .apk-build staging directory, prebuilds the Android project, and runs Gradle assembleRelease with the selected ABI.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/build-android-apk.sh#L89-L127",
+          "version": "repo-lines-v1:sha256:37e72f978f2e5ea5d99883892561d06766ceb97f5ef77ee6c12d4ccdda1e6bf3:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhN2FmNGU4OWQ1OTk5NmUxNmIwNzc4OWEyYjlmZmU5YTkzODU2N2JlMDA2MzhlNWIwMDlkY2E1MTQzZWZlMmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhZmJhMDUyN2MzOTUzYzRiNmUwZTViNTczOWJhODM2MTJmODA1M2JjZGM5NDY2NzMwMTkzY2QxZDU5MGI0MDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkwZTJmNjlkN2Y3MTg3NDQwMWM5OTY4MmFmNDkxMTk2OWVkNmUyMTg3N2Q1NzUwZGI1NjdmMWNjZWI4ZDA1M2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMzOTA2ZmU4NjAzMDljZjFjZTRmNmVhODFlYzQyZTIxMzAxZTA3MjI2OTUwNTRjZWQ2ZWU5ZTg1MTA4Yjg2OGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bb869583627f44c1ba3e833693d5b87f",
+      "statement": "The apk:local npm script is the documented entry point for local APK builds.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L5-L16",
+          "version": "repo-lines-v1:sha256:5207505beb5ad00ed75df7cc69e8fb332a2ef618c509391ed996f3482c2a69bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0ODMzZDU5NDljMDNhNDBjYTk1MjQ5MTYxMGE2NjU5NjQ0YjNhYTQ2NjM2MmY3OTkwMjBkYmYxOTgxNTQ3ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwNzE3NzE3MWQ2MTE2NGQ3YWQ4ZGM3OTEzYmM0NDgxZjAzZmFjNTRiNDA2YjMzMTgzNjZiNzRhY2U1MzEwNWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmMzcyMWY4NGZkOWQwYjdlYmNmOGExMjMxYThmYTc1ODM5NmViMWM5Y2FmMTg5Yjg1ODNlMTE3Mjk1NDVjZTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1971df2be1294b63860a0a6ef3a49b16",
+      "statement": "The Android APK workflow is manual-dispatch only and uploads its build as an artifact with no release permissions or release step.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/android-apk.yml#L23-L93",
+          "version": "repo-lines-v1:sha256:3f21c6574521f20a26e97101c6d22a035c9e1352ebf4e1689476a573f5b318cd:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ZDgwMTU0ZWQ0MmZjNWM3NzliMTMzMTU3OGI1OGI4OWM4MDFlYWNlNzRmMjRjZDQ4ZWI0YTIzNTc5NDBhOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlZGFmNWYyNTgxMmM3MDViOTA4MzIyNTczOWE1MzFjZmY5NmM4MDE3M2UyMTJmMzAzZWZjYjg5ZWU0MDc3NzIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRiZTI3NzBkNDY0Yjc5NmNhOGVkNWE5YmU5MzJmN2FjMWIxMDBhMjZmNDk1Y2FiZTViNTVjMWIxZTcwMGU1ZGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/android-apk.yml#L3-L13",
+          "version": "repo-lines-v1:sha256:79af485d8b7f807212bb7b1876446e2a4ac441f352ba723fbf5a1b91b739b782:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2MTdjYmM1MDFkNjdiMGY0YjFmZTRjOTc1NjdiYjQ5Yjk5M2E0MzFlYjUwMzEwZDc0N2EwZjUyM2MwMWRhZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUyMjA2MWNiNzIwM2RhNzJiMjJkZTAzNGM0MDYyZjA3ZGM1Y2Q5NmFhYThmNjQwNDI4MzkwMGM4MTIzZGE3OTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA2ZDRjNTE2NjI3YjA4NWE4ZTc2ZDEzZTY0ZjVhMzk2YWY5ZmJiN2QyNzgyNjMzNTVmMGI5N2I0YTA0NDMzNjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d223fa4fff704257b33c3a85aa545a60",
+      "statement": "The Android Release workflow is triggered by v* tag pushes or a manual dispatch, and manual runs must come from main.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/android-release.yml#L3-L16",
+          "version": "repo-lines-v1:sha256:2d86b01297ce771caa8c86c8992b400ee449ef4efa81afbbbaf1b61b7a229497:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5NmRjNDgxNDlmNWE4M2QxZWQ2ZGJiMzliYmM3ZTJiOTAyYWEzZDM0ZDZiZDVhZTRiMjkxYjY4ZGYwY2E3OWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2MTdjYmM1MDFkNjdiMGY0YjFmZTRjOTc1NjdiYjQ5Yjk5M2E0MzFlYjUwMzEwZDc0N2EwZjUyM2MwMWRhZTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyZTFlMjc3NjgxZTRjNjQ1NWMwZTg3MDJlMTM3MDdkOTkzYjczMzBmOTRiYTA0NjBjNmE0NjYwYWFmOWU2ZDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM5NDYyZDVmMmMyMDdlNmI0ZjgyODQzZDkxNTRmZjBiYmFkMDM0MzkyNGIyYzNjNGJhYmQ5OWI4N2NjZDRiODIifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/android-release.yml#L78-L86",
+          "version": "repo-lines-v1:sha256:36f6607af15647c622e5370c34844625ad99f3c638d69e68f22e5a1a47608384:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjUwNzI0NzM1YzUxOGJlNzdmYmQ1NTExZWZiMmE1Mjk1MDE0NTMzNzQxMzdlNzEyMzQ5Y2QxMmRkZGJhZWI4YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmY1NTk3OWNlNzMwMjAzM2U2YjJmZDdkODhmNTM3YTNiOGUwOTFlYTMwNWM4MTFmZmExMjc0YmY1NzY0ZWE1ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDk4NDhjNDRhZmY4MjgwYzc5NTE2Mjg0MGM1N2UxMjMwMTU2Zjg1YjZiZTQyZDNjYWM2MDUxMmMwMzc0ZjIwMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTU3MWU2YjM4OTE4MjIwODRhODU1NWI0ODBhMzAxYjBlYmY1NThkZWYwMTEyNDdiYThlMzExMWY2ODEyYThkMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_1e01202ba00d49c7992bbf22196a002a",
+      "statement": "A release tag must equal v<expo.version>, the commit must be an ancestor of origin/main, an existing release is rejected, and a pre-existing tag must point at the same commit.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/android-release.yml#L59-L107",
+          "version": "repo-lines-v1:sha256:e7e3bb22261dd16d8282e9fa19dcb5a0b996b9e1824661609e5f6733090d282a:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYwOGE0YjIzNzM4ODdkMGQ2MGFkN2MwODE2NzA2ZGZiNTI0M2YzMzY1MmJhYzE2MDA5MWQ3OTY5OGY1ZTI4NTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJmNTU5NzljZTczMDIwMzNlNmIyZmQ3ZDg4ZjUzN2EzYjhlMDkxZWEzMDVjODExZmZhMTI3NGJmNTc2NGVhNWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZmN2M3YmM4YTY1ZTdiZjVkY2U4MGNmNTk4NjZlMzA2OGE0NjdkYjkwNjJkZDQ4ODRjZjhlNTNiMDhiMDNmZTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc1NjI4MTUzZGJiZjFhZWUzNDQ5ZWMyMGZkNWZmYThhYjU3NWIyYzdmZDI5YTQ4MDJmNWJlNzgyY2UxODBiOTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9f6c45201cb44548af1da1bd8acc622c",
+      "statement": "The release workflow builds with npm run apk:local, uploads the artifact, and publishes the APK and checksum with gh release create.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/android-release.yml#L130-L159",
+          "version": "repo-lines-v1:sha256:220ce47bb4ead3a523dfa216140076d4248b9921d9ef7ba067efc8e0876fcc2d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1NTQ1MjQ1YWZiODc0ZGQ1ODM2YzkyY2U4OThjMDZhNjc4MzE3MmI1NmU3MTJkYTY3Y2JjZDUwMzhiMmM2YmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3ODFjMDg1OWNlOGJlODIyNjEzYzI2NjdlN2ZiNTM4MDRiZDdmNWU4ZDlkMjIxYjgxZjQ3NDU1YWYxYWFiYzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMyZGUyNWM4ZDFmOWRkY2QxZDNlYTJkYWEyMDdjZTFlODA1ZGM5NjJmMGVjNDFmNzY2NDU0M2VlNDljNDY1NjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1a61cf0b89f74106823d8b23c44cb19c",
+      "statement": "APKs are release-built but signed with the React Native debug keystore, so they are intended for sideloading and testing rather than Google Play distribution.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/android-release.yml#L155-L158",
+          "version": "repo-lines-v1:sha256:b65cad0bebb3a1dc2849d81761b02447b1eed0283122116f6ded2416ec6f4f7d:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzRiNTQxZjVkYzhkYzY0NjU5MThhZGQyNjlkYzRiZWY3ZGRlOThmNGU3OWY1Y2ZkZWY5MmVjZGMwZjM5ZDkxNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDhiZTY3ZGU4YjdlYjU4ZDcxM2U1ODQyNGQ4NjdjYWM5YTY1ZGUwNjgxMDU2MDZlMjdiMzRmY2I2ZDMwZDk4ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjA2NDMyMDk2NjA0NjIxMmVmN2FmZjk4MWY0Nzk5NmE2MmMwN2JlYmY2MGFmNzNjZThiZTI4MGRiNjI1NDIzOSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjc4MWMwODU5Y2U4YmU4MjI2MTNjMjY2N2U3ZmI1MzgwNGJkN2Y1ZThkOWQyMjFiODFmNDc0NTVhZjFhYWJjNSJ9"
+        },
+        {
+          "resource": "repo://README.md#L96-L96",
+          "version": "repo-lines-v1:sha256:251e27d49c1f33771ce6734dc0b440fd475824afeaa940725addcfe916d7083c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjUxZTI3ZDQ5YzFmMzM3NzFjZTY3MzRkYzBiNDQwZmQ0NzU4MjRhZmVhYTk0MDcyNWFkZGNmZTkxNmQ3MDgzYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjUxZTI3ZDQ5YzFmMzM3NzFjZTY3MzRkYzBiNDQwZmQ0NzU4MjRhZmVhYTk0MDcyNWFkZGNmZTkxNmQ3MDgzYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWRiZmI2Mjg4MTBlZjc2YmMzOGE0MmY2ZjhkNmJiNzcyZGE3YmNiOGU0MGY2NzI1ZmM3NTg4OThkMzZkMDM5NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGI0NDdkNGE1NzRiMDczMjdmODM0ODg4ZDYyN2U5NTRiYTNlYThkMDA0NzQyMTVlN2UwMTFmY2FlMzQyNDc0YSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_196fe4946c3848c390e62d0823a9d966",
+      "statement": "The app declares expo-file-system as a direct dependency alongside expo-asset and expo-font for standalone asset and font loading.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L21-L25",
+          "version": "repo-lines-v1:sha256:42337cce57c3a93cfa61e2de1b309bf3c536d05c59b5d62f97b3fc4704a16873:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmU3NTAwMjA3NTU0ZTczMGMyZmM4ZjkzMjE5Y2Y3NTE3MTI2MjNkYzBkOTU0MDQ0M2U1OTRmZGI2MDk5ZWMzOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzAyOTAwZTc4NTg2ZmE3YTdlYWVlNmQ0NzcyMDY0MDg4ZjIyNTI0NjYxMzhhNWZjZDMwZDg3NjJhOWMyZTU2ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmJkZjFiNzgzNDMwZDM3NjU0OGY5ZjBjOWFkNDdlY2FlODdiN2ZkNTVjZmYwNmM2NjBjMDExNzljNTBlYjI0OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWRjNmRmYmUwNWMyZDU0ODY3Nzk1ZmE1ZjFlNjc2MWE0MjAzMjUxMDYxZTlkMWFlZGVjZGY3YzE3NzE4YThmZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a56952109cf34f03aeb20b6d45b9576b",
+      "statement": "The documented release contract is that normal commits never create a release; only the Android Release workflow does, on a v* tag or a manual run from main.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L106-L119",
+          "version": "repo-lines-v1:sha256:4e7fd9a7901cd9b31ee3c104f0cafc96a79f8e5b010908a49951c9649951e764:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxOGYwODc1YmZjYjAwNGY4M2QxNmRjYWZjZDA0ZDg5MzgxMmI5NmM2NzhlNzFkNTdlNGVhYWViYTI4ZmIwZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhhMmQwY2ZkNDY0MWQxNzc3MWNjZWY1NTA1MjQ3ZWJmMmJlOTgwYmUxZWNmYTg1ZTQxYWIzYzQ1MDU4NTNjMDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZlYjk1NWQ5MWY1ODYwMTc0YmRmZTg5Yzc1NTBjMDYyYTg3YWIzMjIzODhlMzY4MTM5MjM3MTMzZjNjNTczZmQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIxYjM5ZjVmMjkwNjg2ODFkZTUwYTJmNjMwNDU2YThjMzk4ZGQ4Mjk4N2IxNmEzMDYxOTc4OGRmOTE3NDI1N2MifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

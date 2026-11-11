@@ -11,14 +11,6 @@ on:
         options:
           - arm64-v8a
           - universal
-      publish_release:
-        description: 'Publish a versioned GitHub release for the app.json version'
-        required: false
-        default: false
-        type: boolean
-
-permissions:
-  contents: write
 
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -30,7 +22,7 @@ env:
 
 jobs:
   build:
-    name: Build installable APK
+    name: Build APK artifact
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -78,27 +70,6 @@ jobs:
           echo "suffix=$suffix" >> "$GITHUB_OUTPUT"
           echo "Architecture suffix: $suffix"
 
-      - name: Validate release target
-        if: inputs.publish_release && github.ref != 'refs/heads/main'
-        run: |
-          echo "::error::Releases can only be published from the main branch."
-          exit 1
-
-      - name: Check that release tag is free
-        if: inputs.publish_release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="v${{ steps.version.outputs.version }}"
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo "::error::Release $tag already exists. Bump expo.version in app.json first."
-            exit 1
-          fi
-          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
-            echo "::error::Tag $tag already exists. Bump expo.version in app.json first."
-            exit 1
-          fi
-
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -120,23 +91,3 @@ jobs:
           name: hour-loop-v${{ steps.version.outputs.version }}-${{ steps.artifact.outputs.suffix }}-apk
           path: builds/*
           if-no-files-found: error
-
-      - name: Publish versioned GitHub release
-        if: inputs.publish_release && github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
-          ARCH_SUFFIX: ${{ steps.artifact.outputs.suffix }}
-          ARCHITECTURE: ${{ inputs.architecture }}
-        run: |
-          tag="v${VERSION}"
-          gh release create "$tag" \
-            "builds/hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk" \
-            "builds/hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk.sha256" \
-            --target "$GITHUB_SHA" \
-            --title "Hour Loop v${VERSION}" \
-            --notes "Hour Loop v${VERSION} for Android (${ARCHITECTURE}).
-
-          Install: download hour-loop-v${VERSION}-${ARCH_SUFFIX}.apk and allow installs from unknown sources.
-          The APK is release-built and signed with the standard React Native debug keystore, so it is intended for direct sideloading and testing rather than Google Play distribution.
-          Commit: ${GITHUB_SHA}"

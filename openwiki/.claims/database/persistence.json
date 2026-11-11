@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:fe8c194d3ff3e357e407fc037f71d79d1a888b5229b5bff7784876b407ae10d8",
+  "claims": [
+    {
+      "id": "claim_17d6acd8536540e8b391f984d49aa10a",
+      "statement": "All durable state uses the expo-sqlite database named hour-loop.db, with schema versioning tracked by PRAGMA user_version at target version 1.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/client.ts#L1-L7",
+          "version": "repo-lines-v1:sha256:e40a3797c16f5fa8ace2412fd278baa01efaa772be27ce70ae6dd27e17fbf775:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzNhYWM1OTAxMGNlOWY3YWYyOGU2NDNhZmZhYzAzN2FkMjcxNmFkY2VkYTI3ZWFmNTNmNmQ5ZDgwN2NmOGZlOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/database/migrations.ts#L3-L3",
+          "version": "repo-lines-v1:sha256:3ead8ab31428270552ba5e4fbdd18e908400ef5158e88c4db747ffe307911760:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VhZDhhYjMxNDI4MjcwNTUyYmE1ZTRmYmRkMThlOTA4NDAwZWY1MTU4ZTg4YzRkYjc0N2ZmZTMwNzkxMTc2MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VhZDhhYjMxNDI4MjcwNTUyYmE1ZTRmYmRkMThlOTA4NDAwZWY1MTU4ZTg4YzRkYjc0N2ZmZTMwNzkxMTc2MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWE4M2MwYzVjM2EzMmNlZmRiNDRjZThiMGVlNDM0OGRjODZjOGJlNGJlYzY4NzNmYWNhOTZhNzU1ZWU3MzE0MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmE3NTk1M2MwMTA4ZjFjMDlhNmYwMmEwOWI3YWI3ZjM3YzQ1OTZjZjQxM2NjNjI4MjVkNjg4Yzk2NzcyN2QyZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0f9d1810465d4908948c8a5fe9a68a60",
+      "statement": "Schema version 1 defines tasks, loops, loop_intervals, intentions, and settings, with timestamps stored as ISO-8601 text and durations as integer seconds.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L5-L78",
+          "version": "repo-lines-v1:sha256:0b98f1abe504096c7095fab62aca8fe473ae77a0922e74af64d3f2e32388ae0c:eyJzZWxlY3RlZExpbmVDb3VudCI6NzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4N2NlNjRlYjJkZDEzOTM2YmZjZmE5NjNjYzkyMGVjYzExZTliYTUzNWJkNTRlYjYxMTI2ZWRmNWViNzUwYjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZDI5NTI1MzZmYzYwMDBhZDkxNTY2YmQ5NTNmMjViYzk1OTYxMGU4MTFhNTI5YTliZWY4YjRmMDdjMWM4Y2QiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU0YWY0Nzk5MjNjMTRiYzY3ZDNkZjY4MDAzMjcyNGQzZmNhNmExYzNkNmM3MWZhYzFlZTZjYTEzYTQ1MDkxYjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAwYmQwNGI1Y2YzOTJkYmNhOGM5OWIxM2ZkNjRmOWVmZjAxODZiYzczODFiM2I0MGYxYjBhZDlhMDU0ZjMwN2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b64401a265ca4ae988020a26a0e36159",
+      "statement": "Task deletion cascades to descendant tasks, loop task links are set to null on task deletion, and deleting a loop cascades to its intervals.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L17-L17",
+          "version": "repo-lines-v1:sha256:0cbc1156ee202fe1e65c411ee805bd7db93fffb4c0771e66834da8274ce14852:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGNiYzExNTZlZTIwMmZlMWU2NWM0MTFlZTgwNWJkN2RiOTNmZmZiNGMwNzcxZTY2ODM0ZGE4Mjc0Y2UxNDg1MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGNiYzExNTZlZTIwMmZlMWU2NWM0MTFlZTgwNWJkN2RiOTNmZmZiNGMwNzcxZTY2ODM0ZGE4Mjc0Y2UxNDg1MiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDllNzVlOTIxMTAwNmFiZTE1MDY4YTQwNjVlNzQ2Njk0NDVkYTkxNDY5OGEzNmFlMWY2YjFjMDA3OTU5MjVmYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTg5MmRjODlhMDc4NjAzMDA1M2UxYzFlNzMzMjRlMWQxZmRmNDk4OTg3ZTQyMzJjNDIzNmJiNWY0NTE3ODY4NCJ9"
+        },
+        {
+          "resource": "repo://src/database/migrations.ts#L39-L40",
+          "version": "repo-lines-v1:sha256:261e53dcb6343b5b6428e7be65ad192d3266b3efb3d3751c5db13c97fb1d3f5f:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTNjYmIxYmIzMmM4ZTliMjRkMGJmMDA0Njc2NzlmMTFiZWNhMGIxODBiMTU4Y2IxMWVkZGQyNjY5ODY2ZmE3MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzY0MzliNTJiYzBhZTZiMTU3ZmViZmZhOGYyYjI1NmNhYzY3YzFjYzg0N2YzYjIyYjgyNmE0N2Y4YWJkMzA1YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWM0Y2IxOTgzNzhiMDA5ZmI2Zjk1MTc0NmQ1MDAzZmViYjYwMjE1OWQ1NWM3ZmIyZGQxYjFjNmRiMjMzOTllOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDNiYThiODQ5NTc5YTkxM2I5YjFiZTcwZWExY2JlODc3Nzk4NzAxOGQ5MzE3OWJiMThiNTljZWViN2ZjNzk1NiJ9"
+        },
+        {
+          "resource": "repo://src/database/migrations.ts#L53-L53",
+          "version": "repo-lines-v1:sha256:452c9fc09d35aba8dc2150eff9ee87044ad654275ed0114fb596ec3c239a20dc:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDUyYzlmYzA5ZDM1YWJhOGRjMjE1MGVmZjllZTg3MDQ0YWQ2NTQyNzVlZDAxMTRmYjU5NmVjM2MyMzlhMjBkYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDUyYzlmYzA5ZDM1YWJhOGRjMjE1MGVmZjllZTg3MDQ0YWQ2NTQyNzVlZDAxMTRmYjU5NmVjM2MyMzlhMjBkYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTRhZThhYTEyM2U5NzMxNGQ4OTVhMmFhZjhjMTY2MTljMTkyMzcxM2UyYTg1NjM2NmRmZTk4Y2JlZWYxNjNkYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODU4ZWEzY2QzMDQ4YmY5Zjk5MDAxYWU1Y2M3MTJkZmRhYjAzYWVjNDFkZDI0MWU4MzhiOWQ5MzdiMjQ2M2FhYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0fd51ae48e748b5b5e8ff9e32ded0df",
+      "statement": "Intentions are unique per period type and period key and are indexed on that pair.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L58-L67",
+          "version": "repo-lines-v1:sha256:16d46feccc04dfb09daf4196f84a3e1f03a09bd51c12d04704ac829dfd92f938:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVhOGFlNTVmMjZmODYxMTU2MzhhNDhjYjgxYTdhZjFkYjQwOTA4MmIxMGFiZWIyYmZkNTFlOWI2ZDU3ZGM0MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQyOGFmMjc3OGMwYmFiMGI0YjIzNjhhODI3ZDk3ZGVkNzg3NDcwN2VhOTIzOThjZTEzZWRkYmMxMDEzZDIzZDkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhmNzI5ZWMzNmRhZTBmM2E2NmQyYWY5MzNiZjdiZGEwYWU0NDEzNGVjY2VmMjMwNTQ3MTMwMWVkZjFjYTgzOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQyZTU0NGZjMmI0ZDRlODkyMTg5NGEwN2JmYzE1MTkxNTQ5NmNmYzg0Nzk1MWMxZDU1OGI5OWMzZmY5ZjNiZjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d3504dc2244540b786e4fbe299d3c6c9",
+      "statement": "The settings table is seeded with default_duration_seconds=3600, theme=system, and notifications_enabled=true.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L69-L77",
+          "version": "repo-lines-v1:sha256:22760093725a51a25fba91a844f501a90596b191b643b2091b2c267da3a5cbb0:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2RjMTc5ZDNlYTdlNjE5OTFlYWIzMWQ3ODA3YzE1YjFiYTIyMDVlYTdiZGM3NDNhYzk2MjhlZDdlYjQyYTI2YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2NlNzNkN2NmOWM3ODM3YmZiNWJlZGViNTVkMmZhYjBlM2Y2YjE1ZDk4ZDE1NjdhNDI3NmZkYWFlNGIxNjgzNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjMyNmE0NzNlODhkMjQxM2Q3ZThlOTM1YjNkNzI5NTU4NDllMGUyZjNjYWVhZjEwZTIyYmMzNzg5ZGY5MDFjNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDRkY2Y3MDgwMDFmNTA4MmZhZjJiYWM0MGZkMGJkYWNiNWRjOTI1Yjg4MzVmOGI3OWMyMzY4NzQ0M2RjZmJhOSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f04b1a8ad3624e17a83b5ae071a14314",
+      "statement": "Every database open reapplies WAL journaling and foreign-key enforcement, then compares PRAGMA user_version with the target before applying SCHEMA_V1.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L80-L100",
+          "version": "repo-lines-v1:sha256:ed24cde19cc6d8749d5a56f9e12965800a0e3472a0b3a1ffd08cfc42535a2cae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNiZjA3NTdlMmUyZWM2YmFjZmZmMDYyN2Y1NTNhOTM2ZTEwNDliYWU1NDBhYmE0Y2MzZDg3MWQwOTg1YmQ4MWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_00c252f6e0ba481eaced75fcb31863bc",
+      "statement": "Repositories contain parameterized SQL and row mapping while application services own multi-row transaction boundaries.",
+      "evidence": [
+        {
+          "resource": "repo://docs/ARCHITECTURE.md#L26-L28",
+          "version": "repo-lines-v1:sha256:a5238b27700516e6d81ba4ddfd5af7e640ef681b5d98bb58423d8e286b353e5b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWJhNThjMjMxZjY1OWJkYjU2M2IzYmZjNzQzZmEzYTZiNmY2NTNjMGM3NWIzZjA4NzhjZTBlN2Q4YjE0Nzc1MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODdlZTdhZGJkOTE1ZmEzMTYwZDYwMDMyMDEwOTMxMzIyNDZlZGZiOWY2MDNhYjk4Zjc2ZTE2ZTg3Y2MzODk3NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTRhN2NiZmI4ZDZiNmM4ZmI0NDc3NzMyZjI4ZGY5MGRiOGNhMmExNDkzMTQzYThjMDc1ZjZjZmYxZDMxOThiNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWY5N2JiODZiOTA2MGVhNjM5M2Y0MmIyMDIzZmUyNDBiNzMzMmE3MjgwMWY4YjkyYjVhYTdlMjk1M2JhNzQ4MSJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L159-L162",
+          "version": "repo-lines-v1:sha256:2bb4b2357cfbb46c604894f141c9d1e7eb5b29ddbffa26e017afa05e94ab3a7a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM3MDljYWNkYzJhNWM4ZDFmMmMzOWY1ZTcxYTViMjNkMDdkNTA2NWY3NTY1MDUzMDIzZjE4Y2QzM2M4ODQ4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzE3YWYxMTAxYzk3YjdjMmY1MjU0MDc4MmU2MzRjYzQ0NDBmMGU5NzAzNDFlNTJmOTc1MjMxMWQ3OGI3ZDdkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODBkZmI1M2EwMjZmNzRlNWFlOTRkZmM3NzJkODNiMzQ3OGFlOTg2YjZiYjRiNmExZTEwMTM3OWVhN2Y2N2E0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGE0Njc2OGM1YWVlODFiZjc5MDI1NWEzODE2MmYzNWY3MzI4MDYwZTBlMTZlYzdiM2E0YzdiY2JmNTg0Mjc2YiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_71f6e75a3f964786a49b78c583deef8a",
+      "statement": "Settings writes use an INSERT ... ON CONFLICT(key) DO UPDATE upsert and store every value as text.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/settingsRepository.ts#L21-L31",
+          "version": "repo-lines-v1:sha256:f30f76f6124d691abbae260a72378df2df02c03bc826e724a23f6d26150315b8:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU3ZWU4MTA5NWY4MDE1ZjIyNDZmZGFmYTRjZWYwYzUyOTZmOTNlNmNkMjg1ODVhNGMwNzFhY2ZhOGZhNjgyNGYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImZhZmRlMjRhMDQ1Y2E1YTA4YzdjZGRjYzVlMjZhNGVjMTU3Y2NkYzk5MjU5ZGEyNTk3MTVmZjdjZmY5NGNhYTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY0YmJlYTY4OGJlOGMzYzI5MTJjMjcwM2I0ZGM2YTk2MWI0YjJmNjQ5OTRjY2M4NThlNzQ1YjNkZjYzMGQ2NWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ea596d6a87e547a0ab2fa3dd21b2ae17",
+      "statement": "Scheduled notification identifiers are stored under the settings key notif_{loopId}, and cancelAllLoopNotifications removes every key with the notif_ prefix after cancelling OS notifications.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L20-L22",
+          "version": "repo-lines-v1:sha256:69e2abec9141855087cc31f5466e398e8eb59c6da19c85a03b3854591c54fe5c:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzMwYTc4YTAxNmZmYjA2YmZhMTdkMmRiYzY0Njg5ZWM5OGQzMmE0ZTkxZjYzOTM3NWFiNmU0ZTMxNjIzNGFhOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDEyY2EzNDVjY2Y3NWJmOWMwODA2YmNlNjk1YmU4ZGU4MDhiNzk5ODQyNTFhN2E1NGQyMDJjZjYxMDFkZDQ1MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODA1OTVmZmU1YmQyOGE3MjM4NjRkNjI3MDQ0YWIzMmNhYjU5NDNhOTg2MmFhNTVhZGFmZTBmZjE0YzVkMTdjZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjg3MjE4Mzg4NzRlYzYxYzY2MjA3ODUzMzVkODI4MzdhOTI2ODExMDViMGQyOGZiMjQzZjBlNzExYmNkYzM1OCJ9"
+        },
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L63-L92",
+          "version": "repo-lines-v1:sha256:57a49054c27485956864eb37490f21d5897330f160a61f181807744647d959a5:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyNTk1NTY3NzkyYTlhZDg2MzJkY2I2YzU2YzA0ODIwNTg3ZDg2MDk4MGVjNTc0MjQ0NDE0MmUzODE2MTBlMjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFiY2QyM2U5NjBhMzBmYTc3OTJkYjdkOGI4ZGU5ZGU3ZTBhMTMwMTFjMmM1NDU1ZTc4NTA1ODlmZDQxZjAyODQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBkNjJlYTBhZDhjOWYxZTM0Mjk3ZTQ2Yjk3YThlZGM5MDZhZWJmZTUyMTBmMjZlYzdkNjc2MjVlNjg3MDVlMTIifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

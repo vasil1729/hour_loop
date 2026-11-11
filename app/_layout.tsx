@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingScreen } from '../src/components/common/LoadingScreen';
+import { WebPhoneFrame } from '../src/components/common/WebPhoneFrame';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
 import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
@@ -66,20 +67,22 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <Suspense fallback={<LoadingScreen message="Opening your local database…" />}>
-          <SQLiteProvider
-            databaseName={DATABASE_NAME}
-            onInit={migrateDbIfNeeded}
-            useSuspense
-          >
-            <AppBootstrap>
-              <RootNavigator />
-            </AppBootstrap>
-          </SQLiteProvider>
-        </Suspense>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <WebPhoneFrame>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <Suspense fallback={<LoadingScreen message="Opening your local database…" />}>
+            <SQLiteProvider
+              databaseName={DATABASE_NAME}
+              onInit={migrateDbIfNeeded}
+              useSuspense
+            >
+              <AppBootstrap>
+                <RootNavigator />
+              </AppBootstrap>
+            </SQLiteProvider>
+          </Suspense>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </WebPhoneFrame>
   );
 }

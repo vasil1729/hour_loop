@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/system-overview.md": {
+      "pageVersion": "sha256:4bac85f9ec4e964c172ceecd452663ce03d14f432e0373f3005bad3dbcb83242",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/database/persistence.md": {
+      "pageVersion": "sha256:fe8c194d3ff3e357e407fc037f71d79d1a888b5229b5bff7784876b407ae10d8",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/domain/intentions-and-history.md": {
+      "pageVersion": "sha256:56f29120b16e84d146ddbef0cd1a8f28a871dc7014116002582432aa10a7b0d0",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/domain/loops-and-timer.md": {
+      "pageVersion": "sha256:b3400d509c24d392ecbb0d46c109e46868ad3806f1b815ebdc7f5850dbbef999",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/domain/tasks.md": {
+      "pageVersion": "sha256:9eb92de21434dc2ad75b8a6570e4977f3b883593c1cce3922ff587feb7ab18ee",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/operations/android-builds-and-releases.md": {
+      "pageVersion": "sha256:b204adc275b869eed13e226a6e10ff26099a85893a810a4d108ace8e6755e2f3",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/operations/web-preview.md": {
+      "pageVersion": "sha256:172fe20b27d355bdb2e65aaf7232e4d4286b19b03c7e498d104a7a43eb3216dc",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:f38d3280bd41723535ba3d2fa1d79d7b369fe0ade96cc31065de6dad25489e6b",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/testing/strategy.md": {
+      "pageVersion": "sha256:6b655db382ca3aff027ac105f2612322069e92a7df80af48a0f321b7f47d4ef4",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/ui/navigation-and-theming.md": {
+      "pageVersion": "sha256:d71d1907a4cf2e19ef291ece689f0ea98cfb0ad8e59f49d7b98138d0eabc4322",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/workflows/app-lifecycle-and-notifications.md": {
+      "pageVersion": "sha256:330e85d4a0a1837000da71ea6700e0602ff829aea65102e65410c22daf5d48a3",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    },
+    "/openwiki/workflows/loop-lifecycle.md": {
+      "pageVersion": "sha256:9a2c8fc7007226883fb0cba55ef6d3db986e8c92299645454ff53d80b80913a2",
+      "completedBy": "opencode",
+      "completedRunId": "9666d876-b7be-4185-9a7e-a46153246647",
+      "gitHead": "e344ac663c9d41979889ac96b298b3b6304fd5c4",
+      "sourceFingerprint": "sha256:cd28e486e90b1728a78639c1a16950e6899afe5c50fc1ba25a272027a93c31e8"
+    }
+  }
+}

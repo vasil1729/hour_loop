@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4bac85f9ec4e964c172ceecd452663ce03d14f432e0373f3005bad3dbcb83242",
+  "claims": [
+    {
+      "id": "claim_09669f6b72ba4d208707afa4efc83cc6",
+      "statement": "RootLayout opens the app database through SQLiteProvider with DATABASE_NAME and migrateDbIfNeeded, suspending rendering until initialization completes.",
+      "evidence": [
+        {
+          "resource": "repo://app/_layout.tsx#L68-L87",
+          "version": "repo-lines-v1:sha256:9a1eba049649c70d76699d43bade2d03dc1a43b1c8b93d3d784e4d6d93feded2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNDViYjViMTQ1NDFkYzMxOGZhYTk2MDExNmFmMjAyYTQzZjdiYzZlNDZjMzI0ODQ1ZmZhZWYyYjhmMTRkYzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1ZWYwMWJjMDhkYmMzYjYzZTRlNzVlYTNkMjZhNWI5NDE4OTE4NzdlMjdhZDg5MTMyOWM4NDExZDdkOGRjNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_25462fbc4cd24ef0ac78af2cbeaeac3f",
+      "statement": "AppBootstrap hydrates persisted settings before running active-loop recovery, and a separate effect initializes notifications and registers the foreground listener.",
+      "evidence": [
+        {
+          "resource": "repo://app/_layout.tsx#L16-L40",
+          "version": "repo-lines-v1:sha256:04b280ea0f3d7f593cb4719abe107c5cdf21684c8f3c3080538073666f82c565:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5ZDgwNGJlNTU1NjE5MDc4YzhlMWM3Y2E4MjczNzQzNDQ3NmE0ODY5ZDI4ODQxYzZmOTkzY2I0NzBjMzJjNmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjIzOWE1YmZjNGU4NzkzYjcwNjNmNDcxNjdjNDY5NzY1NjUyYjQzNDA3YTNkNTU3MjUyZjM1ZDYzYTQwMGQ0MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjZTBlYTM0Y2NmZGY4MDU0YjhiMjNiODY2YjViYjg4YzI0YmFiM2UzOGZhZTk5MjIwNzUzMDhhZTc3OTA2NTQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_e61ef62fe50443ecb3042ecd266c8a56",
+      "statement": "Every database open enables WAL and foreign-key enforcement, then uses PRAGMA user_version with target version 1 to decide whether to apply the initial schema.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/migrations.ts#L80-L100",
+          "version": "repo-lines-v1:sha256:ed24cde19cc6d8749d5a56f9e12965800a0e3472a0b3a1ffd08cfc42535a2cae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNiZjA3NTdlMmUyZWM2YmFjZmZmMDYyN2Y1NTNhOTM2ZTEwNDliYWU1NDBhYmE0Y2MzZDg3MWQwOTg1YmQ4MWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d3db7ea9b0d54c579859f2a6eef72eb9",
+      "statement": "The repository separates UI, pure domain rules, persistence, application services, platform services, display stores, shared components, and theme, with SQLite as the authoritative store and Zustand as derived display state.",
+      "evidence": [
+        {
+          "resource": "repo://docs/ARCHITECTURE.md#L5-L28",
+          "version": "repo-lines-v1:sha256:a81637bc92ca89c3ddb6a8343287b3861975a058c0124fb5cfd6bea7c88a41d6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM2ZGFjMzkxZjcwMjE5NDdiZWRhMWFkYjMzM2MxZDExMGRkYzkzMzE2NzlmOGIxMmVhNzYxZmFlODAzNzdlZTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg3ZWU3YWRiZDkxNWZhMzE2MGQ2MDAzMjAxMDkzMTMyMjQ2ZWRmYjlmNjAzYWI5OGY3NmUxNmU4N2NjMzg5NzYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE1ZWQxODAwZjc0NjE2OTk1Njg3Y2Q0ZWM4YWIyYjBmZDZjZGUyNzE1YmMzOGUxMDRjODdjOWY1ZDk3OThhN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFmOTdiYjg2YjkwNjBlYTYzOTNmNDJiMjAyM2ZlMjQwYjczMzJhNzI4MDFmOGI5MmI1YWE3ZTI5NTNiYTc0ODEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_45d81c5cc5434c64bfb917420d90cdb4",
+      "statement": "loopService is a factory with injectable repository ports, clock, ID generator, and time-zone provider so transitions can be tested deterministically without native SQLite.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L65-L100",
+          "version": "repo-lines-v1:sha256:145b98981b90f4bf931172cd26180899b74e1ed4e7317932098f64da4b18538f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVlNjJlM2VhZGM3YmFjYzJlODI4OGZmZmRjZjdhMjExNGJkYWFkOGIzNmQwMmFmZmZmZjNlM2VkOGQ2NTY5NWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhN2ZmNDFlNGExMTA3ZjhlNGQ4NjU1MWM2OWE1YzFkMWZhYTc4YWZhNWM1NDY5YTdlZDBhYTJkOWViNWNiYTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5ODQxMzdiYjQ3MjcwNmRlNWE5MmI5ZDhjN2U4ZjljNjhiYWFhZmViZGQyMmM0Mjc3OTliZjM1OTMwMjYzOWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiZGU2YTA0ODM1YjZiNDVkYjdiZTJkNmUxZWMxMmZlMjBjNjRiY2Y4YjAxMTk5YjZmNjU3MjY2OWRiZjY1NzcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_15b3712cf94948219b8e5ede2c5b0bf5",
+      "statement": "Loop start, pause, resume, and complete perform their multi-row writes inside db.withTransactionAsync rather than as independent repository calls.",
+      "evidence": [
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L159-L162",
+          "version": "repo-lines-v1:sha256:2bb4b2357cfbb46c604894f141c9d1e7eb5b29ddbffa26e017afa05e94ab3a7a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM3MDljYWNkYzJhNWM4ZDFmMmMzOWY1ZTcxYTViMjNkMDdkNTA2NWY3NTY1MDUzMDIzZjE4Y2QzM2M4ODQ4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzE3YWYxMTAxYzk3YjdjMmY1MjU0MDc4MmU2MzRjYzQ0NDBmMGU5NzAzNDFlNTJmOTc1MjMxMWQ3OGI3ZDdkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODBkZmI1M2EwMjZmNzRlNWFlOTRkZmM3NzJkODNiMzQ3OGFlOTg2YjZiYjRiNmExZTEwMTM3OWVhN2Y2N2E0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGE0Njc2OGM1YWVlODFiZjc5MDI1NWEzODE2MmYzNWY3MzI4MDYwZTBlMTZlYzdiM2E0YzdiY2JmNTg0Mjc2YiJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L176-L179",
+          "version": "repo-lines-v1:sha256:3ee8e56f58b20baddcf69dbe4b8a581b4c48e309ff934a3077fb957a07f90dea:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM3MDljYWNkYzJhNWM4ZDFmMmMzOWY1ZTcxYTViMjNkMDdkNTA2NWY3NTY1MDUzMDIzZjE4Y2QzM2M4ODQ4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzE3YWYxMTAxYzk3YjdjMmY1MjU0MDc4MmU2MzRjYzQ0NDBmMGU5NzAzNDFlNTJmOTc1MjMxMWQ3OGI3ZDdkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNmE1ZTRkOWY3Njg3YzdiNjJkNjNmZWM4YTliOWM2MWMzM2Y3MmEwN2I0NjU2NmVhMTUzNmQzMTcxOTVmNjU3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjcxZWU3ZjU5MmYzZDNhZmQ5NGIxNWEzMzQyYmI2YmI2NmFlYWIyMjBkZGU2YzViMGQyZWUzZWVhZDZkZDMwZiJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L203-L206",
+          "version": "repo-lines-v1:sha256:1f9a2be0484857d2d2708894df001285a05a5f7bd7339228b9b15434b17e254c:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM3MDljYWNkYzJhNWM4ZDFmMmMzOWY1ZTcxYTViMjNkMDdkNTA2NWY3NTY1MDUzMDIzZjE4Y2QzM2M4ODQ4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzE3YWYxMTAxYzk3YjdjMmY1MjU0MDc4MmU2MzRjYzQ0NDBmMGU5NzAzNDFlNTJmOTc1MjMxMWQ3OGI3ZDdkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODBkZmI1M2EwMjZmNzRlNWFlOTRkZmM3NzJkODNiMzQ3OGFlOTg2YjZiYjRiNmExZTEwMTM3OWVhN2Y2N2E0MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjcxZWU3ZjU5MmYzZDNhZmQ5NGIxNWEzMzQyYmI2YmI2NmFlYWIyMjBkZGU2YzViMGQyZWUzZWVhZDZkZDMwZiJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L227-L233",
+          "version": "repo-lines-v1:sha256:7879318448ca6827783bb0ff73481dd726a326a0a18e3d347c128a4b623cab1d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDM3MDljYWNkYzJhNWM4ZDFmMmMzOWY1ZTcxYTViMjNkMDdkNTA2NWY3NTY1MDUzMDIzZjE4Y2QzM2M4ODQ4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzE3YWYxMTAxYzk3YjdjMmY1MjU0MDc4MmU2MzRjYzQ0NDBmMGU5NzAzNDFlNTJmOTc1MjMxMWQ3OGI3ZDdkMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTM3MmExOWYwOWNlZWVhNmViYjhiM2Y0ODYxNGRlZmEwODJmMjdhMGY3MDk3NWQwZDM2NzBhNTIxMjEwOWFiNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjcxZWU3ZjU5MmYzZDNhZmQ5NGIxNWEzMzQyYmI2YmI2NmFlYWIyMjBkZGU2YzViMGQyZWUzZWVhZDZkZDMwZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3661dfc1349248b3a60119f7fe50f9f4",
+      "statement": "The loop store is explicitly display-only: it rebuilds activeLoop and elapsedSeconds by querying loopService instead of owning persistent timer state.",
+      "evidence": [
+        {
+          "resource": "repo://src/store/loopStore.ts#L17-L37",
+          "version": "repo-lines-v1:sha256:002659a08d8fc85c58d6a36a22ce7054defea764c0f56d86dae8717c8557a954:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM2ZjU5OWJlY2Q5ZTQwNmY2NWZjNzZmY2M1MzAxNmRlNjY3ZDQzNDk0N2E4NDA3ZTdjMWIwMDJhYzM0OWU3MTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU5YmUwNmU0NTM5ODNjOTY2NTY0ODhjMDM0OTJjZWZhYzdmODYzZTYxOWFmM2YzM2I2NzY5MzgyZDNjYjEwZjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7c05149ada924ff8b867befc48b2aa0d",
+      "statement": "The application permits at most one ACTIVE or PAUSED loop; startLoop checks the existing active loop and throws LoopAlreadyActiveError before inserting.",
+      "evidence": [
+        {
+          "resource": "repo://src/database/repositories/loopsRepository.ts#L49-L52",
+          "version": "repo-lines-v1:sha256:c1cf7d33ab6ccc7f61920c3d625805b0ae682aa9bcfa46b3bd6705402bc487d3:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTZiNjc4ZmMzYWU4OGVhY2Y5Yjg0Yzk0MjM2MDg1NjkxZGMxYjNlN2ViMDFhMzdlOGVmZTQ1MWQ4MjNkMWMyMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTVlZjAxYmMwOGRiYzNiNjNlNGU3NWVhM2QyNmE1Yjk0MTg5MTg3N2UyN2FkODkxMzI5Yzg0MTFkN2Q4ZGM0ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjk3MTFlYTNkZTMyYThjOWU2NzQyNWUxYmQzYjU2MjVmNWM3MDE2NDdmZWI4NjRmYjcyOGEzYmQ3MDVmZDEzNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzViMTEyZGFiM2U5ODkxYTNjM2QwOGM2NmUxZWJhNmMxNTQ5ZTVmYzdkNjU5MmUxYjY0NjY0YzQ3M2MxNjA0OCJ9"
+        },
+        {
+          "resource": "repo://src/features/loops/loopService.ts#L119-L123",
+          "version": "repo-lines-v1:sha256:aa7d0aa254df26d949ba5a94b60694d25f07f011b97805fe3c396f2748c2ffd1:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzI3NDhhZWFlNDBiNDcyZGZmY2QxNjc1ZmQwOGJjOGE4NTMxZTY5MzMwNmQyMDhhY2VmNGFmOTA1YWI2MDI0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWI2MmY2MGQ4NTkwYTU3OWNmNDZmOGQ2NzM3OGM0YzU3MmI5NjJjZWNjZGI5MGM3YTVmN2I0MmI5NjA3ODJhNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjVkYWFkOTRhYmU0ZWI5YzU3NTkwZmU5OGQ4ZmZmNDc2NDdjOTkyNDE4YzRkNWU5MjJlOWEwNzIyMGRhMmYxMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWU0NzUzOGMwOTA4YjM0YzAzNWFhNzQxMDc4ZjYwYmMzNWI4YzAxYjA4NjQ2YmFhNzIyZTg5MDE0ODUzMTUyMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_5716f8014bd041bbb2cf2beb1ef89c16",
+      "statement": "Foreground recovery refreshes the loop store and reconciles the active loop's scheduled notification, and the AppState listener invokes it only when the app becomes active.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/lifecycle/appLifecycleService.ts#L7-L32",
+          "version": "repo-lines-v1:sha256:b707432f65552e247e1c46d2dff1739cfd6bfb4306d852ad902386fe7f2288ae:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVhZjIyY2YwNzMyNTkyYzI0NzE0MWNiZTYxZWZhMTEwMTI2MTJmNWEzMTIyYjlhZjliYmFmNTJmNTcyNGQxOTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEwZmFlNTE0ZjJjMGNhMjgxYTQyMjYxZTVjN2MyNTk0MTVlMjgyZGFlYWM3NTEwMTcyMGE3NzAzY2NjNTQ1MGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0e44f5264cc4d1cbf80c963efaef750",
+      "statement": "Hour Loop is intentionally fully offline with no accounts or cloud sync, and it persists elapsed focus time as interval rows so pause/resume and force-quit recovery remain exact.",
+      "evidence": [
+        {
+          "resource": "repo://docs/PRODUCT_SPEC.md#L5-L18",
+          "version": "repo-lines-v1:sha256:6e8a3aa6535fbe404f625a7f1b202ae59f49def5ea62b5153504fd9a59e52a2e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1MGM3ODZhMzZjNGZjNTUyN2E3NDQ4MzhkZjQ5OWM2ZTgyMGQ4Y2IwMTFhNTBhNjExOTE0NmU4N2I4YmM2NmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxYjQ2ZGQ4ZjY1ODc1YTcwMzJmNmYxODdjMjVkZjYyMGQ3ZGY5ZDhlMjdiMTc2YjUzYjQ3NzgyZTEzZTBjNTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkNGU5ZTA4MjQ3ZWU2MjRmOTEzMDg4Njk2ZWM5YWFlYTdjN2JjODYyN2Y1ZjRiZTQ1NDYyMDJlYWIwOWE3NmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhZTk4YWNhNzBmM2JlYTI5Njg2MTA2ZGRlNTRiMzgwNjk1ZjJmZmM4YjMyMDhiNDQyMWQ2MTVkNGYxMTE2ZDEifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

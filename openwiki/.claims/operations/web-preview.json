@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:172fe20b27d355bdb2e65aaf7232e4d4286b19b03c7e498d104a7a43eb3216dc",
+  "claims": [
+    {
+      "id": "claim_f2eedb3840014ef498246b0aba0894c8",
+      "statement": "The web preview runs through the npm run web script and is documented as a development-only preview rather than a deployment target.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L34-L42",
+          "version": "repo-lines-v1:sha256:04c8c365878aea031b6af3efef568f78063b71a8647e007a9746578b398a8722:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWRkMzFhZThiYzBmYzVjZjBlYzM4NmRiNDhmOWY0NjgxYTA1ODQwNzc4ZDI2MzRkZGNjNzU3OThmZmIyYWVkZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTIyYWIxNWY0YTJjYzM2OTFiZjJmZjVjZDdjYTQ5Y2JmNjRlMmEwMGNkYjgwNGJmNTdmOTVlNDAzY2Q2ZGQxMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWE4ZWQ5NGRhNzg1MzBmNzVhYmY0YmQ4NTE4NTFhMGZhYTJkZTE2M2U2ZjA3NzRkYzA3NmIyNTYxZmNlZjVhMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjIwOWFmYjVjMDIyOTRmYTMzZDI0Yjk5YjgwNTk5MGMzNzJiZjg1ZjU0MzZhYTFlZjJjYTY5YmUzODMwN2U3OCJ9"
+        },
+        {
+          "resource": "repo://package.json#L5-L16",
+          "version": "repo-lines-v1:sha256:5207505beb5ad00ed75df7cc69e8fb332a2ef618c509391ed996f3482c2a69bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0ODMzZDU5NDljMDNhNDBjYTk1MjQ5MTYxMGE2NjU5NjQ0YjNhYTQ2NjM2MmY3OTkwMjBkYmYxOTgxNTQ3ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwNzE3NzE3MWQ2MTE2NGQ3YWQ4ZGM3OTEzYmM0NDgxZjAzZmFjNTRiNDA2YjMzMTgzNjZiNzRhY2U1MzEwNWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmMzcyMWY4NGZkOWQwYjdlYmNmOGExMjMxYThmYTc1ODM5NmViMWM5Y2FmMTg5Yjg1ODNlMTE3Mjk1NDVjZTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f82a8e75d81447f3911fee07b1078eac",
+      "statement": "The project declares react-dom, react-native-web, and @expo/metro-runtime for the web target.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L17-L37",
+          "version": "repo-lines-v1:sha256:e0248f9aac015ba85f78f125a1f60f20e26c18745a567f869d1e447f4256ba24:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJhM2I0NjlkOWUwOTc1NzIyNDY2NjczNGM5ZWY3YjI1NGQ4ODUzNGY1ZDViYjcwOTg5NjA4MDVjNTUzZGMzMDciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MjYxMjIyMjZjODkzZTdjNzc4NjNkNzhiNTZjOTlmYmEwZTc4YmZiMDk4YTQ2ZmVmMmYxYjU1YzNkMzFhMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2YzE1MWNlYjgwNzgwNTUzNzM1OTM4YTgwYmYyMzYwNDE0OGEzNzYzYzFjZTFhMWQ0ZDRkYjFjNDIxMzcxOGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3ZDhhNzcyYWJkNWFkYjJjYzU0NDU0NjMwYWQ0YmJmN2Q4ZDljZDgzOTI4NmZjYWU3MTQwYzdhYmYwMzAxYWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5ef455ed4b5747daa2f76ebf03179973",
+      "statement": "Metro's resolver adds wasm to assetExts so expo-sqlite's web implementation can load its SQLite engine from a .wasm file.",
+      "evidence": [
+        {
+          "resource": "repo://metro.config.js#L1-L8",
+          "version": "repo-lines-v1:sha256:09f39756edd725a86e44975ba9a5e0d906b0910c18916443e53f0b70e581180b:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2U0YzViZGE3ZDIxNjQ0ZDhkOTQ1NmY3NzhkNzhmZDc4MDk2NmU4YjYwOGM0ZTExNzVlYjc3MTBmMWMwZWZiNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDllMjg2ZjM1NjBhMzZkODZhOGE4YmQxYmUwMWU4ZGY3NmMzMzNhN2M2MDgyYjU2MzI4N2M5OTk0ZTUxOWMzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3c5292de03e34deb9c2a23bcf602fa95",
+      "statement": "WebPhoneFrame wraps the app at the root layout, so the same frame logic applies to every web route.",
+      "evidence": [
+        {
+          "resource": "repo://app/_layout.tsx#L68-L88",
+          "version": "repo-lines-v1:sha256:0ccebbf038d81c007543e6165f201b6b296f57ea90ebe3ab7f3f542b2091611e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVlNDViYjViMTQ1NDFkYzMxOGZhYTk2MDExNmFmMjAyYTQzZjdiYzZlNDZjMzI0ODQ1ZmZhZWYyYjhmMTRkYzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5NGZjMGMxNzNkMWVjM2ZjNTAxZDdkZmE5Mjg1NTAxYzUyN2NmYjQ3MTI1ODNkYTNjYzM2MTgwNTY2YjRiZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_37ab8b26daa04b529d20cb6de7cfef9e",
+      "statement": "The phone frame activates only on web viewports at least 600 by 700, renders a 390-wide screen capped at min(844, height-64), and otherwise returns children unchanged.",
+      "evidence": [
+        {
+          "resource": "repo://src/components/common/WebPhoneFrame.tsx#L4-L36",
+          "version": "repo-lines-v1:sha256:0cf4f99d56c7d0dae61d0bdceffbc3b67671c408589d2100a0223c143530095d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI4Zjk4NTI2ZTU0MzlhOGE2OWJkZGJkM2VhNjU4Y2NlMzYxYWNhYjMyNzZlNmY3OGQ5ZGY1NGNjYTNlN2U1MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjlmZjI0OGU1YmI3ZDJlYzA4ZGE4ODgwNzE1ZDcwMzRmYjRhMzBhMGFlMWE0Nzk5MjgwNTkxZWExZTgyNmFmMGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4M2U3ZTA3ZWM4YzVjNWU3MjRlM2MxNzI3NGY1MjFiNWI3YTgwMjdjMmQzMGM3YjM3ZjA0MjRlYWFlNGUyOWQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_11cb00f63f2e4404968308951ea75f55",
+      "statement": "Notification setup returns immediately on web, and permission checks return false on web.",
+      "evidence": [
+        {
+          "resource": "repo://src/services/notifications/notificationService.ts#L24-L61",
+          "version": "repo-lines-v1:sha256:f064d62ccb90ec2a27cf237d901b83fb9211e18ebb1233dc194ab030972ddf1f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFhYTkyNmZhOGNhMWI0YzIwM2U5MGRjNmZmNTJiZjI5ZDEzYzMyM2E1ZGZhN2VkOTg3MzM1YmQ1NzYwNWI5MWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNlMzkyOTBkY2FjNDkyNDY0OWJmNDRiN2RmN2I5MmM4YmE4Y2M5NmNiZGFkM2UyMDI1NmZjMWQ1ZDNmMmI0YzMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNkODRhN2EzZDBiYmE3NTQwZmIxNmRjMzgxOWYxM2NjOWEzMjZjNGMyYWZjNTUwMjBkNTRjMzg2ZDRlNDY1Y2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c31865f7ddbe4181a2b5c30b363b6eb0",
+      "statement": "Local notifications are documented as disabled in the web preview while expo-sqlite runs through WASM.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L42-L42",
+          "version": "repo-lines-v1:sha256:e22ab15f4a2cc3691bf2ff5cd7ca49cbf64e2a00cdb804bf57f95e403cd6dd12:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTIyYWIxNWY0YTJjYzM2OTFiZjJmZjVjZDdjYTQ5Y2JmNjRlMmEwMGNkYjgwNGJmNTdmOTVlNDAzY2Q2ZGQxMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTIyYWIxNWY0YTJjYzM2OTFiZjJmZjVjZDdjYTQ5Y2JmNjRlMmEwMGNkYjgwNGJmNTdmOTVlNDAzY2Q2ZGQxMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDcyODdkMjc0NTdmYjFiNWY1ZDNlZjY2OTFkODE1ZWQwNWIyMDRmNmU0YmM4OWU0N2E2MmFiYjc5NDRkYzg3OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjIwOWFmYjVjMDIyOTRmYTMzZDI0Yjk5YjgwNTk5MGMzNzJiZjg1ZjU0MzZhYTFlZjJjYTY5YmUzODMwN2U3OCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}

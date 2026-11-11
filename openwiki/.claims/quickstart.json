@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f38d3280bd41723535ba3d2fa1d79d7b369fe0ade96cc31065de6dad25489e6b",
+  "claims": [
+    {
+      "id": "claim_1b834ba16d4e454c880d147f218f417d",
+      "statement": "Hour Loop is a fully offline focus timer with no accounts or cloud sync, and elapsed time is persisted as intervals so pause/resume and force-quit recovery remain exact.",
+      "evidence": [
+        {
+          "resource": "repo://docs/PRODUCT_SPEC.md#L5-L18",
+          "version": "repo-lines-v1:sha256:6e8a3aa6535fbe404f625a7f1b202ae59f49def5ea62b5153504fd9a59e52a2e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1MGM3ODZhMzZjNGZjNTUyN2E3NDQ4MzhkZjQ5OWM2ZTgyMGQ4Y2IwMTFhNTBhNjExOTE0NmU4N2I4YmM2NmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkxYjQ2ZGQ4ZjY1ODc1YTcwMzJmNmYxODdjMjVkZjYyMGQ3ZGY5ZDhlMjdiMTc2YjUzYjQ3NzgyZTEzZTBjNTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkNGU5ZTA4MjQ3ZWU2MjRmOTEzMDg4Njk2ZWM5YWFlYTdjN2JjODYyN2Y1ZjRiZTQ1NDYyMDJlYWIwOWE3NmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhZTk4YWNhNzBmM2JlYTI5Njg2MTA2ZGRlNTRiMzgwNjk1ZjJmZmM4YjMyMDhiNDQyMWQ2MTVkNGYxMTE2ZDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_93b6fa19f017435f839aba61acc04fa0",
+      "statement": "Only one loop may be ACTIVE or PAUSED at a time.",
+      "evidence": [
+        {
+          "resource": "repo://docs/PRODUCT_SPEC.md#L13-L18",
+          "version": "repo-lines-v1:sha256:e374de846c80b212419db4f23044a7b6bc336aa916b925966c325e03aaf565d9:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTQxM2U3MTg0MzRlMTVlYTNmNTM3YmY1ZDk0MTg2MzFkNDIxMGEwODU3MzE5MmU4N2UwNGI3OTM4MjFkYWM1YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTFiNDZkZDhmNjU4NzVhNzAzMmY2ZjE4N2MyNWRmNjIwZDdkZjlkOGUyN2IxNzZiNTNiNDc3ODJlMTNlMGM1NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmZhOTYwMWFjZmYwNTBiMWNiZWU4NWE4ODEwNTkyOTVjYjdmMmFhNzk3NThmYTJlOGU4Yzk3MDA5YzVlYmFjNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGFlOThhY2E3MGYzYmVhMjk2ODYxMDZkZGU1NGIzODA2OTVmMmZmYzhiMzIwOGI0NDIxZDYxNWQ0ZjExMTZkMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4c84823e35704ef18a5f42af4e01b82f",
+      "statement": "SQLite is the source of truth, timer state is derived from persisted UTC intervals, and display ticks never accumulate.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L152-L156",
+          "version": "repo-lines-v1:sha256:cd2fa0bfbafd42de57508cb1b16498bd175c4e9ff5c29e5ce0eb941738e2fee4:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ZiY2M1YjJjOTA4MTllNGQ1YTVlM2VjMmU1ZGYzZDE1ZGZmNmM5ZGQ0Mzk3NTY0ZmJhMjAzNjU4NWRmYzJhOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODc2Y2ZjMTI3NzA3YTVmZjkwNGZhMzJiNzJmOTFkMGM5MzVhYjFkMzY2NWIxOWU0NDljY2JjYmVmODdlYmQzMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWViZjEwZjdhYmZmNTM2NzdiNTIwNTBiN2VmZTgyODFjOGQ3Njc3YjM2YThmMGUzNzU5ZGI5MWQxMDAwN2YzNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ed829ca91c604cd997c45990d49246cf",
+      "statement": "The npm scripts expose start, android, ios, web, test, typecheck, lint, doctor, and apk:local commands.",
+      "evidence": [
+        {
+          "resource": "repo://package.json#L5-L16",
+          "version": "repo-lines-v1:sha256:5207505beb5ad00ed75df7cc69e8fb332a2ef618c509391ed996f3482c2a69bf:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM0ODMzZDU5NDljMDNhNDBjYTk1MjQ5MTYxMGE2NjU5NjQ0YjNhYTQ2NjM2MmY3OTkwMjBkYmYxOTgxNTQ3ZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjcwNzE3NzE3MWQ2MTE2NGQ3YWQ4ZGM3OTEzYmM0NDgxZjAzZmFjNTRiNDA2YjMzMTgzNjZiNzRhY2U1MzEwNWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmMzcyMWY4NGZkOWQwYjdlYmNmOGExMjMxYThmYTc1ODM5NmViMWM5Y2FmMTg5Yjg1ODNlMTE3Mjk1NDVjZTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_16489bd7414d4e5c9a131892f0d8dfab",
+      "statement": "The repository layout separates routes, pure domain logic, SQLite code, feature services, platform services, display stores, components, and theme.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L131-L143",
+          "version": "repo-lines-v1:sha256:a668f1f7ec6b817ef1f3f70287821975d8aad2da4b642e65d657d412a7d6e5c4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjNDRiNzAyZDUwMTY1ZGVhZTk1OGRhYWZkMTk1YmI5MzBiZmVhYTQzNjdjYzUyNjU4ZGFlNDY2MjA2NzFhZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUyZWVhZmEwZmYyOTZlMGM5NGU3MGY5MjY4MTM2YjZkZWUwZTA5N2VkYTBiM2Q1N2NiZDg4ZmRhNjkyOTRkYmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5NDZiNTFiODZhN2U4OGQwNmQ5ZGNmMDgwODlhY2I2YWE4NDQ2MDUwOGUyODg5YjM1N2JmMDQ2NTg3YjExYzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b363189c408a4537a74c8005d599917b",
+      "statement": "The web build is documented as a development-only UI preview, not a deployment target.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L34-L42",
+          "version": "repo-lines-v1:sha256:04c8c365878aea031b6af3efef568f78063b71a8647e007a9746578b398a8722:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWRkMzFhZThiYzBmYzVjZjBlYzM4NmRiNDhmOWY0NjgxYTA1ODQwNzc4ZDI2MzRkZGNjNzU3OThmZmIyYWVkZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTIyYWIxNWY0YTJjYzM2OTFiZjJmZjVjZDdjYTQ5Y2JmNjRlMmEwMGNkYjgwNGJmNTdmOTVlNDAzY2Q2ZGQxMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWE4ZWQ5NGRhNzg1MzBmNzVhYmY0YmQ4NTE4NTFhMGZhYTJkZTE2M2U2ZjA3NzRkYzA3NmIyNTYxZmNlZjVhMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjIwOWFmYjVjMDIyOTRmYTMzZDI0Yjk5YjgwNTk5MGMzNzJiZjg1ZjU0MzZhYTFlZjJjYTY5YmUzODMwN2U3OCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_98e8cdaf5fef4f99b91a5b2d221c14d2",
+      "statement": "Local APK builds require Node 22+, JDK 17, and Android SDK platform 35 with build-tools 35.0.0.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L47-L61",
+          "version": "repo-lines-v1:sha256:f3c8226ae069f110e2ddaa2ceb4ab75dc94a855b1f24a309909aa73c93b1e4c9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlZDQ3ZDdhNTAxZjZkYWRmZTUyMTY4ZmE4MWNlYTgzYTY4ODBkZmU4OTVmYTVkMjgyYzA5NjdkZmY2ZDdlNGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY3OTNkMjBiNDM1ZmI1Njg3MmEzNGE4MzJhODVhZTUzMDRhM2FhMjJkNjQxZWVmNDM5MWNiMDA3ZTY1NTljMDMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQzZWE2MDhiODhkNDQ3YTU5MTRiNTE4NjNjYTg1MzhhMzc4MzUyNzNhODA4ZjRiMjNmMDY3NjFmYzNiOTgxNjcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-11-11T14:17:00.720Z"
+  }
+}
