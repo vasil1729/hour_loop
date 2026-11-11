@@ -45,6 +45,9 @@ export default function ActiveLoopScreen() {
       }
       let cancelled = false;
       void loopService
+        .ensureCurrentItemInterval(db, loopId)
+        .catch(() => undefined);
+      void loopService
         .getLoopItems(db, loopId)
         .then((result) => {
           if (!cancelled) setItems(result);

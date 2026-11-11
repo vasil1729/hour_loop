@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const TARGET_VERSION = 3;
+const TARGET_VERSION = 4;
 
 const SCHEMA_V1 = `
   CREATE TABLE IF NOT EXISTS tasks (
@@ -97,6 +97,26 @@ const SCHEMA_V3 = `
   ALTER TABLE loop_items ADD COLUMN current INTEGER NOT NULL DEFAULT 0;
 `;
 
+const SCHEMA_V4 = `
+  CREATE TABLE IF NOT EXISTS loop_item_intervals (
+    id TEXT PRIMARY KEY,
+    loop_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    ended_at TEXT,
+    time_zone TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (loop_id) REFERENCES loops(id) ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES loop_items(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_loop_item_intervals_loop
+    ON loop_item_intervals(loop_id);
+  CREATE INDEX IF NOT EXISTS idx_loop_item_intervals_item
+    ON loop_item_intervals(item_id);
+  CREATE INDEX IF NOT EXISTS idx_loop_item_intervals_started
+    ON loop_item_intervals(started_at);
+`;
+
 /**
  * Runs on every database open via SQLiteProvider's onInit.
  * `PRAGMA foreign_keys` is connection-scoped and must never be assumed.
@@ -122,6 +142,10 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
 
   if (version < 3) {
     await db.execAsync(SCHEMA_V3);
+  }
+
+  if (version < 4) {
+    await db.execAsync(SCHEMA_V4);
   }
 
   await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);

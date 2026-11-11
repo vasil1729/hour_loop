@@ -138,6 +138,21 @@ export async function listLoopItemsForLoops(
   return rows.map(mapRow);
 }
 
+export async function getLoopItemsByIds(
+  db: SQLiteDatabase,
+  ids: string[]
+): Promise<LoopItem[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const placeholders = ids.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<LoopItemRow>(
+    `${SELECT_ITEM} WHERE id IN (${placeholders})`,
+    ids
+  );
+  return rows.map(mapRow);
+}
+
 export async function updateLoopItemDone(
   db: SQLiteDatabase,
   id: string,

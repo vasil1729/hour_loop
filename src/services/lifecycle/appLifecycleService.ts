@@ -2,6 +2,7 @@ import { AppState, type NativeEventSubscription } from 'react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { useLoopStore } from '../../store/loopStore';
+import { loopService } from '../../features/loops/loopService';
 import { syncLoopNotification } from '../notifications/notificationService';
 
 /**
@@ -15,6 +16,9 @@ export async function recoverAppState(
   await useLoopStore.getState().refresh(db);
   const activeLoop = useLoopStore.getState().activeLoop;
   if (activeLoop) {
+    await loopService
+      .ensureCurrentItemInterval(db, activeLoop.id)
+      .catch(() => undefined);
     await syncLoopNotification(db, activeLoop, options);
   }
 }

@@ -1,6 +1,12 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { Loop, LoopInterval, LoopItem, Task } from '../../domain/types';
+import type {
+  Loop,
+  LoopInterval,
+  LoopItem,
+  LoopItemInterval,
+  Task,
+} from '../../domain/types';
 import type { LoopJournalPatch } from '../../database/repositories/loopsRepository';
 import {
   createLoopService,
@@ -20,6 +26,7 @@ type FakeState = {
   loops: Loop[];
   intervals: LoopInterval[];
   items: LoopItem[];
+  itemIntervals: LoopItemInterval[];
 };
 
 function createHarness() {
@@ -30,6 +37,7 @@ function createHarness() {
     loops: [],
     intervals: [],
     items: [],
+    itemIntervals: [],
   };
 
   const db = {
@@ -51,6 +59,9 @@ function createHarness() {
         state.loops = state.loops.filter((loop) => loop.id !== id);
         state.intervals = state.intervals.filter((interval) => interval.loop_id !== id);
         state.items = state.items.filter((item) => item.loop_id !== id);
+        state.itemIntervals = state.itemIntervals.filter(
+          (interval) => interval.loop_id !== id
+        );
       },
       getLoopById: async (_db, id) => {
         const loop = state.loops.find((entry) => entry.id === id);
@@ -144,6 +155,22 @@ function createHarness() {
           item.updated_at = state.now.toISOString();
         }
       },
+    },
+    itemIntervals: {
+      createLoopItemInterval: async (_db, interval) => {
+        state.itemIntervals.push({ ...interval });
+      },
+      closeOpenLoopItemIntervals: async (_db, loopId, endedAt) => {
+        for (const interval of state.itemIntervals) {
+          if (interval.loop_id === loopId && interval.ended_at === null) {
+            interval.ended_at = endedAt;
+          }
+        }
+      },
+      getOpenLoopItemInterval: async (_db, loopId) =>
+        state.itemIntervals.find(
+          (interval) => interval.loop_id === loopId && interval.ended_at === null
+        ) ?? null,
     },
   };
 
@@ -468,6 +495,38 @@ describe('loopService', () => {
     await expect(
       service.setCurrentLoopItem(db, loop.id, item.id)
     ).rejects.toBeInstanceOf(InvalidStateTransitionError);
+  });
+
+  it('tracks capsule focus intervals across selection and pause', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    const [first, second] = await service.getLoopItems(db, loop.id);
+    if (!first || !second) throw new Error('Expected two items');
+
+    await service.setCurrentLoopItem(db, loop.id, first.id);
+    expect(state.itemIntervals).toHaveLength(1);
+    expect(state.itemIntervals[0]?.item_id).toBe(first.id);
+    expect(state.itemIntervals[0]?.ended_at).toBeNull();
+
+    harness.advanceSeconds(60);
+    await service.setCurrentLoopItem(db, loop.id, second.id);
+    expect(state.itemIntervals[0]?.ended_at).toBe('2026-01-01T10:01:00.000Z');
+    expect(state.itemIntervals[1]?.item_id).toBe(second.id);
+    expect(state.itemIntervals[1]?.ended_at).toBeNull();
+
+    harness.advanceSeconds(60);
+    await service.pauseLoop(db, loop.id);
+    expect(state.itemIntervals[1]?.ended_at).toBe('2026-01-01T10:02:00.000Z');
+
+    harness.advanceSeconds(60);
+    await service.resumeLoop(db, loop.id);
+    expect(state.itemIntervals).toHaveLength(3);
+    expect(state.itemIntervals[2]?.item_id).toBe(second.id);
+    expect(state.itemIntervals[2]?.started_at).toBe('2026-01-01T10:03:00.000Z');
   });
 
   it('returns the latest completed loop and its items for carry-in', async () => {

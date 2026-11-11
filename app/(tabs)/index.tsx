@@ -15,25 +15,21 @@ import { Button } from '../../src/components/common/Button';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
-import { IntentionBar } from '../../src/components/intentions/IntentionBar';
-import { IntentionEditModal } from '../../src/components/intentions/IntentionEditModal';
-import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
 import {
   currentDayKey,
-  currentMonthKey,
   formatDayLabel,
 } from '../../src/domain/shared/dateUtils';
-import { formatElapsed, progressRatio } from '../../src/domain/timer/timerEngine';
+import {
+  formatDurationCompact,
+  formatElapsed,
+  progressRatio,
+} from '../../src/domain/timer/timerEngine';
 import { listRecentLoops } from '../../src/database/repositories/loopsRepository';
 import {
   attachLoopMetrics,
   type LoopWithMetrics,
 } from '../../src/features/loops/loopMetrics';
 import { loopService } from '../../src/features/loops/loopService';
-import {
-  clearIntention,
-  setIntention,
-} from '../../src/features/intentions/intentionsService';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useIntentions } from '../../src/hooks/useIntentions';
@@ -46,11 +42,7 @@ export default function TodayScreen() {
   const { colors } = useTheme();
   const { activeLoop, elapsedSeconds, refresh } = useActiveLoop();
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
-  const { daily, monthly, refresh: refreshIntentions } = useIntentions();
-  const [editingIntention, setEditingIntention] = useState<'daily' | 'monthly' | null>(
-    null
-  );
-  const [savingIntention, setSavingIntention] = useState(false);
+  const { daily } = useIntentions();
   const [loopActionBusy, setLoopActionBusy] = useState(false);
 
   useFocusEffect(
@@ -79,49 +71,6 @@ export default function TodayScreen() {
   const activeTargetReached = activeLoop
     ? elapsedSeconds >= activeLoop.target_duration_seconds
     : false;
-
-  const handleSaveIntention = async (seconds: number) => {
-    if (!editingIntention) return;
-    setSavingIntention(true);
-    try {
-      await setIntention(
-        db,
-        editingIntention,
-        editingIntention === 'daily' ? daily?.periodKey ?? todayKey : monthly?.periodKey ?? currentMonthKey(),
-        seconds
-      );
-      await refreshIntentions();
-      setEditingIntention(null);
-    } catch (error) {
-      Alert.alert(
-        'Could not save intention',
-        error instanceof Error ? error.message : 'Please try again.'
-      );
-    } finally {
-      setSavingIntention(false);
-    }
-  };
-
-  const handleClearIntention = async () => {
-    if (!editingIntention) return;
-    setSavingIntention(true);
-    try {
-      await clearIntention(
-        db,
-        editingIntention,
-        editingIntention === 'daily' ? daily?.periodKey ?? todayKey : monthly?.periodKey ?? currentMonthKey()
-      );
-      await refreshIntentions();
-      setEditingIntention(null);
-    } catch (error) {
-      Alert.alert(
-        'Could not clear intention',
-        error instanceof Error ? error.message : 'Please try again.'
-      );
-    } finally {
-      setSavingIntention(false);
-    }
-  };
 
   const handleToggleLoop = async () => {
     if (!activeLoop || loopActionBusy) return;
@@ -154,22 +103,57 @@ export default function TodayScreen() {
         </Text>
       </View>
 
-      <View style={styles.intentionsRow}>
-        {daily ? (
-          <IntentionBar
-            label="DAILY"
-            summary={daily}
-            onPress={() => setEditingIntention('daily')}
-          />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open daily overview"
+        onPress={() =>
+          router.push({
+            pathname: '/day/[date]',
+            params: { date: todayKey },
+          })
+        }
+        style={({ pressed }) => [
+          styles.dayCard,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            opacity: pressed ? 0.8 : 1,
+          },
+        ]}
+      >
+        <View style={styles.dayCardHeader}>
+          <Text style={[styles.dayCardLabel, { color: colors.textSecondary }]}>
+            DAILY
+          </Text>
+          <Text style={[styles.dayCardAction, { color: colors.accent }]}>
+            Open →
+          </Text>
+        </View>
+        <Text style={[styles.dayCardTitle, { color: colors.text }]}>
+          Daily overview
+        </Text>
+        <Text style={[styles.dayCardMeta, { color: colors.textSecondary }]}>
+          {formatDurationCompact(daily?.actualSeconds ?? 0)} focused today
+          {daily?.intention
+            ? ` · ${daily.progress.percent}% of target`
+            : ' · set targets in Settings'}
+        </Text>
+        {daily?.intention ? (
+          <View style={[styles.dayTrack, { backgroundColor: colors.surfaceAlt }]}>
+            <View
+              style={[
+                styles.dayFill,
+                {
+                  width: `${daily.progress.percent}%`,
+                  backgroundColor: daily.progress.reached
+                    ? colors.success
+                    : colors.accent,
+                },
+              ]}
+            />
+          </View>
         ) : null}
-        {monthly ? (
-          <IntentionBar
-            label="MONTHLY"
-            summary={monthly}
-            onPress={() => setEditingIntention('monthly')}
-          />
-        ) : null}
-      </View>
+      </Pressable>
 
       {activeLoop ? (
         <View
@@ -340,26 +324,6 @@ export default function TodayScreen() {
         )}
       </View>
 
-      <IntentionEditModal
-        visible={editingIntention !== null}
-        title={editingIntention === 'monthly' ? 'Monthly intention' : 'Daily intention'}
-        initialSeconds={
-          editingIntention === 'monthly'
-            ? monthly?.targetSeconds ?? 0
-            : daily?.targetSeconds ?? 0
-        }
-        presetMinutes={INTENTION_PRESETS_MINUTES}
-        busy={savingIntention}
-        clearLabel="Clear"
-        helperText="Tap a preset to add it. Clear returns to your default target."
-        onSave={(seconds) => {
-          void handleSaveIntention(seconds);
-        }}
-        onClear={() => {
-          void handleClearIntention();
-        }}
-        onClose={() => setEditingIntention(null)}
-      />
     </Screen>
   );
 }
@@ -379,9 +343,44 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.4,
   },
-  intentionsRow: {
+  dayCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  dayCardHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.sm,
+  },
+  dayCardLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  dayCardAction: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  dayCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  dayCardMeta: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  dayTrack: {
+    height: 6,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+    marginTop: spacing.xs,
+  },
+  dayFill: {
+    height: '100%',
+    borderRadius: radius.full,
   },
   activeCard: {
     borderWidth: StyleSheet.hairlineWidth,
@@ -476,12 +475,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+    flexWrap: 'wrap',
   },
   sectionTitle: {
+    flexShrink: 0,
     fontSize: 17,
     fontWeight: '700',
+    textAlign: 'left',
   },
   sectionAction: {
+    flexShrink: 0,
     fontSize: 13,
     fontWeight: '600',
   },

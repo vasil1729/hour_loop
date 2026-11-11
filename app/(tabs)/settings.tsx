@@ -23,10 +23,19 @@ import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
 import type { HourLoopBackup } from '../../src/domain/backup/backup';
 import { formatIntentionDuration } from '../../src/domain/intentions/intentionsDomain';
 import {
+  currentDayKey,
+  currentMonthKey,
+} from '../../src/domain/shared/dateUtils';
+import {
   exportBackup,
   importBackup,
   pickBackupFile,
 } from '../../src/features/backup/backupService';
+import {
+  clearIntention,
+  setIntention,
+} from '../../src/features/intentions/intentionsService';
+import { useIntentions } from '../../src/hooks/useIntentions';
 import { recoverAppState } from '../../src/services/lifecycle/appLifecycleService';
 import {
   openExactAlarmSettings,
@@ -77,11 +86,20 @@ export default function SettingsScreen() {
     (state) => state.setNotificationsEnabled
   );
   const loadSettings = useSettingsStore((state) => state.load);
+  const {
+    daily: dailyIntention,
+    monthly: monthlyIntention,
+    refresh: refreshIntentions,
+  } = useIntentions();
 
   const [customMinutes, setCustomMinutes] = useState('');
   const [saving, setSaving] = useState(false);
   const [savingIntention, setSavingIntention] = useState(false);
+  const [savingCurrentIntention, setSavingCurrentIntention] = useState(false);
   const [editingDefaultIntention, setEditingDefaultIntention] = useState<
+    'daily' | 'monthly' | null
+  >(null);
+  const [editingCurrentIntention, setEditingCurrentIntention] = useState<
     'daily' | 'monthly' | null
   >(null);
   const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(
@@ -125,6 +143,31 @@ export default function SettingsScreen() {
       );
     } finally {
       setSavingIntention(false);
+    }
+  };
+
+  const applyCurrentIntention = async (seconds: number) => {
+    if (!editingCurrentIntention) return;
+    setSavingCurrentIntention(true);
+    try {
+      const periodKey =
+        editingCurrentIntention === 'daily'
+          ? dailyIntention?.periodKey ?? currentDayKey()
+          : monthlyIntention?.periodKey ?? currentMonthKey();
+      if (seconds > 0) {
+        await setIntention(db, editingCurrentIntention, periodKey, seconds);
+      } else {
+        await clearIntention(db, editingCurrentIntention, periodKey);
+      }
+      await refreshIntentions();
+      setEditingCurrentIntention(null);
+    } catch (error) {
+      Alert.alert(
+        'Could not save intention',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setSavingCurrentIntention(false);
     }
   };
 
@@ -337,11 +380,64 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Intentions
+          Today & this month
         </Text>
         <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          Defaults for days and months without a custom target. You can still
-          adjust individual targets from Today.
+          Targets for the current day and month. Defaults below apply to periods
+          without a custom target.
+        </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change today's intention"
+          onPress={() => setEditingCurrentIntention('daily')}
+          style={[
+            styles.switchRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.switchBody}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {"Today's target"}
+            </Text>
+            <Text style={[styles.intentionValue, { color: colors.text }]}>
+              {dailyIntention?.targetSeconds
+                ? formatIntentionDuration(dailyIntention.targetSeconds)
+                : 'Not set'}
+            </Text>
+          </View>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change this month's intention"
+          onPress={() => setEditingCurrentIntention('monthly')}
+          style={[
+            styles.switchRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.switchBody}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {"This month's target"}
+            </Text>
+            <Text style={[styles.intentionValue, { color: colors.text }]}>
+              {monthlyIntention?.targetSeconds
+                ? formatIntentionDuration(monthlyIntention.targetSeconds)
+                : 'Not set'}
+            </Text>
+          </View>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+        </Pressable>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Default intentions
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          Used when a day or month has no custom target.
         </Text>
 
         <Pressable
@@ -528,7 +624,6 @@ export default function SettingsScreen() {
           </Text>
           <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
             Open source under the GNU Affero General Public License v3.0 or later.
-            Source: github.com/vasil1729/hour_loop
           </Text>
         </View>
       </View>
@@ -556,6 +651,31 @@ export default function SettingsScreen() {
           void applyDefaultIntention(0);
         }}
         onClose={() => setEditingDefaultIntention(null)}
+      />
+
+      <IntentionEditModal
+        visible={editingCurrentIntention !== null}
+        title={
+          editingCurrentIntention === 'monthly'
+            ? "This month's intention"
+            : "Today's intention"
+        }
+        initialSeconds={
+          editingCurrentIntention === 'monthly'
+            ? monthlyIntention?.targetSeconds ?? 0
+            : dailyIntention?.targetSeconds ?? 0
+        }
+        presetMinutes={INTENTION_PRESETS_MINUTES}
+        busy={savingCurrentIntention}
+        clearLabel="Clear"
+        helperText="Tap a preset to add it. Clear removes the current target."
+        onSave={(seconds) => {
+          void applyCurrentIntention(seconds);
+        }}
+        onClear={() => {
+          void applyCurrentIntention(0);
+        }}
+        onClose={() => setEditingCurrentIntention(null)}
       />
     </Screen>
   );

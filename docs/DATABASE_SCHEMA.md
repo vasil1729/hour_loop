@@ -2,7 +2,7 @@
 
 Database: `hour-loop.db`  
 Library: `expo-sqlite`  
-Migrations: `PRAGMA user_version` (currently version 3)
+Migrations: `PRAGMA user_version` (currently version 4)
 
 All timestamps are ISO-8601 strings in UTC. Calendar keys are local civil dates (`YYYY-MM-DD`) or months (`YYYY-MM`). Durations are integer seconds.
 
@@ -88,6 +88,24 @@ Index: `idx_loop_items_loop_id`.
 At most one item per loop may have `current = 1`. Selecting a capsule clears the previous current in the same loop, and marking the current item done clears it.
 
 Deleting a loop cascades to its items. Carrying an item into a new loop creates a new row with `carried_from_item_id` pointing at the source item; deleting the source loop later nulls the provenance but keeps the carried item.
+
+## `loop_item_intervals`
+
+Capsule-level focus log used by the daily timeline and clock views.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | |
+| `loop_id` | TEXT NOT NULL | FK → loops, `ON DELETE CASCADE` |
+| `item_id` | TEXT NOT NULL | FK → loop_items, `ON DELETE CASCADE` |
+| `started_at` | TEXT NOT NULL | UTC |
+| `ended_at` | TEXT | Null while the capsule is the current focus |
+| `time_zone` | TEXT NOT NULL | IANA zone at interval start |
+| `created_at` | TEXT NOT NULL | |
+
+Indexes: `idx_loop_item_intervals_loop`, `idx_loop_item_intervals_item`, `idx_loop_item_intervals_started`.
+
+At most one capsule interval per loop is open. Selecting a capsule closes the previous interval; pausing or completing the loop closes it too. Capsule totals and the Day view are derived from these rows.
 
 A capsule's task grouping comes from its loop's `task_id`: a loop attached to a subtask groups its capsules under that subtask. A loop with no task produces loose capsules. The Tasks screen reads open, not-yet-carried items from loops where `task_id IS NULL`; task detail reads the same shape for a task subtree. This derivation needs no separate capsule table.
 

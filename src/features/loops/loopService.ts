@@ -1,5 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Loop, LoopInterval, LoopItem } from '../../domain/types';
+import type {
+  Loop,
+  LoopInterval,
+  LoopItem,
+  LoopItemInterval,
+} from '../../domain/types';
 import {
   getDeviceTimeZone,
   toLocalDateKey,
@@ -10,6 +15,7 @@ import * as loopsRepository from '../../database/repositories/loopsRepository';
 import type { LoopJournalPatch } from '../../database/repositories/loopsRepository';
 import * as intervalsRepository from '../../database/repositories/intervalsRepository';
 import * as loopItemsRepository from '../../database/repositories/loopItemsRepository';
+import * as loopItemIntervalsRepository from '../../database/repositories/loopItemIntervalsRepository';
 import * as tasksRepository from '../../database/repositories/tasksRepository';
 
 export class LoopAlreadyActiveError extends Error {
@@ -101,6 +107,12 @@ type LoopItemRepositoryPort = {
   updateLoopItemDone: typeof loopItemsRepository.updateLoopItemDone;
 };
 
+type LoopItemIntervalRepositoryPort = {
+  createLoopItemInterval: typeof loopItemIntervalsRepository.createLoopItemInterval;
+  closeOpenLoopItemIntervals: typeof loopItemIntervalsRepository.closeOpenLoopItemIntervals;
+  getOpenLoopItemInterval: typeof loopItemIntervalsRepository.getOpenLoopItemInterval;
+};
+
 type TaskRepositoryPort = {
   getTaskById: typeof tasksRepository.getTaskById;
 };
@@ -109,6 +121,7 @@ export type LoopServiceDeps = {
   loops: LoopRepositoryPort;
   intervals: IntervalRepositoryPort;
   items: LoopItemRepositoryPort;
+  itemIntervals: LoopItemIntervalRepositoryPort;
   tasks: TaskRepositoryPort;
   now: () => Date;
   newId: () => string;
@@ -119,6 +132,7 @@ const defaultDeps: LoopServiceDeps = {
   loops: loopsRepository,
   intervals: intervalsRepository,
   items: loopItemsRepository,
+  itemIntervals: loopItemIntervalsRepository,
   tasks: tasksRepository,
   now: () => new Date(),
   newId: () => createId(),
@@ -149,6 +163,10 @@ export type LoopService = {
     loopId: string,
     itemId: string | null
   ) => Promise<void>;
+  ensureCurrentItemInterval: (
+    db: SQLiteDatabase,
+    loopId: string
+  ) => Promise<void>;
   getPreviousLoopWithItems: (
     db: SQLiteDatabase
   ) => Promise<{ loop: Loop; items: LoopItem[] } | null>;
@@ -176,6 +194,32 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
   ): Promise<number> {
     const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
     return calculateElapsedSeconds(intervals, deps.now());
+  }
+
+  async function getCurrentItem(
+    db: SQLiteDatabase,
+    loopId: string
+  ): Promise<LoopItem | null> {
+    const items = await deps.items.listLoopItems(db, loopId);
+    return items.find((item) => item.current) ?? null;
+  }
+
+  async function openItemInterval(
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string,
+    startedAt: string
+  ): Promise<void> {
+    const interval: LoopItemInterval = {
+      id: deps.newId(),
+      loop_id: loopId,
+      item_id: itemId,
+      started_at: startedAt,
+      ended_at: null,
+      time_zone: deps.timeZone(),
+      created_at: startedAt,
+    };
+    await deps.itemIntervals.createLoopItemInterval(db, interval);
   }
 
   return {
@@ -266,6 +310,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       const endedAt = deps.now().toISOString();
       await db.withTransactionAsync(async () => {
         await deps.intervals.closeOpenInterval(db, loopId, endedAt);
+        await deps.itemIntervals.closeOpenLoopItemIntervals(db, loopId, endedAt);
         await deps.loops.updateLoopStatus(db, loopId, 'PAUSED', null);
       });
 
@@ -282,6 +327,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
       const now = deps.now();
       const nowIso = now.toISOString();
+      const currentItem = await getCurrentItem(db, loopId);
       const interval: LoopInterval = {
         id: deps.newId(),
         loop_id: loopId,
@@ -294,6 +340,9 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       await db.withTransactionAsync(async () => {
         await deps.loops.updateLoopStatus(db, loopId, 'ACTIVE', null);
         await deps.intervals.createInterval(db, interval);
+        if (currentItem) {
+          await openItemInterval(db, loopId, currentItem.id, nowIso);
+        }
       });
 
       return requireLoop(db, loopId);
@@ -319,6 +368,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         if (loop.status === 'ACTIVE') {
           await deps.intervals.closeOpenInterval(db, loopId, nowIso);
         }
+        await deps.itemIntervals.closeOpenLoopItemIntervals(db, loopId, nowIso);
         await deps.loops.updateLoopJournal(db, loopId, patch);
         await deps.loops.updateLoopStatus(db, loopId, 'COMPLETED', nowIso);
       });
@@ -348,10 +398,21 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       if (!item || item.loop_id !== loopId) {
         throw new LoopItemNotFoundError(itemId);
       }
-      await deps.items.updateLoopItemDone(db, itemId, done);
+      const nowIso = deps.now().toISOString();
+      await db.withTransactionAsync(async () => {
+        if (done && item.current) {
+          await deps.itemIntervals.closeOpenLoopItemIntervals(
+            db,
+            loopId,
+            nowIso
+          );
+        }
+        await deps.items.updateLoopItemDone(db, itemId, done);
+      });
     },
 
     async setCurrentLoopItem(db, loopId, itemId) {
+      const loop = await requireLoop(db, loopId);
       if (itemId) {
         const item = await deps.items.getLoopItemById(db, itemId);
         if (!item || item.loop_id !== loopId) {
@@ -363,7 +424,25 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           );
         }
       }
-      await deps.items.setCurrentLoopItem(db, loopId, itemId);
+      const nowIso = deps.now().toISOString();
+      await db.withTransactionAsync(async () => {
+        await deps.itemIntervals.closeOpenLoopItemIntervals(db, loopId, nowIso);
+        await deps.items.setCurrentLoopItem(db, loopId, itemId);
+        if (itemId && loop.status === 'ACTIVE') {
+          await openItemInterval(db, loopId, itemId, nowIso);
+        }
+      });
+    },
+
+    async ensureCurrentItemInterval(db, loopId) {
+      const loop = await requireLoop(db, loopId);
+      if (loop.status !== 'ACTIVE') return;
+      const currentItem = await getCurrentItem(db, loopId);
+      if (!currentItem) return;
+      const open = await deps.itemIntervals.getOpenLoopItemInterval(db, loopId);
+      if (open) return;
+      const nowIso = deps.now().toISOString();
+      await openItemInterval(db, loopId, currentItem.id, nowIso);
     },
 
     async getPreviousLoopWithItems(db) {

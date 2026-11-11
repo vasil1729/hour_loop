@@ -146,6 +146,7 @@ function RootNavigator() {
           <Stack.Screen name="loop/complete" options={{ gestureEnabled: false }} />
           <Stack.Screen name="loop/[id]" />
           <Stack.Screen name="task/[id]" />
+          <Stack.Screen name="day/[date]" />
         </Stack>
         <NotificationResponseHandler />
       </View>
