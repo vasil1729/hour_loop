@@ -65,6 +65,7 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 - Daily and monthly focus-time targets are stored independently of loops.
 - Settings defines default daily and monthly targets. A day or month without its own target inherits the matching default.
+- The built-in defaults are 8 hours per day and 160 hours per month; both can be changed or disabled in Settings.
 - The intention editor adds preset increments of 15m, 30m, 1h, 2h, 4h, and 8h. Values are displayed as human durations such as `5h 30min`.
 - Clearing an individual day/month target removes the override and returns to the configured default. Clearing a default removes it.
 - Progress is computed from actual interval time, not from loop counts.
@@ -83,8 +84,9 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 ### Notifications
 
-- When an active loop reaches its target, a local notification fires.
-- Paused or completed loops never notify.
+- A configurable early warning fires before an active loop reaches its target. The default is 5 minutes; presets include Off, 1, 5, 10, 15, and 30 minutes.
+- When an active loop reaches its target, a target-reached local notification fires.
+- Paused or completed loops never notify; pausing or closing a loop cancels both alerts.
 - Notification identifiers are persisted so they can be cancelled reliably.
 - Permissions are requested when the user starts a loop or enables notifications.
 

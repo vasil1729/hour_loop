@@ -2,11 +2,17 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import {
+  EARLY_WARNING_SETTING_KEY,
+  parseEarlyWarningMinutes,
+} from '../../constants/notifications';
 import type { Loop } from '../../domain/types';
 import {
   calculateElapsedSeconds,
+  formatDurationCompact,
   remainingSeconds,
 } from '../../domain/timer/timerEngine';
+import { earlyWarningDelaySeconds } from '../../domain/timer/notificationTiming';
 import { getIntervalsForLoop } from '../../database/repositories/intervalsRepository';
 import {
   deleteSetting,
@@ -22,8 +28,12 @@ import { promptForExactAlarmAccess } from './exactAlarmService';
 
 const CHANNEL_ID = 'loop-targets';
 
-function notificationKey(loopId: string): string {
+function targetNotificationKey(loopId: string): string {
   return `notif_${loopId}`;
+}
+
+function earlyNotificationKey(loopId: string): string {
+  return `notif_early_${loopId}`;
 }
 
 export async function setupNotifications(): Promise<void> {
@@ -35,13 +45,15 @@ export async function setupNotifications(): Promise<void> {
       // get their chime and haptic in-app, so keep the OS presentation silent
       // to avoid a double alert. Background delivery still uses the channel's
       // sound and vibration.
-      const isLoopTarget =
-        typeof notification.request.content.data?.loopId === 'string';
+      const isTargetAlert =
+        notification.request.content.data?.kind === 'target';
 
       return {
         shouldShowBanner: true,
         shouldShowList: true,
-        shouldPlaySound: !isLoopTarget,
+        // Target alerts have an in-app chime in the foreground. Early warnings
+        // should still make a sound so they are not missed.
+        shouldPlaySound: !isTargetAlert,
         shouldSetBadge: false,
       };
     },
@@ -49,8 +61,8 @@ export async function setupNotifications(): Promise<void> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Loop targets',
-      description: 'Alerts when a focus loop reaches its target.',
+      name: 'Loop alerts',
+      description: 'Alerts before and when a focus loop reaches its target.',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#7B6EF6',
@@ -74,13 +86,10 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return requested.granted;
 }
 
-export async function cancelLoopNotification(
+async function cancelScheduledNotification(
   db: SQLiteDatabase,
-  loopId: string
+  key: string
 ): Promise<void> {
-  cancelTargetFeedback(loopId);
-
-  const key = notificationKey(loopId);
   const identifier = await getSetting(db, key);
   if (!identifier) return;
   try {
@@ -89,6 +98,17 @@ export async function cancelLoopNotification(
     // The notification may already have fired or been removed by the OS.
   }
   await deleteSetting(db, key);
+}
+
+export async function cancelLoopNotification(
+  db: SQLiteDatabase,
+  loopId: string
+): Promise<void> {
+  cancelTargetFeedback(loopId);
+  await Promise.all([
+    cancelScheduledNotification(db, targetNotificationKey(loopId)),
+    cancelScheduledNotification(db, earlyNotificationKey(loopId)),
+  ]);
 }
 
 export async function cancelAllLoopNotifications(
@@ -114,8 +134,8 @@ type SyncOptions = {
 };
 
 /**
- * Cancels any existing target notification and, for an active loop with
- * notifications enabled, schedules a fresh one for the remaining duration.
+ * Cancels existing target/early-warning notifications and, for an active loop
+ * with notifications enabled, schedules fresh ones for the remaining duration.
  */
 export async function syncLoopNotification(
   db: SQLiteDatabase,
@@ -153,11 +173,11 @@ export async function syncLoopNotification(
 
   await setupNotifications();
 
-  const identifier = await Notifications.scheduleNotificationAsync({
+  const targetIdentifier = await Notifications.scheduleNotificationAsync({
     content: {
       title: `H${loop.sequence_number} target reached`,
       body: "You've reached your target. Keep going or close the loop.",
-      data: { loopId: loop.id },
+      data: { loopId: loop.id, kind: 'target' },
       sound: 'default',
     },
     trigger: {
@@ -167,7 +187,33 @@ export async function syncLoopNotification(
     },
   });
 
-  await setSetting(db, notificationKey(loop.id), identifier);
+  await setSetting(db, targetNotificationKey(loop.id), targetIdentifier);
+
+  const earlyWarningMinutes = parseEarlyWarningMinutes(
+    await getSetting(db, EARLY_WARNING_SETTING_KEY)
+  );
+  const earlyDelay = earlyWarningDelaySeconds(remaining, earlyWarningMinutes);
+  if (earlyDelay !== null) {
+    const warningSeconds = Math.round(earlyWarningMinutes * 60);
+    try {
+      const earlyIdentifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `H${loop.sequence_number} ending soon`,
+          body: `Only ${formatDurationCompact(warningSeconds)} left. Wrap up or keep going.`,
+          data: { loopId: loop.id, kind: 'early' },
+          sound: 'default',
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: earlyDelay,
+          channelId: Platform.OS === 'android' ? CHANNEL_ID : undefined,
+        },
+      });
+      await setSetting(db, earlyNotificationKey(loop.id), earlyIdentifier);
+    } catch {
+      // The target notification is already scheduled; early warning is optional.
+    }
+  }
 
   if (options.requestPermission) {
     // Do not block loop start/navigation on this one-time explanation.
