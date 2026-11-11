@@ -9,10 +9,9 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
+import { LoopClock } from '../../src/components/timer/LoopClock';
 import { LoopControls } from '../../src/components/timer/LoopControls';
 import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
-import { TimerDisplay } from '../../src/components/timer/TimerDisplay';
-import { TimerProgress } from '../../src/components/timer/TimerProgress';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import type { LoopItem } from '../../src/domain/types';
@@ -196,15 +195,12 @@ export default function ActiveLoopScreen() {
         </View>
       </View>
 
-      <TimerDisplay
+      <LoopClock
+        loop={activeLoop}
+        intervals={intervals}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={activeLoop.target_duration_seconds}
-        paused={isPaused}
-      />
-
-      <TimerProgress
-        elapsedSeconds={elapsedSeconds}
-        targetSeconds={activeLoop.target_duration_seconds}
+        referenceTime={new Date()}
       />
 
       {items.length > 0 ? (
@@ -259,7 +255,10 @@ export default function ActiveLoopScreen() {
         </View>
       ) : null}
 
-      <LoopTimeline events={buildLoopTimeline(activeLoop, intervals)} />
+      <LoopTimeline
+        events={buildLoopTimeline(activeLoop, intervals)}
+        referenceTime={new Date()}
+      />
 
       <LoopControls
         status={isPaused ? 'PAUSED' : 'ACTIVE'}
@@ -352,6 +351,13 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1.1,
   },
+  focusCard: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
   itemsSection: {
     gap: spacing.sm,
   },
@@ -375,13 +381,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-  },
-  focusCard: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    marginTop: spacing.md,
   },
   focusLabel: {
     fontSize: 10,

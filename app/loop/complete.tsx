@@ -16,6 +16,7 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
+import { LoopClock } from '../../src/components/timer/LoopClock';
 import { LoopTimeline } from '../../src/components/timer/LoopTimeline';
 import { TaskPicker } from '../../src/components/tasks/TaskPicker';
 import { formatDayLabel } from '../../src/domain/shared/dateUtils';
@@ -252,6 +253,16 @@ export default function CompleteLoopScreen() {
           </Text>
         </View>
       ) : null}
+
+      <LoopClock
+        loop={loop}
+        intervals={intervals}
+        elapsedSeconds={elapsedSeconds}
+        targetSeconds={loop.target_duration_seconds}
+        referenceTime={
+          loop.stopped_at ? new Date(loop.stopped_at) : new Date()
+        }
+      />
 
       <LoopTimeline
         events={buildLoopTimeline(loop, intervals, { closing: !readOnly })}
