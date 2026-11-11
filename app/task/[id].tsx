@@ -137,7 +137,7 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not add subtask',
+        'Could not add capsule',
         caught instanceof Error ? caught.message : 'Please try again.'
       );
     } finally {
@@ -155,7 +155,7 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not update subtask',
+        'Could not update capsule',
         caught instanceof Error ? caught.message : 'Please try again.'
       );
     }
@@ -291,7 +291,7 @@ export default function TaskDetailScreen() {
           ]}
         >
           <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-            SUBTASKS
+            CAPSULES
           </Text>
           <Text style={[styles.metricValue, { color: colors.text }]}>
             {progress.completed}/{progress.total}
@@ -322,7 +322,7 @@ export default function TaskDetailScreen() {
               ? 'This task is archived.'
               : isSubtask
                 ? 'Reopen this task to start another loop.'
-                : 'This is a task container. Open a subtask to start a loop.'}
+                : 'This is a task container. Open a capsule to start a loop.'}
           </Text>
         </View>
       ) : null}
@@ -352,7 +352,7 @@ export default function TaskDetailScreen() {
       </View>
       <View style={styles.actions}>
         <Button
-          label="Add subtask"
+          label="Add capsule"
           variant="secondary"
           onPress={() => setAddSubtaskVisible(true)}
           style={styles.action}
@@ -366,10 +366,10 @@ export default function TaskDetailScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Subtasks</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Capsules</Text>
         {subtreeRows.length === 0 ? (
           <Text style={[styles.muted, { color: colors.textSecondary }]}>
-            No subtasks yet.
+            No capsules yet.
           </Text>
         ) : (
           <View style={styles.subtasks}>
@@ -416,8 +416,8 @@ export default function TaskDetailScreen() {
           </View>
           <Text style={[styles.muted, { color: colors.textSecondary }]}>
             {isSubtask
-              ? 'Capsules from this task and its subtasks. Tap to complete.'
-              : 'Capsules from this container’s subtasks. Tap to complete.'}
+              ? 'Open loop capsules from this task and its child capsules. Tap to complete.'
+              : 'Open loop capsules from this container’s child capsules. Tap to complete.'}
           </Text>
         </View>
       ) : null}
@@ -457,7 +457,7 @@ export default function TaskDetailScreen() {
 
       <TaskFormModal
         visible={addSubtaskVisible}
-        heading="New subtask"
+        heading="New capsule"
         parentTitle={task.title}
         busy={saving}
         onSave={(values) => {
@@ -469,7 +469,7 @@ export default function TaskDetailScreen() {
       <ConfirmDialog
         visible={archiveVisible}
         title="Archive task?"
-        message="The task and its subtasks will be hidden from the task pool. Existing loops stay in history."
+        message="The task and its capsules will be hidden from the task pool. Existing loops stay in history."
         confirmLabel="Archive"
         destructive
         onConfirm={() => {

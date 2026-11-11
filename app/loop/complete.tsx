@@ -333,11 +333,11 @@ export default function CompleteLoopScreen() {
       />
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          ROLL FORWARD SUBTASK (OPTIONAL)
+          ROLL FORWARD CAPSULE (OPTIONAL)
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a roll forward subtask"
+          accessibilityLabel="Choose a follow-up capsule"
           onPress={() => setTaskPickerVisible(true)}
           disabled={readOnly}
           style={[
@@ -353,7 +353,7 @@ export default function CompleteLoopScreen() {
             ]}
           >
             {tasks.find((task) => task.id === rollForwardTaskId)?.title ??
-              'No subtask linked'}
+              'No capsule linked'}
           </Text>
           <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
             {readOnly ? '' : 'Choose'}
@@ -374,8 +374,8 @@ export default function CompleteLoopScreen() {
         visible={taskPickerVisible}
         tasks={tasks}
         selectedTaskId={rollForwardTaskId}
-        title="Link a follow-up subtask"
-        noneLabel="No follow-up subtask"
+        title="Link a follow-up capsule"
+        noneLabel="No follow-up capsule"
         onSelect={(taskId) => {
           setRollForwardTaskId(taskId);
           setTaskPickerVisible(false);

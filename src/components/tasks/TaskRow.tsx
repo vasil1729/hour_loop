@@ -54,7 +54,7 @@ export function TaskRow({
       {showChevron ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={isExpanded ? 'Collapse subtasks' : 'Expand subtasks'}
+          accessibilityLabel={isExpanded ? 'Collapse capsules' : 'Expand capsules'}
           onPress={onToggleExpand}
           hitSlop={8}
           style={styles.chevron}

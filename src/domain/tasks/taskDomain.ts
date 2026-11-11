@@ -14,7 +14,7 @@ export type FlatTaskNode = {
 
 export class TaskCycleError extends Error {
   constructor() {
-    super('A task cannot be moved underneath itself or one of its own subtasks.');
+    super('A task cannot be moved underneath itself or one of its own capsules.');
     this.name = 'TaskCycleError';
   }
 }

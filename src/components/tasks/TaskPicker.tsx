@@ -28,8 +28,8 @@ export function TaskPicker({
   visible,
   tasks,
   selectedTaskId,
-  title = 'Choose a subtask',
-  noneLabel = 'No subtask (capsules stay loose)',
+  title = 'Choose a task capsule',
+  noneLabel = 'No task capsule (loop capsules stay loose)',
   onSelect,
   onClose,
 }: TaskPickerProps) {
@@ -95,7 +95,7 @@ export function TaskPicker({
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Text style={[styles.empty, { color: colors.textSecondary }]}>
-                No subtasks yet. Add a subtask to a task first.
+                No capsules yet. Add a capsule to a task first.
               </Text>
             }
             renderItem={({ item }) => {

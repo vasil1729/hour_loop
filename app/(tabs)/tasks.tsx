@@ -204,7 +204,7 @@ export default function TasksScreen() {
             ))}
           </View>
           <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
-            From loops without a subtask. Tap to complete.
+            From loops without a task capsule. Tap to complete.
           </Text>
         </View>
       ) : null}
@@ -234,7 +234,7 @@ export default function TasksScreen() {
                     ? 'Finish a task and it will appear here.'
                     : looseCapsules.length > 0
                       ? 'Loose capsules are shown above. Add a task container to group future work.'
-                      : 'Add a task container, break it into subtasks, and start loops from a subtask.'
+                      : 'Add a task container, break it into capsules, and start loops from a capsule.'
                 }
               />
             </View>

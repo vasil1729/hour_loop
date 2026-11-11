@@ -150,7 +150,7 @@ export default function StartLoopScreen() {
     ? selectedTaskParent
       ? `${selectedTaskParent.title} / ${selectedTask.title}`
       : selectedTask.title
-    : 'No subtask (loose capsules)';
+    : 'No task capsule (loose loop capsules)';
   const availableLooseCapsules = looseCapsules.filter(
     (capsule) => capsule.loop.id !== carrySource?.loop.id
   );
@@ -336,11 +336,11 @@ export default function StartLoopScreen() {
 
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          SUBTASK (OPTIONAL)
+          TASK CAPSULE (OPTIONAL)
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a subtask for this loop"
+          accessibilityLabel="Choose a task capsule for this loop"
           onPress={() => setTaskPickerVisible(true)}
           style={[
             styles.taskSelector,
@@ -362,8 +362,8 @@ export default function StartLoopScreen() {
         </Pressable>
         <Text style={[styles.helper, { color: colors.textSecondary }]}>
           {selectedTask
-            ? 'Capsules are grouped under this subtask.'
-            : 'No subtask — new capsules stay loose and appear in Tasks.'}
+            ? 'Loop capsules are grouped under this task capsule.'
+            : 'No task capsule — new loop capsules stay loose and appear in Tasks.'}
         </Text>
         {suggestedCarryIn &&
         !capsuleItems.some((item) => item.text === suggestedCarryIn) ? (
@@ -387,7 +387,7 @@ export default function StartLoopScreen() {
             LOOSE CAPSULES
           </Text>
           <Text style={[styles.helper, { color: colors.textSecondary }]}>
-            From loops without a subtask. Tap to bring one into this loop.
+            From loops without a task capsule. Tap to bring one into this loop.
           </Text>
           <View style={styles.capsuleWrap}>
             {availableLooseCapsules.map((capsule) => (

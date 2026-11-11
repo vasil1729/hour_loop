@@ -49,7 +49,7 @@ export class LoopTaskNotFoundError extends Error {
 
 export class LoopTaskNotSubtaskError extends Error {
   constructor() {
-    super('Loops can only be started on a subtask.');
+    super('Loops can only be started on a task capsule.');
     this.name = 'LoopTaskNotSubtaskError';
   }
 }
