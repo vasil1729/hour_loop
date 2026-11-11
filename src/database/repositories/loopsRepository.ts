@@ -59,6 +59,14 @@ export async function getActiveLoop(db: SQLiteDatabase): Promise<Loop | null> {
   );
 }
 
+export async function getLatestCompletedLoop(
+  db: SQLiteDatabase
+): Promise<Loop | null> {
+  return db.getFirstAsync<Loop>(
+    `${SELECT_LOOP} WHERE status = 'COMPLETED' ORDER BY stopped_at DESC LIMIT 1`
+  );
+}
+
 export async function getMaxSequenceForDate(
   db: SQLiteDatabase,
   localDate: string

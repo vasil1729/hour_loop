@@ -28,6 +28,17 @@ export type LoopInterval = {
   created_at: string;
 };
 
+export type LoopItem = {
+  id: string;
+  loop_id: string;
+  text: string;
+  done: boolean;
+  sort_order: number;
+  carried_from_item_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Task = {
   id: string;
   parent_task_id: string | null;
