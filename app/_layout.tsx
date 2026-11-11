@@ -2,6 +2,7 @@ import React, { Suspense, useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
+import { SystemBars } from 'react-native-edge-to-edge';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingScreen } from '../src/components/common/LoadingScreen';
@@ -45,6 +46,11 @@ function RootNavigator() {
   return (
     <>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <SystemBars
+        style={{
+          navigationBar: scheme === 'dark' ? 'light' : 'dark',
+        }}
+      />
       <Stack
         screenOptions={{
           headerShown: false,

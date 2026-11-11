@@ -8,6 +8,9 @@
     "scheme": "hourloop",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "androidNavigationBar": {
+      "barStyle": "light-content"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -43,7 +46,15 @@
           "color": "#7B6EF6"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "react-native-edge-to-edge",
+        {
+          "android": {
+            "enforceNavigationBarContrast": false
+          }
+        }
+      ]
     ]
   }
 }
