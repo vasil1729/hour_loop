@@ -404,6 +404,10 @@ export default function SettingsScreen() {
             plain JSON files, so you can move them anywhere without an account or
             cloud service.
           </Text>
+          <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
+            Open source under the GNU Affero General Public License v3.0 or later.
+            Source: github.com/vasil1729/hour_loop
+          </Text>
         </View>
       </View>
     </Screen>
