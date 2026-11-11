@@ -14,12 +14,13 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 
 ## Features
 
-- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing.
+- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar on Today, and a local-time session log.
 - **Completion journal** — capture focus, carry-in, done, roll-forward, and notes at the end of a loop.
 - **Task pool** — nested tasks with progress, associated loop history, and aggregated focus time.
 - **Intentions** — daily and monthly time targets with actual-vs-planned progress.
 - **History** — per-day and per-month breakdowns, including midnight-crossing allocation.
 - **Notifications** — local target-reached reminders, reconciled on foreground.
+- **Backups** — export and restore all local data as a portable JSON file.
 - **Themes** — system, light, and dark.
 
 ## Tech stack
@@ -155,6 +156,7 @@ docs/                Product and architecture documentation
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Database schema](docs/DATABASE_SCHEMA.md)
+- [Backup format](docs/BACKUP_FORMAT.md)
 - [Implementation plan](IMPLEMENTATION_PLAN.md)
 - [OpenWiki quickstart](openwiki/quickstart.md)
 
