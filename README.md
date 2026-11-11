@@ -31,6 +31,16 @@ npx expo start
 
 Press `a` for an Android emulator, `i` for iOS, or scan the QR code with Expo Go. Local notifications require a development build on some platforms.
 
+## Install on Android
+
+Download the latest APK from the [GitHub Releases page](https://github.com/vasil1729/hour_loop/releases/latest):
+
+1. Open the release page on your phone and download `hour-loop.apk`.
+2. Open the downloaded file and allow installs from your browser or file manager when Android prompts.
+3. Optionally verify the download against `hour-loop.apk.sha256`.
+
+The APK is release-built but signed with the standard React Native debug keystore, so it is intended for direct sideloading and testing rather than Google Play distribution. New APKs are built by the [Android APK workflow](.github/workflows/android-apk.yml) on every push to `main` or when triggered manually from the Actions tab.
+
 ## Quality checks
 
 ```bash
