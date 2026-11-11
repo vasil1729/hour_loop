@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { Platform, StyleSheet, View } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import * as SystemUI from 'expo-system-ui';
 import { SystemBars } from 'react-native-edge-to-edge';
@@ -10,6 +11,7 @@ import { LoadingScreen } from '../src/components/common/LoadingScreen';
 import { WebPhoneFrame } from '../src/components/common/WebPhoneFrame';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
+import { loopService } from '../src/features/loops/loopService';
 import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
 import { setupNotifications } from '../src/services/notifications/notificationService';
 import { useSettingsStore } from '../src/store/settingsStore';
@@ -39,6 +41,78 @@ function AppBootstrap({ children }: { children: React.ReactNode }) {
   }, [db]);
 
   return <>{children}</>;
+}
+
+function NotificationResponseHandler() {
+  const db = useSQLiteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+
+    let active = true;
+    let startTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handled = new Set<string>();
+
+    const handleResponse = async (
+      response: Notifications.NotificationResponse | null
+    ) => {
+      if (!response || !active) return;
+
+      const request = response.notification.request;
+      const key = `${request.identifier}:${response.actionIdentifier}`;
+      if (handled.has(key)) return;
+      handled.add(key);
+
+      const loopId = request.content.data?.loopId;
+      if (typeof loopId !== 'string') return;
+
+      try {
+        const loop = await loopService.getLoop(db, loopId);
+        if (!active) return;
+        if (loop.status === 'ACTIVE' || loop.status === 'PAUSED') {
+          router.navigate('/loop/active');
+        } else {
+          router.navigate({
+            pathname: '/loop/[id]',
+            params: { id: loopId },
+          });
+        }
+      } catch {
+        // The loop may have been deleted after the notification was scheduled.
+      }
+    };
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        void handleResponse(response).finally(() => {
+          void Notifications.clearLastNotificationResponseAsync().catch(
+            () => undefined
+          );
+        });
+      }
+    );
+
+    // A tap that cold-starts the app is not emitted through the listener, so
+    // consume the stored response once the navigator has mounted.
+    startTimeout = setTimeout(() => {
+      void Notifications.getLastNotificationResponseAsync()
+        .then(async (response) => {
+          if (!response) return;
+          await handleResponse(response);
+          await Notifications.clearLastNotificationResponseAsync();
+        })
+        .catch(() => undefined);
+    }, 0);
+
+    return () => {
+      active = false;
+      if (startTimeout) clearTimeout(startTimeout);
+      subscription.remove();
+    };
+  }, [db, router]);
+
+  return null;
 }
 
 function RootNavigator() {
@@ -73,6 +147,7 @@ function RootNavigator() {
           <Stack.Screen name="loop/[id]" />
           <Stack.Screen name="task/[id]" />
         </Stack>
+        <NotificationResponseHandler />
       </View>
     </>
   );

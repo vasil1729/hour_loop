@@ -14,6 +14,11 @@ import {
   getSetting,
   setSetting,
 } from '../../database/repositories/settingsRepository';
+import {
+  cancelTargetFeedback,
+  scheduleTargetFeedback,
+} from '../feedback/targetFeedbackService';
+import { promptForExactAlarmAccess } from './exactAlarmService';
 
 const CHANNEL_ID = 'loop-targets';
 
@@ -25,12 +30,21 @@ export async function setupNotifications(): Promise<void> {
   if (Platform.OS === 'web') return;
 
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
+    handleNotification: async (notification) => {
+      // The handler only runs while the app is in the foreground. Loop targets
+      // get their chime and haptic in-app, so keep the OS presentation silent
+      // to avoid a double alert. Background delivery still uses the channel's
+      // sound and vibration.
+      const isLoopTarget =
+        typeof notification.request.content.data?.loopId === 'string';
+
+      return {
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: !isLoopTarget,
+        shouldSetBadge: false,
+      };
+    },
   });
 
   if (Platform.OS === 'android') {
@@ -64,6 +78,8 @@ export async function cancelLoopNotification(
   db: SQLiteDatabase,
   loopId: string
 ): Promise<void> {
+  cancelTargetFeedback(loopId);
+
   const key = notificationKey(loopId);
   const identifier = await getSetting(db, key);
   if (!identifier) return;
@@ -78,6 +94,8 @@ export async function cancelLoopNotification(
 export async function cancelAllLoopNotifications(
   db: SQLiteDatabase
 ): Promise<void> {
+  cancelTargetFeedback();
+
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {
@@ -122,6 +140,10 @@ export async function syncLoopNotification(
     return;
   }
 
+  // Keep the foreground alert on time even when notification permission is
+  // missing or Android falls back to an inexact alarm.
+  scheduleTargetFeedback(loop.id, remaining);
+
   const allowed = options.requestPermission
     ? await requestNotificationPermission()
     : await hasNotificationPermission();
@@ -146,4 +168,9 @@ export async function syncLoopNotification(
   });
 
   await setSetting(db, notificationKey(loop.id), identifier);
+
+  if (options.requestPermission) {
+    // Do not block loop start/navigation on this one-time explanation.
+    void promptForExactAlarmAccess(db).catch(() => undefined);
+  }
 }

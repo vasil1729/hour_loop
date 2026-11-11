@@ -26,6 +26,10 @@ import {
 } from '../../src/features/backup/backupService';
 import { recoverAppState } from '../../src/services/lifecycle/appLifecycleService';
 import {
+  openExactAlarmSettings,
+  supportsExactAlarmSettings,
+} from '../../src/services/notifications/exactAlarmService';
+import {
   cancelAllLoopNotifications,
   requestNotificationPermission,
 } from '../../src/services/notifications/notificationService';
@@ -353,6 +357,31 @@ export default function SettingsScreen() {
         />
       </View>
 
+      {supportsExactAlarmSettings() ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open Android alarm timing settings"
+          onPress={() => {
+            void openExactAlarmSettings();
+          }}
+          style={[
+            styles.switchRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <View style={styles.switchBody}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Alarm timing
+            </Text>
+            <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+              If target alerts arrive late, allow “Alarms & reminders” for Hour
+              Loop in Android settings.
+            </Text>
+          </View>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+        </Pressable>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           Backup & restore
@@ -499,6 +528,11 @@ const styles = StyleSheet.create({
   switchBody: {
     flex: 1,
     gap: spacing.xs,
+  },
+  infoChevron: {
+    fontSize: 24,
+    fontWeight: '600',
+    paddingHorizontal: spacing.xs,
   },
   backupActions: {
     flexDirection: 'row',
