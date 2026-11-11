@@ -224,6 +224,7 @@ export default function ActiveLoopScreen() {
 
       <LoopClock
         loop={activeLoop}
+        intervals={intervals}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={activeLoop.target_duration_seconds}
       />
