@@ -363,15 +363,18 @@ const styles = StyleSheet.create({
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   chip: {
     minWidth: 64,
+    minHeight: 36,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   chipText: {
     fontSize: 14,
@@ -380,20 +383,27 @@ const styles = StyleSheet.create({
   customChip: {
     flexDirection: 'row',
     alignItems: 'center',
+    minWidth: 132,
+    minHeight: 36,
     borderRadius: radius.full,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: spacing.md,
-    minWidth: 110,
   },
   customInput: {
     flex: 1,
+    minWidth: 58,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
     fontSize: 14,
     fontWeight: '600',
-    paddingVertical: spacing.sm,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   customSuffix: {
     fontSize: 12,
+    lineHeight: 16,
     marginLeft: spacing.xs,
+    alignSelf: 'center',
   },
   taskSelector: {
     flexDirection: 'row',
