@@ -74,9 +74,13 @@ All fields are optional, with focus and carry-in pre-filled when available:
 
 ### History
 
-- Day view: previous/next navigation, a calendar picker for jumping directly to any past date, total focus time, loop count, daily intention progress, and per-loop time for that day.
+- A single History screen switches between **Day**, **Week**, and **Month** tracking.
+- Every mode has previous/next period navigation, a tappable period label, and a calendar picker for jumping to any past date.
+- Day view shows total focus time, loop count, daily intention progress, the day's loops, and a link to the detailed capsule timeline.
+- Week view shows total focus time, unique loop count, days on target, average focus per active day, and a seven-day bar chart. Tapping a bar opens that day.
+- Month view shows total focus time, unique loop count, monthly intention progress, and a calendar heatmap of daily focus intensity. Tapping a day opens that day.
+- Switching modes keeps the selected date as the anchor, so moving from a day to its week or month is one tap.
 - A loop that crosses midnight appears on both days with the correct split.
-- Monthly section: total focus time, unique loop count, and monthly intention progress.
 - Tapping a loop opens its read-only journal.
 - A loop can be permanently deleted from its journal or, before completion, from the active loop or completion screen. Deletion asks for confirmation and also removes the loop's recorded intervals and focus time.
 - Clock times are displayed in the device's current time zone, so the app follows the user's location.

@@ -148,6 +148,21 @@ export function addMonthsToMonthKey(monthKey: string, delta: number): string {
   return monthKeyFromParts(date.getUTCFullYear(), date.getUTCMonth() + 1);
 }
 
+/** Monday-based start of the week containing the given day. */
+export function startOfWeekDayKey(dayKey: string): string {
+  const { year, month, day } = parseDayKey(dayKey);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  const offset = (weekday + 6) % 7;
+  return addDaysToDayKey(dayKey, -offset);
+}
+
+export function getWeekDayKeys(dayKey: string): string[] {
+  const start = startOfWeekDayKey(dayKey);
+  return Array.from({ length: 7 }, (_, index) =>
+    addDaysToDayKey(start, index)
+  );
+}
+
 /**
  * Build a fixed six-week calendar grid for a month, starting on Sunday.
  * Empty leading and trailing cells are null so callers can lay out rows directly.
@@ -272,6 +287,35 @@ export function formatMonthLabel(monthKey: string): string {
   const [year, month] = monthKey.split('-').map(Number);
   const monthName = MONTHS[(month ?? 1) - 1] ?? '';
   return `${monthName} ${year}`;
+}
+
+export function formatCompactDayLabel(dayKey: string): string {
+  const { year, month, day } = parseDayKey(dayKey);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const weekday = WEEKDAYS[date.getUTCDay()]?.slice(0, 3) ?? '';
+  const monthName = MONTHS[month - 1]?.slice(0, 3) ?? '';
+  return `${weekday}, ${monthName} ${day}, ${year}`;
+}
+
+export function formatWeekdayShort(dayKey: string): string {
+  const { year, month, day } = parseDayKey(dayKey);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return WEEKDAYS[date.getUTCDay()]?.slice(0, 3) ?? '';
+}
+
+export function formatWeekRangeLabel(startKey: string, endKey: string): string {
+  const start = parseDayKey(startKey);
+  const end = parseDayKey(endKey);
+  const startMonth = MONTHS[start.month - 1]?.slice(0, 3) ?? '';
+  const endMonth = MONTHS[end.month - 1]?.slice(0, 3) ?? '';
+
+  if (start.year !== end.year) {
+    return `${startMonth} ${start.day}, ${start.year} – ${endMonth} ${end.day}, ${end.year}`;
+  }
+  if (start.month !== end.month) {
+    return `${startMonth} ${start.day} – ${endMonth} ${end.day}, ${end.year}`;
+  }
+  return `${startMonth} ${start.day} – ${end.day}, ${end.year}`;
 }
 
 const clockFormatters = new Map<string, Intl.DateTimeFormat>();

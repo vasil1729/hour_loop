@@ -20,6 +20,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { DayPickerModal } from '../../src/components/history/DayPickerModal';
 import {
   addDaysToDayKey,
   currentDayKey,
@@ -63,6 +64,7 @@ export default function DayViewScreen() {
   const [data, setData] = useState<DayCapsuleData | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('timeline');
+  const [pickerVisible, setPickerVisible] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const [timelineTop, setTimelineTop] = useState(0);
 
@@ -134,7 +136,15 @@ export default function DayViewScreen() {
               {formatDayLabel(selectedDay)}
             </Text>
           </View>
-          <View style={styles.iconButton} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Choose a date"
+            onPress={() => setPickerVisible(true)}
+            hitSlop={12}
+            style={styles.iconButton}
+          >
+            <Ionicons name="calendar-outline" size={20} color={colors.text} />
+          </Pressable>
         </View>
 
         <View style={styles.dayNav}>
@@ -333,6 +343,16 @@ export default function DayViewScreen() {
           </>
         )}
       </ScrollView>
+      <DayPickerModal
+        visible={pickerVisible}
+        selectedDay={selectedDay}
+        maxDay={today}
+        onSelect={(dayKey) => {
+          setSelectedDay(dayKey);
+          setPickerVisible(false);
+        }}
+        onClose={() => setPickerVisible(false)}
+      />
     </Screen>
   );
 }

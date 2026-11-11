@@ -1,7 +1,12 @@
 import {
+  formatCompactDayLabel,
   formatTimeOfDay,
+  formatWeekRangeLabel,
+  formatWeekdayShort,
   getMonthGrid,
+  getWeekDayKeys,
   localDayBounds,
+  startOfWeekDayKey,
   toLocalDateKey,
 } from './dateUtils';
 
@@ -75,5 +80,45 @@ describe('time zone handling', () => {
       /3:30/
     );
     expect(formatTimeOfDay('not-a-date', 'Asia/Kolkata')).toBe('—');
+  });
+});
+
+describe('week helpers', () => {
+  it('starts weeks on Monday', () => {
+    expect(startOfWeekDayKey('2026-11-12')).toBe('2026-11-09');
+    expect(startOfWeekDayKey('2026-11-09')).toBe('2026-11-09');
+    expect(startOfWeekDayKey('2026-11-15')).toBe('2026-11-09');
+  });
+
+  it('returns seven consecutive day keys', () => {
+    expect(getWeekDayKeys('2026-11-12')).toEqual([
+      '2026-11-09',
+      '2026-11-10',
+      '2026-11-11',
+      '2026-11-12',
+      '2026-11-13',
+      '2026-11-14',
+      '2026-11-15',
+    ]);
+  });
+
+  it('labels a week range inside one month', () => {
+    expect(formatWeekRangeLabel('2026-11-09', '2026-11-15')).toBe(
+      'Nov 9 – 15, 2026'
+    );
+  });
+
+  it('labels a week range across months and years', () => {
+    expect(formatWeekRangeLabel('2026-11-30', '2026-12-06')).toBe(
+      'Nov 30 – Dec 6, 2026'
+    );
+    expect(formatWeekRangeLabel('2025-12-29', '2026-01-04')).toBe(
+      'Dec 29, 2025 – Jan 4, 2026'
+    );
+  });
+
+  it('formats compact day labels and weekday initials', () => {
+    expect(formatCompactDayLabel('2026-11-12')).toBe('Thu, Nov 12, 2026');
+    expect(formatWeekdayShort('2026-11-12')).toBe('Thu');
   });
 });
