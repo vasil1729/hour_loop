@@ -1,6 +1,14 @@
-# Hour Loop
+<p align="center">
+  <img src="assets/icon.png" alt="Hour Loop icon" width="160" height="160" />
+</p>
 
-Hour Loop is an offline-first focus timer for intentional time management. A **Loop** is a timestamped focus session that can be paused, resumed, and closed with a short completion journal. An independent hierarchical task pool, daily and monthly time intentions, and a full history view sit alongside the timer.
+<h1 align="center">Hour Loop</h1>
+
+<p align="center">
+  An offline-first focus timer for intentional time management.
+</p>
+
+A **Loop** is a timestamped focus session that can be paused, resumed, and closed with a short completion journal. An independent hierarchical task pool, daily and monthly time intentions, and a full history view sit alongside the timer.
 
 Everything is stored in local SQLite. No account, no network, no tracking.
 
