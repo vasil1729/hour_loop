@@ -27,7 +27,7 @@ export function WeekBars({
   onSelectDay,
 }: WeekBarsProps) {
   const { colors } = useTheme();
-  const { language, t } = useTranslation();
+  const { language, t, isRTL } = useTranslation();
   const maxSeconds = Math.max(1, ...days.map((day) => day.totalSeconds));
 
   return (
@@ -98,7 +98,7 @@ export function WeekBars({
                   },
                 ]}
               >
-                {language === 'ar' || language === 'ml'
+                {isRTL || language === 'ml'
                   ? formatWeekdayNarrow(day.dayKey)
                   : language === 'zh' || language === 'tr'
                     ? formatWeekdayShort(day.dayKey)

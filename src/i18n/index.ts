@@ -7,8 +7,14 @@ import {
   type LanguagePreference,
 } from './localeState';
 import { ar } from './translations/ar';
+import { de } from './translations/de';
 import { en } from './translations/en';
+import { es } from './translations/es';
+import { fa } from './translations/fa';
+import { fr } from './translations/fr';
+import { it } from './translations/it';
 import { ml } from './translations/ml';
+import { pt } from './translations/pt';
 import { ru } from './translations/ru';
 import { tr } from './translations/tr';
 import { zh } from './translations/zh';
@@ -35,6 +41,12 @@ const dictionaries: Record<Language, Record<TranslationKey, TranslationEntry>> =
   zh,
   tr,
   ml,
+  it,
+  fr,
+  es,
+  pt,
+  fa,
+  de,
 };
 
 export function resolveLanguage(
@@ -49,6 +61,12 @@ export function resolveLanguage(
   if (code.startsWith('zh')) return 'zh';
   if (code.startsWith('tr')) return 'tr';
   if (code.startsWith('ml')) return 'ml';
+  if (code.startsWith('it')) return 'it';
+  if (code.startsWith('fr')) return 'fr';
+  if (code.startsWith('es')) return 'es';
+  if (code.startsWith('pt')) return 'pt';
+  if (code.startsWith('fa')) return 'fa';
+  if (code.startsWith('de')) return 'de';
   return DEFAULT_LANGUAGE;
 }
 
@@ -83,6 +101,7 @@ function manualPlural(
     }
     return 'many';
   }
+  if (language === 'fr' && absolute === 0) return 'one';
   return absolute === 1 ? 'one' : 'other';
 }
 

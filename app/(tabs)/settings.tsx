@@ -78,6 +78,12 @@ const LANGUAGES: { key: LanguagePreference; labelKey: TranslationKey }[] = [
   { key: 'zh', labelKey: 'common.chinese' },
   { key: 'tr', labelKey: 'common.turkish' },
   { key: 'ml', labelKey: 'common.malayalam' },
+  { key: 'it', labelKey: 'common.italian' },
+  { key: 'fr', labelKey: 'common.french' },
+  { key: 'es', labelKey: 'common.spanish' },
+  { key: 'pt', labelKey: 'common.portuguese' },
+  { key: 'fa', labelKey: 'common.persian' },
+  { key: 'de', labelKey: 'common.german' },
 ];
 
 export default function SettingsScreen() {

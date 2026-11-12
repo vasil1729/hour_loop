@@ -19,6 +19,24 @@ function shortUnit(unit: 'h' | 'm' | 's'): string {
   if (language === 'ml') {
     return unit === 'h' ? ' മണി.' : unit === 'm' ? ' മിനി.' : ' സെക.';
   }
+  if (language === 'it') {
+    return unit === 'h' ? ' h' : unit === 'm' ? ' min' : ' s';
+  }
+  if (language === 'fr') {
+    return unit === 'h' ? ' h' : unit === 'm' ? ' min' : ' s';
+  }
+  if (language === 'es') {
+    return unit === 'h' ? ' h' : unit === 'm' ? ' min' : ' s';
+  }
+  if (language === 'pt') {
+    return unit === 'h' ? ' h' : unit === 'm' ? ' min' : ' s';
+  }
+  if (language === 'fa') {
+    return unit === 'h' ? ' ساعت' : unit === 'm' ? ' دقیقه' : ' ثانیه';
+  }
+  if (language === 'de') {
+    return unit === 'h' ? ' Std.' : unit === 'm' ? ' Min.' : ' Sek.';
+  }
   return unit;
 }
 

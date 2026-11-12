@@ -12,6 +12,12 @@ const LOCALE_BY_LANGUAGE: Record<Language, string> = {
   zh: 'zh-CN',
   tr: 'tr-TR',
   ml: 'ml-IN',
+  it: 'it-IT',
+  fr: 'fr-FR',
+  es: 'es-ES',
+  pt: 'pt-BR',
+  fa: 'fa-IR-u-ca-gregory-nu-latn',
+  de: 'de-DE',
 };
 
 export function getLanguageLocale(

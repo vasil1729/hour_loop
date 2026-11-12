@@ -5,6 +5,12 @@ export const SUPPORTED_LANGUAGES = [
   'zh',
   'tr',
   'ml',
+  'it',
+  'fr',
+  'es',
+  'pt',
+  'fa',
+  'de',
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -24,5 +30,5 @@ export function getActiveLanguage(): Language {
 }
 
 export function isRtlLanguage(language: Language): boolean {
-  return language === 'ar';
+  return language === 'ar' || language === 'fa';
 }

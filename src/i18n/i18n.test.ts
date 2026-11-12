@@ -8,6 +8,7 @@ import {
   formatDurationWithSeconds,
 } from '../domain/timer/timerEngine';
 import {
+  isRtlLanguage,
   localizeError,
   resolveLanguage,
   setActiveLanguage,
@@ -15,8 +16,14 @@ import {
   translate,
 } from './index';
 import { ar } from './translations/ar';
+import { de } from './translations/de';
 import { en } from './translations/en';
+import { es } from './translations/es';
+import { fa } from './translations/fa';
+import { fr } from './translations/fr';
+import { it as itTranslations } from './translations/it';
 import { ml } from './translations/ml';
+import { pt } from './translations/pt';
 import { ru } from './translations/ru';
 import { tr } from './translations/tr';
 import { zh } from './translations/zh';
@@ -33,7 +40,13 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('system', 'zh-Hans-CN')).toBe('zh');
     expect(resolveLanguage('system', 'tr-TR')).toBe('tr');
     expect(resolveLanguage('system', 'ml-IN')).toBe('ml');
-    expect(resolveLanguage('system', 'fr-FR')).toBe('en');
+    expect(resolveLanguage('system', 'it-IT')).toBe('it');
+    expect(resolveLanguage('system', 'fr-FR')).toBe('fr');
+    expect(resolveLanguage('system', 'es-ES')).toBe('es');
+    expect(resolveLanguage('system', 'pt-BR')).toBe('pt');
+    expect(resolveLanguage('system', 'fa-IR')).toBe('fa');
+    expect(resolveLanguage('system', 'de-DE')).toBe('de');
+    expect(resolveLanguage('system', 'fr-CA')).toBe('fr');
     expect(resolveLanguage('system', null)).toBe('en');
   });
 
@@ -43,6 +56,18 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('zh', 'en-US')).toBe('zh');
     expect(resolveLanguage('tr', 'ml-IN')).toBe('tr');
     expect(resolveLanguage('ml', 'zh-CN')).toBe('ml');
+    expect(resolveLanguage('it', 'de-DE')).toBe('it');
+    expect(resolveLanguage('fr', 'es-ES')).toBe('fr');
+    expect(resolveLanguage('es', 'pt-BR')).toBe('es');
+    expect(resolveLanguage('pt', 'fa-IR')).toBe('pt');
+    expect(resolveLanguage('fa', 'de-DE')).toBe('fa');
+    expect(resolveLanguage('de', 'en-US')).toBe('de');
+  });
+
+  it('marks Persian as right-to-left', () => {
+    expect(isRtlLanguage('ar')).toBe(true);
+    expect(isRtlLanguage('fa')).toBe(true);
+    expect(isRtlLanguage('de')).toBe(false);
   });
 });
 
@@ -58,7 +83,7 @@ describe('translate', () => {
   }
 
   it('keeps interpolation placeholders in every language', () => {
-    const dictionaries = { ar, ml, ru, tr, zh };
+    const dictionaries = { ar, ml, ru, tr, zh, it: itTranslations, fr, es, pt, fa, de };
     for (const [language, dictionary] of Object.entries(dictionaries)) {
       for (const key of Object.keys(en) as TranslationKey[]) {
         const expected = placeholders(en[key]);
@@ -156,6 +181,54 @@ describe('localized dates and durations', () => {
     expect(formatDurationCompact(3660)).toBe('1 മണി. 1 മിനി.');
     expect(formatDurationWithSeconds(81)).toBe('1 മിനി. 21 സെക.');
     expect(formatIntentionDuration(5400)).toBe('1 മണി. 30 മിനി.');
+  });
+
+  it('formats Italian dates and durations', () => {
+    setActiveLanguage('it');
+    expect(formatDayLabel('2026-11-12')).toContain('novembre');
+    expect(formatDurationCompact(3660)).toBe('1 h 1 min');
+    expect(formatDurationWithSeconds(81)).toBe('1 min 21 s');
+    expect(formatIntentionDuration(5400)).toBe('1 h 30 min');
+  });
+
+  it('formats French dates and durations', () => {
+    setActiveLanguage('fr');
+    expect(formatDayLabel('2026-11-12')).toContain('novembre');
+    expect(formatDurationCompact(3660)).toBe('1 h 1 min');
+    expect(formatDurationWithSeconds(81)).toBe('1 min 21 s');
+    expect(formatIntentionDuration(5400)).toBe('1 h 30 min');
+  });
+
+  it('formats Spanish dates and durations', () => {
+    setActiveLanguage('es');
+    expect(formatDayLabel('2026-11-12')).toContain('noviembre');
+    expect(formatDurationCompact(3660)).toBe('1 h 1 min');
+    expect(formatDurationWithSeconds(81)).toBe('1 min 21 s');
+    expect(formatIntentionDuration(5400)).toBe('1 h 30 min');
+  });
+
+  it('formats Portuguese dates and durations', () => {
+    setActiveLanguage('pt');
+    expect(formatDayLabel('2026-11-12')).toContain('novembro');
+    expect(formatDurationCompact(3660)).toBe('1 h 1 min');
+    expect(formatDurationWithSeconds(81)).toBe('1 min 21 s');
+    expect(formatIntentionDuration(5400)).toBe('1 h 30 min');
+  });
+
+  it('formats Persian dates and durations in the Gregorian calendar', () => {
+    setActiveLanguage('fa');
+    expect(formatDayLabel('2026-11-12')).toContain('نوامبر');
+    expect(formatDurationCompact(3660)).toBe('1 ساعت 1 دقیقه');
+    expect(formatDurationWithSeconds(81)).toBe('1 دقیقه 21 ثانیه');
+    expect(formatIntentionDuration(5400)).toBe('1 ساعت 30 دقیقه');
+  });
+
+  it('formats German dates and durations', () => {
+    setActiveLanguage('de');
+    expect(formatDayLabel('2026-11-12')).toContain('November');
+    expect(formatDurationCompact(3660)).toBe('1 Std. 1 Min.');
+    expect(formatDurationWithSeconds(81)).toBe('1 Min. 21 Sek.');
+    expect(formatIntentionDuration(5400)).toBe('1 Std. 30 Min.');
   });
 });
 

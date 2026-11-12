@@ -12,6 +12,12 @@ function durationUnits(): { hour: string; minute: string } {
   if (language === 'zh') return { hour: '小时', minute: '分钟' };
   if (language === 'tr') return { hour: ' sa', minute: ' dk' };
   if (language === 'ml') return { hour: ' മണി.', minute: ' മിനി.' };
+  if (language === 'it') return { hour: ' h', minute: ' min' };
+  if (language === 'fr') return { hour: ' h', minute: ' min' };
+  if (language === 'es') return { hour: ' h', minute: ' min' };
+  if (language === 'pt') return { hour: ' h', minute: ' min' };
+  if (language === 'fa') return { hour: ' ساعت', minute: ' دقیقه' };
+  if (language === 'de') return { hour: ' Std.', minute: ' Min.' };
   return { hour: 'h', minute: 'min' };
 }
 
