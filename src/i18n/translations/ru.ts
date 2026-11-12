@@ -576,4 +576,178 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Этот файл не является корректной резервной копией Hour Loop.',
   'errors.taskMoveCycle':
     'Задачу нельзя переместить внутрь себя или одной из своих капсул.',
+  'assistant.open': 'Ассистент',
+  'assistant.title': 'Спросите Hour Loop',
+  'assistant.eyebrow': 'ИИ-АССИСТЕНТ',
+  'assistant.back': 'Назад',
+  'assistant.clear': 'Очистить разговор',
+  'assistant.clearTitle': 'Очистить разговор?',
+  'assistant.clearBody':
+    'История текущего сеанса будет удалена с этого устройства. Сохранённые циклы и задачи не изменятся.',
+  'assistant.clearConfirm': 'Очистить',
+  'assistant.emptyTitle': 'Чем помочь?',
+  'assistant.emptyBody':
+    'Спросите о времени фокуса, задачах или капсулах. Записи и изменения таймера всегда требуют подтверждения.',
+  'assistant.privacyNote':
+    'Сообщения и выбранный контекст приложения отправляются вашему провайдеру. Ассистент не имеет прямого доступа к базе данных, файлам или оболочке.',
+  'assistant.suggestStats': 'Сколько я фокусировался сегодня?',
+  'assistant.suggestActive': 'Над чем я работаю?',
+  'assistant.suggestStart': 'Запусти цикл на 25 минут',
+  'assistant.suggestTasks': 'Покажи мои задачи',
+  'assistant.placeholder': 'Спросите или скажите Hour Loop…',
+  'assistant.composerA11y': 'Сообщение ассистенту',
+  'assistant.send': 'Отправить сообщение',
+  'assistant.stopA11y': 'Остановить генерацию',
+  'assistant.thinking': 'Думаю…',
+  'assistant.you': 'Вы',
+  'assistant.assistant': 'Ассистент',
+  'assistant.retry': 'Повторить',
+  'assistant.setupTitle': 'Настройте ассистента',
+  'assistant.setupBody':
+    'Добавьте свой API-ключ провайдера и модель в настройках, чтобы начать.',
+  'assistant.openSettings': 'Открыть настройки',
+  'assistant.errorHint':
+    'Можно повторить или продолжить пользоваться Hour Loop.',
+  'assistant.errorGeneric': 'Ассистент не смог выполнить запрос.',
+  'assistant.errorNoKey':
+    'Сначала добавьте и сохраните API-ключ в настройках.',
+  'assistant.errorConfig':
+    'Конфигурация ассистента неверна. Проверьте настройки.',
+  'assistant.errorAuth':
+    'Провайдер отклонил API-ключ. Проверьте его в настройках.',
+  'assistant.errorRateLimit':
+    'Провайдер ограничивает запросы. Повторите позже.',
+  'assistant.errorServer':
+    'Ошибка на стороне провайдера. Повторите позже.',
+  'assistant.errorTimeout': 'Время запроса истекло. Повторите.',
+  'assistant.errorNetwork':
+    'Не удалось связаться с провайдером. Проверьте соединение и адрес.',
+  'assistant.errorCancelled': 'Генерация остановлена.',
+  'assistant.errorMalformed': 'Провайдер вернул неверный ответ.',
+  'assistant.errorUnsupported':
+    'Эта модель не поддерживает запрошенное действие. Попробуйте другую.',
+  'assistant.errorRequest':
+    'Провайдер отклонил запрос. Проверьте модель и настройки.',
+  'assistant.errorEmpty': 'Ассистент вернул пустой ответ.',
+  'assistant.errorTooLong':
+    'Сообщение должно быть короче {max} символов.',
+  'assistant.errorActionPending':
+    'Сначала подтвердите или отмените ожидающее действие.',
+  'assistant.errorToolLimit':
+    'Ассистент остановился после слишком большого числа шагов. Упростите запрос.',
+  'assistant.actionReady': 'Проверьте действие ниже.',
+  'assistant.actionRiskWrite': 'Изменяет данные приложения',
+  'assistant.actionRiskTimer': 'Запускает или меняет реальный таймер',
+  'assistant.actionConfirm': 'Подтвердить',
+  'assistant.actionCancel': 'Отмена',
+  'assistant.actionWorking': 'Применяю…',
+  'assistant.actionExecuted': 'Готово',
+  'assistant.actionFailed': 'Действие не выполнено',
+  'assistant.actionExpired':
+    'Срок действия истёк. Попросите подготовить новое действие.',
+  'assistant.actionCancelled': 'Действие отменено.',
+  'assistant.actionDismiss': 'Закрыть',
+  'assistant.actionPendingTitle': 'Подтвердите действие',
+  'assistant.actionOneAtATime':
+    'Одновременно можно подтвердить только одно действие.',
+  'assistant.actionAlreadyHandled': 'Это действие уже обработано.',
+  'assistant.actionCreateTask': 'Создать задачу «{title}».',
+  'assistant.actionCreateSubtask':
+    'Создать задачу «{title}» внутри «{parent}».',
+  'assistant.actionUpdateTask': 'Обновить задачу «{title}».',
+  'assistant.actionMoveTask': 'Переместить «{title}» внутрь «{parent}».',
+  'assistant.actionMoveTaskRoot': 'Переместить «{title}» в корень.',
+  'assistant.actionCreateCapsule': 'Создать отдельную капсулу «{text}».',
+  'assistant.actionAddCapsule':
+    'Добавить капсулу «{text}» в H{sequence}.',
+  'assistant.actionCompleteCapsule': 'Завершить капсулу «{text}».',
+  'assistant.actionPauseLoop': 'Поставить H{sequence} на паузу.',
+  'assistant.actionResumeLoop': 'Продолжить H{sequence}.',
+  'assistant.actionCompleteLoop':
+    'Завершить H{sequence} и сохранить журнал.',
+  'assistant.actionStartLoop': 'Запустить цикл на {duration} мин.',
+  'assistant.actionStartLoopFocus':
+    'Запустить цикл на {duration} мин для «{focus}».',
+  'assistant.resultTaskCreated': 'Задача создана.',
+  'assistant.resultTaskUpdated': 'Задача обновлена.',
+  'assistant.resultTaskMoved': 'Задача перемещена.',
+  'assistant.resultCapsuleCreated': 'Капсула создана.',
+  'assistant.resultCapsuleAdded': 'Капсула добавлена.',
+  'assistant.resultCapsuleCompleted': 'Капсула завершена.',
+  'assistant.resultLoopStarted':
+    'Запущен H{sequence} на {duration} мин.',
+  'assistant.resultLoopPaused': 'H{sequence} на паузе.',
+  'assistant.resultLoopResumed': 'H{sequence} продолжен.',
+  'assistant.resultLoopCompleted': 'H{sequence} завершён.',
+  'assistant.detailDuration': 'Длительность',
+  'assistant.detailFocus': 'Фокус',
+  'assistant.detailTask': 'Задача',
+  'assistant.detailCapsules': 'Капсулы',
+  'assistant.detailTarget': 'Цель',
+  'assistant.detailTitle': 'Заголовок',
+  'assistant.detailDescription': 'Описание',
+  'assistant.detailDone': 'Сделано',
+  'assistant.detailRollForward': 'Перенести',
+  'assistant.detailNote': 'Заметка',
+  'assistant.writesDisabled':
+    'Записи и действия с таймером отключены в настройках.',
+
+  'settings.assistant': 'ИИ-ассистент',
+  'settings.assistantBody':
+    'Спрашивайте о своих данных и управляйте циклами обычным языком. Ассистент необязателен и использует ваш собственный API-ключ.',
+  'settings.assistantEnable': 'Включить ассистента',
+  'settings.assistantEnableBody':
+    'Когда выключено, запросы к ассистенту не отправляются.',
+  'settings.assistantWrites': 'Разрешить записи и действия с таймером',
+  'settings.assistantWritesBody':
+    'Каждое изменение всё равно требует явного подтверждения. Разрушительные действия недоступны.',
+  'settings.assistantProvider': 'Провайдер',
+  'settings.assistantProviderHint':
+    'Используется {provider}. Ключ предоставляет пользователь; могут действовать тарифы и лимиты провайдера.',
+  'settings.assistantConnection': 'Подключение',
+  'settings.assistantApiKey': 'API-ключ',
+  'settings.assistantApiKeyPlaceholder': 'Вставьте API-ключ',
+  'settings.assistantApiKeySavedPlaceholder': 'Ключ уже сохранён',
+  'settings.assistantApiKeySaved':
+    'Ключ сохранён в защищённом хранилище устройства и не попадает в резервные копии.',
+  'settings.assistantApiKeyWeb':
+    'В веб-версии ключ хранится в памяти и удаляется при закрытии страницы.',
+  'settings.assistantApiKeyHelp':
+    'Ключ хранится вне базы приложения и отправляется только выбранному провайдеру.',
+  'settings.assistantApiKeyWebHelp':
+    'Ключ хранится только в памяти и не записывается в хранилище браузера.',
+  'settings.assistantModel': 'Модель',
+  'settings.assistantModelPlaceholder': 'Идентификатор модели провайдера',
+  'settings.assistantBaseUrl': 'Базовый URL',
+  'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
+  'settings.assistantSave': 'Сохранить настройки ассистента',
+  'settings.assistantSaved': 'Настройки ассистента сохранены.',
+  'settings.assistantTest': 'Проверить подключение',
+  'settings.assistantTesting': 'Проверка…',
+  'settings.assistantTestSuccess': 'Подключение успешно.',
+  'settings.assistantClearKey': 'Удалить сохранённый ключ',
+  'settings.assistantClearKeyTitle': 'Удалить сохранённый API-ключ?',
+  'settings.assistantClearKeyBody':
+    'Ассистент перестанет работать, пока вы снова не сохраните ключ.',
+  'settings.assistantClearKeyDone': 'Сохранённый API-ключ удалён.',
+  'settings.assistantSaveFailed':
+    'Не удалось сохранить настройки ассистента.',
+  'settings.assistantModelRequired': 'Введите идентификатор модели.',
+  'settings.assistantKeyRequired': 'Введите API-ключ.',
+  'settings.assistantPermissions': 'Разрешения',
+  'settings.assistantPermissionsBody':
+    'Чтение данных выполняется автоматически. Создание и изменение задач и капсул, а также запуск, пауза, продолжение и завершение циклов требуют отдельного подтверждения. Удаление, импорт, восстановление и сброс недоступны.',
+  'settings.assistantConversation': 'История разговора',
+  'settings.assistantConversationBody':
+    'История чата хранится в памяти только в течение этого сеанса и никогда не включается в резервные копии.',
+  'settings.assistantConversationCleared': 'Разговор очищен.',
+  'settings.assistantClearConversation': 'Очистить разговор',
+  'settings.assistantPrivacy': 'Конфиденциальность',
+  'settings.assistantPrivacyBody':
+    'Ваши сообщения и только необходимые для запроса данные приложения отправляются выбранному провайдеру. Могут действовать тарифы и лимиты. Hour Loop не предоставляет бесплатный встроенный ИИ-сервис.',
+  'settings.assistantGroq': 'Groq',
+  'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantCustom': 'Другой',
+  'settings.assistantCustomHint':
+    'Используйте совместимый с OpenAI адрес. HTTPS обязателен, кроме локальной сети. Совместимость не гарантируется только по заявлению провайдера.',
 };

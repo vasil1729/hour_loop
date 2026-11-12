@@ -102,12 +102,32 @@ export default function TodayScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
-          {t('today.eyebrow')}
-        </Text>
-        <Text style={[styles.title, { color: colors.text }]}>
-          {formatDayLabel(todayKey)}
-        </Text>
+        <View style={styles.headerTitles}>
+          <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
+            {t('today.eyebrow')}
+          </Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {formatDayLabel(todayKey)}
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('assistant.open')}
+          onPress={() => router.push('/assistant')}
+          style={({ pressed }) => [
+            styles.assistantButton,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              opacity: pressed ? 0.7 : 1,
+            },
+          ]}
+        >
+          <Ionicons name="sparkles-outline" size={16} color={colors.accent} />
+          <Text style={[styles.assistantButtonText, { color: colors.accent }]}>
+            {t('assistant.open')}
+          </Text>
+        </Pressable>
       </View>
 
       <Pressable
@@ -350,8 +370,28 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    gap: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.md,
     marginTop: spacing.sm,
+  },
+  headerTitles: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  assistantButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  assistantButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   eyebrow: {
     fontSize: 11,

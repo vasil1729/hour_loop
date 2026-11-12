@@ -62,7 +62,8 @@
             "enforceNavigationBarContrast": false
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

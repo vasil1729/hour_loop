@@ -581,4 +581,170 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'هذا الملف ليس نسخة احتياطية صالحة من Hour Loop.',
   'errors.taskMoveCycle':
     'لا يمكن نقل مهمة أسفل نفسها أو إحدى كبسولاتها.',
+  'assistant.open': 'المساعد',
+  'assistant.title': 'اسأل Hour Loop',
+  'assistant.eyebrow': 'مساعد الذكاء الاصطناعي',
+  'assistant.back': 'رجوع',
+  'assistant.clear': 'مسح المحادثة',
+  'assistant.clearTitle': 'مسح المحادثة؟',
+  'assistant.clearBody':
+    'سيُحذف سجل هذه الجلسة من هذا الجهاز. لن تتأثر الحلقات والمهام المحفوظة.',
+  'assistant.clearConfirm': 'مسح',
+  'assistant.emptyTitle': 'كيف يمكنني المساعدة؟',
+  'assistant.emptyBody':
+    'اسأل عن وقت التركيز أو المهام أو الكبسولات. تتطلب الكتابة وتغييرات المؤقت تأكيدك دائمًا.',
+  'assistant.privacyNote':
+    'تُرسل الرسائل وسياق التطبيق المحدد إلى المزود الذي تضبطه. لا يحصل المساعد على وصول مباشر إلى قاعدة البيانات أو الملفات أو الطرفية.',
+  'assistant.suggestStats': 'كم ركزت اليوم؟',
+  'assistant.suggestActive': 'على ماذا أعمل؟',
+  'assistant.suggestStart': 'ابدأ حلقة مدتها 25 دقيقة',
+  'assistant.suggestTasks': 'اعرض مهامي',
+  'assistant.placeholder': 'اسأل Hour Loop أو أخبره…',
+  'assistant.composerA11y': 'رسالة إلى المساعد',
+  'assistant.send': 'إرسال الرسالة',
+  'assistant.stopA11y': 'إيقاف التوليد',
+  'assistant.thinking': 'أفكر…',
+  'assistant.you': 'أنت',
+  'assistant.assistant': 'المساعد',
+  'assistant.retry': 'إعادة المحاولة',
+  'assistant.setupTitle': 'إعداد المساعد',
+  'assistant.setupBody':
+    'أضف مفتاح API الخاص بمزودك والطراز في الإعدادات لبدء المحادثة.',
+  'assistant.openSettings': 'فتح الإعدادات',
+  'assistant.errorHint':
+    'يمكنك إعادة المحاولة أو متابعة استخدام Hour Loop كالمعتاد.',
+  'assistant.errorGeneric': 'لم يتمكن المساعد من إكمال الطلب.',
+  'assistant.errorNoKey': 'أضف مفتاح API واحفظه في الإعدادات أولاً.',
+  'assistant.errorConfig': 'إعدادات المساعد غير صالحة. تحقق من الإعدادات.',
+  'assistant.errorAuth':
+    'رفض المزود مفتاح API. تحقق منه في الإعدادات.',
+  'assistant.errorRateLimit':
+    'المزود يحد من الطلبات. أعد المحاولة لاحقًا.',
+  'assistant.errorServer': 'حدث خطأ في خادم المزود. أعد المحاولة لاحقًا.',
+  'assistant.errorTimeout': 'انتهت مهلة الطلب. أعد المحاولة.',
+  'assistant.errorNetwork':
+    'تعذر الوصول إلى المزود. تحقق من الاتصال والعنوان.',
+  'assistant.errorCancelled': 'تم إيقاف التوليد.',
+  'assistant.errorMalformed': 'أعاد المزود استجابة غير صالحة.',
+  'assistant.errorUnsupported':
+    'هذا الطراز لا يدعم الإجراء المطلوب. جرّب طرازًا آخر.',
+  'assistant.errorRequest':
+    'رفض المزود الطلب. تحقق من الطراز والإعدادات.',
+  'assistant.errorEmpty': 'أعاد المساعد استجابة فارغة.',
+  'assistant.errorTooLong': 'اجعل الرسالة أقل من {max} حرفًا.',
+  'assistant.errorActionPending': 'أكد الإجراء المعلق أو ألغه أولاً.',
+  'assistant.errorToolLimit':
+    'توقف المساعد بعد خطوات كثيرة. جرّب طلبًا أبسط.',
+  'assistant.actionReady': 'راجع الإجراء أدناه.',
+  'assistant.actionRiskWrite': 'يغيّر بيانات التطبيق',
+  'assistant.actionRiskTimer': 'يبدأ مؤقتًا حقيقيًا أو يغيّره',
+  'assistant.actionConfirm': 'تأكيد',
+  'assistant.actionCancel': 'إلغاء',
+  'assistant.actionWorking': 'جارٍ التطبيق…',
+  'assistant.actionExecuted': 'تم',
+  'assistant.actionFailed': 'فشل الإجراء',
+  'assistant.actionExpired':
+    'انتهت صلاحية هذا الإجراء. اطلب إعداد إجراء جديد.',
+  'assistant.actionCancelled': 'أُلغي الإجراء.',
+  'assistant.actionDismiss': 'إغلاق',
+  'assistant.actionPendingTitle': 'تأكيد الإجراء',
+  'assistant.actionOneAtATime': 'يمكن تأكيد إجراء واحد فقط في كل مرة.',
+  'assistant.actionAlreadyHandled': 'تمت معالجة هذا الإجراء بالفعل.',
+  'assistant.actionCreateTask': 'إنشاء مهمة «{title}».',
+  'assistant.actionCreateSubtask':
+    'إنشاء مهمة «{title}» تحت «{parent}».',
+  'assistant.actionUpdateTask': 'تحديث مهمة «{title}».',
+  'assistant.actionMoveTask': 'نقل «{title}» تحت «{parent}».',
+  'assistant.actionMoveTaskRoot': 'نقل «{title}» إلى الجذر.',
+  'assistant.actionCreateCapsule': 'إنشاء كبسولة مستقلة «{text}».',
+  'assistant.actionAddCapsule': 'إضافة كبسولة «{text}» إلى H{sequence}.',
+  'assistant.actionCompleteCapsule': 'إكمال كبسولة «{text}».',
+  'assistant.actionPauseLoop': 'إيقاف H{sequence} مؤقتًا.',
+  'assistant.actionResumeLoop': 'استئناف H{sequence}.',
+  'assistant.actionCompleteLoop':
+    'إكمال H{sequence} وحفظ اليوميات.',
+  'assistant.actionStartLoop': 'بدء حلقة مدتها {duration} دقيقة.',
+  'assistant.actionStartLoopFocus':
+    'بدء حلقة مدتها {duration} دقيقة لـ «{focus}».',
+  'assistant.resultTaskCreated': 'تم إنشاء المهمة.',
+  'assistant.resultTaskUpdated': 'تم تحديث المهمة.',
+  'assistant.resultTaskMoved': 'تم نقل المهمة.',
+  'assistant.resultCapsuleCreated': 'تم إنشاء الكبسولة.',
+  'assistant.resultCapsuleAdded': 'تمت إضافة الكبسولة.',
+  'assistant.resultCapsuleCompleted': 'تم إكمال الكبسولة.',
+  'assistant.resultLoopStarted':
+    'بدأت H{sequence} لمدة {duration} دقيقة.',
+  'assistant.resultLoopPaused': 'تم إيقاف H{sequence} مؤقتًا.',
+  'assistant.resultLoopResumed': 'تم استئناف H{sequence}.',
+  'assistant.resultLoopCompleted': 'تم إكمال H{sequence}.',
+  'assistant.detailDuration': 'المدة',
+  'assistant.detailFocus': 'التركيز',
+  'assistant.detailTask': 'المهمة',
+  'assistant.detailCapsules': 'الكبسولات',
+  'assistant.detailTarget': 'الهدف',
+  'assistant.detailTitle': 'العنوان',
+  'assistant.detailDescription': 'الوصف',
+  'assistant.detailDone': 'تم',
+  'assistant.detailRollForward': 'للمتابعة',
+  'assistant.detailNote': 'ملاحظة',
+  'assistant.writesDisabled':
+    'الكتابة وإجراءات المؤقت متوقفة في الإعدادات.',
+
+  'settings.assistant': 'مساعد الذكاء الاصطناعي',
+  'settings.assistantBody':
+    'اسأل عن بياناتك وأدر الحلقات بلغة طبيعية. المساعد اختياري ويستخدم مفتاح API الخاص بك.',
+  'settings.assistantEnable': 'تمكين المساعد',
+  'settings.assistantEnableBody':
+    'عند الإيقاف، لا يمكن إرسال طلبات إلى المساعد.',
+  'settings.assistantWrites': 'السماح بالكتابة وإجراءات المؤقت',
+  'settings.assistantWritesBody':
+    'كل تغيير لا يزال يتطلب تأكيدًا صريحًا. الإجراءات المدمرة غير متاحة أبدًا.',
+  'settings.assistantProvider': 'المزود',
+  'settings.assistantProviderHint':
+    'يُستخدم {provider}. يوفر المستخدم مفتاح API؛ وقد تُطبق رسوم وحدود المزود.',
+  'settings.assistantConnection': 'الاتصال',
+  'settings.assistantApiKey': 'مفتاح API',
+  'settings.assistantApiKeyPlaceholder': 'ألصق مفتاح API',
+  'settings.assistantApiKeySavedPlaceholder': 'المفتاح محفوظ بالفعل',
+  'settings.assistantApiKeySaved':
+    'المفتاح محفوظ في التخزين الآمن للجهاز ولا يُضمّن في النسخ الاحتياطية.',
+  'settings.assistantApiKeyWeb':
+    'على الويب، يبقى المفتاح في الذاكرة ويُمسح عند إغلاق الصفحة.',
+  'settings.assistantApiKeyHelp':
+    'يُحفظ المفتاح خارج قاعدة بيانات التطبيق ويُرسل فقط إلى المزود المحدد.',
+  'settings.assistantApiKeyWebHelp':
+    'يُحفظ المفتاح في الذاكرة فقط ولا يُكتب في تخزين المتصفح.',
+  'settings.assistantModel': 'الطراز',
+  'settings.assistantModelPlaceholder': 'معرّف طراز المزود',
+  'settings.assistantBaseUrl': 'عنوان URL الأساسي',
+  'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
+  'settings.assistantSave': 'حفظ إعدادات المساعد',
+  'settings.assistantSaved': 'تم حفظ إعدادات المساعد.',
+  'settings.assistantTest': 'اختبار الاتصال',
+  'settings.assistantTesting': 'جارٍ الاختبار…',
+  'settings.assistantTestSuccess': 'نجح الاتصال.',
+  'settings.assistantClearKey': 'مسح المفتاح المحفوظ',
+  'settings.assistantClearKeyTitle': 'إزالة مفتاح API المحفوظ؟',
+  'settings.assistantClearKeyBody':
+    'سيتوقف المساعد عن العمل حتى تحفظ مفتاحًا مرة أخرى.',
+  'settings.assistantClearKeyDone': 'تمت إزالة مفتاح API المحفوظ.',
+  'settings.assistantSaveFailed': 'تعذر حفظ إعدادات المساعد.',
+  'settings.assistantModelRequired': 'أدخل معرّف الطراز.',
+  'settings.assistantKeyRequired': 'أدخل مفتاح API.',
+  'settings.assistantPermissions': 'الأذونات',
+  'settings.assistantPermissionsBody':
+    'قراءة بياناتك تتم تلقائيًا. إنشاء المهام والكبسولات أو تحديثها، وبدء الحلقات أو إيقافها مؤقتًا أو استئنافها أو إكمالها، تتطلب تأكيدًا منفصلًا. الحذف والاستيراد والاستعادة وإعادة الضبط غير متاحة.',
+  'settings.assistantConversation': 'سجل المحادثة',
+  'settings.assistantConversationBody':
+    'يُحفظ سجل المحادثة في الذاكرة لهذه الجلسة فقط ولا يُضمّن في النسخ الاحتياطية.',
+  'settings.assistantConversationCleared': 'تم مسح المحادثة.',
+  'settings.assistantClearConversation': 'مسح المحادثة',
+  'settings.assistantPrivacy': 'الخصوصية',
+  'settings.assistantPrivacyBody':
+    'تُرسل رسائلك وبيانات التطبيق اللازمة للطلب فقط إلى المزود الذي تضبطه. قد تُطبق رسوم وحدود المزود. لا يوفر Hour Loop خدمة ذكاء اصطناعي مجانية مدمجة.',
+  'settings.assistantGroq': 'Groq',
+  'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantCustom': 'مخصص',
+  'settings.assistantCustomHint':
+    'استخدم عنوانًا متوافقًا مع OpenAI. HTTPS مطلوب إلا على شبكة محلية. التوافق غير مضمون لمجرد أن المزود يصف نفسه كذلك.',
 };

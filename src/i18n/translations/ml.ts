@@ -558,4 +558,175 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'errors.invalidBackup': 'ഈ ഫയൽ സാധുവായ Hour Loop ബാക്കപ്പ് അല്ല.',
   'errors.taskMoveCycle':
     'ഒരു ടാസ്കിനെ അതിന്റെയോ അതിന്റെ ക്യാപ്സ്യൂളുകളിലൊന്നിന്റെയോ കീഴിലേക്ക് നീക്കാനാകില്ല.',
+  'assistant.open': 'അസിസ്റ്റന്റ്',
+  'assistant.title': 'Hour Loop-നോട് ചോദിക്കുക',
+  'assistant.eyebrow': 'AI അസിസ്റ്റന്റ്',
+  'assistant.back': 'തിരികെ',
+  'assistant.clear': 'സംഭാഷണം മായ്ക്കുക',
+  'assistant.clearTitle': 'സംഭാഷണം മായ്ക്കണോ?',
+  'assistant.clearBody':
+    'ഈ സെഷന്റെ ചാറ്റ് ഈ ഉപകരണത്തിൽ നിന്ന് നീക്കും. സേവ് ചെയ്ത ലൂപ്പുകളും ടാസ്ക്കുകളും മാറില്ല.',
+  'assistant.clearConfirm': 'മായ്ക്കുക',
+  'assistant.emptyTitle': 'എങ്ങനെ സഹായിക്കാം?',
+  'assistant.emptyBody':
+    'ഫോക്കസ് സമയം, ടാസ്ക്കുകൾ അല്ലെങ്കിൽ ക്യാപ്സ്യൂളുകൾ എന്നിവയെക്കുറിച്ച് ചോദിക്കുക. എഴുത്തും ടൈമർ മാറ്റങ്ങളും എപ്പോഴും നിങ്ങളുടെ സ്ഥിരീകരണം ആവശ്യപ്പെടുന്നു.',
+  'assistant.privacyNote':
+    'സന്ദേശങ്ങളും തിരഞ്ഞെടുത്ത ആപ്പ് സന്ദർഭവും നിങ്ങൾ കോൺഫിഗർ ചെയ്ത ദാതാവിന് അയയ്ക്കുന്നു. അസിസ്റ്റന്റിന് ഡാറ്റാബേസ്, ഫയലുകൾ അല്ലെങ്കിൽ ഷെല്ലിലേക്ക് നേരിട്ടുള്ള പ്രവേശനമില്ല.',
+  'assistant.suggestStats': 'ഇന്ന് ഞാൻ എത്ര ഫോക്കസ് ചെയ്തു?',
+  'assistant.suggestActive': 'ഞാൻ എന്തിലാണ് പ്രവർത്തിക്കുന്നത്?',
+  'assistant.suggestStart': '25 മിനിറ്റ് ലൂപ്പ് ആരംഭിക്കുക',
+  'assistant.suggestTasks': 'എന്റെ ടാസ്ക്കുകൾ കാണിക്കുക',
+  'assistant.placeholder': 'Hour Loop-നോട് ചോദിക്കുകയോ പറയുകയോ ചെയ്യുക…',
+  'assistant.composerA11y': 'അസിസ്റ്റന്റിന് സന്ദേശം അയയ്ക്കുക',
+  'assistant.send': 'സന്ദേശം അയയ്ക്കുക',
+  'assistant.stopA11y': 'സൃഷ്ടി നിർത്തുക',
+  'assistant.thinking': 'ചിന്തിക്കുന്നു…',
+  'assistant.you': 'നിങ്ങൾ',
+  'assistant.assistant': 'അസിസ്റ്റന്റ്',
+  'assistant.retry': 'വീണ്ടും ശ്രമിക്കുക',
+  'assistant.setupTitle': 'അസിസ്റ്റന്റ് സജ്ജീകരിക്കുക',
+  'assistant.setupBody':
+    'സംഭാഷണം തുടങ്ങാൻ ക്രമീകരണങ്ങളിൽ നിങ്ങളുടെ ദാതാവിന്റെ API കീയും മോഡലും ചേർക്കുക.',
+  'assistant.openSettings': 'ക്രമീകരണങ്ങൾ തുറക്കുക',
+  'assistant.errorHint':
+    'വീണ്ടും ശ്രമിക്കാം അല്ലെങ്കിൽ Hour Loop സാധാരണയായി ഉപയോഗിക്കാം.',
+  'assistant.errorGeneric': 'അസിസ്റ്റന്റിന് ആ അഭ്യർത്ഥന പൂർത്തിയാക്കാനായില്ല.',
+  'assistant.errorNoKey': 'ആദ്യം ക്രമീകരണങ്ങളിൽ API കീ ചേർത്ത് സേവ് ചെയ്യുക.',
+  'assistant.errorConfig': 'അസിസ്റ്റന്റ് കോൺഫിഗറേഷൻ അസാധുവാണ്. ക്രമീകരണങ്ങൾ പരിശോധിക്കുക.',
+  'assistant.errorAuth': 'ദാതാവ് API കീ നിരസിച്ചു. ക്രമീകരണങ്ങളിൽ പരിശോധിക്കുക.',
+  'assistant.errorRateLimit':
+    'ദാതാവ് അഭ്യർത്ഥനകൾ പരിമിതപ്പെടുത്തുന്നു. പിന്നീട് ശ്രമിക്കുക.',
+  'assistant.errorServer':
+    'ദാതാവിൽ സെർവർ പിശകുണ്ടായി. പിന്നീട് ശ്രമിക്കുക.',
+  'assistant.errorTimeout': 'അഭ്യർത്ഥന സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക.',
+  'assistant.errorNetwork':
+    'ദാതാവിനെ ബന്ധപ്പെടാനായില്ല. കണക്ഷനും വിലാസവും പരിശോധിക്കുക.',
+  'assistant.errorCancelled': 'സൃഷ്ടി നിർത്തി.',
+  'assistant.errorMalformed': 'ദാതാവ് അസാധുവായ പ്രതികരണം നൽകി.',
+  'assistant.errorUnsupported':
+    'ഈ മോഡൽ അഭ്യർത്ഥിച്ച പ്രവർത്തനം പിന്തുണയ്ക്കുന്നില്ല. മറ്റൊരു മോഡൽ പരീക്ഷിക്കുക.',
+  'assistant.errorRequest':
+    'ദാതാവ് അഭ്യർത്ഥന നിരസിച്ചു. മോഡലും ക്രമീകരണങ്ങളും പരിശോധിക്കുക.',
+  'assistant.errorEmpty': 'അസിസ്റ്റന്റ് ശൂന്യമായ പ്രതികരണം നൽകി.',
+  'assistant.errorTooLong':
+    'സന്ദേശം {max} പ്രതീകങ്ങൾക്കുള്ളിൽ നിർത്തുക.',
+  'assistant.errorActionPending':
+    'ആദ്യം കാത്തിരിക്കുന്ന പ്രവർത്തനം സ്ഥിരീകരിക്കുകയോ റദ്ദാക്കുകയോ ചെയ്യുക.',
+  'assistant.errorToolLimit':
+    'വളരെയധികം ഘട്ടങ്ങൾക്ക് ശേഷം അസിസ്റ്റന്റ് നിർത്തി. ലളിതമായ അഭ്യർത്ഥന ശ്രമിക്കുക.',
+  'assistant.actionReady': 'താഴെയുള്ള പ്രവർത്തനം പരിശോധിക്കുക.',
+  'assistant.actionRiskWrite': 'ആപ്പ് ഡാറ്റ മാറ്റുന്നു',
+  'assistant.actionRiskTimer': 'യഥാർത്ഥ ടൈമർ ആരംഭിക്കുന്നു അല്ലെങ്കിൽ മാറ്റുന്നു',
+  'assistant.actionConfirm': 'സ്ഥിരീകരിക്കുക',
+  'assistant.actionCancel': 'റദ്ദാക്കുക',
+  'assistant.actionWorking': 'പ്രയോഗിക്കുന്നു…',
+  'assistant.actionExecuted': 'പൂർത്തിയായി',
+  'assistant.actionFailed': 'പ്രവർത്തനം പരാജയപ്പെട്ടു',
+  'assistant.actionExpired':
+    'ഈ പ്രവർത്തനത്തിന്റെ കാലാവധി കഴിഞ്ഞു. പുതിയത് തയ്യാറാക്കാൻ വീണ്ടും ചോദിക്കുക.',
+  'assistant.actionCancelled': 'പ്രവർത്തനം റദ്ദാക്കി.',
+  'assistant.actionDismiss': 'അടയ്ക്കുക',
+  'assistant.actionPendingTitle': 'പ്രവർത്തനം സ്ഥിരീകരിക്കുക',
+  'assistant.actionOneAtATime': 'ഒരു സമയം ഒരു പ്രവർത്തനം മാത്രം സ്ഥിരീകരിക്കാം.',
+  'assistant.actionAlreadyHandled': 'ഈ പ്രവർത്തനം ഇതിനകം കൈകാര്യം ചെയ്തു.',
+  'assistant.actionCreateTask': '"{title}" ടാസ്ക് സൃഷ്ടിക്കുക.',
+  'assistant.actionCreateSubtask':
+    '"{parent}"-ന്റെ കീഴിൽ "{title}" ടാസ്ക് സൃഷ്ടിക്കുക.',
+  'assistant.actionUpdateTask': '"{title}" ടാസ്ക് അപ്ഡേറ്റ് ചെയ്യുക.',
+  'assistant.actionMoveTask':
+    '"{title}" എന്നത് "{parent}"-ന്റെ കീഴിലേക്ക് നീക്കുക.',
+  'assistant.actionMoveTaskRoot': '"{title}" എന്നത് റൂട്ടിലേക്ക് നീക്കുക.',
+  'assistant.actionCreateCapsule':
+    '"{text}" സ്വതന്ത്ര ക്യാപ്സ്യൂൾ സൃഷ്ടിക്കുക.',
+  'assistant.actionAddCapsule':
+    '"{text}" ക്യാപ്സ്യൂൾ H{sequence}-ലേക്ക് ചേർക്കുക.',
+  'assistant.actionCompleteCapsule': '"{text}" ക്യാപ്സ്യൂൾ പൂർത്തിയാക്കുക.',
+  'assistant.actionPauseLoop': 'H{sequence} താൽക്കാലികമായി നിർത്തുക.',
+  'assistant.actionResumeLoop': 'H{sequence} തുടരുക.',
+  'assistant.actionCompleteLoop':
+    'H{sequence} പൂർത്തിയാക്കി ജേണൽ സേവ് ചെയ്യുക.',
+  'assistant.actionStartLoop': '{duration} മിനിറ്റ് ലൂപ്പ് ആരംഭിക്കുക.',
+  'assistant.actionStartLoopFocus':
+    '"{focus}"-നായി {duration} മിനിറ്റ് ലൂപ്പ് ആരംഭിക്കുക.',
+  'assistant.resultTaskCreated': 'ടാസ്ക് സൃഷ്ടിച്ചു.',
+  'assistant.resultTaskUpdated': 'ടാസ്ക് അപ്ഡേറ്റ് ചെയ്തു.',
+  'assistant.resultTaskMoved': 'ടാസ്ക് നീക്കി.',
+  'assistant.resultCapsuleCreated': 'ക്യാപ്സ്യൂൾ സൃഷ്ടിച്ചു.',
+  'assistant.resultCapsuleAdded': 'ക്യാപ്സ്യൂൾ ചേർത്തു.',
+  'assistant.resultCapsuleCompleted': 'ക്യാപ്സ്യൂൾ പൂർത്തിയാക്കി.',
+  'assistant.resultLoopStarted':
+    'H{sequence} {duration} മിനിറ്റിനായി ആരംഭിച്ചു.',
+  'assistant.resultLoopPaused': 'H{sequence} താൽക്കാലികമായി നിർത്തി.',
+  'assistant.resultLoopResumed': 'H{sequence} തുടർന്നു.',
+  'assistant.resultLoopCompleted': 'H{sequence} പൂർത്തിയാക്കി.',
+  'assistant.detailDuration': 'ദൈർഘ്യം',
+  'assistant.detailFocus': 'ഫോക്കസ്',
+  'assistant.detailTask': 'ടാസ്ക്',
+  'assistant.detailCapsules': 'ക്യാപ്സ്യൂളുകൾ',
+  'assistant.detailTarget': 'ലക്ഷ്യം',
+  'assistant.detailTitle': 'ശീർഷകം',
+  'assistant.detailDescription': 'വിവരണം',
+  'assistant.detailDone': 'പൂർത്തിയായത്',
+  'assistant.detailRollForward': 'മുന്നോട്ട്',
+  'assistant.detailNote': 'കുറിപ്പ്',
+  'assistant.writesDisabled':
+    'എഴുത്തും ടൈമർ പ്രവർത്തനങ്ങളും ക്രമീകരണങ്ങളിൽ ഓഫാണ്.',
+
+  'settings.assistant': 'AI അസിസ്റ്റന്റ്',
+  'settings.assistantBody':
+    'നിങ്ങളുടെ ഡാറ്റയെക്കുറിച്ച് ചോദിക്കുകയും സ്വാഭാവിക ഭാഷയിൽ ലൂപ്പുകൾ കൈകാര്യം ചെയ്യുകയും ചെയ്യുക. അസിസ്റ്റന്റ് ഓപ്ഷണലാണ്, നിങ്ങളുടെ സ്വന്തം ദാതാവ് API കീ ഉപയോഗിക്കുന്നു.',
+  'settings.assistantEnable': 'അസിസ്റ്റന്റ് പ്രവർത്തനക്ഷമമാക്കുക',
+  'settings.assistantEnableBody':
+    'ഓഫാക്കിയാൽ അസിസ്റ്റന്റ് അഭ്യർത്ഥനകൾ അയയ്ക്കാനാകില്ല.',
+  'settings.assistantWrites': 'എഴുത്തും ടൈമർ പ്രവർത്തനങ്ങളും അനുവദിക്കുക',
+  'settings.assistantWritesBody':
+    'ഓരോ മാറ്റത്തിനും ഇപ്പോഴും വ്യക്തമായ സ്ഥിരീകരണം ആവശ്യമാണ്. നശീകരണ പ്രവർത്തനങ്ങൾ ഒരിക്കലും ലഭ്യമല്ല.',
+  'settings.assistantProvider': 'ദാതാവ്',
+  'settings.assistantProviderHint':
+    '{provider} ഉപയോഗിക്കുന്നു. API കീ ഉപയോക്താവ് നൽകുന്നു; ദാതാവിന്റെ നിരക്കുകളും പരിധികളും ബാധകമായേക്കാം.',
+  'settings.assistantConnection': 'കണക്ഷൻ',
+  'settings.assistantApiKey': 'API കീ',
+  'settings.assistantApiKeyPlaceholder': 'നിങ്ങളുടെ API കീ ഒട്ടിക്കുക',
+  'settings.assistantApiKeySavedPlaceholder': 'കീ ഇതിനകം സേവ് ചെയ്തു',
+  'settings.assistantApiKeySaved':
+    'കീ ഉപകരണത്തിന്റെ സുരക്ഷിത സ്റ്റോറിൽ സേവ് ചെയ്യുന്നു. ബാക്കപ്പുകളിൽ ഒരിക്കലും ഉൾപ്പെടുത്തില്ല.',
+  'settings.assistantApiKeyWeb':
+    'വെബിൽ കീ മെമ്മറിയിൽ മാത്രം നിലനിൽക്കും, പേജ് അടയ്ക്കുമ്പോൾ മായും.',
+  'settings.assistantApiKeyHelp':
+    'കീ ആപ്പ് ഡാറ്റാബേസിന് പുറത്താണ്, തിരഞ്ഞെടുത്ത ദാതാവിന് മാത്രം അയയ്ക്കുന്നു.',
+  'settings.assistantApiKeyWebHelp':
+    'കീ മെമ്മറിയിൽ മാത്രം സൂക്ഷിക്കുന്നു, ബ്രൗസർ സ്റ്റോറേജിൽ എഴുതില്ല.',
+  'settings.assistantModel': 'മോഡൽ',
+  'settings.assistantModelPlaceholder': 'ദാതാവിന്റെ മോഡൽ ഐഡന്റിഫയർ',
+  'settings.assistantBaseUrl': 'അടിസ്ഥാന URL',
+  'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
+  'settings.assistantSave': 'അസിസ്റ്റന്റ് ക്രമീകരണങ്ങൾ സേവ് ചെയ്യുക',
+  'settings.assistantSaved': 'അസിസ്റ്റന്റ് ക്രമീകരണങ്ങൾ സേവ് ചെയ്തു.',
+  'settings.assistantTest': 'കണക്ഷൻ പരീക്ഷിക്കുക',
+  'settings.assistantTesting': 'പരീക്ഷിക്കുന്നു…',
+  'settings.assistantTestSuccess': 'കണക്ഷൻ വിജയിച്ചു.',
+  'settings.assistantClearKey': 'സേവ് ചെയ്ത കീ മായ്ക്കുക',
+  'settings.assistantClearKeyTitle': 'സേവ് ചെയ്ത API കീ നീക്കണോ?',
+  'settings.assistantClearKeyBody':
+    'വീണ്ടും ഒരു കീ സേവ് ചെയ്യുന്നതുവരെ അസിസ്റ്റന്റ് പ്രവർത്തിക്കില്ല.',
+  'settings.assistantClearKeyDone': 'സേവ് ചെയ്ത API കീ നീക്കി.',
+  'settings.assistantSaveFailed': 'അസിസ്റ്റന്റ് ക്രമീകരണങ്ങൾ സേവ് ചെയ്യാനായില്ല.',
+  'settings.assistantModelRequired': 'ഒരു മോഡൽ ഐഡന്റിഫയർ നൽകുക.',
+  'settings.assistantKeyRequired': 'ഒരു API കീ നൽകുക.',
+  'settings.assistantPermissions': 'അനുമതികൾ',
+  'settings.assistantPermissionsBody':
+    'നിങ്ങളുടെ ഡാറ്റ വായന സ്വയമേവ നടക്കും. ടാസ്ക്കുകളും ക്യാപ്സ്യൂളുകളും സൃഷ്ടിക്കുന്നതോ അപ്ഡേറ്റ് ചെയ്യുന്നതോ, ലൂപ്പുകൾ ആരംഭിക്കുന്നതോ താൽക്കാലികമായി നിർത്തുന്നതോ തുടരുന്നതോ പൂർത്തിയാക്കുന്നതോ പ്രത്യേക സ്ഥിരീകരണം ആവശ്യപ്പെടുന്നു. ഇല്ലാതാക്കൽ, ഇംപോർട്ട്, പുനഃസ്ഥാപനം, റീസെറ്റ് എന്നിവ ലഭ്യമല്ല.',
+  'settings.assistantConversation': 'സംഭാഷണ ചരിത്രം',
+  'settings.assistantConversationBody':
+    'ചാറ്റ് ചരിത്രം ഈ ആപ്പ് സെഷനിൽ മെമ്മറിയിൽ മാത്രം സൂക്ഷിക്കുന്നു. ബാക്കപ്പുകളിൽ ഒരിക്കലും ഉൾപ്പെടുത്തില്ല.',
+  'settings.assistantConversationCleared': 'സംഭാഷണം മായ്ച്ചു.',
+  'settings.assistantClearConversation': 'സംഭാഷണം മായ്ക്കുക',
+  'settings.assistantPrivacy': 'സ്വകാര്യത',
+  'settings.assistantPrivacyBody':
+    'നിങ്ങളുടെ സന്ദേശങ്ങളും ഒരു അഭ്യർത്ഥനയ്ക്ക് ആവശ്യമായ ആപ്പ് ഡാറ്റയും മാത്രം നിങ്ങൾ കോൺഫിഗർ ചെയ്ത ദാതാവിന് അയയ്ക്കുന്നു. ദാതാവിന്റെ നിരക്കുകളും പരിധികളും ബാധകമായേക്കാം. Hour Loop സൗജന്യ ബിൽറ്റ്-ഇൻ AI സേവനം നൽകുന്നില്ല.',
+  'settings.assistantGroq': 'Groq',
+  'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantCustom': 'ഇഷ്ടാനുസൃതം',
+  'settings.assistantCustomHint':
+    'OpenAI-യോട് അനുയോജ്യമായ വിലാസം ഉപയോഗിക്കുക. ലോക്കൽ നെറ്റ്വർക്ക് ഒഴികെ HTTPS നിർബന്ധമാണ്. ഒരു എൻഡ്പോയിന്റ് സ്വയം അനുയോജ്യമെന്ന് പറയുന്നത് മാത്രം അനുയോജ്യത ഉറപ്പാക്കുന്നില്ല.',
 }

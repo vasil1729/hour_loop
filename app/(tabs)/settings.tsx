@@ -15,6 +15,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
+import { AssistantSettings } from '../../src/components/assistant/AssistantSettings';
 import { IntentionEditModal } from '../../src/components/intentions/IntentionEditModal';
 import {
   DURATION_PRESETS_MINUTES,
@@ -139,6 +140,7 @@ export default function SettingsScreen() {
   const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(
     null
   );
+  const [assistantReloadToken, setAssistantReloadToken] = useState(0);
   const [defaultsExpanded, setDefaultsExpanded] = useState(false);
 
   const applyDuration = async (seconds: number) => {
@@ -317,6 +319,7 @@ export default function SettingsScreen() {
       await cancelAllLoopNotifications(db);
       const result = await importBackup(db, backup);
       await loadSettings(db);
+      setAssistantReloadToken((value) => value + 1);
       await recoverAppState(db);
 
       const pausedNote =
@@ -818,6 +821,8 @@ export default function SettingsScreen() {
           <Text style={[styles.infoChevron, { color: colors.accent }]}>{isRTL ? '‹' : '›'}</Text>
         </Pressable>
       ) : null}
+
+      <AssistantSettings reloadToken={assistantReloadToken} />
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>

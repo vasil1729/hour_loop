@@ -241,7 +241,10 @@ function requireMonthKey(
 }
 
 function isDeviceSpecificSetting(key: string): boolean {
-  return key.startsWith('notif_');
+  // Assistant preferences are device/provider scoped and secrets never belong
+  // in the generic settings table. Keep all assistant_* keys out of backups so
+  // imported data can never carry credentials or override local AI choices.
+  return key.startsWith('notif_') || key.startsWith('assistant_');
 }
 
 function countData(data: BackupData): BackupCounts {

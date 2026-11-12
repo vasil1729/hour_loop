@@ -297,6 +297,9 @@ export async function importBackup(
       await createIntention(db, intention);
     }
     for (const setting of backup.data.settings) {
+      // Never accept assistant preferences from an imported backup. They are
+      // device/provider scoped and could redirect future AI traffic.
+      if (setting.key.startsWith('assistant_')) continue;
       await insertSetting(db, setting);
     }
 

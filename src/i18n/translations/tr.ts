@@ -533,4 +533,173 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'errors.invalidBackup': 'Bu dosya geçerli bir Hour Loop yedeği değil.',
   'errors.taskMoveCycle':
     'Bir görev kendisinin veya kendi kapsüllerinden birinin altına taşınamaz.',
+  'assistant.open': 'Asistan',
+  'assistant.title': "Hour Loop'a sor",
+  'assistant.eyebrow': 'YAPAY ZEKÂ ASİSTANI',
+  'assistant.back': 'Geri',
+  'assistant.clear': 'Sohbeti temizle',
+  'assistant.clearTitle': 'Sohbet temizlensin mi?',
+  'assistant.clearBody':
+    'Bu oturumun sohbeti bu cihazdan kaldırılır. Kayıtlı döngüler ve görevler etkilenmez.',
+  'assistant.clearConfirm': 'Temizle',
+  'assistant.emptyTitle': 'Nasıl yardımcı olabilirim?',
+  'assistant.emptyBody':
+    'Odak sürenizi, görevlerinizi veya kapsüllerinizi sorun. Yazma ve zamanlayıcı değişiklikleri her zaman onayınızı gerektirir.',
+  'assistant.privacyNote':
+    'Mesajlar ve seçilen uygulama bağlamı yapılandırdığınız sağlayıcıya gönderilir. Asistanın veritabanına, dosyalara veya kabuğa doğrudan erişimi yoktur.',
+  'assistant.suggestStats': 'Bugün ne kadar odaklandım?',
+  'assistant.suggestActive': 'Ne üzerinde çalışıyorum?',
+  'assistant.suggestStart': '25 dakikalık bir döngü başlat',
+  'assistant.suggestTasks': 'Görevlerimi göster',
+  'assistant.placeholder': "Hour Loop'a sorun veya söyleyin…",
+  'assistant.composerA11y': 'Asistana mesaj gönder',
+  'assistant.send': 'Mesaj gönder',
+  'assistant.stopA11y': 'Üretimi durdur',
+  'assistant.thinking': 'Düşünüyor…',
+  'assistant.you': 'Siz',
+  'assistant.assistant': 'Asistan',
+  'assistant.retry': 'Yeniden dene',
+  'assistant.setupTitle': 'Asistanı ayarlayın',
+  'assistant.setupBody':
+    'Sohbete başlamak için Ayarlar bölümüne kendi sağlayıcı API anahtarınızı ve modelinizi ekleyin.',
+  'assistant.openSettings': 'Ayarları aç',
+  'assistant.errorHint':
+    'Yeniden deneyebilir veya Hour Loop kullanmaya normal şekilde devam edebilirsiniz.',
+  'assistant.errorGeneric': 'Asistan isteği tamamlayamadı.',
+  'assistant.errorNoKey': 'Önce Ayarlar bölümünde bir API anahtarı ekleyip kaydedin.',
+  'assistant.errorConfig': 'Asistan yapılandırması geçersiz. Ayarları kontrol edin.',
+  'assistant.errorAuth': 'Sağlayıcı API anahtarını reddetti. Ayarlardan kontrol edin.',
+  'assistant.errorRateLimit':
+    'Sağlayıcı istekleri sınırlıyor. Daha sonra tekrar deneyin.',
+  'assistant.errorServer':
+    'Sağlayıcıda sunucu hatası oluştu. Daha sonra tekrar deneyin.',
+  'assistant.errorTimeout': 'İstek zaman aşımına uğradı. Tekrar deneyin.',
+  'assistant.errorNetwork':
+    'Sağlayıcıya ulaşılamadı. Bağlantıyı ve adresi kontrol edin.',
+  'assistant.errorCancelled': 'Üretim durduruldu.',
+  'assistant.errorMalformed': 'Sağlayıcı geçersiz bir yanıt döndürdü.',
+  'assistant.errorUnsupported':
+    'Bu model istenen eylemi desteklemiyor. Başka bir model deneyin.',
+  'assistant.errorRequest':
+    'Sağlayıcı isteği reddetti. Modeli ve ayarları kontrol edin.',
+  'assistant.errorEmpty': 'Asistan boş bir yanıt döndürdü.',
+  'assistant.errorTooLong': 'Mesajı {max} karakterin altında tutun.',
+  'assistant.errorActionPending': 'Önce bekleyen eylemi onaylayın veya iptal edin.',
+  'assistant.errorToolLimit':
+    'Asistan çok fazla adımdan sonra durdu. Daha basit bir istek deneyin.',
+  'assistant.actionReady': 'Aşağıdaki eylemi inceleyin.',
+  'assistant.actionRiskWrite': 'Uygulama verilerini değiştirir',
+  'assistant.actionRiskTimer': 'Gerçek bir zamanlayıcı başlatır veya değiştirir',
+  'assistant.actionConfirm': 'Onayla',
+  'assistant.actionCancel': 'İptal',
+  'assistant.actionWorking': 'Uygulanıyor…',
+  'assistant.actionExecuted': 'Tamam',
+  'assistant.actionFailed': 'Eylem başarısız',
+  'assistant.actionExpired':
+    'Bu eylemin süresi doldu. Yeni bir eylem hazırlamasını isteyin.',
+  'assistant.actionCancelled': 'Eylem iptal edildi.',
+  'assistant.actionDismiss': 'Kapat',
+  'assistant.actionPendingTitle': 'Eylemi onayla',
+  'assistant.actionOneAtATime': 'Aynı anda yalnızca bir eylem onaylanabilir.',
+  'assistant.actionAlreadyHandled': 'Bu eylem zaten işlendi.',
+  'assistant.actionCreateTask': '"{title}" görevini oluştur.',
+  'assistant.actionCreateSubtask':
+    '"{parent}" altında "{title}" görevini oluştur.',
+  'assistant.actionUpdateTask': '"{title}" görevini güncelle.',
+  'assistant.actionMoveTask':
+    '"{title}" görevini "{parent}" altına taşı.',
+  'assistant.actionMoveTaskRoot': '"{title}" görevini köke taşı.',
+  'assistant.actionCreateCapsule':
+    '"{text}" bağımsız kapsülünü oluştur.',
+  'assistant.actionAddCapsule':
+    '"{text}" kapsülünü H{sequence} döngüsüne ekle.',
+  'assistant.actionCompleteCapsule': '"{text}" kapsülünü tamamla.',
+  'assistant.actionPauseLoop': 'H{sequence} döngüsünü duraklat.',
+  'assistant.actionResumeLoop': 'H{sequence} döngüsünü sürdür.',
+  'assistant.actionCompleteLoop':
+    'H{sequence} döngüsünü tamamla ve günlüğü kaydet.',
+  'assistant.actionStartLoop':
+    '{duration} dakikalık bir döngü başlat.',
+  'assistant.actionStartLoopFocus':
+    '"{focus}" için {duration} dakikalık bir döngü başlat.',
+  'assistant.resultTaskCreated': 'Görev oluşturuldu.',
+  'assistant.resultTaskUpdated': 'Görev güncellendi.',
+  'assistant.resultTaskMoved': 'Görev taşındı.',
+  'assistant.resultCapsuleCreated': 'Kapsül oluşturuldu.',
+  'assistant.resultCapsuleAdded': 'Kapsül eklendi.',
+  'assistant.resultCapsuleCompleted': 'Kapsül tamamlandı.',
+  'assistant.resultLoopStarted':
+    'H{sequence}, {duration} dakika için başlatıldı.',
+  'assistant.resultLoopPaused': 'H{sequence} duraklatıldı.',
+  'assistant.resultLoopResumed': 'H{sequence} sürdürüldü.',
+  'assistant.resultLoopCompleted': 'H{sequence} tamamlandı.',
+  'assistant.detailDuration': 'Süre',
+  'assistant.detailFocus': 'Odak',
+  'assistant.detailTask': 'Görev',
+  'assistant.detailCapsules': 'Kapsüller',
+  'assistant.detailTarget': 'Hedef',
+  'assistant.detailTitle': 'Başlık',
+  'assistant.detailDescription': 'Açıklama',
+  'assistant.detailDone': 'Tamamlanan',
+  'assistant.detailRollForward': 'Devret',
+  'assistant.detailNote': 'Not',
+  'assistant.writesDisabled': 'Yazma ve zamanlayıcı eylemleri Ayarlarda kapalı.',
+
+  'settings.assistant': 'Yapay zekâ asistanı',
+  'settings.assistantBody':
+    'Verileriniz hakkında soru sorun ve döngüleri doğal dille yönetin. Asistan isteğe bağlıdır ve kendi sağlayıcı API anahtarınızı kullanır.',
+  'settings.assistantEnable': 'Asistanı etkinleştir',
+  'settings.assistantEnableBody':
+    'Kapalıyken asistan isteği gönderilemez.',
+  'settings.assistantWrites': 'Yazma ve zamanlayıcı eylemlerine izin ver',
+  'settings.assistantWritesBody':
+    'Her değişiklik yine açık onay gerektirir. Yıkıcı eylemler hiçbir zaman sunulmaz.',
+  'settings.assistantProvider': 'Sağlayıcı',
+  'settings.assistantProviderHint':
+    '{provider} kullanılıyor. API anahtarını kullanıcı sağlar; sağlayıcı ücretleri ve sınırları geçerli olabilir.',
+  'settings.assistantConnection': 'Bağlantı',
+  'settings.assistantApiKey': 'API anahtarı',
+  'settings.assistantApiKeyPlaceholder': 'API anahtarınızı yapıştırın',
+  'settings.assistantApiKeySavedPlaceholder': 'Anahtar zaten kayıtlı',
+  'settings.assistantApiKeySaved':
+    'Anahtar cihazın güvenli deposunda saklanır ve yedeklere asla dahil edilmez.',
+  'settings.assistantApiKeyWeb':
+    'Webde anahtar yalnızca bellekte tutulur ve sayfa kapanınca silinir.',
+  'settings.assistantApiKeyHelp':
+    'Anahtar uygulama veritabanının dışında tutulur ve yalnızca seçilen sağlayıcıya gönderilir.',
+  'settings.assistantApiKeyWebHelp':
+    'Anahtar yalnızca bellekte tutulur ve tarayıcı deposuna yazılmaz.',
+  'settings.assistantModel': 'Model',
+  'settings.assistantModelPlaceholder': 'Sağlayıcı model tanımlayıcısı',
+  'settings.assistantBaseUrl': 'Temel URL',
+  'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
+  'settings.assistantSave': 'Asistan ayarlarını kaydet',
+  'settings.assistantSaved': 'Asistan ayarları kaydedildi.',
+  'settings.assistantTest': 'Bağlantıyı test et',
+  'settings.assistantTesting': 'Test ediliyor…',
+  'settings.assistantTestSuccess': 'Bağlantı başarılı.',
+  'settings.assistantClearKey': 'Kayıtlı anahtarı temizle',
+  'settings.assistantClearKeyTitle': 'Kayıtlı API anahtarı kaldırılsın mı?',
+  'settings.assistantClearKeyBody':
+    'Yeni bir anahtar kaydedene kadar asistan çalışmayı durdurur.',
+  'settings.assistantClearKeyDone': 'Kayıtlı API anahtarı kaldırıldı.',
+  'settings.assistantSaveFailed': 'Asistan ayarları kaydedilemedi.',
+  'settings.assistantModelRequired': 'Bir model tanımlayıcısı girin.',
+  'settings.assistantKeyRequired': 'Bir API anahtarı girin.',
+  'settings.assistantPermissions': 'İzinler',
+  'settings.assistantPermissionsBody':
+    'Verilerinizi okuma otomatik gerçekleşir. Görev ve kapsül oluşturma veya güncelleme ile döngüleri başlatma, duraklatma, sürdürme veya tamamlama ayrı onay gerektirir. Silme, içe aktarma, geri yükleme veya sıfırlama kullanılamaz.',
+  'settings.assistantConversation': 'Sohbet geçmişi',
+  'settings.assistantConversationBody':
+    'Sohbet geçmişi yalnızca bu uygulama oturumu için bellekte tutulur ve yedeklere asla dahil edilmez.',
+  'settings.assistantConversationCleared': 'Sohbet temizlendi.',
+  'settings.assistantClearConversation': 'Sohbeti temizle',
+  'settings.assistantPrivacy': 'Gizlilik',
+  'settings.assistantPrivacyBody':
+    'Mesajlarınız ve bir istek için gereken uygulama verileri yalnızca yapılandırdığınız sağlayıcıya gönderilir. Sağlayıcı ücretleri ve sınırları geçerli olabilir. Hour Loop ücretsiz yerleşik bir yapay zekâ hizmeti sunmaz.',
+  'settings.assistantGroq': 'Groq',
+  'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantCustom': 'Özel',
+  'settings.assistantCustomHint':
+    'OpenAI uyumlu bir adres kullanın. Yerel ağ dışında HTTPS gerekir. Bir uç noktanın kendisini uyumlu olarak adlandırması uyumluluğu garanti etmez.',
 }

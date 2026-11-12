@@ -168,6 +168,22 @@ describe('createBackupPayload', () => {
     });
     expect(backup.data.settings.map((setting) => setting.key)).toEqual(['theme']);
   });
+
+  it('drops assistant preferences and cannot carry credentials', () => {
+    const backup = makeBackup({
+      settings: [
+        makeSetting('theme', 'dark'),
+        makeSetting('assistant_provider', 'openai'),
+        makeSetting('assistant_model', 'gpt-4o-mini'),
+        makeSetting('assistant_api_key', 'sk-should-never-export'),
+      ],
+    });
+
+    expect(backup.data.settings.map((setting) => setting.key)).toEqual([
+      'theme',
+    ]);
+    expect(JSON.stringify(backup)).not.toContain('sk-should-never-export');
+  });
 });
 
 describe('validateBackup', () => {
