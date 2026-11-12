@@ -611,6 +611,9 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'assistant.errorGeneric': 'Ассистент не смог выполнить запрос.',
   'assistant.errorNoKey':
     'Сначала добавьте и сохраните API-ключ в настройках.',
+  'assistant.errorCredentials':
+    'Не удалось получить доступ к API-ключу в защищённом хранилище.',
+  'assistant.errorUnavailable': 'Ассистент выключен в настройках.',
   'assistant.errorConfig':
     'Конфигурация ассистента неверна. Проверьте настройки.',
   'assistant.errorAuth':
@@ -749,5 +752,5 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': 'Другой',
   'settings.assistantCustomHint':
-    'Используйте совместимый с OpenAI адрес. HTTPS обязателен, кроме локальной сети. Совместимость не гарантируется только по заявлению провайдера.',
+    'Используйте HTTPS-адрес, совместимый с OpenAI. Совместимость не гарантируется только по заявлению провайдера.',
 };

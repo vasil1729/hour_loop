@@ -90,6 +90,10 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
     send: async (db, config, rawText) => {
       const text = rawText.trim();
       if (!text || get().status === 'busy') return;
+      if (!config.enabled) {
+        set({ error: t('assistant.errorUnavailable') });
+        return;
+      }
 
       if (text.length > ASSISTANT_MAX_MESSAGE_LENGTH) {
         set({
@@ -148,7 +152,16 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
           finishWithError(assistantId, text, t('assistant.errorNoKey'));
           return;
         }
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) {
+          set((state) => ({
+            messages: state.messages.filter(
+              (message) => message.id !== assistantId
+            ),
+            status: 'idle',
+            error: null,
+          }));
+          return;
+        }
 
         const result = await runAssistantTurn({
           db,
@@ -172,6 +185,24 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
         });
 
         if (activeController !== controller) return;
+
+        if (controller.signal.aborted) {
+          set((state) => {
+            const assistant = state.messages.find(
+              (message) => message.id === assistantId
+            );
+            const messages =
+              !assistant || !assistant.content.trim()
+                ? state.messages.filter((message) => message.id !== assistantId)
+                : state.messages.map((message) =>
+                    message.id === assistantId
+                      ? { ...message, status: 'sent' as const }
+                      : message
+                  );
+            return { messages, status: 'idle', error: null };
+          });
+          return;
+        }
 
         const content =
           result.content ||
@@ -225,6 +256,13 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
     approve: async (db, config, actionId) => {
       const action = get().pendingAction;
       if (!action || action.id !== actionId) return;
+      if (!config.enabled) {
+        set({
+          pendingAction: { ...action, status: 'cancelled' },
+          error: t('assistant.errorUnavailable'),
+        });
+        return;
+      }
 
       if (action.status !== 'pending') {
         set({ error: t('assistant.actionAlreadyHandled') });
@@ -260,6 +298,7 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
           action,
           { writesEnabled: config.writesEnabled }
         );
+        if (get().pendingAction?.id !== action.id) return;
         set({
           pendingAction: {
             ...action,
@@ -268,6 +307,7 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
           },
         });
       } catch (error) {
+        if (get().pendingAction?.id !== action.id) return;
         if (
           error instanceof AssistantActionError &&
           error.code === 'expired'

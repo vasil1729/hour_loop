@@ -121,6 +121,7 @@ describe('assistant settings UI', () => {
 
     expect(await screen.findByText('assistant.errorAuth')).toBeTruthy();
     expect(screen.queryByText('secret provider text')).toBeNull();
+    expect(mockSetKey).not.toHaveBeenCalled();
   });
 
   it('saves non-secret configuration and stores the key separately', async () => {
@@ -137,5 +138,6 @@ describe('assistant settings UI', () => {
       expect(mockSetKey).toHaveBeenCalledWith('groq', 'sk-new-key');
     });
     expect(screen.getByText('settings.assistantSaved')).toBeTruthy();
+    expect(screen.queryByDisplayValue('sk-new-key')).toBeNull();
   });
 });

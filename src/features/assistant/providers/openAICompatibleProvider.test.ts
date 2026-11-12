@@ -86,9 +86,6 @@ describe('assistant provider configuration', () => {
     expect(normalizeBaseUrl('https://ai.example.com/v1/')).toBe(
       'https://ai.example.com/v1'
     );
-    expect(normalizeBaseUrl('http://127.0.0.1:8080/v1')).toBe(
-      'http://127.0.0.1:8080/v1'
-    );
     const provider = createCustomProvider(
       'https://ai.example.com/v1/',
       KEY,
@@ -103,12 +100,18 @@ describe('assistant provider configuration', () => {
     );
   });
 
-  it('rejects an invalid or insecure endpoint', () => {
+  it('rejects an invalid, insecure, or local plaintext endpoint', () => {
     expect(() => normalizeBaseUrl('not-a-url')).toThrow(AssistantConfigError);
     expect(() => normalizeBaseUrl('https://user:pass@example.com/v1')).toThrow(
       AssistantConfigError
     );
     expect(() => normalizeBaseUrl('http://example.com/v1')).toThrow(
+      AssistantConfigError
+    );
+    expect(() => normalizeBaseUrl('http://127.0.0.1:11434/v1')).toThrow(
+      AssistantConfigError
+    );
+    expect(() => normalizeBaseUrl('http://192.168.1.20:8080/v1')).toThrow(
       AssistantConfigError
     );
     expect(() =>
@@ -258,6 +261,100 @@ describe('OpenAI-compatible request handling', () => {
         status: 200,
         headers: { 'content-type': 'text/event-stream' },
       })
+    ) as unknown as typeof fetch;
+
+    await expectProviderError(
+      chatCompletion(
+        { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+        { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+      ),
+      'network'
+    );
+  });
+
+  it('parses JSON responses without a content-type header', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ choices: [{ message: { content: 'OK' } }] }), {
+        status: 200,
+      })
+    ) as unknown as typeof fetch;
+
+    const result = await chatCompletion(
+      { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+      { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+    );
+    expect(result.content).toBe('OK');
+  });
+
+  it('parses SSE text returned without an event-stream header', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        'data: {"choices":[{"delta":{"content":"Fallback"}}]}\n\ndata: [DONE]\n\n',
+        { status: 200, headers: { 'content-type': 'text/plain' } }
+      )
+    ) as unknown as typeof fetch;
+
+    const result = await chatCompletion(
+      { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+      { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+    );
+    expect(result.content).toBe('Fallback');
+  });
+
+  it('returns an empty response without crashing', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      jsonResponse({ choices: [{ message: { content: '' } }] })
+    ) as unknown as typeof fetch;
+
+    const result = await chatCompletion(
+      { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+      { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+    );
+    expect(result.content).toBe('');
+    expect(result.toolCalls).toEqual([]);
+  });
+
+  it('rejects an oversized non-stream response', async () => {
+    const oversized = JSON.stringify({
+      choices: [{ message: { content: 'x'.repeat(1_100_000) } }],
+    });
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(oversized, {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    ) as unknown as typeof fetch;
+
+    await expectProviderError(
+      chatCompletion(
+        { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+        { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+      ),
+      'malformed'
+    );
+  });
+
+  it('maps an invalid model rejection to a request error', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      errorResponse(400, 'The model `missing-model` does not exist')
+    ) as unknown as typeof fetch;
+
+    await expectProviderError(
+      chatCompletion(
+        { baseUrl: 'https://api.example.com/v1', apiKey: KEY, model: 'm' },
+        { messages: [{ role: 'user', content: 'hi' }], tools: [] }
+      ),
+      'request'
+    );
+  });
+
+  it('rejects a redirected response even if a transport followed it', async () => {
+    const response = jsonResponse({
+      choices: [{ message: { content: 'OK' } }],
+    });
+    Object.defineProperty(response, 'redirected', { value: true });
+    global.fetch = jest.fn().mockResolvedValue(
+      response
     ) as unknown as typeof fetch;
 
     await expectProviderError(

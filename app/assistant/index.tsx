@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  AppState,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -53,6 +54,15 @@ export default function AssistantScreen() {
   const [hasKey, setHasKey] = useState(false);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState('');
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') {
+        useAssistantStore.getState().stop();
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

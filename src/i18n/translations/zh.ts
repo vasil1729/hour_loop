@@ -540,6 +540,8 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'assistant.errorHint': '你可以重试，也可以继续正常使用 Hour Loop。',
   'assistant.errorGeneric': '助手无法完成该请求。',
   'assistant.errorNoKey': '请先在设置中添加并保存 API 密钥。',
+  'assistant.errorCredentials': '无法访问安全存储中的 API 密钥。',
+  'assistant.errorUnavailable': '助手已在设置中关闭。',
   'assistant.errorConfig': '助手配置无效。请检查设置。',
   'assistant.errorAuth': '服务商拒绝了 API 密钥。请在设置中检查。',
   'assistant.errorRateLimit': '服务商正在限制请求。请稍后重试。',
@@ -649,5 +651,5 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': '自定义',
-  'settings.assistantCustomHint': '使用兼容 OpenAI 的地址。除本地网络外必须使用 HTTPS。仅因端点自称兼容并不保证兼容性。',
+  'settings.assistantCustomHint': '使用兼容 OpenAI 的 HTTPS 地址。仅因端点自称兼容并不保证兼容性。',
 }

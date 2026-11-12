@@ -592,6 +592,9 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
     'വീണ്ടും ശ്രമിക്കാം അല്ലെങ്കിൽ Hour Loop സാധാരണയായി ഉപയോഗിക്കാം.',
   'assistant.errorGeneric': 'അസിസ്റ്റന്റിന് ആ അഭ്യർത്ഥന പൂർത്തിയാക്കാനായില്ല.',
   'assistant.errorNoKey': 'ആദ്യം ക്രമീകരണങ്ങളിൽ API കീ ചേർത്ത് സേവ് ചെയ്യുക.',
+  'assistant.errorCredentials':
+    'സുരക്ഷിത സ്റ്റോറേജിലുള്ള API കീ ആക്സസ് ചെയ്യാനായില്ല.',
+  'assistant.errorUnavailable': 'അസിസ്റ്റന്റ് ക്രമീകരണങ്ങളിൽ ഓഫാണ്.',
   'assistant.errorConfig': 'അസിസ്റ്റന്റ് കോൺഫിഗറേഷൻ അസാധുവാണ്. ക്രമീകരണങ്ങൾ പരിശോധിക്കുക.',
   'assistant.errorAuth': 'ദാതാവ് API കീ നിരസിച്ചു. ക്രമീകരണങ്ങളിൽ പരിശോധിക്കുക.',
   'assistant.errorRateLimit':
@@ -728,5 +731,5 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': 'ഇഷ്ടാനുസൃതം',
   'settings.assistantCustomHint':
-    'OpenAI-യോട് അനുയോജ്യമായ വിലാസം ഉപയോഗിക്കുക. ലോക്കൽ നെറ്റ്വർക്ക് ഒഴികെ HTTPS നിർബന്ധമാണ്. ഒരു എൻഡ്പോയിന്റ് സ്വയം അനുയോജ്യമെന്ന് പറയുന്നത് മാത്രം അനുയോജ്യത ഉറപ്പാക്കുന്നില്ല.',
+    'HTTPS OpenAI-അനുയോജ്യമായ വിലാസം ഉപയോഗിക്കുക. ഒരു എൻഡ്പോയിന്റ് സ്വയം അനുയോജ്യമെന്ന് പറയുന്നത് മാത്രം അനുയോജ്യത ഉറപ്പാക്കുന്നില്ല.',
 }

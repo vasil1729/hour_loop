@@ -193,6 +193,109 @@ describe('assistant conversation tool loop', () => {
     expect(toolMessage?.content).toContain('Invalid arguments');
   });
 
+  it('parses JSON tool arguments before schema validation', async () => {
+    const parse = jest.fn((args: unknown) => args);
+    const readTool = makeTool('get_status', 'read', {
+      parse,
+      execute: jest.fn(async () => ({ summary: 'ok' })),
+    });
+    const provider = scriptedProvider([
+      {
+        content: '',
+        toolCalls: [toolCall('call-1', 'get_status', { loopId: 'loop-1' })],
+        finishReason: 'tool_calls',
+      },
+      { content: 'Done.', toolCalls: [], finishReason: 'stop' },
+    ]);
+
+    await runAssistantTurn({
+      db,
+      config: config(),
+      apiKey: 'sk-test-key',
+      history: [],
+      text: 'Show it.',
+      provider,
+      tools: [readTool],
+    });
+
+    expect(parse).toHaveBeenCalledWith({ loopId: 'loop-1' });
+    expect(readTool.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ db }),
+      { loopId: 'loop-1' }
+    );
+  });
+
+  it('rejects malformed JSON tool arguments without executing the tool', async () => {
+    const parse = jest.fn((args: unknown) => args);
+    const readTool = makeTool('get_status', 'read', { parse });
+    const provider = scriptedProvider([
+      {
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-1',
+            type: 'function',
+            function: { name: 'get_status', arguments: '{not-json' },
+          },
+        ],
+        finishReason: 'tool_calls',
+      },
+      { content: 'I need valid arguments.', toolCalls: [], finishReason: 'stop' },
+    ]);
+
+    await runAssistantTurn({
+      db,
+      config: config(),
+      apiKey: 'sk-test-key',
+      history: [],
+      text: 'Show it.',
+      provider,
+      tools: [readTool],
+    });
+
+    expect(parse).not.toHaveBeenCalled();
+    expect(readTool.execute).not.toHaveBeenCalled();
+    const toolMessage = provider.requests[1]?.messages.find(
+      (message) => message.role === 'tool'
+    );
+    expect(toolMessage?.content).toContain('Invalid arguments');
+  });
+
+  it('rejects oversized JSON tool arguments without executing the tool', async () => {
+    const parse = jest.fn((args: unknown) => args);
+    const readTool = makeTool('get_status', 'read', { parse });
+    const provider = scriptedProvider([
+      {
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-1',
+            type: 'function',
+            function: {
+              name: 'get_status',
+              arguments: JSON.stringify({ text: 'x'.repeat(25_000) }),
+            },
+          },
+        ],
+        finishReason: 'tool_calls',
+      },
+      { content: 'Arguments were too large.', toolCalls: [], finishReason: 'stop' },
+    ]);
+
+    await runAssistantTurn({
+      db,
+      config: config(),
+      apiKey: 'sk-test-key',
+      history: [],
+      text: 'Show it.',
+      provider,
+      tools: [readTool],
+    });
+
+    expect(parse).not.toHaveBeenCalled();
+    expect(readTool.execute).not.toHaveBeenCalled();
+  });
+
   it('does not execute a mutation before native approval', async () => {
     const writeTool = makeTool('create_task', 'write');
     const provider = scriptedProvider([

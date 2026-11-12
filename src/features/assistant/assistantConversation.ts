@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import {
+  ASSISTANT_MAX_TOOL_ARGUMENT_CHARS,
   ASSISTANT_MAX_TOOL_RESULT_CHARS,
   ASSISTANT_MAX_TURN_TOOL_RESULT_CHARS,
   ASSISTANT_TOOL_ITERATION_LIMIT,
@@ -199,7 +200,14 @@ export async function runAssistantTurn(
 
       let args: unknown;
       try {
-        args = tool.parse(call.function.arguments);
+        const rawArguments = call.function.arguments.trim() || '{}';
+        if (rawArguments.length > ASSISTANT_MAX_TOOL_ARGUMENT_CHARS) {
+          throw new AssistantProviderError(
+            'malformed',
+            'Tool arguments were too large.'
+          );
+        }
+        args = tool.parse(JSON.parse(rawArguments));
       } catch (error) {
         messages.push({
           role: 'tool',

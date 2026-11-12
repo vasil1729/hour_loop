@@ -38,11 +38,11 @@ export function describeAssistantError(error: unknown): string {
     }
     return t('assistant.errorGeneric');
   }
-  if (
-    error instanceof AssistantConfigError ||
-    error instanceof CredentialStorageError
-  ) {
+  if (error instanceof AssistantConfigError) {
     return t('assistant.errorConfig');
+  }
+  if (error instanceof CredentialStorageError) {
+    return t('assistant.errorCredentials');
   }
   if (error instanceof AssistantToolError) {
     return t('assistant.errorRequest');

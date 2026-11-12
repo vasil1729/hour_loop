@@ -55,6 +55,13 @@ describe('assistant credential storage', () => {
     expect(mockDeleteItem).toHaveBeenCalledWith('hour-loop.assistant.key.groq');
   });
 
+  it('replaces an existing key for the same provider', async () => {
+    await setAssistantApiKey('groq', 'sk-first');
+    await setAssistantApiKey('groq', 'sk-second');
+    expect(await getAssistantApiKey('groq')).toBe('sk-second');
+    expect(mockSetItem).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects an empty key without touching secure storage', async () => {
     await expect(setAssistantApiKey('openai', '   ')).rejects.toThrow(
       'Enter an API key.'

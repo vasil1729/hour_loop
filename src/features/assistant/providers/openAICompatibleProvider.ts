@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { fetch as expoFetch } from 'expo/fetch';
 
 import type {
@@ -11,6 +12,12 @@ const DEFAULT_TIMEOUT_MS = 45_000;
 const MAX_RESPONSE_BYTES = 1_000_000;
 const MAX_CONTENT_CHARS = 20_000;
 const MAX_TOOL_CALLS = 8;
+
+type StreamState = {
+  content: string;
+  toolCalls: Map<number, ToolCallAccumulator>;
+  finishReason: string | null;
+};
 
 type ChatOptions = {
   baseUrl: string;
@@ -56,9 +63,46 @@ function providerErrorForStatus(status: number, message: string): AssistantProvi
   );
 }
 
+async function readBoundedText(
+  response: Response,
+  maxBytes: number
+): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    return (await response.text()).slice(0, maxBytes);
+  }
+  const decoder = new TextDecoder();
+  let text = '';
+  let bytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      bytes += value.byteLength;
+      if (bytes > maxBytes) {
+        throw new AssistantProviderError(
+          'malformed',
+          'The provider response was too large.'
+        );
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+    return text;
+  } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      // The stream may already be closed or errored.
+    }
+    reader.releaseLock();
+  }
+}
+
 async function readErrorMessage(response: Response): Promise<string> {
   try {
-    const text = (await response.text()).slice(0, 4000);
+    const text = (await readBoundedText(response, 4000)).slice(0, 4000);
     try {
       const parsed = JSON.parse(text) as {
         error?: { message?: unknown };
@@ -143,11 +187,7 @@ function parseJsonResponse(payload: unknown): ProviderResponse {
 
 function handleStreamChunk(
   payload: unknown,
-  state: {
-    content: string;
-    toolCalls: Map<number, ToolCallAccumulator>;
-    finishReason: string | null;
-  },
+  state: StreamState,
   request: ProviderRequest
 ): void {
   if (typeof payload !== 'object' || payload === null) return;
@@ -208,6 +248,48 @@ function handleStreamChunk(
   }
 }
 
+function createStreamState(): StreamState {
+  return {
+    content: '',
+    toolCalls: new Map<number, ToolCallAccumulator>(),
+    finishReason: null,
+  };
+}
+
+function consumeSseLine(
+  line: string,
+  state: StreamState,
+  request: ProviderRequest
+): boolean {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith(':')) return false;
+  if (!trimmed.startsWith('data:')) return false;
+  const data = trimmed.slice(5).trim();
+  if (data === '[DONE]') return true;
+  let payload: unknown;
+  try {
+    payload = JSON.parse(data);
+  } catch {
+    throw new AssistantProviderError(
+      'malformed',
+      'The provider stream contained invalid JSON.'
+    );
+  }
+  handleStreamChunk(payload, state, request);
+  return false;
+}
+
+function parseSseText(
+  text: string,
+  request: ProviderRequest
+): ProviderResponse {
+  const state = createStreamState();
+  for (const line of text.split(/\r?\n/)) {
+    if (consumeSseLine(line, state, request)) break;
+  }
+  return finalizeStream(state);
+}
+
 async function parseStreamResponse(
   response: Response,
   request: ProviderRequest
@@ -217,32 +299,9 @@ async function parseStreamResponse(
     throw new AssistantProviderError('malformed', 'The provider stream was empty.');
   }
   const decoder = new TextDecoder();
-  const state = {
-    content: '',
-    toolCalls: new Map<number, ToolCallAccumulator>(),
-    finishReason: null as string | null,
-  };
+  const state = createStreamState();
   let buffer = '';
   let bytes = 0;
-
-  const consumeLine = (line: string): boolean => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith(':')) return false;
-    if (!trimmed.startsWith('data:')) return false;
-    const data = trimmed.slice(5).trim();
-    if (data === '[DONE]') return true;
-    let payload: unknown;
-    try {
-      payload = JSON.parse(data);
-    } catch {
-      throw new AssistantProviderError(
-        'malformed',
-        'The provider stream contained invalid JSON.'
-      );
-    }
-    handleStreamChunk(payload, state, request);
-    return false;
-  };
 
   try {
     while (true) {
@@ -262,12 +321,17 @@ async function parseStreamResponse(
       while (newline >= 0) {
         const line = buffer.slice(0, newline);
         buffer = buffer.slice(newline + 1);
-        if (consumeLine(line)) return finalizeStream(state);
+        if (consumeSseLine(line, state, request)) return finalizeStream(state);
         newline = buffer.indexOf('\n');
       }
     }
-    if (buffer) consumeLine(buffer);
+    if (buffer) consumeSseLine(buffer, state, request);
   } finally {
+    try {
+      await reader.cancel();
+    } catch {
+      // The stream may already be closed or errored.
+    }
     reader.releaseLock();
   }
   return finalizeStream(state);
@@ -331,25 +395,37 @@ export async function chatCompletion(
   }, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
 
   try {
-    const response = await expoFetch(
-      `${options.baseUrl.replace(/\/+$/, '')}/chat/completions`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: request.messages,
-          tools: request.tools.length > 0 ? request.tools : undefined,
-          tool_choice: request.tools.length > 0 ? 'auto' : undefined,
-          stream: true,
-        }),
-        signal: controller.signal,
-      }
-    );
+    const endpoint = `${options.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+    const requestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: request.messages,
+        tools: request.tools.length > 0 ? request.tools : undefined,
+        tool_choice: request.tools.length > 0 ? 'auto' : undefined,
+        stream: true,
+      }),
+      credentials: 'omit' as const,
+      signal: controller.signal,
+    };
+    const response =
+      Platform.OS === 'web'
+        ? await globalThis.fetch(endpoint, {
+            ...requestInit,
+            redirect: 'error',
+          })
+        : await expoFetch(endpoint, requestInit);
 
+    if (response.redirected) {
+      throw new AssistantProviderError(
+        'network',
+        'The provider redirected the request. Use its final HTTPS endpoint directly.'
+      );
+    }
     if (response.url) {
       const expectedOrigin = new URL(options.baseUrl).origin;
       let actualOrigin = '';
@@ -372,17 +448,33 @@ export async function chatCompletion(
     }
 
     const contentType = response.headers.get('content-type') ?? '';
-    if (
-      contentType.includes('text/event-stream') ||
-      (!contentType.includes('application/json') && response.body)
-    ) {
+    if (contentType.includes('text/event-stream')) {
       return await parseStreamResponse(response, request);
     }
 
     let payload: unknown;
     try {
-      payload = await response.json();
-    } catch {
+      const text = (await readBoundedText(response, MAX_RESPONSE_BYTES)).trim();
+      if (!text) {
+        throw new AssistantProviderError(
+          'malformed',
+          'The provider returned an empty response.'
+        );
+      }
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        const sse = parseSseText(text, request);
+        if (sse.content || sse.toolCalls.length > 0) {
+          return sse;
+        }
+        throw new AssistantProviderError(
+          'malformed',
+          'The provider returned invalid JSON.'
+        );
+      }
+    } catch (error) {
+      if (error instanceof AssistantProviderError) throw error;
       throw new AssistantProviderError(
         'malformed',
         'The provider returned invalid JSON.'

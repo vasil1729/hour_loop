@@ -37,20 +37,6 @@ function parseProvider(value: string | null): AssistantProviderId {
     : 'groq';
 }
 
-function isPrivateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  if (host === 'localhost' || host === '::1' || host === '[::1]') return true;
-  if (/^127\./.test(host)) return true;
-  if (/^10\./.test(host)) return true;
-  if (/^192\.168\./.test(host)) return true;
-  const match = /^172\.(\d{1,3})\./.exec(host);
-  if (match) {
-    const second = Number(match[1]);
-    return second >= 16 && second <= 31;
-  }
-  return false;
-}
-
 /** Returns a normalized endpoint or throws a user-safe validation error. */
 export function normalizeBaseUrl(value: string): string {
   const raw = value.trim();
@@ -61,21 +47,18 @@ export function normalizeBaseUrl(value: string): string {
   try {
     url = new URL(raw);
   } catch {
-    throw new AssistantConfigError('Enter a valid HTTP or HTTPS base URL.');
+    throw new AssistantConfigError('Enter a valid HTTPS base URL.');
   }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    throw new AssistantConfigError('The base URL must use HTTP or HTTPS.');
+  if (url.protocol !== 'https:') {
+    throw new AssistantConfigError(
+      'The base URL must use HTTPS to protect the API key.'
+    );
   }
   if (url.username || url.password) {
     throw new AssistantConfigError('The base URL cannot contain credentials.');
   }
   if (url.hash) {
     throw new AssistantConfigError('The base URL cannot contain a fragment.');
-  }
-  if (url.protocol === 'http:' && !isPrivateHost(url.hostname)) {
-    throw new AssistantConfigError(
-      'Use HTTPS unless the endpoint is on a local network.'
-    );
   }
   url.search = '';
   return url.toString().replace(/\/+$/, '');
@@ -127,7 +110,13 @@ export async function saveAssistantConfig(
   db: SQLiteDatabase,
   config: AssistantConfig
 ): Promise<AssistantConfig> {
-  const normalized = validateAssistantConfig(config);
+  const normalized = config.enabled
+    ? validateAssistantConfig(config)
+    : {
+        ...config,
+        model: config.model.trim(),
+        baseUrl: config.baseUrl?.trim() || null,
+      };
   await Promise.all([
     setSetting(db, ASSISTANT_ENABLED_KEY, String(normalized.enabled)),
     setSetting(db, ASSISTANT_PROVIDER_KEY, normalized.provider),

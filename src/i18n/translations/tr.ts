@@ -567,6 +567,9 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Yeniden deneyebilir veya Hour Loop kullanmaya normal şekilde devam edebilirsiniz.',
   'assistant.errorGeneric': 'Asistan isteği tamamlayamadı.',
   'assistant.errorNoKey': 'Önce Ayarlar bölümünde bir API anahtarı ekleyip kaydedin.',
+  'assistant.errorCredentials':
+    'API anahtarına güvenli depolama alanında erişilemedi.',
+  'assistant.errorUnavailable': 'Asistan Ayarlar bölümünde kapalı.',
   'assistant.errorConfig': 'Asistan yapılandırması geçersiz. Ayarları kontrol edin.',
   'assistant.errorAuth': 'Sağlayıcı API anahtarını reddetti. Ayarlardan kontrol edin.',
   'assistant.errorRateLimit':
@@ -701,5 +704,5 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': 'Özel',
   'settings.assistantCustomHint':
-    'OpenAI uyumlu bir adres kullanın. Yerel ağ dışında HTTPS gerekir. Bir uç noktanın kendisini uyumlu olarak adlandırması uyumluluğu garanti etmez.',
+    'HTTPS destekli, OpenAI uyumlu bir adres kullanın. Bir uç noktanın kendisini uyumlu olarak adlandırması uyumluluğu garanti etmez.',
 }

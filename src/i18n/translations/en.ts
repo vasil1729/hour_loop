@@ -585,6 +585,9 @@ export const en = {
   'assistant.errorHint': 'You can retry or keep using Hour Loop normally.',
   'assistant.errorGeneric': 'The assistant could not complete that request.',
   'assistant.errorNoKey': 'Add and save an API key in Settings first.',
+  'assistant.errorCredentials':
+    'The API key could not be accessed in secure storage.',
+  'assistant.errorUnavailable': 'The assistant is turned off in Settings.',
   'assistant.errorConfig':
     'The assistant configuration is invalid. Check Settings.',
   'assistant.errorAuth':
@@ -716,5 +719,5 @@ export const en = {
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': 'Custom',
   'settings.assistantCustomHint':
-    'Use an OpenAI-compatible endpoint. HTTPS is required except on a local network. Compatibility is not guaranteed just because an endpoint uses that label.',
+    'Use an HTTPS OpenAI-compatible endpoint. Compatibility is not guaranteed just because an endpoint uses that label.',
 } as const;

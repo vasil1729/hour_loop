@@ -29,6 +29,7 @@ export const ASSISTANT_MAX_KEY_LENGTH = 512;
 export const ASSISTANT_MAX_MESSAGE_LENGTH = 2000;
 export const ASSISTANT_MAX_TOOL_RESULT_CHARS = 12000;
 export const ASSISTANT_MAX_TURN_TOOL_RESULT_CHARS = 60000;
+export const ASSISTANT_MAX_TOOL_ARGUMENT_CHARS = 20000;
 
 export const ASSISTANT_SUGGESTED_MODELS: Record<
   Exclude<AssistantProviderId, 'custom'>,

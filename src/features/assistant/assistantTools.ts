@@ -549,6 +549,10 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           description: args.description,
           parentTaskId: args.parentTaskId,
         });
+        const created = await getTaskById(context.db, task.id);
+        if (!created) {
+          throw new AssistantToolError('stale', 'The task was not saved.');
+        }
         return {
           summary: t('assistant.resultTaskCreated'),
           data: { id: task.id },
@@ -574,7 +578,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
         const record = requireObject(args);
         const title = optionalString(record, 'title', 120);
         const description = optionalString(record, 'description', 1000);
-        if (title === undefined && description === undefined) {
+        if (title == null && description === undefined) {
           throw new AssistantToolError(
             'invalid_arguments',
             'Provide a title or description to update.'
@@ -618,6 +622,10 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           title: args.title,
           description: args.description,
         });
+        const updated = await getTaskById(context.db, args.taskId);
+        if (!updated) {
+          throw new AssistantToolError('stale', 'Task no longer exists.');
+        }
         return { summary: t('assistant.resultTaskUpdated') };
       },
     }),
@@ -665,6 +673,10 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
       execute: async (context, args) => {
         await moveTask(context.db, args.taskId, args.newParentId);
+        const moved = await getTaskById(context.db, args.taskId);
+        if (!moved || moved.parent_task_id !== args.newParentId) {
+          throw new AssistantToolError('stale', 'Task no longer exists.');
+        }
         return { summary: t('assistant.resultTaskMoved') };
       },
     }),
@@ -741,6 +753,10 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           args.loopId,
           args.text
         );
+        const added = await getLoopItemById(context.db, item.id);
+        if (!added || added.loop_id !== args.loopId) {
+          throw new AssistantToolError('stale', 'The capsule was not saved.');
+        }
         return {
           summary: t('assistant.resultCapsuleAdded'),
           data: { id: item.id },
@@ -788,6 +804,13 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           throw new AssistantToolError('stale', 'That capsule no longer exists.');
         }
         await setStandaloneCapsuleDone(context.db, capsule, true);
+        const updated = await getStandaloneCapsuleById(
+          context.db,
+          args.capsuleId
+        );
+        if (!updated) {
+          throw new AssistantToolError('stale', 'That capsule no longer exists.');
+        }
         return { summary: t('assistant.resultCapsuleCompleted') };
       },
     }),
@@ -837,6 +860,10 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           args.itemId,
           true
         );
+        const updatedItem = await getLoopItemById(context.db, args.itemId);
+        if (!updatedItem || updatedItem.loop_id !== args.loopId) {
+          throw new AssistantToolError('stale', 'That capsule no longer exists.');
+        }
         return { summary: t('assistant.resultCapsuleCompleted') };
       },
     }),

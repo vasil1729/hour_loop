@@ -615,6 +615,9 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يمكنك إعادة المحاولة أو متابعة استخدام Hour Loop كالمعتاد.',
   'assistant.errorGeneric': 'لم يتمكن المساعد من إكمال الطلب.',
   'assistant.errorNoKey': 'أضف مفتاح API واحفظه في الإعدادات أولاً.',
+  'assistant.errorCredentials':
+    'تعذر الوصول إلى مفتاح API في التخزين الآمن.',
+  'assistant.errorUnavailable': 'المساعد متوقف في الإعدادات.',
   'assistant.errorConfig': 'إعدادات المساعد غير صالحة. تحقق من الإعدادات.',
   'assistant.errorAuth':
     'رفض المزود مفتاح API. تحقق منه في الإعدادات.',
@@ -746,5 +749,5 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantOpenAI': 'OpenAI',
   'settings.assistantCustom': 'مخصص',
   'settings.assistantCustomHint':
-    'استخدم عنوانًا متوافقًا مع OpenAI. HTTPS مطلوب إلا على شبكة محلية. التوافق غير مضمون لمجرد أن المزود يصف نفسه كذلك.',
+    'استخدم عنوان HTTPS متوافقًا مع OpenAI. التوافق غير مضمون لمجرد أن المزود يصف نفسه كذلك.',
 };

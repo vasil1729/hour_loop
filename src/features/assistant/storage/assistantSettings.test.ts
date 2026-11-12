@@ -62,12 +62,33 @@ describe('assistant settings', () => {
     expect(serialized).not.toMatch(/sk-|api[_-]?key/i);
   });
 
-  it('validates custom endpoints and requires HTTPS off the local network', () => {
+  it('allows disabling the assistant without a valid provider configuration', async () => {
+    const saved = await saveAssistantConfig(db, {
+      enabled: false,
+      provider: 'custom',
+      model: '',
+      baseUrl: 'http://127.0.0.1:11434/v1',
+      writesEnabled: true,
+    });
+
+    expect(saved.enabled).toBe(false);
+    expect(mockSetSetting).toHaveBeenCalledWith(
+      db,
+      'assistant_enabled',
+      'false'
+    );
+    expect(assistantConfigIsUsable(saved)).toBe(false);
+  });
+
+  it('validates custom endpoints and requires HTTPS', () => {
     expect(normalizeBaseUrl('https://example.com/v1/')).toBe(
       'https://example.com/v1'
     );
-    expect(normalizeBaseUrl('http://192.168.1.20:8080/v1')).toBe(
-      'http://192.168.1.20:8080/v1'
+    expect(() => normalizeBaseUrl('http://192.168.1.20:8080/v1')).toThrow(
+      AssistantConfigError
+    );
+    expect(() => normalizeBaseUrl('http://127.0.0.1:11434/v1')).toThrow(
+      AssistantConfigError
     );
     expect(() => normalizeBaseUrl('http://example.com/v1')).toThrow(
       AssistantConfigError

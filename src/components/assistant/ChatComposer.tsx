@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   StyleSheet,
   TextInput,
@@ -85,15 +84,11 @@ export function ChatComposer({
             },
           ]}
         >
-          {busy ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Ionicons
-              name={isRTL ? 'arrow-back' : 'arrow-forward'}
-              size={18}
-              color="#FFFFFF"
-            />
-          )}
+          <Ionicons
+            name={isRTL ? 'arrow-back' : 'arrow-forward'}
+            size={18}
+            color="#FFFFFF"
+          />
         </Pressable>
       )}
     </View>

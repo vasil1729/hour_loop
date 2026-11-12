@@ -194,6 +194,8 @@ export function AssistantSettings({
   const providerLabel =
     PROVIDERS.find((provider) => provider.id === config?.provider)?.labelKey ??
     'settings.assistantGroq';
+  const canSave =
+    config !== null && (!config.enabled || assistantConfigIsUsable(config));
 
   if (!loaded) {
     return null;
@@ -431,7 +433,7 @@ export function AssistantSettings({
             void handleSave();
           }}
           loading={busy}
-          disabled={busy || !config || !assistantConfigIsUsable({ ...config, enabled: true })}
+          disabled={busy || !canSave}
           style={styles.button}
         />
         <Button

@@ -66,6 +66,24 @@ describe('assistant action approval', () => {
     expect(tool.execute).toHaveBeenCalledTimes(1);
   });
 
+  it('serializes concurrent approvals exactly once', async () => {
+    const tool = makeTool();
+    const action = makeAction(tool);
+
+    const results = await Promise.allSettled([
+      executeAssistantAction(context, tool, action, { writesEnabled: true }),
+      executeAssistantAction(context, tool, action, { writesEnabled: true }),
+    ]);
+
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(
+      1
+    );
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(
+      1
+    );
+    expect(tool.execute).toHaveBeenCalledTimes(1);
+  });
+
   it('rejects a cancelled action without executing it', async () => {
     const tool = makeTool();
     const action = { ...makeAction(tool), status: 'cancelled' as const };

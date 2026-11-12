@@ -5,8 +5,10 @@ import { executeAssistantAction, createPendingAction } from './assistantActionAp
 import { createAssistantTools } from './assistantTools';
 import type { AssistantTool, AssistantToolContext } from './assistantTypes';
 import { loopService } from '../loops/loopService';
-import { syncLoopNotification } from '../../services/notifications/notificationService';
+import { syncLoopNotification, cancelLoopNotification } from '../../services/notifications/notificationService';
 import { getLoopItemById } from '../../database/repositories/loopItemsRepository';
+import { getTaskById } from '../../database/repositories/tasksRepository';
+import { updateTaskDetails } from '../tasks/taskService';
 
 jest.mock('../loops/loopService', () => ({
   loopService: {
@@ -33,9 +35,11 @@ jest.mock('../../services/notifications/notificationService', () => ({
   cancelLoopNotification: jest.fn(async () => undefined),
 }));
 
+const mockRefresh = jest.fn(async () => undefined);
+
 jest.mock('../../store/loopStore', () => ({
   useLoopStore: {
-    getState: () => ({ refresh: jest.fn(async () => undefined) }),
+    getState: () => ({ refresh: mockRefresh }),
   },
 }));
 
@@ -43,13 +47,29 @@ jest.mock('../../database/repositories/loopItemsRepository', () => ({
   getLoopItemById: jest.fn(),
 }));
 
+jest.mock('../../database/repositories/tasksRepository', () => ({
+  getTaskById: jest.fn(),
+}));
+
+jest.mock('../tasks/taskService', () => ({
+  createTask: jest.fn(),
+  getTaskDetail: jest.fn(),
+  listTasks: jest.fn(),
+  markTaskInProgress: jest.fn(async () => undefined),
+  moveTask: jest.fn(),
+  updateTaskDetails: jest.fn(async () => undefined),
+}));
+
 const db = {} as SQLiteDatabase;
 const context: AssistantToolContext = { db };
 const loops = jest.mocked(loopService);
 const notifications = {
   syncLoopNotification: jest.mocked(syncLoopNotification),
+  cancelLoopNotification: jest.mocked(cancelLoopNotification),
 };
 const items = jest.mocked(getLoopItemById);
+const tasks = jest.mocked(getTaskById);
+const taskService = { updateTaskDetails: jest.mocked(updateTaskDetails) };
 
 function makeLoop(overrides: Partial<Loop> = {}): Loop {
   return {
@@ -112,6 +132,7 @@ describe('AI loop actions use the existing timer service', () => {
       items: [{ text: 'Outline' }],
     });
     expect(notifications.syncLoopNotification).toHaveBeenCalled();
+    expect(mockRefresh).toHaveBeenCalled();
     expect(result.summary).toContain('H2');
   });
 
@@ -137,6 +158,7 @@ describe('AI loop actions use the existing timer service', () => {
 
     expect(loops.pauseLoop).toHaveBeenCalledWith(db, 'loop-1');
     expect(notifications.syncLoopNotification).toHaveBeenCalled();
+    expect(mockRefresh).toHaveBeenCalled();
   });
 
   it('resumes the paused loop through the existing service', async () => {
@@ -151,6 +173,8 @@ describe('AI loop actions use the existing timer service', () => {
     });
 
     expect(loops.resumeLoop).toHaveBeenCalledWith(db, 'loop-1');
+    expect(notifications.syncLoopNotification).toHaveBeenCalled();
+    expect(mockRefresh).toHaveBeenCalled();
   });
 
   it('completes the loop with journal data through the existing service', async () => {
@@ -175,6 +199,11 @@ describe('AI loop actions use the existing timer service', () => {
       note: 'Good focus',
       rollForwardTaskId: null,
     });
+    expect(notifications.cancelLoopNotification).toHaveBeenCalledWith(
+      db,
+      'loop-1'
+    );
+    expect(mockRefresh).toHaveBeenCalled();
   });
 
   it('rejects invalid status transitions before preparing an action', async () => {
@@ -195,6 +224,110 @@ describe('AI loop actions use the existing timer service', () => {
     await expect(
       executeAssistantAction(context, tool, action, { writesEnabled: true })
     ).rejects.toThrow('Timer write failed.');
+  });
+
+  it('starts on a valid existing subtask', async () => {
+    loops.getActiveLoop.mockResolvedValue(null);
+    loops.startLoop.mockResolvedValue(makeLoop({ task_id: 'task-1' }));
+    tasks.mockResolvedValue({
+      id: 'task-1',
+      parent_task_id: 'parent-1',
+      title: 'Write tests',
+      description: null,
+      status: 'IN_PROGRESS',
+      sort_order: 0,
+      created_at: '2026-11-12T08:00:00.000Z',
+      updated_at: '2026-11-12T08:00:00.000Z',
+      completed_at: null,
+      archived_at: null,
+    });
+    const tool = findTool('start_loop');
+    const action = await prepare(tool, {
+      durationMinutes: 25,
+      taskId: 'task-1',
+    });
+
+    await executeAssistantAction(context, tool, action, { writesEnabled: true });
+
+    expect(loops.startLoop).toHaveBeenCalledWith(
+      db,
+      expect.objectContaining({ taskId: 'task-1' })
+    );
+  });
+
+  it('rejects starting on a root task', async () => {
+    loops.getActiveLoop.mockResolvedValue(null);
+    tasks.mockResolvedValue({
+      id: 'task-root',
+      parent_task_id: null,
+      title: 'Root task',
+      description: null,
+      status: 'IN_PROGRESS',
+      sort_order: 0,
+      created_at: '2026-11-12T08:00:00.000Z',
+      updated_at: '2026-11-12T08:00:00.000Z',
+      completed_at: null,
+      archived_at: null,
+    });
+    const tool = findTool('start_loop');
+
+    await expect(
+      prepare(tool, { durationMinutes: 25, taskId: 'task-root' })
+    ).rejects.toThrow('Loops can only target a subtask.');
+  });
+
+  it('rejects starting on a missing task', async () => {
+    loops.getActiveLoop.mockResolvedValue(null);
+    tasks.mockResolvedValue(null);
+    const tool = findTool('start_loop');
+
+    await expect(
+      prepare(tool, { durationMinutes: 25, taskId: 'missing' })
+    ).rejects.toThrow('Task not found.');
+  });
+
+  it('completes a paused loop through the existing service', async () => {
+    loops.getActiveLoop.mockResolvedValue(makeLoop({ status: 'PAUSED' }));
+    loops.completeLoop.mockResolvedValue(
+      makeLoop({ status: 'COMPLETED', stopped_at: '2026-11-12T10:00:00.000Z' })
+    );
+    const tool = findTool('complete_loop');
+    const action = await prepare(tool, {});
+
+    await executeAssistantAction(context, tool, action, { writesEnabled: true });
+
+    expect(loops.completeLoop).toHaveBeenCalledWith(db, 'loop-1', {
+      done: null,
+      rollForward: null,
+      note: null,
+      rollForwardTaskId: null,
+    });
+  });
+
+  it('does not report success if the task disappears during update', async () => {
+    const task = {
+      id: 'task-1',
+      parent_task_id: null,
+      title: 'Task',
+      description: null,
+      status: 'IN_PROGRESS' as const,
+      sort_order: 0,
+      created_at: '2026-11-12T08:00:00.000Z',
+      updated_at: '2026-11-12T08:00:00.000Z',
+      completed_at: null,
+      archived_at: null,
+    };
+    tasks
+      .mockResolvedValueOnce(task)
+      .mockResolvedValueOnce(task)
+      .mockResolvedValueOnce(null);
+    const tool = findTool('update_task');
+    const action = await prepare(tool, { taskId: 'task-1', title: 'New' });
+
+    await expect(
+      executeAssistantAction(context, tool, action, { writesEnabled: true })
+    ).rejects.toThrow('Task no longer exists.');
+    expect(taskService.updateTaskDetails).toHaveBeenCalledTimes(1);
   });
 
   it('rejects a missing capsule target', async () => {
