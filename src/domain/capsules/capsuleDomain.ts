@@ -1,7 +1,7 @@
 import type { Loop, LoopItem } from '../types';
 
 /**
- * A capsule is an open loop item viewed together with the loop that owns it.
+ * A loop capsule is a loop item viewed together with the loop that owns it.
  * Capsules whose loop has no subtask are "loose" and surface in the task pool.
  */
 export type Capsule = {

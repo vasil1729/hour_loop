@@ -32,6 +32,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'common.loops': 'ലൂപ്പുകൾ',
   'common.doneCount': '{done}/{total} പൂർത്തിയായി',
   'common.openCount': '{count} തുറന്നത്',
+  'common.completedCount': '{count} പൂർത്തിയായി',
   'common.focused': 'ഫോക്കസ് ചെയ്തു',
   'common.status': 'നില',
   'common.today': 'ഇന്ന്',
@@ -125,7 +126,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'tasks.filterAll': 'എല്ലാം',
   'tasks.looseCapsules': 'സ്വതന്ത്ര ക്യാപ്സ്യൂളുകൾ',
   'tasks.looseHint':
-    'ടാസ്ക് ക്യാപ്സ്യൂൾ ഇല്ലാത്ത ലൂപ്പുകളിൽ നിന്ന്. പൂർത്തിയാക്കാൻ തൊടുക.',
+    'സ്വതന്ത്ര ക്യാപ്സ്യൂളുകൾ ഒരു ടാസ്കിലും ഉൾപ്പെടുന്നില്ല. പൂർത്തിയാക്കാൻ തൊടുക; പൂർത്തിയായവ പൂർത്തിയായവയിൽ തുടരും.',
   'tasks.completeCapsuleA11y': '{text} ക്യാപ്സ്യൂൾ പൂർത്തിയാക്കുക',
   'tasks.noCompletedTitle': 'പൂർത്തിയായ ടാസ്ക്കുകളില്ല',
   'tasks.noTasksTitle': 'ഇതുവരെ ടാസ്ക്കുകളില്ല',
@@ -160,6 +161,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'task.capsulesSection': 'ക്യാപ്സ്യൂളുകൾ',
   'task.noCapsules': 'ഇതുവരെ ക്യാപ്സ്യൂളുകളില്ല.',
   'task.openCapsules': 'തുറന്ന ക്യാപ്സ്യൂളുകൾ',
+  'task.completedCapsules': 'പൂർത്തിയായ ക്യാപ്സ്യൂളുകൾ',
   'task.openCapsulesHintSubtask':
     'ഈ ടാസ്കിൽ നിന്നും അതിന്റെ ഉപ ക്യാപ്സ്യൂളുകളിൽ നിന്നുമുള്ള തുറന്ന ലൂപ്പ് ക്യാപ്സ്യൂളുകൾ. പൂർത്തിയാക്കാൻ തൊടുക.',
   'task.openCapsulesHintContainer':

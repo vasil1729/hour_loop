@@ -1,5 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -11,10 +18,14 @@ import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskTree } from '../../src/components/tasks/TaskTree';
 import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
-import type { Task } from '../../src/domain/types';
+import type { StandaloneCapsule, Task } from '../../src/domain/types';
 import {
+  createStandaloneCapsule,
+  listCompletedLooseCapsules,
   listLooseCapsules,
+  listStandaloneCapsules,
   setCapsuleDone,
+  setStandaloneCapsuleDone,
 } from '../../src/features/capsules/capsuleService';
 import {
   createTask,
@@ -43,18 +54,40 @@ export default function TasksScreen() {
   const [filter, setFilter] = useState<TaskFilter>('active');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [looseCapsules, setLooseCapsules] = useState<Capsule[]>([]);
+  const [standaloneCapsules, setStandaloneCapsules] = useState<
+    StandaloneCapsule[]
+  >([]);
+  const [completedLooseCapsules, setCompletedLooseCapsules] = useState<
+    Capsule[]
+  >([]);
+  const [completedStandaloneCapsules, setCompletedStandaloneCapsules] =
+    useState<StandaloneCapsule[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [addVisible, setAddVisible] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [newCapsuleText, setNewCapsuleText] = useState('');
+  const [addingCapsule, setAddingCapsule] = useState(false);
 
   const reload = useCallback(async () => {
-    const [result, capsules] = await Promise.all([
+    const [
+      result,
+      openLoopCapsules,
+      openStandaloneCapsules,
+      doneLoopCapsules,
+      doneStandaloneCapsules,
+    ] = await Promise.all([
       listTasks(db, filter),
       listLooseCapsules(db),
+      listStandaloneCapsules(db, false),
+      listCompletedLooseCapsules(db),
+      listStandaloneCapsules(db, true),
     ]);
     setTasks(result);
-    setLooseCapsules(capsules);
+    setLooseCapsules(openLoopCapsules);
+    setStandaloneCapsules(openStandaloneCapsules);
+    setCompletedLooseCapsules(doneLoopCapsules);
+    setCompletedStandaloneCapsules(doneStandaloneCapsules);
     setLoading(false);
   }, [db, filter]);
 
@@ -62,11 +95,26 @@ export default function TasksScreen() {
     useCallback(() => {
       let cancelled = false;
       setLoading(true);
-      void Promise.all([listTasks(db, filter), listLooseCapsules(db)]).then(
-        ([result, capsules]) => {
+      void Promise.all([
+        listTasks(db, filter),
+        listLooseCapsules(db),
+        listStandaloneCapsules(db, false),
+        listCompletedLooseCapsules(db),
+        listStandaloneCapsules(db, true),
+      ]).then(
+        ([
+          result,
+          openLoopCapsules,
+          openStandaloneCapsules,
+          doneLoopCapsules,
+          doneStandaloneCapsules,
+        ]) => {
           if (!cancelled) {
             setTasks(result);
-            setLooseCapsules(capsules);
+            setLooseCapsules(openLoopCapsules);
+            setStandaloneCapsules(openStandaloneCapsules);
+            setCompletedLooseCapsules(doneLoopCapsules);
+            setCompletedStandaloneCapsules(doneStandaloneCapsules);
             setLoading(false);
           }
         }
@@ -114,6 +162,35 @@ export default function TasksScreen() {
         t('tasks.couldNotUpdateCapsule'),
         localizeError(error)
       );
+    }
+  };
+
+  const completeStandaloneCapsule = async (capsule: StandaloneCapsule) => {
+    try {
+      await setStandaloneCapsuleDone(db, capsule, true);
+      await reload();
+    } catch (error) {
+      Alert.alert(
+        t('tasks.couldNotUpdateCapsule'),
+        localizeError(error)
+      );
+    }
+  };
+
+  const handleAddCapsule = async () => {
+    if (!newCapsuleText.trim() || addingCapsule) return;
+    setAddingCapsule(true);
+    try {
+      await createStandaloneCapsule(db, newCapsuleText);
+      setNewCapsuleText('');
+      await reload();
+    } catch (error) {
+      Alert.alert(
+        t('tasks.couldNotUpdateCapsule'),
+        localizeError(error)
+      );
+    } finally {
+      setAddingCapsule(false);
     }
   };
 
@@ -187,33 +264,128 @@ export default function TasksScreen() {
         })}
       </View>
 
-      {looseCapsules.length > 0 ? (
+      {filter !== 'completed' ? (
         <View style={styles.capsuleSection}>
           <View style={styles.capsuleHeader}>
             <Text style={[styles.capsuleLabel, { color: colors.textSecondary }]}>
               {t('tasks.looseCapsules')}
             </Text>
             <Text style={[styles.capsuleCount, { color: colors.textSecondary }]}>
-              {t('common.openCount', { count: looseCapsules.length })}
+              {t('common.openCount', {
+                count: looseCapsules.length + standaloneCapsules.length,
+              })}
             </Text>
           </View>
-          <View style={styles.capsuleWrap}>
-            {looseCapsules.map((capsule) => (
-              <LoopItemCapsule
-                key={capsule.item.id}
-                text={capsule.item.text}
-                pressAccessibilityLabel={t('tasks.completeCapsuleA11y', {
-                  text: capsule.item.text,
-                })}
-                onPress={() => {
-                  void completeCapsule(capsule);
-                }}
-              />
-            ))}
+          {looseCapsules.length + standaloneCapsules.length > 0 ? (
+            <View style={styles.capsuleWrap}>
+              {looseCapsules.map((capsule) => (
+                <LoopItemCapsule
+                  key={`loop-${capsule.item.id}`}
+                  text={capsule.item.text}
+                  pressAccessibilityLabel={t('tasks.completeCapsuleA11y', {
+                    text: capsule.item.text,
+                  })}
+                  onPress={() => {
+                    void completeCapsule(capsule);
+                  }}
+                />
+              ))}
+              {standaloneCapsules.map((capsule) => (
+                <LoopItemCapsule
+                  key={`standalone-${capsule.id}`}
+                  text={capsule.text}
+                  pressAccessibilityLabel={t('tasks.completeCapsuleA11y', {
+                    text: capsule.text,
+                  })}
+                  onPress={() => {
+                    void completeStandaloneCapsule(capsule);
+                  }}
+                />
+              ))}
+            </View>
+          ) : (
+            <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
+              {t('task.noCapsules')}
+            </Text>
+          )}
+          <View style={styles.addRow}>
+            <TextInput
+              value={newCapsuleText}
+              onChangeText={setNewCapsuleText}
+              placeholder={t('task.addCapsule')}
+              placeholderTextColor={colors.textSecondary}
+              editable={!addingCapsule}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                void handleAddCapsule();
+              }}
+              maxLength={120}
+              style={[
+                styles.addInput,
+                {
+                  color: colors.text,
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('task.addCapsule')}
+              disabled={!newCapsuleText.trim() || addingCapsule}
+              onPress={() => {
+                void handleAddCapsule();
+              }}
+              style={[
+                styles.addCapsuleButton,
+                {
+                  backgroundColor: colors.accent,
+                  opacity:
+                    newCapsuleText.trim() && !addingCapsule ? 1 : 0.45,
+                },
+              ]}
+            >
+              <Ionicons name="add" size={22} color="#FFFFFF" />
+            </Pressable>
           </View>
           <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
             {t('tasks.looseHint')}
           </Text>
+        </View>
+      ) : null}
+
+      {filter !== 'active' &&
+      completedLooseCapsules.length + completedStandaloneCapsules.length >
+        0 ? (
+        <View style={styles.capsuleSection}>
+          <View style={styles.capsuleHeader}>
+            <Text style={[styles.capsuleLabel, { color: colors.textSecondary }]}>
+              {t('task.completedCapsules')}
+            </Text>
+            <Text style={[styles.capsuleCount, { color: colors.textSecondary }]}>
+              {t('common.completedCount', {
+                count:
+                  completedLooseCapsules.length +
+                  completedStandaloneCapsules.length,
+              })}
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {completedLooseCapsules.map((capsule) => (
+              <LoopItemCapsule
+                key={`loop-${capsule.item.id}`}
+                text={capsule.item.text}
+                done
+              />
+            ))}
+            {completedStandaloneCapsules.map((capsule) => (
+              <LoopItemCapsule
+                key={`standalone-${capsule.id}`}
+                text={capsule.text}
+                done
+              />
+            ))}
+          </View>
         </View>
       ) : null}
     </View>
@@ -244,7 +416,7 @@ export default function TasksScreen() {
                 message={
                   filter === 'completed'
                     ? t('tasks.noCompletedMessage')
-                    : looseCapsules.length > 0
+                    : looseCapsules.length + standaloneCapsules.length > 0
                       ? t('tasks.noTasksLooseMessage')
                       : t('tasks.noTasksMessage')
                 }
@@ -338,6 +510,27 @@ const styles = StyleSheet.create({
   capsuleHint: {
     fontSize: 12,
     lineHeight: 17,
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  addInput: {
+    flex: 1,
+    minHeight: 44,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+  },
+  addCapsuleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   empty: {
     minHeight: 300,

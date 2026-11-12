@@ -30,6 +30,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'common.loops': 'ЦИКЛЫ',
   'common.doneCount': '{done}/{total} готово',
   'common.openCount': 'Открыто: {count}',
+  'common.completedCount': 'Завершено: {count}',
   'common.focused': 'В фокусе',
   'common.status': 'Статус',
   'common.today': 'Сегодня',
@@ -127,7 +128,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'tasks.filterAll': 'Все',
   'tasks.looseCapsules': 'СВОБОДНЫЕ КАПСУЛЫ',
   'tasks.looseHint':
-    'Из циклов без капсулы задачи. Нажмите, чтобы завершить.',
+    'Свободные капсулы не привязаны к задаче. Нажмите, чтобы завершить; завершённые остаются в разделе «Завершённые».',
   'tasks.completeCapsuleA11y': 'Завершить капсулу {text}',
   'tasks.noCompletedTitle': 'Нет завершённых задач',
   'tasks.noTasksTitle': 'Задач пока нет',
@@ -166,6 +167,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'task.capsulesSection': 'Капсулы',
   'task.noCapsules': 'Капсул пока нет.',
   'task.openCapsules': 'Открытые капсулы',
+  'task.completedCapsules': 'Завершённые капсулы',
   'task.openCapsulesHintSubtask':
     'Открытые капсулы этой задачи и её дочерних капсул. Нажмите, чтобы завершить.',
   'task.openCapsulesHintContainer':

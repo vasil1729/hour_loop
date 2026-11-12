@@ -32,6 +32,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'common.loops': '循环',
   'common.doneCount': '已完成 {done}/{total}',
   'common.openCount': '{count} 个未完成',
+  'common.completedCount': '{count} 个已完成',
   'common.focused': '已专注',
   'common.status': '状态',
   'common.today': '今天',
@@ -120,7 +121,8 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'tasks.filterCompleted': '已完成',
   'tasks.filterAll': '全部',
   'tasks.looseCapsules': '独立胶囊',
-  'tasks.looseHint': '来自没有任务胶囊的循环。点击即可完成。',
+  'tasks.looseHint':
+    '独立胶囊不隶属于任务。点击即可完成；已完成的会保留在“已完成”中。',
   'tasks.completeCapsuleA11y': '完成胶囊 {text}',
   'tasks.noCompletedTitle': '没有已完成的任务',
   'tasks.noTasksTitle': '还没有任务',
@@ -153,6 +155,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'task.capsulesSection': '胶囊',
   'task.noCapsules': '还没有胶囊。',
   'task.openCapsules': '未完成胶囊',
+  'task.completedCapsules': '已完成胶囊',
   'task.openCapsulesHintSubtask':
     '此任务及其子胶囊中未完成的循环胶囊。点击即可完成。',
   'task.openCapsulesHintContainer':

@@ -208,7 +208,8 @@ export default function TaskDetailScreen() {
     );
   }
 
-  const { task, progress, loops, capsules, totalSeconds } = detail;
+  const { task, progress, loops, capsules, completedCapsules, totalSeconds } =
+    detail;
   const completed = task.status === 'COMPLETED';
   const archived = task.status === 'ARCHIVED';
   const isSubtask = task.parent_task_id !== null;
@@ -437,6 +438,28 @@ export default function TaskDetailScreen() {
               ? t('task.openCapsulesHintSubtask')
               : t('task.openCapsulesHintContainer')}
           </Text>
+        </View>
+      ) : null}
+
+      {completedCapsules.length > 0 ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('task.completedCapsules')}
+            </Text>
+            <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
+              {t('common.completedCount', { count: completedCapsules.length })}
+            </Text>
+          </View>
+          <View style={styles.capsuleWrap}>
+            {completedCapsules.map((capsule) => (
+              <LoopItemCapsule
+                key={capsule.item.id}
+                text={capsule.item.text}
+                done
+              />
+            ))}
+          </View>
         </View>
       ) : null}
 

@@ -28,6 +28,7 @@ export const en = {
   'common.loops': 'LOOPS',
   'common.doneCount': '{done}/{total} done',
   'common.openCount': '{count} open',
+  'common.completedCount': '{count} completed',
   'common.focused': 'Focused',
   'common.status': 'Status',
   'common.today': 'Today',
@@ -121,7 +122,8 @@ export const en = {
   'tasks.filterCompleted': 'Completed',
   'tasks.filterAll': 'All',
   'tasks.looseCapsules': 'LOOSE CAPSULES',
-  'tasks.looseHint': 'From loops without a task capsule. Tap to complete.',
+  'tasks.looseHint':
+    'Loose capsules are not tied to a task. Tap to complete; completed ones stay under Completed.',
   'tasks.completeCapsuleA11y': 'Complete capsule {text}',
   'tasks.noCompletedTitle': 'No completed tasks',
   'tasks.noTasksTitle': 'No tasks yet',
@@ -158,6 +160,7 @@ export const en = {
   'task.capsulesSection': 'Capsules',
   'task.noCapsules': 'No capsules yet.',
   'task.openCapsules': 'Open capsules',
+  'task.completedCapsules': 'Completed capsules',
   'task.openCapsulesHintSubtask':
     'Open loop capsules from this task and its child capsules. Tap to complete.',
   'task.openCapsulesHintContainer':

@@ -26,14 +26,14 @@ const SELECT_ITEM = `
   FROM loop_items
 `;
 
-const SELECT_OPEN_CAPSULES = `
+const SELECT_CAPSULES = `
   SELECT li.id, li.loop_id, li.text, li.done, li.current, li.sort_order,
          li.carried_from_item_id, li.created_at, li.updated_at,
          l.task_id, l.sequence_number, l.local_date,
          l.status AS loop_status, l.started_at
   FROM loop_items AS li
   JOIN loops AS l ON l.id = li.loop_id
-  WHERE li.done = 0
+  WHERE li.done = ?
     AND NOT EXISTS (
       SELECT 1
       FROM loop_items AS carried
@@ -43,6 +43,10 @@ const SELECT_OPEN_CAPSULES = `
 
 const ORDER_OPEN_CAPSULES = `
   ORDER BY l.started_at DESC, li.sort_order ASC, li.created_at ASC
+`;
+
+const ORDER_COMPLETED_CAPSULES = `
+  ORDER BY li.updated_at DESC, l.started_at DESC
 `;
 
 function mapRow(row: LoopItemRow): LoopItem {
@@ -188,9 +192,26 @@ export async function setCurrentLoopItem(
  */
 export async function listLooseCapsules(db: SQLiteDatabase): Promise<Capsule[]> {
   const rows = await db.getAllAsync<CapsuleRow>(
-    `${SELECT_OPEN_CAPSULES}
+    `${SELECT_CAPSULES}
        AND l.task_id IS NULL
-     ${ORDER_OPEN_CAPSULES}`
+     ${ORDER_OPEN_CAPSULES}`,
+    [0]
+  );
+  return rows.map(mapCapsuleRow);
+}
+
+/**
+ * Completed, not-yet-carried capsules from loops without a subtask.
+ * They remain visible in the completed capsule list instead of disappearing.
+ */
+export async function listCompletedLooseCapsules(
+  db: SQLiteDatabase
+): Promise<Capsule[]> {
+  const rows = await db.getAllAsync<CapsuleRow>(
+    `${SELECT_CAPSULES}
+       AND l.task_id IS NULL
+     ${ORDER_COMPLETED_CAPSULES}`,
+    [1]
   );
   return rows.map(mapCapsuleRow);
 }
@@ -208,10 +229,31 @@ export async function listCapsulesForTasks(
   }
   const placeholders = taskIds.map(() => '?').join(', ');
   const rows = await db.getAllAsync<CapsuleRow>(
-    `${SELECT_OPEN_CAPSULES}
+    `${SELECT_CAPSULES}
        AND l.task_id IN (${placeholders})
      ${ORDER_OPEN_CAPSULES}`,
-    taskIds
+    [0, ...taskIds]
+  );
+  return rows.map(mapCapsuleRow);
+}
+
+/**
+ * Completed, not-yet-carried capsules from loops attached to the given
+ * subtasks. Shown in a separate completed section in task detail.
+ */
+export async function listCompletedCapsulesForTasks(
+  db: SQLiteDatabase,
+  taskIds: string[]
+): Promise<Capsule[]> {
+  if (taskIds.length === 0) {
+    return [];
+  }
+  const placeholders = taskIds.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<CapsuleRow>(
+    `${SELECT_CAPSULES}
+       AND l.task_id IN (${placeholders})
+     ${ORDER_COMPLETED_CAPSULES}`,
+    [1, ...taskIds]
   );
   return rows.map(mapCapsuleRow);
 }

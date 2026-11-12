@@ -13,6 +13,7 @@ import {
   prepareBackupForImport,
   validateBackup,
   type BackupLoopItem,
+  type BackupStandaloneCapsule,
 } from './backup';
 
 const CREATED_AT = '2026-11-11T10:00:00.000Z';
@@ -96,12 +97,27 @@ function makeLoopItem(
   };
 }
 
+function makeStandaloneCapsule(
+  overrides: Partial<BackupStandaloneCapsule> &
+    Pick<BackupStandaloneCapsule, 'id'>
+): BackupStandaloneCapsule {
+  return {
+    text: 'Loose capsule',
+    done: false,
+    created_at: CREATED_AT,
+    updated_at: CREATED_AT,
+    completed_at: null,
+    ...overrides,
+  };
+}
+
 function makeBackup(
   overrides: {
     tasks?: Task[];
     loops?: Loop[];
     intervals?: LoopInterval[];
     loopItems?: BackupLoopItem[];
+    standaloneCapsules?: BackupStandaloneCapsule[];
     intentions?: Intention[];
     settings?: Setting[];
   } = {}
@@ -120,6 +136,7 @@ function makeBackup(
     loopItems: overrides.loopItems ?? [
       makeLoopItem({ id: 'item-1', loop_id: 'loop-1' }),
     ],
+    standaloneCapsules: overrides.standaloneCapsules ?? [],
     intentions: overrides.intentions ?? [
       makeIntention({ id: 'intention-1' }),
     ],
@@ -145,6 +162,7 @@ describe('createBackupPayload', () => {
       loops: 1,
       intervals: 1,
       loopItems: 1,
+      standaloneCapsules: 0,
       intentions: 1,
       settings: 1,
     });
@@ -275,6 +293,27 @@ describe('validateBackup', () => {
       ],
     });
     expect(() => validateBackup(backup)).toThrow(/cycle/);
+  });
+
+  it('accepts standalone capsules and counts them', () => {
+    const backup = makeBackup({
+      standaloneCapsules: [
+        makeStandaloneCapsule({ id: 'loose-1', text: 'Buy milk' }),
+        makeStandaloneCapsule({
+          id: 'loose-2',
+          text: 'Call bank',
+          done: true,
+          completed_at: EXPORTED_AT,
+        }),
+      ],
+    });
+
+    const parsed = validateBackup(backup);
+    expect(parsed.counts.standaloneCapsules).toBe(2);
+    expect(parsed.data.standaloneCapsules.map((capsule) => capsule.text)).toEqual([
+      'Buy milk',
+      'Call bank',
+    ]);
   });
 
   it('rejects invalid JSON', () => {

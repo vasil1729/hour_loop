@@ -32,6 +32,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'common.loops': 'DÖNGÜLER',
   'common.doneCount': '{done}/{total} tamamlandı',
   'common.openCount': '{count} açık',
+  'common.completedCount': '{count} tamamlandı',
   'common.focused': 'Odaklanıldı',
   'common.status': 'Durum',
   'common.today': 'Bugün',
@@ -122,7 +123,8 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'tasks.filterCompleted': 'Tamamlanan',
   'tasks.filterAll': 'Tümü',
   'tasks.looseCapsules': 'SERBEST KAPSÜLLER',
-  'tasks.looseHint': 'Görev kapsülü olmayan döngülerden. Tamamlamak için dokun.',
+  'tasks.looseHint':
+    'Serbest kapsüller bir göreve bağlı değildir. Tamamlamak için dokunun; tamamlananlar Tamamlananlar altında kalır.',
   'tasks.completeCapsuleA11y': '{text} kapsülünü tamamla',
   'tasks.noCompletedTitle': 'Tamamlanmış görev yok',
   'tasks.noTasksTitle': 'Henüz görev yok',
@@ -155,6 +157,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'task.capsulesSection': 'Kapsüller',
   'task.noCapsules': 'Henüz kapsül yok.',
   'task.openCapsules': 'Açık kapsüller',
+  'task.completedCapsules': 'Tamamlanan kapsüller',
   'task.openCapsulesHintSubtask':
     'Bu görevden ve alt kapsüllerinden açık döngü kapsülleri. Tamamlamak için dokun.',
   'task.openCapsulesHintContainer':

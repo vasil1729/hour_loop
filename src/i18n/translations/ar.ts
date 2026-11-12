@@ -30,6 +30,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'common.loops': 'حلقات',
   'common.doneCount': '{done}/{total} مكتمل',
   'common.openCount': 'مفتوح: {count}',
+  'common.completedCount': 'مكتمل: {count}',
   'common.focused': 'قيد التركيز',
   'common.status': 'الحالة',
   'common.today': 'اليوم',
@@ -128,7 +129,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'tasks.filterAll': 'الكل',
   'tasks.looseCapsules': 'كبسولات حرة',
   'tasks.looseHint':
-    'من حلقات دون كبسولة مهمة. انقر للإكمال.',
+    'الكبسولات الحرة غير مرتبطة بمهمة. انقر لإكمالها؛ تبقى المكتملة ضمن «المكتملة».',
   'tasks.completeCapsuleA11y': 'إكمال الكبسولة {text}',
   'tasks.noCompletedTitle': 'لا مهام مكتملة',
   'tasks.noTasksTitle': 'لا مهام بعد',
@@ -169,6 +170,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'task.capsulesSection': 'الكبسولات',
   'task.noCapsules': 'لا كبسولات بعد.',
   'task.openCapsules': 'الكبسولات المفتوحة',
+  'task.completedCapsules': 'الكبسولات المكتملة',
   'task.openCapsulesHintSubtask':
     'كبسولات الحلقات المفتوحة من هذه المهمة وكبسولاتها الفرعية. انقر للإكمال.',
   'task.openCapsulesHintContainer':

@@ -6,7 +6,14 @@ import {
   type LoopStatus,
   type TaskStatus,
 } from '../../constants/loopStatus';
-import type { Intention, Loop, LoopInterval, Setting, Task } from '../types';
+import type {
+  Intention,
+  Loop,
+  LoopInterval,
+  Setting,
+  StandaloneCapsule,
+  Task,
+} from '../types';
 
 export const BACKUP_FORMAT = 'hour-loop-backup';
 export const BACKUP_VERSION = 1;
@@ -40,6 +47,7 @@ export type BackupData = {
   loops: Loop[];
   intervals: LoopInterval[];
   loopItems: BackupLoopItem[];
+  standaloneCapsules: BackupStandaloneCapsule[];
   intentions: Intention[];
   settings: Setting[];
 };
@@ -55,11 +63,16 @@ export type BackupLoopItem = {
   updated_at: string;
 };
 
+export type BackupStandaloneCapsule = Omit<StandaloneCapsule, 'done'> & {
+  done: boolean;
+};
+
 export type BackupCounts = {
   tasks: number;
   loops: number;
   intervals: number;
   loopItems: number;
+  standaloneCapsules: number;
   intentions: number;
   settings: number;
 };
@@ -79,6 +92,7 @@ export type BackupSource = {
   loops: Loop[];
   intervals: LoopInterval[];
   loopItems: BackupLoopItem[];
+  standaloneCapsules: BackupStandaloneCapsule[];
   intentions: Intention[];
   settings: Setting[];
   appVersion: string;
@@ -236,6 +250,7 @@ function countData(data: BackupData): BackupCounts {
     loops: data.loops.length,
     intervals: data.intervals.length,
     loopItems: data.loopItems.length,
+    standaloneCapsules: data.standaloneCapsules.length,
     intentions: data.intentions.length,
     settings: data.settings.length,
   };
@@ -247,6 +262,7 @@ export function createBackupPayload(source: BackupSource): HourLoopBackup {
     loops: source.loops,
     intervals: source.intervals,
     loopItems: source.loopItems,
+    standaloneCapsules: source.standaloneCapsules,
     intentions: source.intentions,
     settings: source.settings.filter(
       (setting) => !isDeviceSpecificSetting(setting.key)
@@ -342,6 +358,26 @@ function parseLoopItem(value: unknown, index: number): BackupLoopItem {
     carried_from_item_id: optionalString(record, 'carried_from_item_id', path),
     created_at: requireTimestamp(record, 'created_at', path),
     updated_at: requireTimestamp(record, 'updated_at', path),
+  };
+}
+
+function parseStandaloneCapsule(
+  value: unknown,
+  index: number
+): BackupStandaloneCapsule {
+  const path = `data.standaloneCapsules[${index}]`;
+  const record = requireRecord(value, path);
+  const done = record.done;
+  if (typeof done !== 'boolean') {
+    fail(`${path}.done must be a boolean.`);
+  }
+  return {
+    id: requireString(record, 'id', path),
+    text: requireString(record, 'text', path),
+    done,
+    created_at: requireTimestamp(record, 'created_at', path),
+    updated_at: requireTimestamp(record, 'updated_at', path),
+    completed_at: optionalTimestamp(record, 'completed_at', path),
   };
 }
 
@@ -519,6 +555,10 @@ export function validateBackup(value: unknown): HourLoopBackup {
     dataRecord.loopItems ?? [],
     'backup.data.loopItems'
   ).map(parseLoopItem);
+  const standaloneCapsules = requireArray(
+    dataRecord.standaloneCapsules ?? [],
+    'backup.data.standaloneCapsules'
+  ).map(parseStandaloneCapsule);
   const intentions = requireArray(
     dataRecord.intentions,
     'backup.data.intentions'
@@ -531,6 +571,7 @@ export function validateBackup(value: unknown): HourLoopBackup {
   orderLoopItemsParentFirst(loopItems);
   assertUniqueIds(loops, 'Loop');
   assertUniqueIds(intervals, 'Interval');
+  assertUniqueIds(standaloneCapsules, 'Standalone capsule');
   assertUniqueIds(intentions, 'Intention');
 
   const taskIds = new Set(tasks.map((task) => task.id));
@@ -609,6 +650,7 @@ export function validateBackup(value: unknown): HourLoopBackup {
     loops,
     intervals,
     loopItems,
+    standaloneCapsules,
     intentions,
     settings,
   };

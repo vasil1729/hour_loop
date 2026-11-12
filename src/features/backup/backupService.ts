@@ -14,6 +14,7 @@ import {
   prepareBackupForImport,
   type BackupCounts,
   type BackupLoopItem,
+  type BackupStandaloneCapsule,
   type HourLoopBackup,
 } from '../../domain/backup/backup';
 import { getDeviceTimeZone, nowUtcIso } from '../../domain/shared/dateUtils';
@@ -84,22 +85,58 @@ async function readLoopItems(db: SQLiteDatabase): Promise<BackupLoopItem[]> {
   return rows.map((row) => ({ ...row, done: row.done === 1 }));
 }
 
+async function standaloneCapsulesTableExists(
+  db: SQLiteDatabase
+): Promise<boolean> {
+  const row = await db.getFirstAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'standalone_capsules'"
+  );
+  return Boolean(row);
+}
+
+type StandaloneCapsuleRow = Omit<BackupStandaloneCapsule, 'done'> & {
+  done: number;
+};
+
+async function readStandaloneCapsules(
+  db: SQLiteDatabase
+): Promise<BackupStandaloneCapsule[]> {
+  if (!(await standaloneCapsulesTableExists(db))) {
+    return [];
+  }
+  const rows = await db.getAllAsync<StandaloneCapsuleRow>(`
+    SELECT id, text, done, created_at, updated_at, completed_at
+    FROM standalone_capsules
+    ORDER BY created_at ASC
+  `);
+  return rows.map((row) => ({ ...row, done: row.done === 1 }));
+}
+
 export async function createBackup(db: SQLiteDatabase): Promise<HourLoopBackup> {
-  const [tasks, loops, intervals, loopItems, intentions, settings] =
-    await Promise.all([
-      listTasks(db, { includeArchived: true }),
-      listAllLoops(db),
-      getAllIntervals(db),
-      readLoopItems(db),
-      getAllIntentions(db),
-      getAllSettings(db),
-    ]);
+  const [
+    tasks,
+    loops,
+    intervals,
+    loopItems,
+    standaloneCapsules,
+    intentions,
+    settings,
+  ] = await Promise.all([
+    listTasks(db, { includeArchived: true }),
+    listAllLoops(db),
+    getAllIntervals(db),
+    readLoopItems(db),
+    readStandaloneCapsules(db),
+    getAllIntentions(db),
+    getAllSettings(db),
+  ]);
 
   return createBackupPayload({
     tasks,
     loops,
     intervals,
     loopItems,
+    standaloneCapsules,
     intentions,
     settings,
     appVersion: Constants.expoConfig?.version ?? 'unknown',
@@ -187,10 +224,20 @@ export async function importBackup(
   const orderedTasks = orderTasksParentFirst(backup.data.tasks);
   const orderedLoopItems = orderLoopItemsParentFirst(backup.data.loopItems);
   const hasLoopItemsTable = await loopItemsTableExists(db);
+  const hasStandaloneCapsulesTable = await standaloneCapsulesTableExists(db);
 
   if (orderedLoopItems.length > 0 && !hasLoopItemsTable) {
     throw new Error(
       'This backup contains loop checklist items, but this app version cannot restore them.'
+    );
+  }
+
+  if (
+    backup.data.standaloneCapsules.length > 0 &&
+    !hasStandaloneCapsulesTable
+  ) {
+    throw new Error(
+      'This backup contains loose capsules, but this app version cannot restore them.'
     );
   }
 
@@ -199,6 +246,7 @@ export async function importBackup(
       DELETE FROM loop_intervals;
       DELETE FROM loops;
       DELETE FROM tasks;
+      DELETE FROM standalone_capsules;
       DELETE FROM intentions;
       DELETE FROM settings;
     `);
@@ -224,6 +272,21 @@ export async function importBackup(
           item.carried_from_item_id,
           item.created_at,
           item.updated_at,
+        ]
+      );
+    }
+    for (const capsule of backup.data.standaloneCapsules) {
+      await db.runAsync(
+        `INSERT INTO standalone_capsules (
+           id, text, done, created_at, updated_at, completed_at
+         ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          capsule.id,
+          capsule.text,
+          capsule.done ? 1 : 0,
+          capsule.created_at,
+          capsule.updated_at,
+          capsule.completed_at,
         ]
       );
     }

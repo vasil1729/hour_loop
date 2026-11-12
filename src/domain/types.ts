@@ -28,6 +28,15 @@ export type LoopInterval = {
   created_at: string;
 };
 
+export type StandaloneCapsule = {
+  id: string;
+  text: string;
+  done: boolean;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+};
+
 export type LoopItem = {
   id: string;
   loop_id: string;

@@ -14,7 +14,10 @@ import {
 } from '../../domain/tasks/taskDomain';
 import * as tasksRepository from '../../database/repositories/tasksRepository';
 import { listLoopsForTask, listLoopsForTasks } from '../../database/repositories/loopsRepository';
-import { listCapsulesForTasks } from '../../database/repositories/loopItemsRepository';
+import {
+  listCapsulesForTasks,
+  listCompletedCapsulesForTasks,
+} from '../../database/repositories/loopItemsRepository';
 import { attachLoopMetrics, type LoopWithMetrics } from '../loops/loopMetrics';
 
 export type TaskFilter = 'active' | 'completed' | 'all';
@@ -32,6 +35,7 @@ export type TaskDetail = {
   descendantTasks: Task[];
   loops: LoopWithMetrics[];
   capsules: Capsule[];
+  completedCapsules: Capsule[];
   totalSeconds: number;
   progress: TaskProgress;
 };
@@ -159,9 +163,10 @@ export async function getTaskDetail(
     (entry) => entry.id !== taskId && descendantIdSet.has(entry.id)
   );
   const loops = await listLoopsForTasks(db, descendantIds);
-  const [loopsWithMetrics, capsules] = await Promise.all([
+  const [loopsWithMetrics, capsules, completedCapsules] = await Promise.all([
     attachLoopMetrics(db, loops),
     listCapsulesForTasks(db, descendantIds),
+    listCompletedCapsulesForTasks(db, descendantIds),
   ]);
   const totalSeconds = loopsWithMetrics.reduce(
     (sum, entry) => sum + entry.elapsedSeconds,
@@ -175,6 +180,7 @@ export async function getTaskDetail(
     descendantTasks,
     loops: loopsWithMetrics,
     capsules,
+    completedCapsules,
     totalSeconds,
     progress: childProgress(allTasks, taskId),
   };

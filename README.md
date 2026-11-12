@@ -17,7 +17,7 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 - **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar and quick pause/resume on Today, and a local-time session log.
 - **Completion journal** — capture focus, carry-in, done, roll-forward, and notes at the end of a loop.
 - **Task pool** — task containers with actionable subtasks, open capsules, progress, loop history, and aggregated focus time.
-- **Capsules** — loop-sized checklist items that can be added or removed during a running loop. Capsules created without a subtask become loose capsules in the Tasks screen.
+- **Capsules** — loop-sized checklist items that can be added or removed during a running loop. Loose capsules can be created directly in the Tasks screen, and completed capsules remain visible in their completed list.
 - **Intentions** — daily and monthly time targets with additive presets, configurable defaults, and actual-vs-planned progress.
 - **History** — day, week, and month views with a date picker, weekly bars, a monthly heatmap, and midnight-crossing allocation.
 - **Notifications** — configurable early warnings and target-reached reminders, reconciled on foreground.
