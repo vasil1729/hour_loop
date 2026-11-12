@@ -76,9 +76,6 @@ The app declares `expo-file-system` alongside `expo-asset` and `expo-font`. In a
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/operations/web-preview.md] link "/openwiki/operations/web-preview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Web Preview](/openwiki/operations/web-preview.md)
-<!-- openwiki: broken internal link [/openwiki/quickstart.md] link "/openwiki/quickstart.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Hour Loop Quickstart](/openwiki/quickstart.md)
-<!-- openwiki: broken internal link [/openwiki/testing/strategy.md] link "/openwiki/testing/strategy.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Testing Strategy](/openwiki/testing/strategy.md)
+- [Web Preview](web-preview.md)
+- [Hour Loop Quickstart](../quickstart.md)
+- [Testing Strategy](../testing/strategy.md)

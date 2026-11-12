@@ -47,11 +47,16 @@ The active screen waits for the loop store to load, then shows either an empty s
 - a status pill: `PAUSED`, `TARGET REACHED`, or `FOCUSING`;
 - the elapsed timer and target progress;
 - optional focus and carry-in text;
+- the capsule list, with tap-to-focus, swipe-to-complete, and an inline add composer;
 - Pause/Resume and Stop controls, plus a minimize action.
 
 The timer display refreshes once per second, but each refresh re-queries intervals and recomputes elapsed seconds. There is no incremental counter to drift.
 
 Pause calls `pauseLoop` (closes the open interval, sets `PAUSED`) and then reconciles the notification; the service sees a non-ACTIVE loop and cancels the schedule. Resume calls `resumeLoop` (sets `ACTIVE`, opens a new interval) and syncs with a permission request. Minimize dismisses to Today without changing the loop.
+
+Capsules remain editable while the loop runs. Adding appends a loop item; removing deletes the item and closes its open capsule-focus interval if it was the current one. Completed loops reject both operations.
+
+When elapsed time reaches the target, the global guard or a screen check calls `pauseAtTarget`. The service truncates both interval logs at the exact target instant, sets the loop `PAUSED`, and the active screen shows `TARGET REACHED` with the elapsed value clamped to the target. Resume is not offered once the target is reached.
 
 ## 3. Stop and journal
 
@@ -73,14 +78,17 @@ If the journaled loop was paused, **Keep looping** calls `resumeLoop`, syncs the
 
 Completed loops appear in Today's recent list and in History. History derives per-day time from interval allocation, so a loop that crossed midnight appears on both days with the correct split. Opening a loop from history shows the read-only journal. The loop's `local_date` labels the original day but does not determine history totals.
 
+The separate Day view groups capsule focus by task rather than by loop. Its timeline and numbered 24-hour clock share the same selection model, and its weekday/month range mode uses clipped capsule intervals for the selected period.
+
 ## Persistence and notification touchpoints
 
 | Step | Database writes | Notification |
 | --- | --- | --- |
-| Start | insert loop + open interval (transaction) | schedule for remaining target |
+| Start | insert loop + open interval + capsule rows (transaction) | schedule for remaining target |
 | Pause | close interval + status `PAUSED` (transaction) | cancel |
 | Resume | status `ACTIVE` + open interval (transaction) | reschedule |
 | Stop | pause if active | cancel via non-ACTIVE sync |
+| Target reached | truncate loop/capsule intervals at target + status `PAUSED` (transaction) | cancel via non-ACTIVE sync |
 | Save | close interval if needed + journal + status `COMPLETED` (transaction) | cancel by loop ID |
 | Keep looping | resume if paused | reschedule with permission request |
 
@@ -88,9 +96,7 @@ Notification failures are caught at the screen boundary so a denied permission o
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/domain/loops-and-timer.md] link "/openwiki/domain/loops-and-timer.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loops, Intervals, and Timer Math](/openwiki/domain/loops-and-timer.md)
-<!-- openwiki: broken internal link [/openwiki/workflows/app-lifecycle-and-notifications.md] link "/openwiki/workflows/app-lifecycle-and-notifications.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Bootstrap, Foreground Recovery, and Notifications](/openwiki/workflows/app-lifecycle-and-notifications.md)
-<!-- openwiki: broken internal link [/openwiki/ui/navigation-and-theming.md] link "/openwiki/ui/navigation-and-theming.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Navigation, Screens, and Theming](/openwiki/ui/navigation-and-theming.md)
+- [Loops, Intervals, and Timer Math](../domain/loops-and-timer.md)
+- [Bootstrap, Foreground Recovery, and Notifications](../workflows/app-lifecycle-and-notifications.md)
+- [Navigation, Screens, and Theming](../ui/navigation-and-theming.md)
+- [Product Overview](../product/overview.md)

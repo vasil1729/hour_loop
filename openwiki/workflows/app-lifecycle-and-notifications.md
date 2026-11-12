@@ -37,29 +37,35 @@ This page follows the app from process start through database initialization, se
 1. `WebPhoneFrame` (web preview only)
 2. `SafeAreaProvider`
 3. `ThemeProvider`
-4. `Suspense` with a loading screen
-5. `SQLiteProvider` with `databaseName="hour-loop.db"` and `onInit={migrateDbIfNeeded}`, using suspense
-6. `AppBootstrap`
-7. `RootNavigator`
+4. `I18nProvider`
+5. `DatabaseErrorBoundary`
+6. `Suspense` with a localized loading screen
+7. `SQLiteProvider` with `databaseName="hour-loop.db"` and `onInit={migrateDbIfNeeded}`, using suspense
+8. `AppBootstrap`
+9. `RootNavigator`
 
-`SQLiteProvider` suspends until the database is open and migrations have run. A migration failure therefore keeps the app on the loading screen instead of rendering against an uninitialized database.
+`SQLiteProvider` suspends until the database is open and migrations have run. A migration or open failure is caught by `DatabaseErrorBoundary`, which renders a localized error or "database already open" screen instead of an uncaught render error.
 
-`AppBootstrap` has two effects:
+`AppBootstrap` has effects for:
 
 - **Hydration/recovery:** load settings from SQLite, then run `recoverAppState(db)`.
+- **Global target guard:** `useTargetGuard` schedules the exact target pause even when no timer screen is mounted.
 - **Platform services:** call `setupNotifications()` and register `subscribeToForeground(db)`; cleanup removes only the foreground subscription.
 
-Settings must load before recovery because recovery may schedule a notification and the notification service reads `notifications_enabled` and the loop data.
+Settings must load before recovery because recovery may schedule a notification and the notification service reads `notifications_enabled` and the loop data. `I18nProvider` resolves language before the database opens so loading and error screens are localized too.
 
 ## Settings hydration
 
-The settings store loads three keys in parallel:
+The settings store loads these keys in parallel:
 
 - `default_duration_seconds`
+- default daily/monthly intention seconds
+- `early_warning_minutes`
 - `theme`
+- `language`
 - `notifications_enabled`
 
-It falls back to 3600 seconds for a missing/invalid duration, `system` for an unknown theme, and enabled unless the stored value is exactly `"false"`. Writes update SQLite first and then the store, so a failed write does not leave the UI claiming a preference was saved.
+It falls back to 3600 seconds for a missing/invalid duration, the built-in 8-hour/160-hour intention defaults, `system` for an unknown theme or language, and enabled unless the stored value is exactly `"false"`. Writes update SQLite first and then the store, so a failed write does not leave the UI claiming a preference was saved.
 
 ## Foreground recovery
 
@@ -72,7 +78,7 @@ It falls back to 3600 seconds for a missing/invalid duration, `system` for an un
 
 ## Notification setup
 
-`setupNotifications` returns immediately on web. On native it installs a notification handler that shows banners/list entries, plays sound, and skips badge updates. On Android it creates the `loop-targets` channel with high importance, a vibration pattern, the accent color, and the default sound.
+`setupNotifications` returns immediately on web. On native it installs a notification handler that shows banners/list entries, plays sound, and skips badge updates. On Android it creates the `loop-targets` channel with high importance, a vibration pattern, the accent color, and the default sound. Channel names and descriptions come from the active translation dictionary; changing language refreshes them.
 
 Permission helpers also guard web and return `false`. `requestNotificationPermission` returns early when permission is already granted, refuses when `canAskAgain` is false, and otherwise requests permission.
 
@@ -89,7 +95,7 @@ Permission helpers also guard web and return `false`. `requestNotificationPermis
 7. Schedule a `TIME_INTERVAL` notification for the remaining seconds, with the Android channel.
 8. Persist the OS identifier under `notif_{loopId}`.
 
-The trigger uses at least one second and rounds the remaining duration. The notification payload includes the loop ID, title `H{sequence_number} target reached`, and a body inviting the user to keep going or close the loop.
+The trigger uses at least one second and rounds the remaining duration. The notification payload includes the loop ID, a localized `H{sequence_number} target reached` title, and a body inviting the user to keep going or close the loop. Early warnings use the same localized path and are scheduled only when the remaining time is longer than the warning window.
 
 ## Lifecycle touchpoints
 
@@ -114,9 +120,7 @@ The trigger uses at least one second and rounds the remaining duration. The noti
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md)
-<!-- openwiki: broken internal link [/openwiki/database/persistence.md] link "/openwiki/database/persistence.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [SQLite Persistence and Migrations](/openwiki/database/persistence.md)
-<!-- openwiki: broken internal link [/openwiki/domain/loops-and-timer.md] link "/openwiki/domain/loops-and-timer.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loops, Intervals, and Timer Math](/openwiki/domain/loops-and-timer.md)
+- [Loop Lifecycle End to End](../workflows/loop-lifecycle.md)
+- [SQLite Persistence and Migrations](../database/persistence.md)
+- [Loops, Intervals, and Timer Math](../domain/loops-and-timer.md)
+- [Product Overview](../product/overview.md)

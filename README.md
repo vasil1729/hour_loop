@@ -149,18 +149,18 @@ src/features/        Application services
 src/services/        Notifications and app lifecycle
 src/store/           Zustand display stores
 src/components/      Reusable UI
+src/i18n/            Typed translations and language resolution
 src/theme/           Design tokens and theme provider
-docs/                Product and architecture documentation
+openwiki/            Generated product, architecture, and operations wiki
 ```
 
 ## Documentation
 
-- [Product specification](docs/PRODUCT_SPEC.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Database schema](docs/DATABASE_SCHEMA.md)
-- [Backup format](docs/BACKUP_FORMAT.md)
-- [Implementation plan](IMPLEMENTATION_PLAN.md)
 - [OpenWiki quickstart](openwiki/quickstart.md)
+- [Product overview](openwiki/product/overview.md)
+- [Architecture](openwiki/architecture/system-overview.md)
+- [Database schema](openwiki/database/persistence.md)
+- [Backup and restore](openwiki/operations/backup-and-restore.md)
 
 ## Design principles
 

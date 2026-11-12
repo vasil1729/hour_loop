@@ -40,15 +40,16 @@ The root layout defines one `Stack` with headers hidden:
 - `loop/complete`: gestures disabled
 - `loop/[id]`: read-only loop journal
 - `task/[id]`: task detail and subtree
+- `day/[date]`: task-first day/week/month focus overview
 
 The tab shell contains four routes:
 
 | Tab | Route | Role |
 | --- | --- | --- |
 | Today | `(tabs)/index` | Date, intentions, active-loop banner or start CTA, recent loops |
-| Tasks | `(tabs)/tasks` | Filterable flattened task tree |
-| History | `(tabs)/history` | Day navigation, day summary, loops, monthly summary |
-| Settings | `(tabs)/settings` | Default duration, theme, notifications, about |
+| Tasks | `(tabs)/tasks` | Loose capsules and a filterable flattened task tree |
+| History | `(tabs)/history` | Day/week/month summaries, period navigation, weekly bars, monthly heatmap |
+| Settings | `(tabs)/settings` | Duration, intentions, language, theme, notifications, backup/restore, about |
 
 Tab icons are Ionicons, colored from the active/inactive theme tokens. The tab bar surface and border come from the palette, and scene backgrounds use `colors.background`.
 
@@ -59,6 +60,24 @@ Tab icons are Ionicons, colored from the active/inactive theme tokens. The tab b
 `Button` supports `primary`, `secondary`, `ghost`, and `danger` variants. It exposes `accessibilityRole="button"`, an accessibility label, an optional hint, and disabled/busy state; a loading button swaps the label for an activity indicator. `ConfirmDialog` wraps a transparent React Native `Modal` with a themed overlay and reuses `Button` for its actions. `EmptyState`, `LoadingScreen`, and form modals (task, intention, task picker) follow the same token-based styling.
 
 The task pool uses a single `FlatList` of depth-aware rows from `flattenTree`, not nested views. Rows expose accessibility labels for expand/collapse and completion, and the add-task control is an accessible icon button.
+
+## Day view
+
+`app/day/[date].tsx` is the detailed focus overview opened from Today or History. It is task-first rather than loop-first:
+
+- a summary counts focused time, distinct task capsules, and capsule segments;
+- focus time is grouped by task capsule, with parent-task context, per-task totals, capsule counts, and color dots for the grouped segments;
+- tapping a capsule highlights its time in both visualization modes and shows a selected-capsule card.
+
+The view offers a **Timeline** mode and a **Clock** mode. The clock is a numbered 24-hour dial: hour labels `00` through `22` sit outside an inner data disc, and each capsule segment is a wedge colored from the shared capsule palette. Selecting a wedge outlines it, dims the other wedges, and updates the center total. Today's view also draws a live now marker. The timeline scrolls vertically, supports jump-to-now and jump-to-first-capsule actions, and highlights the same selected segments.
+
+A `HistoryPeriodSwitcher` lets the same screen show a day, week, or month range. Week/month ranges use `getRangeCapsuleData`, which clips capsule intervals to the inclusive local-day bounds; the task-first grouping and totals are otherwise identical.
+
+## Internationalization and direction
+
+Language is resolved by `I18nProvider` from the persisted preference and the device locale. Screens consume `useTranslation()` for `t()` and `isRTL`; the provider owns the active language used by non-React formatters. Arabic is the only RTL language. Layout direction is forced through `I18nManager` on native and `<html dir>` on web; screens also flip directional icons and use start/end spacing so layouts remain correct before a native restart applies the new direction.
+
+The Settings language picker lists System plus English, Russian, Arabic, Simplified Chinese, Turkish, and Malayalam. Language changes update React text immediately; native RTL layout changes apply after an app restart.
 
 ## Theming
 
@@ -90,14 +109,11 @@ This keeps the Today tab as the stable root after journaling without assuming ho
 
 ## Web-only frame
 
-<!-- openwiki: broken internal link [/openwiki/operations/web-preview.md] link "/openwiki/operations/web-preview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-`WebPhoneFrame` wraps the root layout and activates only on web viewports at least 600×700. It centers a 390 px-wide screen and adds a bezel; on native, phones, and small viewports it returns children directly. See [Web Preview](/openwiki/operations/web-preview.md) for the full behavior.
+`WebPhoneFrame` wraps the root layout and activates only on web viewports at least 600×700. It centers a 390 px-wide screen and adds a bezel; on native, phones, and small viewports it returns children directly. See [Web Preview](../operations/web-preview.md) for the full behavior.
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/operations/web-preview.md] link "/openwiki/operations/web-preview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Web Preview](/openwiki/operations/web-preview.md)
-<!-- openwiki: broken internal link [/openwiki/quickstart.md] link "/openwiki/quickstart.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Hour Loop Quickstart](/openwiki/quickstart.md)
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md)
+- [Web Preview](../operations/web-preview.md)
+- [Hour Loop Quickstart](../quickstart.md)
+- [Loop Lifecycle End to End](../workflows/loop-lifecycle.md)
+- [Product Overview](../product/overview.md)

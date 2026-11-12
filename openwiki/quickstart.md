@@ -7,8 +7,6 @@ verified:
   - by: openwiki/0.7.2
     at: 2026-11-11T14:17:00.720Z
 sources:
-  - id: openwiki-source-7b048c0c1552ba7ab4761ff9
-    resource: repo://docs/PRODUCT_SPEC.md
   - id: openwiki-source-5b54a58d1b51cd490b0e7162
     resource: repo://package.json
   - id: openwiki-source-23775c3de52f3ab95a13cb8b
@@ -25,7 +23,9 @@ Hour Loop is a calm, fully offline focus timer. A **Loop** is a timestamped focu
 - **SQLite is the source of truth.** Timer state is derived from persisted UTC intervals; display ticks never accumulate time.
 - **One loop at a time.** A loop may be `ACTIVE` or `PAUSED`, but starting another while one exists throws `LoopAlreadyActiveError`.
 - **Intervals, not counters.** Pause closes an interval, resume opens a new one, and elapsed time is recomputed from timestamps.
+- **The target is exact.** Reaching it truncates the interval log at the crossing instant, pauses the loop, and clamps displayed elapsed time.
 - **Calendar attribution is interval-based.** History and intentions use zoned allocation, not `loop.local_date`.
+- **Language is local state.** System or an explicit choice resolves to a typed dictionary; English is the fallback.
 - **Web is a preview only.** The shipped product targets native; the browser build exists for UI development.
 
 ## Commands
@@ -53,38 +53,30 @@ src/features/        Application services: loops, tasks, intentions, history
 src/services/        Notifications, lifecycle recovery, navigation helpers
 src/store/           Zustand display caches derived from SQLite
 src/components/      Reusable presentational components
+src/i18n/            Typed dictionaries and language resolution
 src/theme/           Tokens and theme provider
-docs/                Product spec, architecture, database schema
 scripts/             Local Android APK builder
-.github/workflows/   Manual APK build and tag-triggered release
+.github/workflows/   Manual APK build, release, and OpenWiki update
+openwiki/            Generated product, architecture, and operations wiki
 ```
 
 ## Read by task
 
 | If you are working on… | Start here |
 | --- | --- |
-<!-- openwiki: broken internal link [/openwiki/architecture/system-overview.md] link "/openwiki/architecture/system-overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Overall layering, bootstrap, state ownership | [System Architecture](/openwiki/architecture/system-overview.md) |
-<!-- openwiki: broken internal link [/openwiki/domain/loops-and-timer.md] link "/openwiki/domain/loops-and-timer.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Timer correctness, pauses, midnight/DST | [Loops, Intervals, and Timer Math](/openwiki/domain/loops-and-timer.md) |
-<!-- openwiki: broken internal link [/openwiki/domain/tasks.md] link "/openwiki/domain/tasks.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Task tree, moves, subtree focus time | [Task Hierarchy](/openwiki/domain/tasks.md) |
-<!-- openwiki: broken internal link [/openwiki/domain/intentions-and-history.md] link "/openwiki/domain/intentions-and-history.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Daily/monthly targets and history totals | [Intentions and History](/openwiki/domain/intentions-and-history.md) |
-<!-- openwiki: broken internal link [/openwiki/database/persistence.md] link "/openwiki/database/persistence.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Schema, migrations, repositories, settings | [SQLite Persistence and Migrations](/openwiki/database/persistence.md) |
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Start → timer → journal → history | [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md) |
-<!-- openwiki: broken internal link [/openwiki/workflows/app-lifecycle-and-notifications.md] link "/openwiki/workflows/app-lifecycle-and-notifications.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Startup, foreground recovery, notifications | [Bootstrap, Foreground Recovery, and Notifications](/openwiki/workflows/app-lifecycle-and-notifications.md) |
-<!-- openwiki: broken internal link [/openwiki/ui/navigation-and-theming.md] link "/openwiki/ui/navigation-and-theming.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Routes, theme, shared components | [Navigation, Screens, and Theming](/openwiki/ui/navigation-and-theming.md) |
-<!-- openwiki: broken internal link [/openwiki/operations/android-builds-and-releases.md] link "/openwiki/operations/android-builds-and-releases.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| APK builds, artifacts, releases | [Android Builds and Releases](/openwiki/operations/android-builds-and-releases.md) |
-<!-- openwiki: broken internal link [/openwiki/operations/web-preview.md] link "/openwiki/operations/web-preview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Browser preview and its limits | [Web Preview](/openwiki/operations/web-preview.md) |
-<!-- openwiki: broken internal link [/openwiki/testing/strategy.md] link "/openwiki/testing/strategy.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-| Test coverage and build gates | [Testing Strategy](/openwiki/testing/strategy.md) |
+| Product vision, concepts, screens, scope | [Product Overview](product/overview.md) |
+| Overall layering, bootstrap, state ownership | [System Architecture](architecture/system-overview.md) |
+| Timer correctness, pauses, exact targets, midnight/DST | [Loops, Intervals, and Timer Math](domain/loops-and-timer.md) |
+| Task tree, moves, capsules, subtree focus time | [Task Hierarchy](domain/tasks.md) |
+| Daily/monthly targets and history totals | [Intentions and History](domain/intentions-and-history.md) |
+| Schema, migrations, repositories, settings | [SQLite Persistence and Migrations](database/persistence.md) |
+| Start → timer → journal → history | [Loop Lifecycle End to End](workflows/loop-lifecycle.md) |
+| Startup, foreground recovery, notifications | [Bootstrap, Foreground Recovery, and Notifications](workflows/app-lifecycle-and-notifications.md) |
+| Routes, day view, theme, shared components | [Navigation, Screens, and Theming](ui/navigation-and-theming.md) |
+| Backup envelope, import rules, restore workflow | [Backup and Restore](operations/backup-and-restore.md) |
+| APK builds, artifacts, releases | [Android Builds and Releases](operations/android-builds-and-releases.md) |
+| Browser preview and its limits | [Web Preview](operations/web-preview.md) |
+| Test coverage and build gates | [Testing Strategy](testing/strategy.md) |
 
 ## First things to check before changing behavior
 
@@ -95,9 +87,7 @@ scripts/             Local Android APK builder
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/architecture/system-overview.md] link "/openwiki/architecture/system-overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [System Architecture](/openwiki/architecture/system-overview.md)
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md)
-<!-- openwiki: broken internal link [/openwiki/testing/strategy.md] link "/openwiki/testing/strategy.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Testing Strategy](/openwiki/testing/strategy.md)
+- [Product Overview](product/overview.md)
+- [System Architecture](architecture/system-overview.md)
+- [Loop Lifecycle End to End](workflows/loop-lifecycle.md)
+- [Testing Strategy](testing/strategy.md)

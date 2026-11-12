@@ -79,6 +79,18 @@ The returned day record contains:
 
 This means a single loop can appear on multiple days with different elapsed values, and multiple intervals from the same loop on the same day are merged before display.
 
+## Week history
+
+`getWeekHistory` anchors on a Sunday-first week (`startOfWeekDayKey`), loads all overlapping intervals once, and builds seven `WeekDayHistory` entries from `getDaySummary`. It returns:
+
+- `totalSeconds`: sum of the seven day totals;
+- `loopCount`: unique loop IDs across the week's intervals, so pause/resume does not inflate it;
+- `activeDays`: days with any focus time;
+- `targetDays` / `targetDayCount`: elapsed days whose daily target was reached and elapsed days with a target;
+- `days`: per-day totals plus each day's intention summary for the bar chart.
+
+Because every day is queried through the same zoned allocation, a loop crossing a midnight boundary contributes to both adjacent day bars and the week total stays consistent with the day view.
+
 ## Month history
 
 `getMonthHistory` uses the local month bounds, fetches overlapping intervals, and delegates total focus time and progress to the monthly intention summary. The loop count is the size of the set of loop IDs among those intervals, so repeated pause/resume intervals do not inflate it.
@@ -92,13 +104,12 @@ The monthly total is derived from monthly allocation, which itself is derived fr
 - Open intervals are included and count up to `new Date()` at query time.
 - Rounding happens at the display/aggregation boundary (`Math.round` for history totals); the underlying allocation stays fractional-second precise.
 - Zero-length or reversed intervals contribute nothing.
+- `actualSeconds` and target labels are formatted through the active language's duration helper, so compact units change with the selected language.
 - Empty days return zero totals and an empty loop list, not an error.
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/domain/loops-and-timer.md] link "/openwiki/domain/loops-and-timer.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loops, Intervals, and Timer Math](/openwiki/domain/loops-and-timer.md)
-<!-- openwiki: broken internal link [/openwiki/database/persistence.md] link "/openwiki/database/persistence.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [SQLite Persistence and Migrations](/openwiki/database/persistence.md)
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md)
+- [Loops, Intervals, and Timer Math](../domain/loops-and-timer.md)
+- [SQLite Persistence and Migrations](../database/persistence.md)
+- [Loop Lifecycle End to End](../workflows/loop-lifecycle.md)
+- [Navigation, Screens, and Theming](../ui/navigation-and-theming.md)

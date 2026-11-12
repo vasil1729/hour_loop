@@ -37,6 +37,19 @@ Tasks form an arbitrarily deep adjacency-list hierarchy. A task may have one par
 
 Loops reference tasks with `task_id` and `roll_forward_task_id`; both use `ON DELETE SET NULL`, so deleting a task never deletes focus history. Deleting a parent task does cascade to its descendant tasks.
 
+## Capsules
+
+Capsules are `loop_items` rows: snapshots of checklist text that belong to one loop. They carry `done`, `current`, `sort_order`, and `carried_from_item_id` fields. A loop attached to a subtask groups its capsules under that task; a loop without a task produces loose capsules.
+
+- Starting a loop creates its capsule rows in the same transaction as the loop and first interval.
+- An active or paused loop can add capsules and remove existing capsules. Removing the current capsule closes its open focus interval first.
+- Selecting a capsule clears the previous `current` flag and opens a `loop_item_intervals` row for capsule-level focus time. Marking the current capsule done, pausing, completing, or removing it closes that interval.
+- Capsule totals and the Day view are derived from `loop_item_intervals`, not from the loop-level interval log.
+- Open, uncarried loose capsules are derived from `loop_items` joined to loops with `task_id IS NULL`. They are not a separate table.
+- Carrying an item into a new loop creates a new row whose `carried_from_item_id` points at the source item. Open, already-carried capsules are excluded from the loose pool and from start-loop suggestions.
+
+The Tasks screen shows loose capsules above the task tree. Task detail shows open capsules grouped under the task and its descendants. Tapping a loose capsule completes it.
+
 ## Tree construction and flattening
 
 `sortTasks` orders siblings by `sort_order`, then by `created_at` as a tiebreaker. `buildTaskTree` maps tasks by ID and treats a task as a root when its parent ID is missing from the supplied set or when the parent was archived and therefore excluded. This prevents orphaned subtrees from disappearing.
@@ -80,13 +93,12 @@ Creating a task trims the title, rejects an empty title, assigns `sort_order = m
 - A missing or archived parent promotes its children to roots rather than hiding them.
 - Delete cascades through descendants; loops survive with a null task link.
 - Loop completion does not complete its task.
+- Capsules are loop snapshots: editing or removing one does not rewrite an older loop's carried provenance.
 - Sibling order is append-only through `max + 1`; there is no reordering UI in the current code.
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/database/persistence.md] link "/openwiki/database/persistence.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [SQLite Persistence and Migrations](/openwiki/database/persistence.md)
-<!-- openwiki: broken internal link [/openwiki/ui/navigation-and-theming.md] link "/openwiki/ui/navigation-and-theming.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Navigation, Screens, and Theming](/openwiki/ui/navigation-and-theming.md)
-<!-- openwiki: broken internal link [/openwiki/workflows/loop-lifecycle.md] link "/openwiki/workflows/loop-lifecycle.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loop Lifecycle End to End](/openwiki/workflows/loop-lifecycle.md)
+- [SQLite Persistence and Migrations](../database/persistence.md)
+- [Navigation, Screens, and Theming](../ui/navigation-and-theming.md)
+- [Loop Lifecycle End to End](../workflows/loop-lifecycle.md)
+- [Product Overview](../product/overview.md)

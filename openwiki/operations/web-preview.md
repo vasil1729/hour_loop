@@ -1,6 +1,8 @@
 ---
-type: "Reference"
-title: "Web Preview"
+type: operations
+title: Web Preview
+description: Development-only browser preview covering run commands, the phone frame, platform limits, and SQLite OPFS behavior.
+tags: [web, expo, preview, sqlite, development]
 openwiki_generated: true
 verified:
   - by: openwiki/0.7.2
@@ -24,7 +26,7 @@ generated: { by: "opencode", at: "2026-11-11T14:17:00.720Z" }
 
 # Web Preview
 
-The web target exists only to preview the UI in a browser during development. It is not a deployment target, is not covered by the product specification, and does not share data with a phone.
+The web target exists only to preview the UI in a browser during development. It is not a deployment target and does not share data with a phone.
 
 ## Running it
 
@@ -75,9 +77,6 @@ The rest of the loop flow still runs, so starting, pausing, and completing a loo
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/ui/navigation-and-theming.md] link "/openwiki/ui/navigation-and-theming.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Navigation, Screens, and Theming](/openwiki/ui/navigation-and-theming.md)
-<!-- openwiki: broken internal link [/openwiki/quickstart.md] link "/openwiki/quickstart.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Hour Loop Quickstart](/openwiki/quickstart.md)
-<!-- openwiki: broken internal link [/openwiki/operations/android-builds-and-releases.md] link "/openwiki/operations/android-builds-and-releases.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Android Builds and Releases](/openwiki/operations/android-builds-and-releases.md)
+- [Navigation, Screens, and Theming](../ui/navigation-and-theming.md)
+- [Hour Loop Quickstart](../quickstart.md)
+- [Android Builds and Releases](android-builds-and-releases.md)

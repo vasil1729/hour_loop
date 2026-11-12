@@ -83,6 +83,15 @@ Coverage is therefore aimed at the pure rules and application services. Screens,
 - zero targets and negative actual time
 - day/month allocation helpers across multiple intervals
 
+`src/i18n/i18n.test.ts` covers:
+
+- device-language resolution and explicit overrides for all supported languages
+- interpolation behavior and plural forms
+- placeholder parity across every dictionary
+- localized dates, compact durations, intention durations, and error mapping
+
+`src/features/days/dayCapsuleService.test.ts` covers range clipping of capsule intervals, open-interval capping at the reference time, and aggregation by capsule and task.
+
 These tests import no React Native or SQLite APIs, so they run quickly and deterministically.
 
 ## Loop service tests
@@ -104,7 +113,9 @@ The service is created with `createLoopService(deps)`, not the production single
 - the full start → pause → resume → complete sequence
 - stable elapsed time across a simulated app restart
 - sequence increment for a second loop on the same day
+- exact target pause, no early pause, and overtime trimming
 - persistence of every completion-journal field
+- adding/removing capsules, current-capsule invariants, and capsule focus intervals
 
 The restart test constructs a second service instance over the same harness state, which is the closest analogue to process restart without a native database.
 
@@ -120,9 +131,7 @@ For those areas, the build gates and manual Android checks are the verification 
 
 ## Related pages
 
-<!-- openwiki: broken internal link [/openwiki/architecture/system-overview.md] link "/openwiki/architecture/system-overview.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [System Architecture](/openwiki/architecture/system-overview.md)
-<!-- openwiki: broken internal link [/openwiki/domain/loops-and-timer.md] link "/openwiki/domain/loops-and-timer.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Loops, Intervals, and Timer Math](/openwiki/domain/loops-and-timer.md)
-<!-- openwiki: broken internal link [/openwiki/domain/tasks.md] link "/openwiki/domain/tasks.md" is root-absolute, which no real consumer resolves against the repository root (not a coding agent reading the page, not GitHub's Markdown renderer, not a local viewer); use a path relative to this file instead. Fix the href or restore the target, then delete this comment. -->
-- [Task Hierarchy](/openwiki/domain/tasks.md)
+- [System Architecture](../architecture/system-overview.md)
+- [Loops, Intervals, and Timer Math](../domain/loops-and-timer.md)
+- [Task Hierarchy](../domain/tasks.md)
+- [Android Builds and Releases](../operations/android-builds-and-releases.md)

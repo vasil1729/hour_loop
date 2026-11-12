@@ -12,6 +12,7 @@ okf_version: "0.2"
 - [database](database/)
 - [domain](domain/)
 - [operations](operations/)
+- [product](product/)
 - [testing](testing/)
 - [ui](ui/)
 - [workflows](workflows/)
