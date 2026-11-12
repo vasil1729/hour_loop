@@ -24,6 +24,8 @@ import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import type { Loop, LoopInterval, LoopItem, Task } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
 import { goToToday } from '../../src/services/navigation/navigationService';
 import {
   cancelLoopNotification,
@@ -38,6 +40,7 @@ export default function CompleteLoopScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ loopId?: string }>();
   const loopId = typeof params.loopId === 'string' ? params.loopId : undefined;
   const refreshLoop = useLoopStore((state) => state.refresh);
@@ -87,7 +90,9 @@ export default function CompleteLoopScreen() {
         setRollForwardTaskId(result.loop.roll_forward_task_id);
       } catch (caught) {
         if (!cancelled) {
-          setError(caught instanceof Error ? caught.message : 'Loop not found.');
+          setError(
+            caught instanceof Error ? caught.message : t('loopComplete.notFound')
+          );
         }
       } finally {
         if (!cancelled) {
@@ -100,7 +105,7 @@ export default function CompleteLoopScreen() {
     return () => {
       cancelled = true;
     };
-  }, [db, loopId]);
+  }, [db, loopId, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,8 +134,8 @@ export default function CompleteLoopScreen() {
         )
       );
       Alert.alert(
-        'Could not update capsule',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('loopComplete.couldNotUpdateCapsule'),
+        localizeError(caught)
       );
     }
   };
@@ -147,8 +152,8 @@ export default function CompleteLoopScreen() {
         await refreshLoop(db);
       } catch (caught) {
         Alert.alert(
-          'Could not resume loop',
-          caught instanceof Error ? caught.message : 'Please try again.'
+          t('loopComplete.couldNotResume'),
+          localizeError(caught)
         );
         return;
       } finally {
@@ -180,8 +185,8 @@ export default function CompleteLoopScreen() {
       goToToday(router);
     } catch (caught) {
       Alert.alert(
-        'Could not close loop',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('loopComplete.couldNotClose'),
+        localizeError(caught)
       );
     } finally {
       setBusy(false);
@@ -199,8 +204,8 @@ export default function CompleteLoopScreen() {
       goToToday(router);
     } catch (caught) {
       Alert.alert(
-        'Could not delete loop',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('loopComplete.couldNotDelete'),
+        localizeError(caught)
       );
     } finally {
       setDeleting(false);
@@ -208,17 +213,20 @@ export default function CompleteLoopScreen() {
   };
 
   if (loading) {
-    return <LoadingScreen message="Preparing your journal…" />;
+    return <LoadingScreen message={t('loopComplete.loading')} />;
   }
 
   if (error || !loop) {
     return (
       <Screen>
         <EmptyState
-          title="Loop not found"
-          message={error ?? 'This loop is no longer available.'}
+          title={t('loopComplete.notFound')}
+          message={error ?? t('loopComplete.unavailable')}
           action={
-            <Button label="Back to Today" onPress={() => goToToday(router)} />
+            <Button
+              label={t('loopComplete.backToToday')}
+              onPress={() => goToToday(router)}
+            />
           }
         />
       </Screen>
@@ -232,7 +240,7 @@ export default function CompleteLoopScreen() {
     <Screen contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
-          CLOSING LOOP
+          {t('loopComplete.eyebrow')}
         </Text>
         <Text style={[styles.title, { color: colors.text }]}>
           H{loop.sequence_number} · {formatDurationCompact(elapsedSeconds)}
@@ -250,7 +258,7 @@ export default function CompleteLoopScreen() {
           ]}
         >
           <Text style={[styles.noticeText, { color: colors.accent }]}>
-            This loop is already complete. Its journal is shown below.
+            {t('loopComplete.alreadyComplete')}
           </Text>
         </View>
       ) : null}
@@ -265,7 +273,7 @@ export default function CompleteLoopScreen() {
           ]}
         >
           <Text style={[styles.noticeText, { color: colors.success }]}>
-            Target reached. The timer stopped at your target.
+            {t('loopComplete.targetReachedNotice')}
           </Text>
         </View>
       ) : null}
@@ -284,10 +292,13 @@ export default function CompleteLoopScreen() {
         <View style={styles.field}>
           <View style={styles.itemsHeader}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>
-              CAPSULES
+              {t('loopComplete.capsules')}
             </Text>
             <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
-              {items.filter((item) => item.done).length}/{items.length} done
+              {t('common.doneCount', {
+                done: items.filter((item) => item.done).length,
+                total: items.length,
+              })}
             </Text>
           </View>
           <View style={styles.capsuleWrap}>
@@ -310,46 +321,46 @@ export default function CompleteLoopScreen() {
       ) : (
         <>
           <Field
-            label="FOCUS"
+            label={t('loopComplete.focus')}
             value={focus}
             onChangeText={setFocus}
-            placeholder="What was this loop for?"
+            placeholder={t('loopComplete.focusPlaceholder')}
             editable={!readOnly}
             multiline
           />
           <Field
-            label="CARRY IN"
+            label={t('loopComplete.carryIn')}
             value={carryIn}
             onChangeText={setCarryIn}
-            placeholder="What you brought into the loop"
+            placeholder={t('loopComplete.carryInPlaceholder')}
             editable={!readOnly}
             multiline
           />
         </>
       )}
       <Field
-        label="DONE"
+        label={t('loopComplete.done')}
         value={done}
         onChangeText={setDone}
-        placeholder="What did you actually accomplish?"
+        placeholder={t('loopComplete.donePlaceholder')}
         editable={!readOnly}
         multiline
       />
       <Field
-        label="ROLL FORWARD"
+        label={t('loopComplete.rollForward')}
         value={rollForward}
         onChangeText={setRollForward}
-        placeholder="What should the next loop pick up?"
+        placeholder={t('loopComplete.rollForwardPlaceholder')}
         editable={!readOnly}
         multiline
       />
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          ROLL FORWARD CAPSULE (OPTIONAL)
+          {t('loopComplete.rollForwardCapsule')}
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a follow-up capsule"
+          accessibilityLabel={t('loopComplete.chooseFollowUpA11y')}
           onPress={() => setTaskPickerVisible(true)}
           disabled={readOnly}
           style={[
@@ -365,19 +376,19 @@ export default function CompleteLoopScreen() {
             ]}
           >
             {tasks.find((task) => task.id === rollForwardTaskId)?.title ??
-              'No capsule linked'}
+              t('loopComplete.noCapsuleLinked')}
           </Text>
           <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
-            {readOnly ? '' : 'Choose'}
+            {readOnly ? '' : t('common.choose')}
           </Text>
         </Pressable>
       </View>
 
       <Field
-        label="NOTE"
+        label={t('loopComplete.note')}
         value={note}
         onChangeText={setNote}
-        placeholder="Anything worth remembering?"
+        placeholder={t('loopComplete.notePlaceholder')}
         editable={!readOnly}
         multiline
       />
@@ -386,8 +397,8 @@ export default function CompleteLoopScreen() {
         visible={taskPickerVisible}
         tasks={tasks}
         selectedTaskId={rollForwardTaskId}
-        title="Link a follow-up capsule"
-        noneLabel="No follow-up capsule"
+        title={t('loopComplete.linkFollowUp')}
+        noneLabel={t('loopComplete.noFollowUp')}
         onSelect={(taskId) => {
           setRollForwardTaskId(taskId);
           setTaskPickerVisible(false);
@@ -396,7 +407,9 @@ export default function CompleteLoopScreen() {
       />
 
       <Button
-        label={readOnly ? 'Back to Today' : 'Save & close loop'}
+        label={
+          readOnly ? t('loopComplete.backToToday') : t('loopComplete.saveClose')
+        }
         onPress={() => {
           void handleSave();
         }}
@@ -404,7 +417,7 @@ export default function CompleteLoopScreen() {
       />
       {!readOnly && !targetReached ? (
         <Button
-          label="Keep looping"
+          label={t('loopComplete.keepLooping')}
           variant="ghost"
           onPress={() => {
             void handleKeepLooping();
@@ -416,7 +429,7 @@ export default function CompleteLoopScreen() {
       {!readOnly ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Delete loop"
+          accessibilityLabel={t('loopComplete.delete')}
           disabled={deleting}
           onPress={() => setDeleteVisible(true)}
           style={({ pressed }) => [
@@ -425,18 +438,20 @@ export default function CompleteLoopScreen() {
           ]}
         >
           <Text style={[styles.deleteText, { color: colors.danger }]}>
-            Delete loop
+            {t('loopComplete.delete')}
           </Text>
         </Pressable>
       ) : null}
 
       <ConfirmDialog
         visible={deleteVisible}
-        title={`Delete H${loop.sequence_number}?`}
-        message={`This permanently removes this loop and ${formatDurationCompact(
-          elapsedSeconds
-        )} of recorded focus time. This cannot be undone.`}
-        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        title={t('loopComplete.deleteTitle', {
+          sequence: loop.sequence_number,
+        })}
+        message={t('loopComplete.deleteMessage', {
+          duration: formatDurationCompact(elapsedSeconds),
+        })}
+        confirmLabel={deleting ? t('common.deleting') : t('common.delete')}
         destructive
         onConfirm={() => {
           void handleDelete();

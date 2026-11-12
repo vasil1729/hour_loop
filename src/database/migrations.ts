@@ -74,6 +74,7 @@ const SCHEMA_V1 = `
   INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES
     ('default_duration_seconds', '3600', datetime('now')),
     ('theme', 'system', datetime('now')),
+    ('language', 'system', datetime('now')),
     ('notifications_enabled', 'true', datetime('now'));
 `;
 

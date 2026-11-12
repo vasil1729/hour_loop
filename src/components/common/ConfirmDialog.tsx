@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 import { Button } from './Button';
@@ -20,13 +21,14 @@ export function ConfirmDialog({
   visible,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -43,13 +45,13 @@ export function ConfirmDialog({
           <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
           <View style={styles.actions}>
             <Button
-              label={cancelLabel}
+              label={cancelLabel ?? t('common.cancel')}
               variant="secondary"
               onPress={onCancel}
               style={styles.action}
             />
             <Button
-              label={confirmLabel}
+              label={confirmLabel ?? t('common.confirm')}
               variant={destructive ? 'danger' : 'primary'}
               onPress={onConfirm}
               style={styles.action}

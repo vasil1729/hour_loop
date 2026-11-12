@@ -22,19 +22,23 @@ import {
   setTaskStatus,
   type TaskFilter,
 } from '../../src/features/tasks/taskService';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
+import type { TranslationKey } from '../../src/i18n/types';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
-const FILTERS: { key: TaskFilter; label: string }[] = [
-  { key: 'active', label: 'Active' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'all', label: 'All' },
+const FILTERS: { key: TaskFilter; labelKey: TranslationKey }[] = [
+  { key: 'active', labelKey: 'tasks.filterActive' },
+  { key: 'completed', labelKey: 'tasks.filterCompleted' },
+  { key: 'all', labelKey: 'tasks.filterAll' },
 ];
 
 export default function TasksScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const [filter, setFilter] = useState<TaskFilter>('active');
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -95,8 +99,8 @@ export default function TasksScreen() {
       await reload();
     } catch (error) {
       Alert.alert(
-        'Could not update task',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('tasks.couldNotUpdateTask'),
+        localizeError(error)
       );
     }
   };
@@ -107,8 +111,8 @@ export default function TasksScreen() {
       await reload();
     } catch (error) {
       Alert.alert(
-        'Could not update capsule',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('tasks.couldNotUpdateCapsule'),
+        localizeError(error)
       );
     }
   };
@@ -124,8 +128,8 @@ export default function TasksScreen() {
       await reload();
     } catch (error) {
       Alert.alert(
-        'Could not add task',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('tasks.couldNotAddTask'),
+        localizeError(error)
       );
     } finally {
       setSaving(false);
@@ -137,13 +141,15 @@ export default function TasksScreen() {
       <View style={styles.headerRow}>
         <View>
           <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
-            TASK POOL
+            {t('tasks.eyebrow')}
           </Text>
-          <Text style={[styles.title, { color: colors.text }]}>Tasks</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {t('tasks.title')}
+          </Text>
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Add task"
+          accessibilityLabel={t('tasks.addTaskA11y')}
           onPress={() => setAddVisible(true)}
           style={[styles.addButton, { backgroundColor: colors.accent }]}
         >
@@ -174,7 +180,7 @@ export default function TasksScreen() {
                   { color: selected ? '#FFFFFF' : colors.textSecondary },
                 ]}
               >
-                {entry.label}
+                {t(entry.labelKey)}
               </Text>
             </Pressable>
           );
@@ -185,10 +191,10 @@ export default function TasksScreen() {
         <View style={styles.capsuleSection}>
           <View style={styles.capsuleHeader}>
             <Text style={[styles.capsuleLabel, { color: colors.textSecondary }]}>
-              LOOSE CAPSULES
+              {t('tasks.looseCapsules')}
             </Text>
             <Text style={[styles.capsuleCount, { color: colors.textSecondary }]}>
-              {looseCapsules.length} open
+              {t('common.openCount', { count: looseCapsules.length })}
             </Text>
           </View>
           <View style={styles.capsuleWrap}>
@@ -196,7 +202,9 @@ export default function TasksScreen() {
               <LoopItemCapsule
                 key={capsule.item.id}
                 text={capsule.item.text}
-                pressAccessibilityLabel={`Complete capsule ${capsule.item.text}`}
+                pressAccessibilityLabel={t('tasks.completeCapsuleA11y', {
+                  text: capsule.item.text,
+                })}
                 onPress={() => {
                   void completeCapsule(capsule);
                 }}
@@ -204,7 +212,7 @@ export default function TasksScreen() {
             ))}
           </View>
           <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
-            From loops without a task capsule. Tap to complete.
+            {t('tasks.looseHint')}
           </Text>
         </View>
       ) : null}
@@ -228,13 +236,17 @@ export default function TasksScreen() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <EmptyState
-                title={filter === 'completed' ? 'No completed tasks' : 'No tasks yet'}
+                title={
+                  filter === 'completed'
+                    ? t('tasks.noCompletedTitle')
+                    : t('tasks.noTasksTitle')
+                }
                 message={
                   filter === 'completed'
-                    ? 'Finish a task and it will appear here.'
+                    ? t('tasks.noCompletedMessage')
                     : looseCapsules.length > 0
-                      ? 'Loose capsules are shown above. Add a task container to group future work.'
-                      : 'Add a task container, break it into capsules, and start loops from a capsule.'
+                      ? t('tasks.noTasksLooseMessage')
+                      : t('tasks.noTasksMessage')
                 }
               />
             </View>
@@ -244,7 +256,7 @@ export default function TasksScreen() {
 
       <TaskFormModal
         visible={addVisible}
-        heading="New task"
+        heading={t('tasks.newTask')}
         busy={saving}
         onSave={(values) => {
           void handleAddTask(values);

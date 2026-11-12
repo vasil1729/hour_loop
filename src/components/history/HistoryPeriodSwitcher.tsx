@@ -1,15 +1,17 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from '../../i18n/I18nProvider';
+import type { TranslationKey } from '../../i18n/types';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
 export type HistoryPeriod = 'day' | 'week' | 'month';
 
-const OPTIONS: { key: HistoryPeriod; label: string }[] = [
-  { key: 'day', label: 'Day' },
-  { key: 'week', label: 'Week' },
-  { key: 'month', label: 'Month' },
+const OPTIONS: { key: HistoryPeriod; labelKey: TranslationKey }[] = [
+  { key: 'day', labelKey: 'history.periodDay' },
+  { key: 'week', labelKey: 'history.periodWeek' },
+  { key: 'month', labelKey: 'history.periodMonth' },
 ];
 
 type HistoryPeriodSwitcherProps = {
@@ -22,6 +24,7 @@ export function HistoryPeriodSwitcher({
   onChange,
 }: HistoryPeriodSwitcherProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.track, { backgroundColor: colors.surfaceAlt }]}>
@@ -32,7 +35,9 @@ export function HistoryPeriodSwitcher({
             key={option.key}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            accessibilityLabel={`${option.label} view`}
+            accessibilityLabel={t('history.view', {
+              label: t(option.labelKey),
+            })}
             onPress={() => onChange(option.key)}
             style={[
               styles.option,
@@ -45,7 +50,7 @@ export function HistoryPeriodSwitcher({
                 { color: selected ? '#FFFFFF' : colors.textSecondary },
               ]}
             >
-              {option.label}
+              {t(option.labelKey)}
             </Text>
           </Pressable>
         );

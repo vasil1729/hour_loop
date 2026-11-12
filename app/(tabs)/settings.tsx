@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   Switch,
@@ -8,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -26,6 +28,7 @@ import { formatIntentionDuration } from '../../src/domain/intentions/intentionsD
 import {
   currentDayKey,
   currentMonthKey,
+  getLanguageLocale,
 } from '../../src/domain/shared/dateUtils';
 import {
   exportBackup,
@@ -37,6 +40,13 @@ import {
   setIntention,
 } from '../../src/features/intentions/intentionsService';
 import { useIntentions } from '../../src/hooks/useIntentions';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
+import type { LanguagePreference } from '../../src/i18n/localeState';
+import type {
+  TranslationKey,
+  TranslationParams,
+} from '../../src/i18n/types';
 import { recoverAppState } from '../../src/services/lifecycle/appLifecycleService';
 import {
   openExactAlarmSettings,
@@ -53,15 +63,26 @@ import {
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
-const THEMES: { key: ThemePreference; label: string }[] = [
-  { key: 'system', label: 'System' },
-  { key: 'light', label: 'Light' },
-  { key: 'dark', label: 'Dark' },
+const THEMES: { key: ThemePreference; labelKey: TranslationKey }[] = [
+  { key: 'system', labelKey: 'settings.themeSystem' },
+  { key: 'light', labelKey: 'settings.themeLight' },
+  { key: 'dark', labelKey: 'settings.themeDark' },
+];
+
+const LANGUAGES: { key: LanguagePreference; labelKey: TranslationKey }[] = [
+  { key: 'system', labelKey: 'common.system' },
+  { key: 'en', labelKey: 'common.english' },
+  { key: 'ru', labelKey: 'common.russian' },
+  { key: 'ar', labelKey: 'common.arabic' },
+  { key: 'zh', labelKey: 'common.chinese' },
+  { key: 'tr', labelKey: 'common.turkish' },
+  { key: 'ml', labelKey: 'common.malayalam' },
 ];
 
 export default function SettingsScreen() {
   const db = useSQLiteContext();
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const defaultDurationSeconds = useSettingsStore(
     (state) => state.defaultDurationSeconds
   );
@@ -72,6 +93,9 @@ export default function SettingsScreen() {
     (state) => state.defaultMonthlyIntentionSeconds
   );
   const themePreference = useSettingsStore((state) => state.themePreference);
+  const languagePreference = useSettingsStore(
+    (state) => state.languagePreference
+  );
   const notificationsEnabled = useSettingsStore(
     (state) => state.notificationsEnabled
   );
@@ -86,6 +110,9 @@ export default function SettingsScreen() {
     (state) => state.setDefaultMonthlyIntention
   );
   const setThemePreference = useSettingsStore((state) => state.setThemePreference);
+  const setLanguagePreference = useSettingsStore(
+    (state) => state.setLanguagePreference
+  );
   const setNotificationsEnabled = useSettingsStore(
     (state) => state.setNotificationsEnabled
   );
@@ -112,6 +139,7 @@ export default function SettingsScreen() {
   const [backupBusy, setBackupBusy] = useState<'export' | 'import' | null>(
     null
   );
+  const [defaultsExpanded, setDefaultsExpanded] = useState(false);
 
   const applyDuration = async (seconds: number) => {
     setSaving(true);
@@ -119,8 +147,8 @@ export default function SettingsScreen() {
       await setDefaultDuration(db, seconds);
     } catch (error) {
       Alert.alert(
-        'Could not save duration',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotSaveDuration'),
+        localizeError(error)
       );
     } finally {
       setSaving(false);
@@ -145,8 +173,8 @@ export default function SettingsScreen() {
       setEditingDefaultIntention(null);
     } catch (error) {
       Alert.alert(
-        'Could not save default intention',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotSaveDefaultIntention'),
+        localizeError(error)
       );
     } finally {
       setSavingIntention(false);
@@ -170,8 +198,8 @@ export default function SettingsScreen() {
       setEditingCurrentIntention(null);
     } catch (error) {
       Alert.alert(
-        'Could not save intention',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotSaveIntention'),
+        localizeError(error)
       );
     } finally {
       setSavingCurrentIntention(false);
@@ -183,9 +211,17 @@ export default function SettingsScreen() {
       await setThemePreference(db, preference);
     } catch (error) {
       Alert.alert(
-        'Could not save theme',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotSaveTheme'),
+        localizeError(error)
       );
+    }
+  };
+
+  const handleLanguage = async (preference: LanguagePreference) => {
+    try {
+      await setLanguagePreference(db, preference);
+    } catch (error) {
+      Alert.alert(t('settings.couldNotSaveLanguage'), localizeError(error));
     }
   };
 
@@ -195,8 +231,8 @@ export default function SettingsScreen() {
         const granted = await requestNotificationPermission();
         if (!granted) {
           Alert.alert(
-            'Notifications are blocked',
-            'Enable notifications for Hour Loop in your device settings, then try again.'
+            t('settings.notificationsBlocked'),
+            t('settings.notificationsBlockedBody')
           );
           return;
         }
@@ -209,8 +245,8 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       Alert.alert(
-        'Could not update notifications',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotUpdateNotifications'),
+        localizeError(error)
       );
     }
   };
@@ -223,8 +259,8 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       Alert.alert(
-        'Could not update early warning',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotUpdateWarning'),
+        localizeError(error)
       );
     }
   };
@@ -235,8 +271,8 @@ export default function SettingsScreen() {
       await exportBackup(db);
     } catch (error) {
       Alert.alert(
-        'Export failed',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.exportFailed'),
+        localizeError(error)
       );
     } finally {
       setBackupBusy(null);
@@ -253,12 +289,12 @@ export default function SettingsScreen() {
       }
       setBackupBusy(null);
       Alert.alert(
-        'Replace all data?',
-        buildImportMessage(backup),
+        t('settings.replaceTitle'),
+        buildImportMessage(backup, t),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Replace data',
+            text: t('settings.replaceData'),
             style: 'destructive',
             onPress: () => {
               void performImport(backup);
@@ -268,8 +304,8 @@ export default function SettingsScreen() {
       );
     } catch (error) {
       Alert.alert(
-        'Import failed',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.importFailed'),
+        localizeError(error)
       );
       setBackupBusy(null);
     }
@@ -285,19 +321,23 @@ export default function SettingsScreen() {
 
       const pausedNote =
         result.pausedLoops > 0
-          ? ` ${result.pausedLoops} running ${
-              result.pausedLoops === 1 ? 'loop was' : 'loops were'
-            } paused at the export time.`
+          ? t('settings.restoredPaused', { count: result.pausedLoops })
           : '';
       Alert.alert(
-        'Backup restored',
-        `Restored ${result.tasks} tasks, ${result.loops} loops, ${result.intervals} intervals, ${result.loopItems} checklist items, and ${result.intentions} intentions.${pausedNote}`
+        t('settings.restoredTitle'),
+        `${t('settings.restoredBody', {
+          tasks: result.tasks,
+          loops: result.loops,
+          intervals: result.intervals,
+          items: result.loopItems,
+          intentions: result.intentions,
+        })}${pausedNote}`
       );
     } catch (error) {
       await recoverAppState(db).catch(() => undefined);
       Alert.alert(
-        'Could not restore backup',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('settings.couldNotRestore'),
+        localizeError(error)
       );
     } finally {
       setBackupBusy(null);
@@ -312,18 +352,19 @@ export default function SettingsScreen() {
     <Screen>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
-          PREFERENCES
+          {t('settings.eyebrow')}
         </Text>
-        <Text style={[styles.title, { color: colors.text }]}>Settings</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('settings.title')}
+        </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Default loop duration
+          {t('settings.defaultDuration')}
         </Text>
         <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          New loops start with this target. Existing loops keep the target they were
-          created with.
+          {t('settings.defaultDurationBody')}
         </Text>
         <View style={styles.chips}>
           {DURATION_PRESETS_MINUTES.map((minutes) => {
@@ -352,7 +393,8 @@ export default function SettingsScreen() {
                     { color: selected ? '#FFFFFF' : colors.text },
                   ]}
                 >
-                  {minutes}m
+                  {minutes}
+                  {t('duration.minuteShort')}
                 </Text>
               </Pressable>
             );
@@ -366,8 +408,10 @@ export default function SettingsScreen() {
             }
             placeholder={
               isPreset
-                ? 'Custom minutes'
-                : `Custom (${secondsToMinutes(defaultDurationSeconds)}m)`
+                ? t('settings.customMinutes')
+                : t('settings.customMinutesValue', {
+                    minutes: secondsToMinutes(defaultDurationSeconds),
+                  })
             }
             placeholderTextColor={colors.textSecondary}
             keyboardType="number-pad"
@@ -383,7 +427,7 @@ export default function SettingsScreen() {
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Apply custom duration"
+            accessibilityLabel={t('settings.applyCustom')}
             onPress={handleCustomDuration}
             disabled={saving || !customMinutes}
             style={[
@@ -394,23 +438,24 @@ export default function SettingsScreen() {
               },
             ]}
           >
-            <Text style={[styles.applyText, { color: colors.text }]}>Apply</Text>
+            <Text style={[styles.applyText, { color: colors.text }]}>
+              {t('common.apply')}
+            </Text>
           </Pressable>
         </View>
       </View>
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Today & this month
+          {t('settings.todayAndMonth')}
         </Text>
         <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          Targets for the current day and month. Defaults below apply to periods
-          without a custom target.
+          {t('settings.todayAndMonthBody')}
         </Text>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Change today's intention"
+          accessibilityLabel={t('settings.changeTodayIntention')}
           onPress={() => setEditingCurrentIntention('daily')}
           style={[
             styles.switchRow,
@@ -419,20 +464,55 @@ export default function SettingsScreen() {
         >
           <View style={styles.switchBody}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {"Today's target"}
+              {t('settings.todayTarget')}
             </Text>
-            <Text style={[styles.intentionValue, { color: colors.text }]}>
-              {dailyIntention?.targetSeconds
-                ? formatIntentionDuration(dailyIntention.targetSeconds)
-                : 'Not set'}
-            </Text>
+            <View style={styles.intentionValueRow}>
+              <Text style={[styles.intentionValue, { color: colors.text }]}>
+                {dailyIntention?.targetSeconds
+                  ? formatIntentionDuration(dailyIntention.targetSeconds)
+                  : t('common.notSet')}
+              </Text>
+              {dailyIntention?.isDefault ? (
+                <View
+                  style={[
+                    styles.intentionBadge,
+                    { borderColor: colors.border },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.intentionBadgeText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {t('settings.defaultBadge')}
+                  </Text>
+                </View>
+              ) : dailyIntention?.intention ? (
+                <View
+                  style={[
+                    styles.intentionBadge,
+                    { borderColor: colors.accent },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.intentionBadgeText,
+                      { color: colors.accent },
+                    ]}
+                  >
+                    {t('settings.customBadge')}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
-          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>{isRTL ? '‹' : '›'}</Text>
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Change this month's intention"
+          accessibilityLabel={t('settings.changeMonthIntention')}
           onPress={() => setEditingCurrentIntention('monthly')}
           style={[
             styles.switchRow,
@@ -441,73 +521,130 @@ export default function SettingsScreen() {
         >
           <View style={styles.switchBody}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {"This month's target"}
+              {t('settings.monthTarget')}
             </Text>
-            <Text style={[styles.intentionValue, { color: colors.text }]}>
-              {monthlyIntention?.targetSeconds
-                ? formatIntentionDuration(monthlyIntention.targetSeconds)
-                : 'Not set'}
-            </Text>
+            <View style={styles.intentionValueRow}>
+              <Text style={[styles.intentionValue, { color: colors.text }]}>
+                {monthlyIntention?.targetSeconds
+                  ? formatIntentionDuration(monthlyIntention.targetSeconds)
+                  : t('common.notSet')}
+              </Text>
+              {monthlyIntention?.isDefault ? (
+                <View
+                  style={[
+                    styles.intentionBadge,
+                    { borderColor: colors.border },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.intentionBadgeText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {t('settings.defaultBadge')}
+                  </Text>
+                </View>
+              ) : monthlyIntention?.intention ? (
+                <View
+                  style={[
+                    styles.intentionBadge,
+                    { borderColor: colors.accent },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.intentionBadgeText,
+                      { color: colors.accent },
+                    ]}
+                  >
+                    {t('settings.customBadge')}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
-          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>{isRTL ? '‹' : '›'}</Text>
         </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.defaultIntentions')}
+          accessibilityState={{ expanded: defaultsExpanded }}
+          onPress={() => setDefaultsExpanded((value) => !value)}
+          style={styles.defaultsToggle}
+        >
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            {t('settings.defaultIntentions')}
+          </Text>
+          <Ionicons
+            name={defaultsExpanded ? 'chevron-up' : 'chevron-down'}
+            size={18}
+            color={colors.textSecondary}
+          />
+        </Pressable>
+
+        {defaultsExpanded ? (
+          <>
+            <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+              {t('settings.defaultIntentionsBody')}
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.changeDefaultDaily')}
+              onPress={() => setEditingDefaultIntention('daily')}
+              style={[
+                styles.switchRow,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.switchBody}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t('settings.dailyTarget')}
+                </Text>
+                <Text style={[styles.intentionValue, { color: colors.text }]}>
+                  {defaultDailyIntentionSeconds > 0
+                    ? formatIntentionDuration(defaultDailyIntentionSeconds)
+                    : t('common.notSet')}
+                </Text>
+              </View>
+              <Text style={[styles.infoChevron, { color: colors.accent }]}>
+                {isRTL ? '‹' : '›'}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.changeDefaultMonthly')}
+              onPress={() => setEditingDefaultIntention('monthly')}
+              style={[
+                styles.switchRow,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <View style={styles.switchBody}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                  {t('settings.monthlyTarget')}
+                </Text>
+                <Text style={[styles.intentionValue, { color: colors.text }]}>
+                  {defaultMonthlyIntentionSeconds > 0
+                    ? formatIntentionDuration(defaultMonthlyIntentionSeconds)
+                    : t('common.notSet')}
+                </Text>
+              </View>
+              <Text style={[styles.infoChevron, { color: colors.accent }]}>
+                {isRTL ? '‹' : '›'}
+              </Text>
+            </Pressable>
+          </>
+        ) : null}
       </View>
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Default intentions
+          {t('settings.theme')}
         </Text>
-        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          Used when a day or month has no custom target.
-        </Text>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Change default daily intention"
-          onPress={() => setEditingDefaultIntention('daily')}
-          style={[
-            styles.switchRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <View style={styles.switchBody}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Daily target
-            </Text>
-            <Text style={[styles.intentionValue, { color: colors.text }]}>
-              {defaultDailyIntentionSeconds > 0
-                ? formatIntentionDuration(defaultDailyIntentionSeconds)
-                : 'Not set'}
-            </Text>
-          </View>
-          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Change default monthly intention"
-          onPress={() => setEditingDefaultIntention('monthly')}
-          style={[
-            styles.switchRow,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <View style={styles.switchBody}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Monthly target
-            </Text>
-            <Text style={[styles.intentionValue, { color: colors.text }]}>
-              {defaultMonthlyIntentionSeconds > 0
-                ? formatIntentionDuration(defaultMonthlyIntentionSeconds)
-                : 'Not set'}
-            </Text>
-          </View>
-          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Theme</Text>
         <View style={styles.chips}>
           {THEMES.map((entry) => {
             const selected = themePreference === entry.key;
@@ -533,12 +670,57 @@ export default function SettingsScreen() {
                     { color: selected ? '#FFFFFF' : colors.text },
                   ]}
                 >
-                  {entry.label}
+                  {t(entry.labelKey)}
                 </Text>
               </Pressable>
             );
           })}
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('settings.language')}
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          {t('settings.languageDescription')}
+        </Text>
+        <View style={styles.chips}>
+          {LANGUAGES.map((entry) => {
+            const selected = languagePreference === entry.key;
+            return (
+              <Pressable
+                key={entry.key}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  void handleLanguage(entry.key);
+                }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? colors.accent : colors.surface,
+                    borderColor: selected ? colors.accent : colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    { color: selected ? '#FFFFFF' : colors.text },
+                  ]}
+                >
+                  {t(entry.labelKey)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {Platform.OS !== 'web' ? (
+          <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+            {t('settings.languageRestart')}
+          </Text>
+        ) : null}
       </View>
 
       <View
@@ -549,15 +731,14 @@ export default function SettingsScreen() {
       >
         <View style={styles.switchBody}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Loop notifications
+            {t('settings.notifications')}
           </Text>
           <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-            Notify me before and when a running loop reaches its target. Paused
-            loops do not notify.
+            {t('settings.notificationsBody')}
           </Text>
         </View>
         <Switch
-          accessibilityLabel="Loop notifications"
+          accessibilityLabel={t('settings.notifications')}
           value={notificationsEnabled}
           onValueChange={(value) => {
             void handleNotifications(value);
@@ -569,11 +750,10 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Early warning
+          {t('settings.earlyWarning')}
         </Text>
         <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          Notify me before a running loop reaches its target. Off disables only
-          the early alert.
+          {t('settings.earlyWarningBody')}
         </Text>
         <View style={styles.chips}>
           {EARLY_WARNING_PRESETS_MINUTES.map((minutes) => {
@@ -605,7 +785,9 @@ export default function SettingsScreen() {
                     { color: selected ? '#FFFFFF' : colors.text },
                   ]}
                 >
-                  {minutes === 0 ? 'Off' : `${minutes}m`}
+                  {minutes === 0
+                    ? t('common.off')
+                    : `${minutes}${t('duration.minuteShort')}`}
                 </Text>
               </Pressable>
             );
@@ -616,7 +798,7 @@ export default function SettingsScreen() {
       {supportsExactAlarmSettings() ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Open Android alarm timing settings"
+          accessibilityLabel={t('settings.openAlarmA11y')}
           onPress={() => {
             void openExactAlarmSettings();
           }}
@@ -627,28 +809,26 @@ export default function SettingsScreen() {
         >
           <View style={styles.switchBody}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Alarm timing
+              {t('settings.alarmTiming')}
             </Text>
             <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-              If loop alerts arrive late, allow “Alarms & reminders” for Hour
-              Loop in Android settings.
+              {t('settings.alarmTimingBody')}
             </Text>
           </View>
-          <Text style={[styles.infoChevron, { color: colors.accent }]}>›</Text>
+          <Text style={[styles.infoChevron, { color: colors.accent }]}>{isRTL ? '‹' : '›'}</Text>
         </Pressable>
       ) : null}
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Backup & restore
+          {t('settings.backup')}
         </Text>
         <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-          Export a readable JSON backup you can keep in Files, Drive, or email.
-          Importing a backup replaces all data currently on this device.
+          {t('settings.backupBody')}
         </Text>
         <View style={styles.backupActions}>
           <Button
-            label="Export data"
+            label={t('settings.export')}
             variant="secondary"
             onPress={() => {
               void handleExport();
@@ -658,7 +838,7 @@ export default function SettingsScreen() {
             style={styles.backupButton}
           />
           <Button
-            label="Import data"
+            label={t('settings.import')}
             variant="secondary"
             onPress={() => {
               void handleImport();
@@ -671,7 +851,9 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>About</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('settings.about')}
+        </Text>
         <View
           style={[
             styles.aboutCard,
@@ -682,15 +864,15 @@ export default function SettingsScreen() {
             Hour Loop
           </Text>
           <Text style={[styles.aboutValue, { color: colors.text }]}>
-            Version {Constants.expoConfig?.version ?? '1.0.0'}
+            {t('common.version', {
+              version: Constants.expoConfig?.version ?? '1.0.0',
+            })}
           </Text>
           <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
-            All data lives in a local SQLite database on this device. Backups are
-            plain JSON files, so you can move them anywhere without an account or
-            cloud service.
+            {t('settings.aboutBody')}
           </Text>
           <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
-            Open source under the GNU Affero General Public License v3.0 or later.
+            {t('settings.license')}
           </Text>
         </View>
       </View>
@@ -699,8 +881,8 @@ export default function SettingsScreen() {
         visible={editingDefaultIntention !== null}
         title={
           editingDefaultIntention === 'monthly'
-            ? 'Default monthly intention'
-            : 'Default daily intention'
+            ? t('settings.defaultMonthlyIntention')
+            : t('settings.defaultDailyIntention')
         }
         initialSeconds={
           editingDefaultIntention === 'monthly'
@@ -709,8 +891,8 @@ export default function SettingsScreen() {
         }
         presetMinutes={INTENTION_PRESETS_MINUTES}
         busy={savingIntention}
-        clearLabel="Clear"
-        helperText="Tap a preset to add it. Clear removes the default target."
+        clearLabel={t('common.clear')}
+        helperText={t('settings.defaultHelper')}
         onSave={(seconds) => {
           void applyDefaultIntention(seconds);
         }}
@@ -724,8 +906,8 @@ export default function SettingsScreen() {
         visible={editingCurrentIntention !== null}
         title={
           editingCurrentIntention === 'monthly'
-            ? "This month's intention"
-            : "Today's intention"
+            ? t('settings.thisMonthIntention')
+            : t('settings.todayIntention')
         }
         initialSeconds={
           editingCurrentIntention === 'monthly'
@@ -734,8 +916,8 @@ export default function SettingsScreen() {
         }
         presetMinutes={INTENTION_PRESETS_MINUTES}
         busy={savingCurrentIntention}
-        clearLabel="Clear"
-        helperText="Tap a preset to add it. Clear removes the current target."
+        clearLabel={t('common.clear')}
+        helperText={t('settings.currentHelper')}
         onSave={(seconds) => {
           void applyCurrentIntention(seconds);
         }}
@@ -748,15 +930,28 @@ export default function SettingsScreen() {
   );
 }
 
-function buildImportMessage(backup: HourLoopBackup): string {
+function buildImportMessage(
+  backup: HourLoopBackup,
+  t: (key: TranslationKey, params?: TranslationParams) => string
+): string {
   const { counts } = backup;
-  const exportedAt = new Date(backup.exportedAt).toLocaleString();
-  const pausedNote =
-    backup.data.loops.some((loop) => loop.status === 'ACTIVE')
-      ? ' Running loops will be restored as paused at the export time.'
-      : '';
+  const locale = getLanguageLocale();
+  const exportedAt = new Date(backup.exportedAt).toLocaleString(locale);
+  const pausedNote = backup.data.loops.some(
+    (loop) => loop.status === 'ACTIVE'
+  )
+    ? t('settings.replaceBodyPaused')
+    : '';
 
-  return `This backup contains ${counts.tasks} tasks, ${counts.loops} loops, ${counts.intervals} intervals, ${counts.loopItems} checklist items, and ${counts.intentions} intentions.\n\nExported ${exportedAt} from Hour Loop ${backup.appVersion}.\n\nThis replaces all current data on this device.${pausedNote}`;
+  return `${t('settings.replaceBody', {
+    tasks: counts.tasks,
+    loops: counts.loops,
+    intervals: counts.intervals,
+    items: counts.loopItems,
+    intentions: counts.intentions,
+    date: exportedAt,
+    version: backup.appVersion,
+  })}${pausedNote}`;
 }
 
 const styles = StyleSheet.create({
@@ -790,6 +985,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
+  },
+  intentionValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  intentionBadge: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  intentionBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  defaultsToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
   },
   chips: {
     flexDirection: 'row',

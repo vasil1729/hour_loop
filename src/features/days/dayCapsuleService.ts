@@ -29,12 +29,15 @@ export type DayCapsuleTotal = {
   seconds: number;
 };
 
-export type DayCapsuleData = {
-  dayKey: string;
+export type CapsulePeriodData = {
+  startDayKey: string;
+  endDayKey: string;
   totalSeconds: number;
   segments: DayCapsuleSegment[];
   capsules: DayCapsuleTotal[];
 };
+
+export type DayCapsuleData = CapsulePeriodData;
 
 /**
  * Capsule focus intervals clipped to one local day. Open intervals count up to
@@ -44,28 +47,71 @@ export async function getDayCapsuleData(
   db: SQLiteDatabase,
   dayKey: string,
   referenceTime: Date = new Date()
-): Promise<DayCapsuleData> {
+): Promise<CapsulePeriodData> {
   const timeZone = getDeviceTimeZone();
   const bounds = localDayBounds(dayKey, timeZone);
-  const dayStart = bounds.start.getTime();
-  const dayEnd = bounds.end.getTime();
+  return getCapsuleDataForBounds(
+    db,
+    dayKey,
+    dayKey,
+    bounds.start,
+    bounds.end,
+    referenceTime
+  );
+}
+
+/**
+ * Task-first capsule focus totals for an inclusive local-day range. Used by the
+ * week and month views of the task overview.
+ */
+export async function getRangeCapsuleData(
+  db: SQLiteDatabase,
+  startDayKey: string,
+  endDayKey: string,
+  referenceTime: Date = new Date()
+): Promise<CapsulePeriodData> {
+  const timeZone = getDeviceTimeZone();
+  const bounds = {
+    start: localDayBounds(startDayKey, timeZone).start,
+    end: localDayBounds(endDayKey, timeZone).end,
+  };
+  return getCapsuleDataForBounds(
+    db,
+    startDayKey,
+    endDayKey,
+    bounds.start,
+    bounds.end,
+    referenceTime
+  );
+}
+
+async function getCapsuleDataForBounds(
+  db: SQLiteDatabase,
+  startDayKey: string,
+  endDayKey: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+  referenceTime: Date
+): Promise<CapsulePeriodData> {
+  const startMs = rangeStart.getTime();
+  const endMs = rangeEnd.getTime();
   const now = referenceTime.getTime();
 
   const intervals = await getLoopItemIntervalsOverlapping(
     db,
-    bounds.start.toISOString(),
-    bounds.end.toISOString()
+    rangeStart.toISOString(),
+    rangeEnd.toISOString()
   );
 
   const segments: DayCapsuleSegment[] = [];
   const secondsByItem = new Map<string, number>();
 
   for (const interval of intervals) {
-    const start = Math.max(Date.parse(interval.started_at), dayStart);
+    const start = Math.max(Date.parse(interval.started_at), startMs);
     const rawEnd = interval.ended_at
       ? Date.parse(interval.ended_at)
-      : Math.min(now, dayEnd);
-    const end = Math.min(rawEnd, dayEnd);
+      : Math.min(now, endMs);
+    const end = Math.min(rawEnd, endMs);
     if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
       continue;
     }
@@ -138,7 +184,8 @@ export async function getDayCapsuleData(
   segments.sort((a, b) => a.startAt.localeCompare(b.startAt));
 
   return {
-    dayKey,
+    startDayKey,
+    endDayKey,
     totalSeconds: capsules.reduce((sum, capsule) => sum + capsule.seconds, 0),
     segments,
     capsules,

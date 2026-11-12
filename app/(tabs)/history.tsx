@@ -39,6 +39,11 @@ import {
   type MonthHistory,
   type WeekHistory,
 } from '../../src/features/history/historyService';
+import { useTranslation } from '../../src/i18n/I18nProvider';
+import type {
+  TranslationKey,
+  TranslationParams,
+} from '../../src/i18n/types';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
@@ -46,6 +51,7 @@ export default function HistoryScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const today = currentDayKey();
 
   const [period, setPeriod] = useState<HistoryPeriod>('day');
@@ -74,18 +80,25 @@ export default function HistoryScreen() {
         ? formatWeekRangeLabel(weekStart, weekEnd)
         : formatMonthLabel(monthKey);
 
+  const periodName =
+    period === 'day'
+      ? t('history.periodDay')
+      : period === 'week'
+        ? t('history.periodWeek')
+        : t('history.periodMonth');
+
   const periodHint =
     period === 'day'
       ? isCurrentPeriod
-        ? 'Today'
-        : 'Back to today'
+        ? t('common.today')
+        : t('history.backToToday')
       : period === 'week'
         ? isCurrentPeriod
-          ? 'This week'
-          : 'Back to this week'
+          ? t('history.thisWeek')
+          : t('history.backToThisWeek')
         : isCurrentPeriod
-          ? 'This month'
-          : 'Back to this month';
+          ? t('history.thisMonth')
+          : t('history.backToThisMonth');
 
   useFocusEffect(
     useCallback(() => {
@@ -142,8 +155,12 @@ export default function HistoryScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>JOURNAL</Text>
-        <Text style={[styles.title, { color: colors.text }]}>History</Text>
+        <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
+          {t('history.eyebrow')}
+        </Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('history.title')}
+        </Text>
       </View>
 
       <HistoryPeriodSwitcher period={period} onChange={setPeriod} />
@@ -151,18 +168,23 @@ export default function HistoryScreen() {
       <View style={styles.periodNav}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Previous ${period}`}
+          accessibilityLabel={t('history.previousPeriod', {
+            period: periodName,
+          })}
           onPress={() => shiftPeriod(-1)}
           hitSlop={10}
           style={[styles.navButton, { backgroundColor: colors.surface }]}
         >
-          <Ionicons name="chevron-back" size={20} color={colors.text} />
+          <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={20} color={colors.text} />
         </Pressable>
 
         <View style={styles.periodBody}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Selected ${period}: ${periodLabel}. Choose another date.`}
+            accessibilityLabel={t('history.selectedPeriod', {
+              period: periodName,
+              label: periodLabel,
+            })}
             onPress={() => setPickerVisible(true)}
             hitSlop={8}
             style={styles.periodLabelButton}
@@ -186,7 +208,7 @@ export default function HistoryScreen() {
           ) : (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Jump to current period"
+              accessibilityLabel={t('history.jumpToCurrent')}
               onPress={goToCurrentPeriod}
             >
               <Text style={[styles.periodLink, { color: colors.accent }]}>
@@ -198,7 +220,9 @@ export default function HistoryScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Next ${period}`}
+          accessibilityLabel={t('history.nextPeriod', {
+            period: periodName,
+          })}
           onPress={() => shiftPeriod(1)}
           disabled={isCurrentPeriod}
           hitSlop={10}
@@ -210,7 +234,7 @@ export default function HistoryScreen() {
             },
           ]}
         >
-          <Ionicons name="chevron-forward" size={20} color={colors.text} />
+          <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.text} />
         </Pressable>
       </View>
 
@@ -226,7 +250,7 @@ export default function HistoryScreen() {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Open the detailed day timeline"
+            accessibilityLabel={t('history.openDayTimeline')}
             onPress={() =>
               router.push({
                 pathname: '/day/[date]',
@@ -236,18 +260,20 @@ export default function HistoryScreen() {
             style={styles.timelineLink}
           >
             <Text style={[styles.timelineLinkText, { color: colors.accent }]}>
-              Open day timeline
+              {t('history.openDayTimeline')}
             </Text>
-            <Ionicons name="arrow-forward" size={14} color={colors.accent} />
+            <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={14} color={colors.accent} />
           </Pressable>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Loops</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('history.loops')}
+            </Text>
             {dayHistory.loops.length === 0 ? (
               <View style={styles.emptyWrap}>
                 <EmptyState
-                  title="No loops on this day"
-                  message="Completed and in-progress loops that overlapped this day will appear here."
+                  title={t('history.noLoopsTitle')}
+                  message={t('history.noLoopsMessage')}
                 />
               </View>
             ) : (
@@ -267,7 +293,7 @@ export default function HistoryScreen() {
       ) : period === 'week' && weekHistory ? (
         <>
           <PeriodSummary
-            stats={weekStats(weekHistory)}
+            stats={weekStats(weekHistory, t)}
             progress={
               weekHistory.targetDayCount > 0
                 ? {
@@ -276,19 +302,25 @@ export default function HistoryScreen() {
                     ),
                     reached:
                       weekHistory.targetDays === weekHistory.targetDayCount,
-                    label: `${weekHistory.targetDays} of ${weekHistory.targetDayCount} days on target`,
+                    label: t('history.daysOnTarget', {
+                      count: weekHistory.targetDays,
+                      total: weekHistory.targetDayCount,
+                    }),
                   }
                 : undefined
             }
-            meta={`${weekHistory.activeDays} active ${
-              weekHistory.activeDays === 1 ? 'day' : 'days'
-            } · avg ${formatDurationCompact(
-              weekHistory.activeDays > 0
-                ? Math.round(
-                    weekHistory.totalSeconds / weekHistory.activeDays
-                  )
-                : 0
-            )}/day`}
+            meta={t('history.activeDaysAvg', {
+              days: t('history.activeDays', {
+                count: weekHistory.activeDays,
+              }),
+              duration: formatDurationCompact(
+                weekHistory.activeDays > 0
+                  ? Math.round(
+                      weekHistory.totalSeconds / weekHistory.activeDays
+                    )
+                  : 0
+              ),
+            })}
           />
           <WeekBars
             days={weekHistory.days}
@@ -300,29 +332,36 @@ export default function HistoryScreen() {
       ) : period === 'month' && monthHistory ? (
         <>
           <PeriodSummary
-            stats={monthStats(monthHistory)}
+            stats={monthStats(monthHistory, t)}
             progress={
               monthHistory.monthly.targetSeconds > 0
                 ? {
                     percent: monthHistory.monthly.progress.percent,
                     reached: monthHistory.monthly.progress.reached,
                     label: `${
-                      monthHistory.monthly.isDefault ? 'Default target · ' : ''
-                    }${formatIntentionDuration(
-                      monthHistory.monthly.actualSeconds
-                    )} of ${formatIntentionDuration(
-                      monthHistory.monthly.targetSeconds
-                    )}`,
+                      monthHistory.monthly.isDefault
+                        ? t('history.defaultTargetPrefix')
+                        : ''
+                    }${t('history.intended', {
+                      actual: formatIntentionDuration(
+                        monthHistory.monthly.actualSeconds
+                      ),
+                      target: formatIntentionDuration(
+                        monthHistory.monthly.targetSeconds
+                      ),
+                    })}`,
                   }
                 : undefined
             }
-            meta={`${monthHistory.activeDays} active ${
-              monthHistory.activeDays === 1 ? 'day' : 'days'
-            }${
+            meta={`${t('history.activeDays', {
+              count: monthHistory.activeDays,
+            })}${
               monthHistory.monthly.targetSeconds > 0
-                ? ` · ${formatIntentionDuration(
-                    monthHistory.monthly.progress.remainingSeconds
-                  )} to go`
+                ? ` · ${t('history.toGo', {
+                    duration: formatIntentionDuration(
+                      monthHistory.monthly.progress.remainingSeconds
+                    ),
+                  })}`
                 : ''
             }`}
           />
@@ -350,12 +389,17 @@ export default function HistoryScreen() {
   );
 }
 
-function weekStats(week: WeekHistory): PeriodSummaryStat[] {
+type Translate = (key: TranslationKey, params?: TranslationParams) => string;
+
+function weekStats(week: WeekHistory, t: Translate): PeriodSummaryStat[] {
   return [
-    { label: 'FOCUSED', value: formatDurationCompact(week.totalSeconds) },
-    { label: 'LOOPS', value: String(week.loopCount) },
     {
-      label: 'ON TARGET',
+      label: t('daySummary.focused'),
+      value: formatDurationCompact(week.totalSeconds),
+    },
+    { label: t('common.loops'), value: String(week.loopCount) },
+    {
+      label: t('history.onTarget'),
       value:
         week.targetDayCount > 0
           ? `${week.targetDays}/${week.targetDayCount}`
@@ -369,12 +413,15 @@ function weekStats(week: WeekHistory): PeriodSummaryStat[] {
   ];
 }
 
-function monthStats(month: MonthHistory): PeriodSummaryStat[] {
+function monthStats(month: MonthHistory, t: Translate): PeriodSummaryStat[] {
   return [
-    { label: 'FOCUSED', value: formatDurationCompact(month.totalSeconds) },
-    { label: 'LOOPS', value: String(month.loopCount) },
     {
-      label: 'OF INTENTION',
+      label: t('daySummary.focused'),
+      value: formatDurationCompact(month.totalSeconds),
+    },
+    { label: t('common.loops'), value: String(month.loopCount) },
+    {
+      label: t('daySummary.ofIntention'),
       value:
         month.monthly.targetSeconds > 0
           ? `${month.monthly.progress.percent}%`

@@ -14,6 +14,7 @@ import {
   progressRatio,
   remainingSeconds,
 } from '../../domain/timer/timerEngine';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { spacing } from '../../theme/tokens';
 
@@ -31,6 +32,7 @@ export function LoopClock({
   targetSeconds,
 }: LoopClockProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const size = Math.min(Math.max(width - 88, 220), 320);
   const center = size / 2;
@@ -55,9 +57,10 @@ export function LoopClock({
       accessible
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}
-      accessibilityLabel={`Loop progress. ${formatElapsed(
-        elapsedSeconds
-      )} focused toward a ${formatElapsed(targetSeconds)} target.`}
+      accessibilityLabel={t('clock.a11y', {
+        elapsed: formatElapsed(elapsedSeconds),
+        target: formatElapsed(targetSeconds),
+      })}
       style={styles.wrapper}
     >
       <View style={[styles.face, { width: size, height: size }]}>
@@ -150,7 +153,7 @@ export function LoopClock({
             {formatElapsed(elapsedSeconds)}
           </Text>
           <Text style={[styles.target, { color: colors.textSecondary }]}>
-            target {formatElapsed(targetSeconds)}
+            {t('clock.target', { time: formatElapsed(targetSeconds) })}
           </Text>
           <Text
             style={[
@@ -159,8 +162,10 @@ export function LoopClock({
             ]}
           >
             {reached
-              ? 'Target reached'
-              : `${formatDurationCompact(remaining)} remaining`}
+              ? t('clock.reached')
+              : t('clock.remaining', {
+                  duration: formatDurationCompact(remaining),
+                })}
           </Text>
         </View>
       </View>

@@ -7,12 +7,14 @@ import * as SystemUI from 'expo-system-ui';
 import { SystemBars } from 'react-native-edge-to-edge';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DatabaseErrorBoundary } from '../src/components/common/DatabaseErrorBoundary';
 import { LoadingScreen } from '../src/components/common/LoadingScreen';
 import { useTargetGuard } from '../src/hooks/useTargetGuard';
 import { WebPhoneFrame } from '../src/components/common/WebPhoneFrame';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
 import { loopService } from '../src/features/loops/loopService';
+import { I18nProvider, useTranslation } from '../src/i18n/I18nProvider';
 import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
 import { setupNotifications } from '../src/services/notifications/notificationService';
 import { useSettingsStore } from '../src/store/settingsStore';
@@ -156,22 +158,31 @@ function RootNavigator() {
   );
 }
 
+function DatabaseLoadingScreen() {
+  const { t } = useTranslation();
+  return <LoadingScreen message={t('app.openingDatabase')} />;
+}
+
 export default function RootLayout() {
   return (
     <WebPhoneFrame>
       <SafeAreaProvider>
         <ThemeProvider>
-          <Suspense fallback={<LoadingScreen message="Opening your local database…" />}>
-            <SQLiteProvider
-              databaseName={DATABASE_NAME}
-              onInit={migrateDbIfNeeded}
-              useSuspense
-            >
-              <AppBootstrap>
-                <RootNavigator />
-              </AppBootstrap>
-            </SQLiteProvider>
-          </Suspense>
+          <I18nProvider>
+            <DatabaseErrorBoundary>
+              <Suspense fallback={<DatabaseLoadingScreen />}>
+                <SQLiteProvider
+                  databaseName={DATABASE_NAME}
+                  onInit={migrateDbIfNeeded}
+                  useSuspense
+                >
+                  <AppBootstrap>
+                    <RootNavigator />
+                  </AppBootstrap>
+                </SQLiteProvider>
+              </Suspense>
+            </DatabaseErrorBoundary>
+          </I18nProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </WebPhoneFrame>

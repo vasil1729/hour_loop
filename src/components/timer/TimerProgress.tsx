@@ -6,6 +6,7 @@ import {
   progressRatio,
   remainingSeconds,
 } from '../../domain/timer/timerEngine';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -18,9 +19,10 @@ type TimerProgressProps = {
 export function TimerProgress({
   elapsedSeconds,
   targetSeconds,
-  reachedLabel = 'Target reached',
+  reachedLabel,
 }: TimerProgressProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const ratio = progressRatio(targetSeconds, elapsedSeconds);
   const remaining = remainingSeconds(targetSeconds, elapsedSeconds);
   const reached = remaining === 0;
@@ -48,7 +50,11 @@ export function TimerProgress({
           { color: reached ? colors.success : colors.textSecondary },
         ]}
       >
-        {reached ? reachedLabel : `${formatDurationCompact(remaining)} remaining`}
+        {reached
+          ? reachedLabel ?? t('timerProgress.reached')
+          : t('timerProgress.remaining', {
+              duration: formatDurationCompact(remaining),
+            })}
       </Text>
     </View>
   );

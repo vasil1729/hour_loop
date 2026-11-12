@@ -4,13 +4,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   formatCompactDayLabel,
   getMonthGrid,
+  getWeekdayLabels,
   parseDayKey,
 } from '../../domain/shared/dateUtils';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
-
-const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 type MonthHeatmapProps = {
   monthKey: string;
@@ -28,7 +28,9 @@ export function MonthHeatmap({
   onSelectDay,
 }: MonthHeatmapProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const weeks = getMonthGrid(monthKey);
+  const weekdayLabels = getWeekdayLabels('narrow');
   const maxSeconds = Math.max(1, ...Object.values(days));
 
   return (
@@ -39,19 +41,21 @@ export function MonthHeatmap({
       ]}
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Daily map</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('history.dailyMap')}
+        </Text>
         <Text style={[styles.hint, { color: colors.textSecondary }]}>
-          Tap a day
+          {t('common.tapADay')}
         </Text>
       </View>
 
       <View style={styles.weekdayRow}>
-        {WEEKDAY_LABELS.map((label, index) => (
+        {weekdayLabels.map((label, index) => (
           <Text
             key={`${label}-${index}`}
             style={[styles.weekday, { color: colors.textSecondary }]}
           >
-            {label.slice(0, 1)}
+            {label}
           </Text>
         ))}
       </View>
@@ -80,9 +84,10 @@ export function MonthHeatmap({
               <Pressable
                 key={dayKey}
                 accessibilityRole="button"
-                accessibilityLabel={`${formatCompactDayLabel(dayKey)}, ${formatDurationCompact(
-                  seconds
-                )} focused`}
+                accessibilityLabel={t('monthHeatmap.a11y', {
+                  day: formatCompactDayLabel(dayKey),
+                  duration: formatDurationCompact(seconds),
+                })}
                 accessibilityState={{ selected: isSelected, disabled: isFuture }}
                 disabled={isFuture}
                 onPress={() => onSelectDay(dayKey)}
@@ -138,7 +143,7 @@ export function MonthHeatmap({
 
       <View style={styles.legend}>
         <Text style={[styles.legendText, { color: colors.textSecondary }]}>
-          Less
+          {t('common.less')}
         </Text>
         {[0.35, 0.6, 0.85, 1].map((opacity, index) => (
           <View
@@ -153,7 +158,7 @@ export function MonthHeatmap({
           />
         ))}
         <Text style={[styles.legendText, { color: colors.textSecondary }]}>
-          More
+          {t('common.more')}
         </Text>
       </View>
     </View>

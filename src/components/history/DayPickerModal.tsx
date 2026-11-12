@@ -7,13 +7,13 @@ import {
   formatDayLabel,
   formatMonthLabel,
   getMonthGrid,
+  getWeekdayLabels,
   parseDayKey,
 } from '../../domain/shared/dateUtils';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 import { Button } from '../common/Button';
-
-const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 type DayPickerModalProps = {
   visible: boolean;
@@ -31,6 +31,10 @@ export function DayPickerModal({
   onClose,
 }: DayPickerModalProps) {
   const { colors } = useTheme();
+  const { t, isRTL, language } = useTranslation();
+  const weekdayLabels = getWeekdayLabels(
+    isRTL || language === 'ml' ? 'narrow' : 'short'
+  );
   const [viewMonth, setViewMonth] = useState(selectedDay.slice(0, 7));
   const maxMonth = maxDay.slice(0, 7);
 
@@ -63,32 +67,36 @@ export function DayPickerModal({
       <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close date picker"
+          accessibilityLabel={t('dayPicker.closeA11y')}
           onPress={onClose}
           style={StyleSheet.absoluteFill}
         />
         <View style={[styles.card, { backgroundColor: colors.surface }]}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>Jump to date</Text>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {t('dayPicker.title')}
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close"
+              accessibilityLabel={t('common.close')}
               onPress={onClose}
               hitSlop={10}
             >
-              <Text style={[styles.close, { color: colors.textSecondary }]}>Close</Text>
+              <Text style={[styles.close, { color: colors.textSecondary }]}>
+                {t('common.close')}
+              </Text>
             </Pressable>
           </View>
 
           <View style={styles.monthNav}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Previous month"
+              accessibilityLabel={t('dayPicker.previousMonth')}
               onPress={goToPreviousMonth}
               hitSlop={8}
               style={[styles.monthButton, { backgroundColor: colors.surfaceAlt }]}
             >
-              <Ionicons name="chevron-back" size={18} color={colors.text} />
+              <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={18} color={colors.text} />
             </Pressable>
 
             <Text style={[styles.monthLabel, { color: colors.text }]}>
@@ -97,7 +105,7 @@ export function DayPickerModal({
 
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Next month"
+              accessibilityLabel={t('dayPicker.nextMonth')}
               accessibilityState={{ disabled: !canGoNext }}
               onPress={goToNextMonth}
               disabled={!canGoNext}
@@ -107,14 +115,14 @@ export function DayPickerModal({
                 { backgroundColor: colors.surfaceAlt, opacity: canGoNext ? 1 : 0.35 },
               ]}
             >
-              <Ionicons name="chevron-forward" size={18} color={colors.text} />
+              <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.text} />
             </Pressable>
           </View>
 
           <View style={styles.weekdayRow}>
-            {WEEKDAY_LABELS.map((label) => (
+            {weekdayLabels.map((label, index) => (
               <Text
-                key={label}
+                key={`${label}-${index}`}
                 style={[styles.weekday, { color: colors.textSecondary }]}
               >
                 {label}
@@ -191,7 +199,7 @@ export function DayPickerModal({
           </View>
 
           <Button
-            label="Jump to today"
+            label={t('dayPicker.jumpToday')}
             variant="secondary"
             onPress={() => onSelect(maxDay)}
           />

@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
 import type { IntentionSummary } from '../../features/intentions/intentionsService';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -15,6 +16,7 @@ type DaySummaryProps = {
 
 export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const hasIntention = daily.targetSeconds > 0;
   const percent = daily.progress.percent;
 
@@ -31,14 +33,14 @@ export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) 
             {formatDurationCompact(totalSeconds)}
           </Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-            FOCUSED
+            {t('daySummary.focused')}
           </Text>
         </View>
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <View style={styles.stat}>
           <Text style={[styles.statValue, { color: colors.text }]}>{loopCount}</Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-            {loopCount === 1 ? 'LOOP' : 'LOOPS'}
+            {loopCount === 1 ? t('daySummary.loop') : t('daySummary.loops')}
           </Text>
         </View>
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -52,7 +54,7 @@ export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) 
             {hasIntention ? `${percent}%` : '—'}
           </Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-            OF INTENTION
+            {t('daySummary.ofIntention')}
           </Text>
         </View>
       </View>
@@ -73,14 +75,16 @@ export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) 
             />
           </View>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
-            {daily.isDefault ? 'Default target · ' : ''}
-            {formatIntentionDuration(daily.actualSeconds)} of{' '}
-            {formatIntentionDuration(daily.targetSeconds)} intended
+            {daily.isDefault ? t('daySummary.defaultPrefix') : ''}
+            {t('daySummary.intended', {
+              actual: formatIntentionDuration(daily.actualSeconds),
+              target: formatIntentionDuration(daily.targetSeconds),
+            })}
           </Text>
         </>
       ) : (
         <Text style={[styles.meta, { color: colors.textSecondary }]}>
-          No daily intention was set for this day.
+          {t('daySummary.noIntention')}
         </Text>
       )}
     </View>

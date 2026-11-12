@@ -4,6 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatShortDayLabel, formatTimeOfDay } from '../../domain/shared/dateUtils';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
 import type { Loop } from '../../domain/types';
+import { useTranslation } from '../../i18n/I18nProvider';
+import type { TranslationKey } from '../../i18n/types';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -21,12 +23,21 @@ export function LoopHistoryRow({
   onPress,
 }: LoopHistoryRowProps) {
   const { colors } = useTheme();
-  const title = loop.done?.trim() || loop.focus?.trim() || 'Untitled loop';
+  const { t } = useTranslation();
+  const title = loop.done?.trim() || loop.focus?.trim() || t('loopRow.untitled');
   const timeLabel = loop.stopped_at
     ? formatTimeOfDay(loop.stopped_at)
     : loop.status === 'PAUSED'
-      ? 'Paused'
-      : 'Running';
+      ? t('loopRow.paused')
+      : t('loopRow.running');
+  const statusLabelKey: TranslationKey | null =
+    loop.status === 'ACTIVE'
+      ? 'loopRow.statusActive'
+      : loop.status === 'PAUSED'
+        ? 'loopRow.statusPaused'
+        : loop.status === 'COMPLETED'
+          ? 'loopRow.statusCompleted'
+          : null;
 
   const content = (
     <>
@@ -42,7 +53,9 @@ export function LoopHistoryRow({
         <Text style={[styles.meta, { color: colors.textSecondary }]}>
           {showDate ? `${formatShortDayLabel(loop.local_date)} · ` : ''}
           {timeLabel}
-          {loop.status === 'COMPLETED' ? '' : ` · ${loop.status.toLowerCase()}`}
+          {loop.status === 'COMPLETED' || !statusLabelKey
+            ? ''
+            : ` · ${t(statusLabelKey)}`}
         </Text>
       </View>
       <Text style={[styles.duration, { color: colors.textSecondary }]}>
@@ -60,7 +73,10 @@ export function LoopHistoryRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Open loop H${loop.sequence_number}: ${title}`}
+      accessibilityLabel={t('loopRow.openA11y', {
+        sequence: loop.sequence_number,
+        title,
+      })}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,

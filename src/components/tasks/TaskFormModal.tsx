@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 import { Button } from '../common/Button';
@@ -35,6 +36,7 @@ export function TaskFormModal({
   onClose,
 }: TaskFormModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
 
@@ -62,13 +64,13 @@ export function TaskFormModal({
           <Text style={[styles.heading, { color: colors.text }]}>{heading}</Text>
           {parentTitle ? (
             <Text style={[styles.parent, { color: colors.textSecondary }]}>
-              Under {parentTitle}
+              {t('taskForm.under', { parent: parentTitle })}
             </Text>
           ) : null}
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Task title"
+            placeholder={t('taskForm.titlePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             autoFocus
             maxLength={200}
@@ -84,7 +86,7 @@ export function TaskFormModal({
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="Description (optional)"
+            placeholder={t('taskForm.descriptionPlaceholder')}
             placeholderTextColor={colors.textSecondary}
             multiline
             maxLength={2000}
@@ -101,14 +103,14 @@ export function TaskFormModal({
           />
           <View style={styles.actions}>
             <Button
-              label="Cancel"
+              label={t('common.cancel')}
               variant="secondary"
               onPress={onClose}
               style={styles.action}
               disabled={busy}
             />
             <Button
-              label="Save"
+              label={t('common.save')}
               onPress={() => onSave({ title, description })}
               style={styles.action}
               loading={busy}

@@ -15,6 +15,8 @@ import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import type { Loop, LoopInterval, LoopItem } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
 import { cancelLoopNotification } from '../../src/services/notifications/notificationService';
 import { useLoopStore } from '../../src/store/loopStore';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -24,6 +26,7 @@ export default function LoopDetailScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ id?: string }>();
   const loopId = typeof params.id === 'string' ? params.id : undefined;
 
@@ -57,7 +60,9 @@ export default function LoopDetailScreen() {
         }
       } catch (caught) {
         if (!cancelled) {
-          setError(caught instanceof Error ? caught.message : 'Loop not found.');
+          setError(
+            caught instanceof Error ? caught.message : t('loopDetail.notFound')
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -67,7 +72,7 @@ export default function LoopDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [db, loopId]);
+  }, [db, loopId, t]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -76,7 +81,10 @@ export default function LoopDetailScreen() {
   if (error || !loop) {
     return (
       <Screen>
-        <EmptyState title="Loop not found" message={error ?? 'This loop is unavailable.'} />
+        <EmptyState
+          title={t('loopDetail.notFound')}
+          message={error ?? t('loopDetail.unavailable')}
+        />
       </Screen>
     );
   }
@@ -92,8 +100,8 @@ export default function LoopDetailScreen() {
       router.replace('/');
     } catch (caught) {
       Alert.alert(
-        'Could not delete loop',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('loopDetail.couldNotDelete'),
+        localizeError(caught)
       );
     } finally {
       setDeleting(false);
@@ -104,12 +112,14 @@ export default function LoopDetailScreen() {
     <Screen>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Back"
+        accessibilityLabel={t('common.back')}
         onPress={() => router.back()}
         hitSlop={12}
         style={styles.back}
       >
-        <Text style={[styles.backText, { color: colors.accent }]}>‹ Back</Text>
+        <Text style={[styles.backText, { color: colors.accent }]}>
+          {t('loopDetail.back')}
+        </Text>
       </Pressable>
 
       <View style={styles.header}>
@@ -127,12 +137,24 @@ export default function LoopDetailScreen() {
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
-        <SummaryItem label="Focused" value={formatElapsed(elapsedSeconds)} />
         <SummaryItem
-          label="Target"
+          label={t('loopDetail.focused')}
+          value={formatElapsed(elapsedSeconds)}
+        />
+        <SummaryItem
+          label={t('loopDetail.target')}
           value={formatElapsed(loop.target_duration_seconds)}
         />
-        <SummaryItem label="Status" value={loop.status} />
+        <SummaryItem
+          label={t('loopDetail.status')}
+          value={t(
+            loop.status === 'ACTIVE'
+              ? 'task.statusInProgress'
+              : loop.status === 'PAUSED'
+                ? 'loopRow.statusPaused'
+                : 'task.statusCompleted'
+          )}
+        />
       </View>
 
       <LoopClock
@@ -147,10 +169,13 @@ export default function LoopDetailScreen() {
         <View style={styles.field}>
           <View style={styles.itemsHeader}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
-              CAPSULES
+              {t('loopDetail.capsules')}
             </Text>
             <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
-              {items.filter((item) => item.done).length}/{items.length} done
+              {t('common.doneCount', {
+                done: items.filter((item) => item.done).length,
+                total: items.length,
+              })}
             </Text>
           </View>
           <View style={styles.capsuleWrap}>
@@ -165,15 +190,18 @@ export default function LoopDetailScreen() {
         </View>
       ) : null}
 
-      <JournalField label="FOCUS" value={loop.focus} />
-      <JournalField label="CARRY IN" value={loop.carry_in} />
-      <JournalField label="DONE" value={loop.done} />
-      <JournalField label="ROLL FORWARD" value={loop.roll_forward} />
-      <JournalField label="NOTE" value={loop.note} />
+      <JournalField label={t('loopComplete.focus')} value={loop.focus} />
+      <JournalField label={t('loopComplete.carryIn')} value={loop.carry_in} />
+      <JournalField label={t('loopComplete.done')} value={loop.done} />
+      <JournalField
+        label={t('loopComplete.rollForward')}
+        value={loop.roll_forward}
+      />
+      <JournalField label={t('loopComplete.note')} value={loop.note} />
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Delete loop"
+        accessibilityLabel={t('loopDetail.delete')}
         disabled={deleting}
         onPress={() => setDeleteVisible(true)}
         style={({ pressed }) => [
@@ -182,19 +210,23 @@ export default function LoopDetailScreen() {
         ]}
       >
         <Text style={[styles.deleteText, { color: colors.danger }]}>
-          Delete loop
+          {t('loopDetail.delete')}
         </Text>
       </Pressable>
 
       <ConfirmDialog
         visible={deleteVisible}
-        title={`Delete H${loop.sequence_number}?`}
-        message={`This permanently removes this loop and ${formatElapsed(
-          elapsedSeconds
-        )} of recorded focus time. This cannot be undone.${
-          loop.status !== 'COMPLETED' ? ' The active loop will be discarded.' : ''
+        title={t('loopDetail.deleteTitle', {
+          sequence: loop.sequence_number,
+        })}
+        message={`${t('loopDetail.deleteMessage', {
+          duration: formatElapsed(elapsedSeconds),
+        })}${
+          loop.status !== 'COMPLETED'
+            ? t('loopDetail.deleteActiveNote')
+            : ''
         }`}
-        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        confirmLabel={deleting ? t('common.deleting') : t('common.delete')}
         destructive
         onConfirm={() => {
           void handleDelete();

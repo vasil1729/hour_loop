@@ -23,28 +23,49 @@ import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { DayPickerModal } from '../../src/components/history/DayPickerModal';
 import {
+  HistoryPeriodSwitcher,
+  type HistoryPeriod,
+} from '../../src/components/history/HistoryPeriodSwitcher';
+import {
   addDaysToDayKey,
+  addMonthsToMonthKey,
   currentDayKey,
   formatDayLabel,
+  formatMonthLabel,
+  formatWeekRangeLabel,
   getDeviceTimeZone,
   getZonedParts,
+  startOfWeekDayKey,
 } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import {
   getDayCapsuleData,
+  getRangeCapsuleData,
+  type CapsulePeriodData,
   type DayCapsuleData,
   type DayCapsuleTotal,
 } from '../../src/features/days/dayCapsuleService';
+import { getActiveLanguage } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
+import type {
+  TranslationKey,
+  TranslationParams,
+} from '../../src/i18n/types';
 import { capsuleColor } from '../../src/theme/capsuleColors';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
 const HOUR_HEIGHT = 58;
-const HOURS = Array.from({ length: 24 }, (_, hour) => {
-  const suffix = hour < 12 ? 'AM' : 'PM';
-  const display = hour % 12 === 0 ? 12 : hour % 12;
-  return `${display} ${suffix}`;
-});
+
+function hourLabels(): string[] {
+  const use12Hour = getActiveLanguage() === 'en';
+  return Array.from({ length: 24 }, (_, hour) => {
+    if (!use12Hour) return `${String(hour).padStart(2, '0')}:00`;
+    const suffix = hour < 12 ? 'AM' : 'PM';
+    const display = hour % 12 === 0 ? 12 : hour % 12;
+    return `${display} ${suffix}`;
+  });
+}
 
 type ViewMode = 'timeline' | 'clock';
 
@@ -62,7 +83,12 @@ type TaskGroup = {
   loose: boolean;
 };
 
-function buildTaskGroups(capsules: DayCapsuleTotal[]): TaskGroup[] {
+type Translate = (key: TranslationKey, params?: TranslationParams) => string;
+
+function buildTaskGroups(
+  capsules: DayCapsuleTotal[],
+  t: Translate
+): TaskGroup[] {
   const groups = new Map<string, TaskGroup>();
   const loose: DayCapsuleTotal[] = [];
 
@@ -78,7 +104,7 @@ function buildTaskGroups(capsules: DayCapsuleTotal[]): TaskGroup[] {
     } else {
       groups.set(capsule.taskId, {
         key: capsule.taskId,
-        title: capsule.taskTitle ?? 'Task capsule',
+        title: capsule.taskTitle ?? t('day.taskCapsuleFallback'),
         parentTitle: capsule.parentTaskTitle,
         totalSeconds: capsule.seconds,
         items: [capsule],
@@ -101,7 +127,7 @@ function buildTaskGroups(capsules: DayCapsuleTotal[]): TaskGroup[] {
     loose.sort((a, b) => b.seconds - a.seconds || a.text.localeCompare(b.text));
     result.push({
       key: 'loose',
-      title: 'Loose capsules',
+      title: t('day.looseCapsules'),
       parentTitle: null,
       totalSeconds: loose.reduce((sum, item) => sum + item.seconds, 0),
       items: loose,
@@ -116,13 +142,15 @@ export default function DayViewScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const { width } = useWindowDimensions();
   const params = useLocalSearchParams<{ date?: string }>();
   const today = currentDayKey();
   const [selectedDay, setSelectedDay] = useState(
     typeof params.date === 'string' ? params.date : today
   );
-  const [data, setData] = useState<DayCapsuleData | null>(null);
+  const [period, setPeriod] = useState<HistoryPeriod>('day');
+  const [data, setData] = useState<CapsulePeriodData | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('timeline');
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -130,11 +158,53 @@ export default function DayViewScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [timelineTop, setTimelineTop] = useState(0);
 
+  const monthKey = selectedDay.slice(0, 7);
+  const weekStart = startOfWeekDayKey(selectedDay);
+  const weekEnd = addDaysToDayKey(weekStart, 6);
+  const rangeStart =
+    period === 'day'
+      ? selectedDay
+      : period === 'week'
+        ? weekStart
+        : `${monthKey}-01`;
+  const rangeEnd =
+    period === 'day'
+      ? selectedDay
+      : period === 'week'
+        ? weekEnd
+        : addDaysToDayKey(`${addMonthsToMonthKey(monthKey, 1)}-01`, -1);
+
+  const periodLabel =
+    period === 'day'
+      ? formatDayLabel(selectedDay)
+      : period === 'week'
+        ? formatWeekRangeLabel(weekStart, weekEnd)
+        : formatMonthLabel(monthKey);
+
+  const periodName =
+    period === 'day'
+      ? t('history.periodDay')
+      : period === 'week'
+        ? t('history.periodWeek')
+        : t('history.periodMonth');
+
+  const currentWeekStart = startOfWeekDayKey(today);
+  const isCurrentPeriod =
+    period === 'day'
+      ? selectedDay === today
+      : period === 'week'
+        ? weekStart === currentWeekStart
+        : monthKey === today.slice(0, 7);
+
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
       setLoading(true);
-      void getDayCapsuleData(db, selectedDay)
+      const request =
+        period === 'day'
+          ? getDayCapsuleData(db, selectedDay)
+          : getRangeCapsuleData(db, rangeStart, rangeEnd);
+      void request
         .then((result) => {
           if (!cancelled) setData(result);
         })
@@ -147,7 +217,7 @@ export default function DayViewScreen() {
       return () => {
         cancelled = true;
       };
-    }, [db, selectedDay])
+    }, [db, period, rangeEnd, rangeStart, selectedDay])
   );
 
   const colorByItem = useMemo(() => {
@@ -158,7 +228,10 @@ export default function DayViewScreen() {
     return map;
   }, [data]);
 
-  const groups = useMemo(() => buildTaskGroups(data?.capsules ?? []), [data]);
+  const groups = useMemo(
+    () => buildTaskGroups(data?.capsules ?? [], t),
+    [data, t]
+  );
   const selectedCapsule =
     data?.capsules.find((capsule) => capsule.itemId === selectedItemId) ?? null;
   const selectedColor = selectedCapsule
@@ -167,13 +240,25 @@ export default function DayViewScreen() {
 
   useEffect(() => {
     setSelectedItemId(null);
-  }, [selectedDay]);
+  }, [period, selectedDay]);
 
-  const isToday = selectedDay >= today;
+  const isToday = selectedDay === today;
   const timeZone = getDeviceTimeZone();
 
   const toggleSelectedItem = (itemId: string) => {
     setSelectedItemId((current) => (current === itemId ? null : itemId));
+  };
+
+  const shiftPeriod = (delta: number) => {
+    if (period === 'day') {
+      setSelectedDay((value) => addDaysToDayKey(value, delta));
+      return;
+    }
+    if (period === 'week') {
+      setSelectedDay((value) => addDaysToDayKey(value, delta * 7));
+      return;
+    }
+    setSelectedDay(`${addMonthsToMonthKey(monthKey, delta)}-01`);
   };
 
   const jumpToTimeline = () => {
@@ -198,24 +283,27 @@ export default function DayViewScreen() {
         <View style={styles.topBar}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Back"
+            accessibilityLabel={t('day.back')}
             onPress={() => router.back()}
             hitSlop={12}
             style={styles.iconButton}
           >
-            <Ionicons name="chevron-back" size={22} color={colors.text} />
+            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={22} color={colors.text} />
           </Pressable>
           <View style={styles.topBarTitle}>
             <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
-              DAY VIEW
+              {t('day.eyebrow')}
             </Text>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {formatDayLabel(selectedDay)}
+            <Text
+              numberOfLines={2}
+              style={[styles.title, { color: colors.text }]}
+            >
+              {periodLabel}
             </Text>
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Choose a date"
+            accessibilityLabel={t('day.chooseDate')}
             onPress={() => setPickerVisible(true)}
             hitSlop={12}
             style={styles.iconButton}
@@ -224,47 +312,58 @@ export default function DayViewScreen() {
           </Pressable>
         </View>
 
+        <HistoryPeriodSwitcher period={period} onChange={setPeriod} />
+
         <View style={styles.dayNav}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Previous day"
-            onPress={() => setSelectedDay((day) => addDaysToDayKey(day, -1))}
+            accessibilityLabel={t('history.previousPeriod', {
+              period: periodName,
+            })}
+            onPress={() => shiftPeriod(-1)}
             hitSlop={10}
             style={[styles.navButton, { backgroundColor: colors.surface }]}
           >
-            <Ionicons name="chevron-back" size={18} color={colors.text} />
+            <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={18} color={colors.text} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Next day"
-            disabled={isToday}
-            onPress={() => setSelectedDay((day) => addDaysToDayKey(day, 1))}
+            accessibilityLabel={t('history.nextPeriod', {
+              period: periodName,
+            })}
+            disabled={isCurrentPeriod}
+            onPress={() => shiftPeriod(1)}
             hitSlop={10}
             style={[
               styles.navButton,
-              { backgroundColor: colors.surface, opacity: isToday ? 0.35 : 1 },
+              {
+                backgroundColor: colors.surface,
+                opacity: isCurrentPeriod ? 0.35 : 1,
+              },
             ]}
           >
-            <Ionicons name="chevron-forward" size={18} color={colors.text} />
+            <Ionicons name={isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.text} />
           </Pressable>
-          {!isToday ? (
+          {!isCurrentPeriod ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Jump to today"
+              accessibilityLabel={t('day.jumpToday')}
               onPress={() => setSelectedDay(today)}
             >
               <Text style={[styles.todayLink, { color: colors.accent }]}>
-                Today
+                {t('day.today')}
               </Text>
             </Pressable>
           ) : (
             <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>
-              Today
+              {t('day.today')}
             </Text>
           )}
           <View style={styles.navSpacer} />
           <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
-            {formatDurationCompact(data?.totalSeconds ?? 0)} focused
+            {t('day.focused', {
+              duration: formatDurationCompact(data?.totalSeconds ?? 0),
+            })}
           </Text>
         </View>
 
@@ -273,8 +372,16 @@ export default function DayViewScreen() {
         ) : !data || data.capsules.length === 0 ? (
           <View style={styles.emptyWrap}>
             <EmptyState
-              title="No capsule time yet"
-              message="Focus capsules during a loop and their time will appear here."
+              title={
+                period === 'day'
+                  ? t('day.noCapsuleTitle')
+                  : t('day.noPeriodCapsuleTitle')
+              }
+              message={
+                period === 'day'
+                  ? t('day.noCapsuleMessage')
+                  : t('day.noPeriodCapsuleMessage')
+              }
             />
           </View>
         ) : (
@@ -293,7 +400,7 @@ export default function DayViewScreen() {
                   <Text
                     style={[styles.summaryLabel, { color: colors.textSecondary }]}
                   >
-                    FOCUSED
+                    {t('day.focusedLabel')}
                   </Text>
                 </View>
                 <View style={[styles.summaryDivider, { backgroundColor: colors.border }]} />
@@ -304,7 +411,7 @@ export default function DayViewScreen() {
                   <Text
                     style={[styles.summaryLabel, { color: colors.textSecondary }]}
                   >
-                    TASKS
+                    {t('day.tasks')}
                   </Text>
                 </View>
                 <View style={[styles.summaryDivider, { backgroundColor: colors.border }]} />
@@ -315,7 +422,7 @@ export default function DayViewScreen() {
                   <Text
                     style={[styles.summaryLabel, { color: colors.textSecondary }]}
                   >
-                    CAPSULES
+                    {t('day.capsules')}
                   </Text>
                 </View>
               </View>
@@ -324,12 +431,14 @@ export default function DayViewScreen() {
             <View style={styles.taskSection}>
               <View style={styles.taskSectionHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  Tasks
+                  {t('day.tasks')}
                 </Text>
                 <Text
                   style={[styles.sectionMeta, { color: colors.textSecondary }]}
                 >
-                  {groups.filter((group) => !group.loose).length} task capsules
+                  {t('day.taskCapsulesCount', {
+                    count: groups.filter((group) => !group.loose).length,
+                  })}
                 </Text>
               </View>
 
@@ -389,24 +498,41 @@ export default function DayViewScreen() {
                       <Text
                         style={[styles.taskGroupCount, { color: colors.textSecondary }]}
                       >
-                        {group.items.length}{' '}
-                        {group.items.length === 1 ? 'capsule' : 'capsules'}
+                        {t('day.capsuleCount', {
+                          count: group.items.length,
+                        })}
                       </Text>
                     </View>
                   </View>
 
                   {group.items.map((item) => {
-                    const selected = selectedItemId === item.itemId;
+                    const selected =
+                      period === 'day' && selectedItemId === item.itemId;
                     const color = colorByItem.get(item.itemId) ?? colors.accent;
                     return (
                       <Pressable
                         key={item.itemId}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected }}
-                        accessibilityLabel={`${item.text}, ${formatDurationCompact(
-                          item.seconds
-                        )}${selected ? ', selected' : ''}`}
-                        onPress={() => toggleSelectedItem(item.itemId)}
+                        accessibilityRole={
+                          period === 'day' ? 'button' : undefined
+                        }
+                        accessibilityState={
+                          period === 'day' ? { selected } : undefined
+                        }
+                        accessibilityLabel={
+                          period === 'day'
+                            ? t('day.capsuleA11y', {
+                                text: item.text,
+                                duration: formatDurationCompact(item.seconds),
+                                selected: selected
+                                  ? `, ${t('day.selected')}`
+                                  : '',
+                              })
+                            : undefined
+                        }
+                        disabled={period !== 'day'}
+                        onPress={() => {
+                          toggleSelectedItem(item.itemId);
+                        }}
                         style={[
                           styles.capsuleRow,
                           {
@@ -448,18 +574,20 @@ export default function DayViewScreen() {
               ))}
             </View>
 
-            <View
-              style={[
-                styles.viewToggle,
-                { backgroundColor: colors.surfaceAlt },
-              ]}
-            >
-              {(
-                [
-                  ['timeline', 'Timeline'],
-                  ['clock', 'Clock'],
-                ] as const
-              ).map(([mode, label]) => {
+            {period === 'day' ? (
+              <>
+                <View
+                  style={[
+                    styles.viewToggle,
+                    { backgroundColor: colors.surfaceAlt },
+                  ]}
+                >
+                  {(
+                    [
+                      ['timeline', t('day.timeline')],
+                      ['clock', t('day.clock')],
+                    ] as const
+                  ).map(([mode, label]) => {
                 const selected = viewMode === mode;
                 return (
                   <Pressable
@@ -514,24 +642,24 @@ export default function DayViewScreen() {
                   <Text
                     style={[styles.selectionMeta, { color: colors.textSecondary }]}
                   >
-                    {selectedCapsule.taskTitle ?? 'Loose capsule'} ·{' '}
+                    {selectedCapsule.taskTitle ?? t('day.looseCapsule')} ·{' '}
                     {formatDurationCompact(selectedCapsule.seconds)}
                   </Text>
                 </View>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Clear capsule highlight"
+                  accessibilityLabel={t('day.clearHighlightA11y')}
                   onPress={() => setSelectedItemId(null)}
                   hitSlop={8}
                 >
                   <Text style={[styles.selectionClear, { color: colors.accent }]}>
-                    Clear
+                    {t('day.clear')}
                   </Text>
                 </Pressable>
               </View>
             ) : (
               <Text style={[styles.selectionHint, { color: colors.textSecondary }]}>
-                Tap a capsule or a wedge to highlight its time.
+                {t('day.selectionHint')}
               </Text>
             )}
 
@@ -541,18 +669,18 @@ export default function DayViewScreen() {
                   <Text
                     style={[styles.timelineHint, { color: colors.textSecondary }]}
                   >
-                    Scroll through the day
+                    {t('day.scroll')}
                   </Text>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={
-                      isToday ? 'Jump to current time' : 'Jump to first capsule'
+                      isToday ? t('day.jumpNow') : t('day.jumpFirst')
                     }
                     onPress={jumpToTimeline}
                     hitSlop={8}
                   >
                     <Text style={[styles.jumpLink, { color: colors.accent }]}>
-                      {isToday ? 'Jump to now' : 'Jump to first capsule'}
+                      {isToday ? t('day.jumpNow') : t('day.jumpFirst')}
                     </Text>
                   </Pressable>
                 </View>
@@ -582,6 +710,8 @@ export default function DayViewScreen() {
                 onSelectItem={toggleSelectedItem}
               />
             )}
+              </>
+            ) : null}
           </>
         )}
       </ScrollView>
@@ -615,6 +745,7 @@ function TimelineView({
   onSelectItem: (itemId: string) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const now = new Date();
   const nowMinutes =
     isToday ? now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60 : -1;
@@ -622,7 +753,7 @@ function TimelineView({
   return (
     <View style={styles.timelineWrap}>
       <View style={styles.hourLabels}>
-        {HOURS.map((label) => (
+        {hourLabels().map((label) => (
           <View key={label} style={styles.hourLabelCell}>
             <Text style={[styles.hourLabel, { color: colors.textSecondary }]}>
               {label}
@@ -640,7 +771,7 @@ function TimelineView({
           },
         ]}
       >
-        {HOURS.map((label, hour) => (
+        {hourLabels().map((label, hour) => (
           <View
             key={label}
             pointerEvents="none"
@@ -673,9 +804,11 @@ function TimelineView({
             <Pressable
               key={`${segment.itemId}-${segment.startAt}-${index}`}
               accessibilityRole="button"
-              accessibilityLabel={`${capsule?.text ?? 'Capsule'}, ${formatDurationCompact(
-                segment.seconds
-              )}${selected ? ', highlighted' : ''}`}
+              accessibilityLabel={t('day.capsuleA11y', {
+                text: capsule?.text ?? t('day.capsuleFallback'),
+                duration: formatDurationCompact(segment.seconds),
+                selected: selected ? `, ${t('day.highlighted')}` : '',
+              })}
               onPress={() => onSelectItem(segment.itemId)}
               style={[
                 styles.timelineBlock,
@@ -691,7 +824,7 @@ function TimelineView({
             >
               {showText ? (
                 <Text numberOfLines={2} style={styles.timelineBlockText}>
-                  {capsule?.text ?? 'Capsule'}
+                  {capsule?.text ?? t('day.capsuleFallback')}
                   {height >= 44
                     ? ` · ${formatDurationCompact(segment.seconds)}`
                     : ''}
@@ -735,6 +868,7 @@ function ClockView({
   onSelectItem: (itemId: string) => void;
 }) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const size = Math.min(Math.max(width - 72, 240), 360);
   const center = size / 2;
   const outerRadius = center - 14;
@@ -861,16 +995,17 @@ function ClockView({
             {formatDurationCompact(selected?.seconds ?? data.totalSeconds)}
           </Text>
           <Text style={[styles.clockLabel, { color: colors.textSecondary }]}>
-            {selected ? 'SELECTED' : 'FOCUSED'}
+            {selected ? t('day.selectedLabel') : t('day.focusedLabel')}
           </Text>
         </View>
       </View>
       <Text style={[styles.clockHint, { color: colors.textSecondary }]}>
         {selected
-          ? `Highlighting ${selected.text} · ${formatDurationCompact(
-              selected.seconds
-            )}`
-          : '24-hour clock · each wedge is a capsule. Tap a wedge to highlight it.'}
+          ? t('day.clockHintSelected', {
+              text: selected.text,
+              duration: formatDurationCompact(selected.seconds),
+            })
+          : t('day.clockHint')}
       </Text>
     </View>
   );
@@ -1141,7 +1276,7 @@ const styles = StyleSheet.create({
   hourLabelCell: {
     height: HOUR_HEIGHT,
     alignItems: 'flex-end',
-    paddingRight: spacing.xs,
+    paddingEnd: spacing.xs,
   },
   hourLabel: {
     fontSize: 10,
@@ -1151,7 +1286,7 @@ const styles = StyleSheet.create({
   timelineTrack: {
     flex: 1,
     position: 'relative',
-    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderStartWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.sm,
     overflow: 'hidden',
   },

@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import type { Task } from '../../domain/types';
 import { flattenTree, isLoopTarget } from '../../domain/tasks/taskDomain';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -28,12 +29,13 @@ export function TaskPicker({
   visible,
   tasks,
   selectedTaskId,
-  title = 'Choose a task capsule',
-  noneLabel = 'No task capsule (loop capsules stay loose)',
+  title,
+  noneLabel,
   onSelect,
   onClose,
 }: TaskPickerProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const expanded = useMemo(
     () => new Set(tasks.map((task) => task.id)),
     [tasks]
@@ -59,10 +61,12 @@ export function TaskPicker({
       <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
         <View style={[styles.sheet, { backgroundColor: colors.background }]}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {title ?? t('taskPicker.title')}
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close task picker"
+              accessibilityLabel={t('taskPicker.closeA11y')}
               onPress={onClose}
               hitSlop={10}
             >
@@ -85,7 +89,7 @@ export function TaskPicker({
               color={selectedTaskId === null ? colors.accent : colors.textSecondary}
             />
             <Text style={[styles.noneText, { color: colors.text }]}>
-              {noneLabel}
+              {noneLabel ?? t('taskPicker.none')}
             </Text>
           </Pressable>
 
@@ -95,7 +99,7 @@ export function TaskPicker({
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <Text style={[styles.empty, { color: colors.textSecondary }]}>
-                No capsules yet. Add a capsule to a task first.
+                {t('taskPicker.empty')}
               </Text>
             }
             renderItem={({ item }) => {
@@ -112,7 +116,7 @@ export function TaskPicker({
                     styles.taskRow,
                     {
                       backgroundColor: selected ? colors.accentSoft : colors.surface,
-                      marginLeft: item.depth * spacing.lg,
+                      marginStart: item.depth * spacing.lg,
                     },
                   ]}
                 >

@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { minutesToSeconds, secondsToMinutes } from '../../constants/durationPresets';
 import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 import { Button } from '../common/Button';
@@ -21,8 +22,13 @@ type IntentionEditModalProps = {
   onClose: () => void;
 };
 
-function presetLabel(minutes: number): string {
-  return minutes >= 60 ? `${minutes / 60}h` : `${minutes}m`;
+function presetLabel(
+  minutes: number,
+  t: (key: 'duration.minuteShort' | 'duration.hourShort') => string
+): string {
+  return minutes >= 60
+    ? `${minutes / 60}${t('duration.hourShort')}`
+    : `${minutes}${t('duration.minuteShort')}`;
 }
 
 export function IntentionEditModal({
@@ -32,13 +38,14 @@ export function IntentionEditModal({
   presetMinutes,
   busy = false,
   clearDisabled = false,
-  clearLabel = 'Clear',
-  helperText = 'Tap a preset to add it to the target.',
+  clearLabel,
+  helperText,
   onSave,
   onClear,
   onClose,
 }: IntentionEditModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [seconds, setSeconds] = useState(Math.max(0, initialSeconds));
   const [customMinutes, setCustomMinutes] = useState(
     initialSeconds > 0 ? String(secondsToMinutes(initialSeconds)) : ''
@@ -85,11 +92,13 @@ export function IntentionEditModal({
             <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Close"
+              accessibilityLabel={t('common.close')}
               onPress={onClose}
               hitSlop={10}
             >
-              <Text style={[styles.close, { color: colors.textSecondary }]}>Close</Text>
+              <Text style={[styles.close, { color: colors.textSecondary }]}>
+                {t('common.close')}
+              </Text>
             </Pressable>
           </View>
 
@@ -100,7 +109,7 @@ export function IntentionEditModal({
             ]}
           >
             <Text style={[styles.totalLabel, { color: colors.textSecondary }]}>
-              TARGET
+              {t('intentionEdit.target')}
             </Text>
             <Text
               accessibilityLiveRegion="polite"
@@ -111,7 +120,7 @@ export function IntentionEditModal({
           </View>
 
           <Text style={[styles.helper, { color: colors.textSecondary }]}>
-            {helperText}
+            {helperText ?? t('intentionEdit.helper')}
           </Text>
 
           <View style={styles.chips}>
@@ -119,7 +128,9 @@ export function IntentionEditModal({
               <Pressable
                 key={minutes}
                 accessibilityRole="button"
-                accessibilityLabel={`Add ${presetLabel(minutes)}`}
+                accessibilityLabel={t('intentionEdit.addPreset', {
+                  value: presetLabel(minutes, t),
+                })}
                 onPress={() => addPreset(minutes)}
                 disabled={busy}
                 style={[
@@ -132,7 +143,7 @@ export function IntentionEditModal({
                 ]}
               >
                 <Text style={[styles.chipText, { color: colors.accent }]}>
-                  +{presetLabel(minutes)}
+                  +{presetLabel(minutes, t)}
                 </Text>
               </Pressable>
             ))}
@@ -142,7 +153,7 @@ export function IntentionEditModal({
             <TextInput
               value={customMinutes}
               onChangeText={handleCustom}
-              placeholder="Set exact minutes"
+              placeholder={t('intentionEdit.placeholder')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               maxLength={5}
@@ -156,19 +167,21 @@ export function IntentionEditModal({
                 },
               ]}
             />
-            <Text style={[styles.suffix, { color: colors.textSecondary }]}>min</Text>
+            <Text style={[styles.suffix, { color: colors.textSecondary }]}>
+              {t('intentionEdit.min')}
+            </Text>
           </View>
 
           <View style={styles.actions}>
             <Button
-              label={clearLabel}
+              label={clearLabel ?? t('common.clear')}
               variant="ghost"
               onPress={onClear}
               disabled={busy || clearDisabled}
               style={styles.action}
             />
             <Button
-              label="Save"
+              label={t('common.save')}
               onPress={() => onSave(seconds)}
               loading={busy}
               disabled={seconds <= 0}

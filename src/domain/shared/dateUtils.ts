@@ -1,4 +1,47 @@
+import {
+  getActiveLanguage,
+  type Language,
+} from '../../i18n/localeState';
+
 const TWO_DIGITS = (value: number): string => String(value).padStart(2, '0');
+
+const LOCALE_BY_LANGUAGE: Record<Language, string> = {
+  en: 'en-US',
+  ru: 'ru-RU',
+  ar: 'ar-u-nu-latn',
+  zh: 'zh-CN',
+  tr: 'tr-TR',
+  ml: 'ml-IN',
+};
+
+export function getLanguageLocale(
+  language: Language = getActiveLanguage()
+): string {
+  return LOCALE_BY_LANGUAGE[language] ?? 'en-US';
+}
+
+function getFormatLocale(): string {
+  return getLanguageLocale();
+}
+
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getDateFormatter(
+  cacheKey: string,
+  options: Intl.DateTimeFormatOptions
+): Intl.DateTimeFormat {
+  const key = `${getFormatLocale()}:${cacheKey}`;
+  const cached = dateFormatters.get(key);
+  if (cached) return cached;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(getFormatLocale(), options);
+  } catch {
+    formatter = new Intl.DateTimeFormat('en-US', options);
+  }
+  dateFormatters.set(key, formatter);
+  return formatter;
+}
 
 export type DateParts = {
   year: number;
@@ -241,94 +284,120 @@ export function currentMonthKey(timeZone: string = getDeviceTimeZone()): string 
   return toLocalMonthKey(new Date(), timeZone);
 }
 
-const WEEKDAYS = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-];
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+function dayKeyToUtcDate(dayKey: string): Date {
+  const { year, month, day } = parseDayKey(dayKey);
+  return new Date(Date.UTC(year, month - 1, day));
+}
 
 /**
  * Day keys are calendar keys, so format their parts without re-applying a zone.
  */
 export function formatDayLabel(dayKey: string): string {
-  const { year, month, day } = parseDayKey(dayKey);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const weekday = WEEKDAYS[date.getUTCDay()] ?? '';
-  const monthName = MONTHS[month - 1] ?? '';
-  return `${weekday}, ${monthName} ${day}, ${year}`;
+  return getDateFormatter('day-label', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(dayKey));
 }
 
 export function formatShortDayLabel(dayKey: string): string {
-  const { month, day } = parseDayKey(dayKey);
-  const monthName = MONTHS[month - 1] ?? '';
-  return `${monthName.slice(0, 3)} ${day}`;
+  return getDateFormatter('short-day', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(dayKey));
 }
 
 export function formatMonthLabel(monthKey: string): string {
   const [year, month] = monthKey.split('-').map(Number);
-  const monthName = MONTHS[(month ?? 1) - 1] ?? '';
-  return `${monthName} ${year}`;
+  return getDateFormatter('month-label', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, 1)));
 }
 
 export function formatCompactDayLabel(dayKey: string): string {
-  const { year, month, day } = parseDayKey(dayKey);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const weekday = WEEKDAYS[date.getUTCDay()]?.slice(0, 3) ?? '';
-  const monthName = MONTHS[month - 1]?.slice(0, 3) ?? '';
-  return `${weekday}, ${monthName} ${day}, ${year}`;
+  return getDateFormatter('compact-day', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(dayKey));
 }
 
 export function formatWeekdayShort(dayKey: string): string {
-  const { year, month, day } = parseDayKey(dayKey);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return WEEKDAYS[date.getUTCDay()]?.slice(0, 3) ?? '';
+  return getDateFormatter('weekday-short', {
+    weekday: 'short',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(dayKey));
+}
+
+export function formatWeekdayNarrow(dayKey: string): string {
+  return getDateFormatter('weekday-narrow', {
+    weekday: 'narrow',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(dayKey));
+}
+
+/** Sunday-first weekday labels for calendar headers. */
+export function getWeekdayLabels(style: 'short' | 'narrow'): string[] {
+  const sunday = Date.UTC(2023, 0, 1);
+  return Array.from({ length: 7 }, (_, index) =>
+    getDateFormatter(`weekday-${style}`, {
+      weekday: style,
+      timeZone: 'UTC',
+    }).format(new Date(sunday + index * 24 * 60 * 60 * 1000))
+  );
 }
 
 export function formatWeekRangeLabel(startKey: string, endKey: string): string {
   const start = parseDayKey(startKey);
   const end = parseDayKey(endKey);
-  const startMonth = MONTHS[start.month - 1]?.slice(0, 3) ?? '';
-  const endMonth = MONTHS[end.month - 1]?.slice(0, 3) ?? '';
+  const language = getActiveLanguage();
+  const startLabel = getDateFormatter('range-start', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(startKey));
+  const endLabel = getDateFormatter('range-end', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(dayKeyToUtcDate(endKey));
 
   if (start.year !== end.year) {
-    return `${startMonth} ${start.day}, ${start.year} – ${endMonth} ${end.day}, ${end.year}`;
+    return `${startLabel}, ${start.year} – ${endLabel}, ${end.year}`;
   }
   if (start.month !== end.month) {
-    return `${startMonth} ${start.day} – ${endMonth} ${end.day}, ${end.year}`;
+    return `${startLabel} – ${endLabel}, ${end.year}`;
   }
-  return `${startMonth} ${start.day} – ${end.day}, ${end.year}`;
+  return language === 'en'
+    ? `${startLabel} – ${end.day}, ${end.year}`
+    : `${startLabel} – ${endLabel}, ${end.year}`;
 }
 
 const clockFormatters = new Map<string, Intl.DateTimeFormat>();
 
 function getClockFormatter(timeZone: string): Intl.DateTimeFormat {
-  const cached = clockFormatters.get(timeZone);
+  const key = `${getFormatLocale()}:${timeZone}`;
+  const cached = clockFormatters.get(key);
   if (cached) return cached;
-  const formatter = new Intl.DateTimeFormat(undefined, {
+  const options: Intl.DateTimeFormatOptions = {
     timeZone,
     hour: 'numeric',
     minute: '2-digit',
-  });
-  clockFormatters.set(timeZone, formatter);
+  };
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat(getFormatLocale(), options);
+  } catch {
+    formatter = new Intl.DateTimeFormat('en-US', options);
+  }
+  clockFormatters.set(key, formatter);
   return formatter;
 }
 

@@ -12,15 +12,17 @@ import type {
   LoopEvent,
   LoopEventKind,
 } from '../../features/loops/loopTimeline';
+import { useTranslation } from '../../i18n/I18nProvider';
+import type { TranslationKey } from '../../i18n/types';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
-const EVENT_LABELS: Record<LoopEventKind | 'NOW', string> = {
-  STARTED: 'Started',
-  PAUSED: 'Paused',
-  RESUMED: 'Resumed',
-  STOPPED: 'Stopped',
-  NOW: 'Now',
+const EVENT_LABEL_KEYS: Record<LoopEventKind | 'NOW', TranslationKey> = {
+  STARTED: 'timeline.started',
+  PAUSED: 'timeline.paused',
+  RESUMED: 'timeline.resumed',
+  STOPPED: 'timeline.stopped',
+  NOW: 'timeline.now',
 };
 
 type TimelineEvent = LoopEvent | { kind: 'NOW'; at: string };
@@ -32,6 +34,7 @@ type LoopTimelineProps = {
 
 export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   if (events.length === 0) return null;
 
   const timeZone = getDeviceTimeZone();
@@ -46,7 +49,7 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
   return (
     <View style={styles.section}>
       <Text style={[styles.title, { color: colors.textSecondary }]}>
-        SESSION LOG
+        {t('timeline.title')}
       </Text>
       <View
         style={[
@@ -96,18 +99,22 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
               : Math.max(20, Math.min(96, 12 + (segmentSeconds / 60) * 6));
           const durationLabel =
             segmentSeconds !== null && segmentSeconds > 0 && segmentState
-              ? `${formatDurationWithSeconds(segmentSeconds)} ${
-                  segmentState === 'paused' ? 'paused' : 'focused'
-                }`
+              ? `${formatDurationWithSeconds(segmentSeconds)} ${t(
+                  segmentState === 'paused'
+                    ? 'timeline.pausedDuration'
+                    : 'timeline.focused'
+                )}`
               : null;
 
           return (
             <View
               key={`${event.kind}-${event.at}-${index}`}
               accessible
-              accessibilityLabel={`${EVENT_LABELS[event.kind]} at ${timeLabel}${
-                durationLabel ? `, ${durationLabel}` : ''
-              }`}
+              accessibilityLabel={t('timeline.a11y', {
+                event: t(EVENT_LABEL_KEYS[event.kind]),
+                time: timeLabel,
+                duration: durationLabel ? `, ${durationLabel}` : '',
+              })}
               style={[
                 styles.row,
                 segmentHeight !== undefined ? { minHeight: segmentHeight } : null,
@@ -135,7 +142,7 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
               >
                 <View style={styles.headerRow}>
                   <Text style={[styles.eventLabel, { color: colors.text }]}>
-                    {EVENT_LABELS[event.kind]}
+                    {t(EVENT_LABEL_KEYS[event.kind])}
                   </Text>
                   <Text
                     style={[styles.eventTime, { color: colors.textSecondary }]}

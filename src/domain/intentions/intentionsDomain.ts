@@ -3,6 +3,17 @@ import {
   allocateIntervalToMonths,
   type IntervalRecord,
 } from '../timer/timerEngine';
+import { getActiveLanguage } from '../../i18n/localeState';
+
+function durationUnits(): { hour: string; minute: string } {
+  const language = getActiveLanguage();
+  if (language === 'ru') return { hour: ' ч', minute: ' мин' };
+  if (language === 'ar') return { hour: ' س', minute: ' د' };
+  if (language === 'zh') return { hour: '小时', minute: '分钟' };
+  if (language === 'tr') return { hour: ' sa', minute: ' dk' };
+  if (language === 'ml') return { hour: ' മണി.', minute: ' മിനി.' };
+  return { hour: 'h', minute: 'min' };
+}
 
 export type IntentionProgress = {
   targetSeconds: number;
@@ -18,11 +29,14 @@ export function formatIntentionDuration(totalSeconds: number): string {
   const safe = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
+  const units = durationUnits();
 
-  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}min`;
-  if (hours > 0) return `${hours}h`;
-  if (minutes > 0) return `${minutes}min`;
-  return '0min';
+  if (hours > 0 && minutes > 0) {
+    return `${hours}${units.hour} ${minutes}${units.minute}`;
+  }
+  if (hours > 0) return `${hours}${units.hour}`;
+  if (minutes > 0) return `${minutes}${units.minute}`;
+  return `0${units.minute}`;
 }
 
 export function computeIntentionProgress(

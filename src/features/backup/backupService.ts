@@ -17,6 +17,7 @@ import {
   type HourLoopBackup,
 } from '../../domain/backup/backup';
 import { getDeviceTimeZone, nowUtcIso } from '../../domain/shared/dateUtils';
+import { t } from '../../i18n';
 import { getAllIntentions, createIntention } from '../../database/repositories/intentionsRepository';
 import {
   getAllIntervals,
@@ -133,7 +134,7 @@ export async function exportBackup(db: SQLiteDatabase): Promise<void> {
 
   await Sharing.shareAsync(uri, {
     mimeType: 'application/json',
-    dialogTitle: 'Save Hour Loop backup',
+    dialogTitle: t('settings.saveBackupDialog'),
     UTI: 'public.json',
   });
 }
@@ -240,6 +241,7 @@ export async function importBackup(
       INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES
         ('default_duration_seconds', '3600', datetime('now')),
         ('theme', 'system', datetime('now')),
+        ('language', 'system', datetime('now')),
         ('notifications_enabled', 'true', datetime('now'));
     `);
 

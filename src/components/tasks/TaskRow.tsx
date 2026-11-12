@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import type { Task } from '../../domain/types';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -28,6 +29,7 @@ export function TaskRow({
   showChevron = true,
 }: TaskRowProps) {
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const completed = task.status === 'COMPLETED';
   const inProgress = task.status === 'IN_PROGRESS';
 
@@ -40,13 +42,17 @@ export function TaskRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${task.title}${completed ? ', completed' : ''}`}
+      accessibilityLabel={
+        completed
+          ? t('taskRow.completedA11y', { title: task.title })
+          : task.title
+      }
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
         {
           backgroundColor: colors.surface,
-          marginLeft: depth * spacing.lg,
+          marginStart: depth * spacing.lg,
           opacity: pressed ? 0.78 : 1,
         },
       ]}
@@ -54,14 +60,16 @@ export function TaskRow({
       {showChevron ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={isExpanded ? 'Collapse capsules' : 'Expand capsules'}
+          accessibilityLabel={
+            isExpanded ? t('taskRow.collapse') : t('taskRow.expand')
+          }
           onPress={onToggleExpand}
           hitSlop={8}
           style={styles.chevron}
         >
           {hasChildren ? (
             <Ionicons
-              name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+              name={isExpanded ? 'chevron-down' : isRTL ? 'chevron-back' : 'chevron-forward'}
               size={16}
               color={colors.textSecondary}
             />
@@ -76,7 +84,7 @@ export function TaskRow({
       <Pressable
         accessibilityRole="checkbox"
         accessibilityState={{ checked: completed }}
-        accessibilityLabel={`Mark ${task.title} complete`}
+        accessibilityLabel={t('taskRow.markComplete', { title: task.title })}
         onPress={onToggleComplete}
         hitSlop={8}
         disabled={!onToggleComplete}
@@ -108,12 +116,14 @@ export function TaskRow({
           {task.title}
         </Text>
         {inProgress ? (
-          <Text style={[styles.meta, { color: colors.warning }]}>In progress</Text>
+          <Text style={[styles.meta, { color: colors.warning }]}>
+            {t('taskRow.inProgress')}
+          </Text>
         ) : null}
       </View>
 
       <Ionicons
-        name="chevron-forward"
+        name={isRTL ? 'chevron-back' : 'chevron-forward'}
         size={16}
         color={colors.textSecondary}
         style={styles.trailing}

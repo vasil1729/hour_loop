@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -44,6 +45,7 @@ export function LoopItemCapsule({
   onRemove,
 }: LoopItemCapsuleProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
   const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone);
 
@@ -116,9 +118,10 @@ export function LoopItemCapsule({
         <Pressable
           accessibilityRole="checkbox"
           accessibilityState={{ checked: done, disabled }}
-          accessibilityLabel={
-            done ? `Mark ${text} not done` : `Mark ${text} done`
-          }
+          accessibilityLabel={t(
+            done ? 'loopItem.markNotDone' : 'loopItem.markDone',
+            { text }
+          )}
           disabled={disabled}
           hitSlop={8}
           onPress={onToggleDone}
@@ -149,7 +152,9 @@ export function LoopItemCapsule({
           accessibilityRole="button"
           accessibilityLabel={
             pressAccessibilityLabel ??
-            (current ? `${text}, current focus` : `Focus on ${text}`)
+            (current
+              ? t('loopItem.currentFocusA11y', { text })
+              : t('loopItem.focusA11y', { text }))
           }
           accessibilityState={{ selected: current || selected, disabled }}
           disabled={disabled || done}
@@ -201,7 +206,7 @@ export function LoopItemCapsule({
       {onRemove ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Remove ${text}`}
+          accessibilityLabel={t('loopItem.removeA11y', { text })}
           hitSlop={8}
           onPress={onRemove}
           style={styles.remove}
@@ -221,8 +226,8 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.full,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.sm,
+    paddingStart: spacing.md,
+    paddingEnd: spacing.sm,
     paddingVertical: spacing.sm,
     gap: spacing.xs,
   },
@@ -237,7 +242,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     minWidth: 0,
     gap: spacing.xs,
-    paddingRight: spacing.xs,
+    paddingEnd: spacing.xs,
   },
   text: {
     flexShrink: 1,

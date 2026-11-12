@@ -3,11 +3,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import {
   formatCompactDayLabel,
+  formatWeekdayNarrow,
   formatWeekdayShort,
   parseDayKey,
 } from '../../domain/shared/dateUtils';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
 import type { WeekDayHistory } from '../../features/history/historyService';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -25,6 +27,7 @@ export function WeekBars({
   onSelectDay,
 }: WeekBarsProps) {
   const { colors } = useTheme();
+  const { language, t } = useTranslation();
   const maxSeconds = Math.max(1, ...days.map((day) => day.totalSeconds));
 
   return (
@@ -35,9 +38,11 @@ export function WeekBars({
       ]}
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Daily breakdown</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('history.dailyBreakdown')}
+        </Text>
         <Text style={[styles.hint, { color: colors.textSecondary }]}>
-          Tap a day
+          {t('common.tapADay')}
         </Text>
       </View>
 
@@ -56,9 +61,10 @@ export function WeekBars({
             <Pressable
               key={day.dayKey}
               accessibilityRole="button"
-              accessibilityLabel={`${formatCompactDayLabel(day.dayKey)}, ${formatDurationCompact(
-                day.totalSeconds
-              )} focused`}
+              accessibilityLabel={t('weekBars.a11y', {
+                day: formatCompactDayLabel(day.dayKey),
+                duration: formatDurationCompact(day.totalSeconds),
+              })}
               accessibilityState={{ selected: isSelected, disabled: isFuture }}
               disabled={isFuture}
               onPress={() => onSelectDay(day.dayKey)}
@@ -92,7 +98,11 @@ export function WeekBars({
                   },
                 ]}
               >
-                {formatWeekdayShort(day.dayKey).slice(0, 2)}
+                {language === 'ar' || language === 'ml'
+                  ? formatWeekdayNarrow(day.dayKey)
+                  : language === 'zh' || language === 'tr'
+                    ? formatWeekdayShort(day.dayKey)
+                    : formatWeekdayShort(day.dayKey).slice(0, 2)}
               </Text>
               <Text
                 style={[

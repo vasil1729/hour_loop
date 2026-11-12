@@ -24,6 +24,8 @@ import {
   updateTaskDetails,
   type TaskDetail,
 } from '../../src/features/tasks/taskService';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { radius, spacing } from '../../src/theme/tokens';
 
@@ -31,6 +33,7 @@ export default function TaskDetailScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const params = useLocalSearchParams<{ id?: string }>();
   const taskId = typeof params.id === 'string' ? params.id : undefined;
 
@@ -50,17 +53,17 @@ export default function TaskDetailScreen() {
     try {
       const result = await getTaskDetail(db, taskId);
       if (!result) {
-        setError('This task no longer exists.');
+        setError(t('task.noLongerExists'));
       } else {
         setDetail(result);
         setError(null);
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Could not load task.');
+      setError(localizeError(caught, 'task.couldNotLoad'));
     } finally {
       setLoading(false);
     }
-  }, [db, taskId]);
+  }, [db, taskId, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -93,8 +96,8 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not update task',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotUpdate'),
+        localizeError(caught)
       );
     } finally {
       setSaving(false);
@@ -113,8 +116,8 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not save task',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotSave'),
+        localizeError(caught)
       );
     } finally {
       setSaving(false);
@@ -137,8 +140,8 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not add capsule',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotAddCapsule'),
+        localizeError(caught)
       );
     } finally {
       setSaving(false);
@@ -155,8 +158,8 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not update capsule',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotUpdateCapsule'),
+        localizeError(caught)
       );
     }
   };
@@ -167,8 +170,8 @@ export default function TaskDetailScreen() {
       await reload();
     } catch (caught) {
       Alert.alert(
-        'Could not update capsule',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotUpdateCapsule'),
+        localizeError(caught)
       );
     }
   };
@@ -182,8 +185,8 @@ export default function TaskDetailScreen() {
       router.back();
     } catch (caught) {
       Alert.alert(
-        'Could not archive task',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        t('task.couldNotArchive'),
+        localizeError(caught)
       );
     } finally {
       setSaving(false);
@@ -197,7 +200,10 @@ export default function TaskDetailScreen() {
   if (error || !detail) {
     return (
       <Screen>
-        <EmptyState title="Task not found" message={error ?? 'This task is unavailable.'} />
+        <EmptyState
+          title={t('task.notFoundTitle')}
+          message={error ?? t('task.unavailable')}
+        />
       </Screen>
     );
   }
@@ -213,16 +219,16 @@ export default function TaskDetailScreen() {
       <View style={styles.topBar}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Back"
+          accessibilityLabel={t('task.backA11y')}
           onPress={() => router.back()}
           hitSlop={12}
           style={styles.iconButton}
         >
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
+          <Ionicons name={isRTL ? 'chevron-forward' : 'chevron-back'} size={24} color={colors.text} />
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Edit task"
+          accessibilityLabel={t('task.editA11y')}
           onPress={() => setEditVisible(true)}
           hitSlop={12}
           style={styles.iconButton}
@@ -256,7 +262,15 @@ export default function TaskDetailScreen() {
               },
             ]}
           >
-            {task.status.replace('_', ' ')}
+            {t(
+              task.status === 'COMPLETED'
+                ? 'task.statusCompleted'
+                : task.status === 'IN_PROGRESS'
+                  ? 'task.statusInProgress'
+                  : task.status === 'ARCHIVED'
+                    ? 'task.statusArchived'
+                    : 'task.statusNotStarted'
+            )}
           </Text>
         </View>
         <Text style={[styles.title, { color: colors.text }]}>{task.title}</Text>
@@ -275,13 +289,13 @@ export default function TaskDetailScreen() {
           ]}
         >
           <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-            FOCUSED
+            {t('task.focused')}
           </Text>
           <Text style={[styles.metricValue, { color: colors.text }]}>
             {formatDurationCompact(totalSeconds)}
           </Text>
           <Text style={[styles.metricMeta, { color: colors.textSecondary }]}>
-            {loops.length} {loops.length === 1 ? 'loop' : 'loops'}
+            {t('task.loopsCount', { count: loops.length })}
           </Text>
         </View>
         <View
@@ -291,7 +305,7 @@ export default function TaskDetailScreen() {
           ]}
         >
           <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>
-            CAPSULES
+            {t('task.capsules')}
           </Text>
           <Text style={[styles.metricValue, { color: colors.text }]}>
             {progress.completed}/{progress.total}
@@ -319,10 +333,10 @@ export default function TaskDetailScreen() {
         >
           <Text style={[styles.hintText, { color: colors.textSecondary }]}>
             {archived
-              ? 'This task is archived.'
+              ? t('task.hintArchived')
               : isSubtask
-                ? 'Reopen this task to start another loop.'
-                : 'This is a task container. Open a capsule to start a loop.'}
+                ? t('task.hintReopen')
+                : t('task.hintContainer')}
           </Text>
         </View>
       ) : null}
@@ -330,7 +344,7 @@ export default function TaskDetailScreen() {
       <View style={styles.actions}>
         {canStartLoop ? (
           <Button
-            label="Start a loop"
+            label={t('task.startLoop')}
             onPress={() =>
               router.push({
                 pathname: '/loop/start',
@@ -341,7 +355,7 @@ export default function TaskDetailScreen() {
           />
         ) : null}
         <Button
-          label={completed ? 'Reopen' : 'Complete'}
+          label={completed ? t('task.reopen') : t('task.complete')}
           variant="secondary"
           onPress={() => {
             void handleToggleComplete();
@@ -352,13 +366,13 @@ export default function TaskDetailScreen() {
       </View>
       <View style={styles.actions}>
         <Button
-          label="Add capsule"
+          label={t('task.addCapsule')}
           variant="secondary"
           onPress={() => setAddSubtaskVisible(true)}
           style={styles.action}
         />
         <Button
-          label="Archive"
+          label={t('task.archive')}
           variant="ghost"
           onPress={() => setArchiveVisible(true)}
           style={styles.action}
@@ -366,10 +380,12 @@ export default function TaskDetailScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Capsules</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('task.capsulesSection')}
+        </Text>
         {subtreeRows.length === 0 ? (
           <Text style={[styles.muted, { color: colors.textSecondary }]}>
-            No capsules yet.
+            {t('task.noCapsules')}
           </Text>
         ) : (
           <View style={styles.subtasks}>
@@ -396,10 +412,10 @@ export default function TaskDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Open capsules
+              {t('task.openCapsules')}
             </Text>
             <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
-              {capsules.length} open
+              {t('common.openCount', { count: capsules.length })}
             </Text>
           </View>
           <View style={styles.capsuleWrap}>
@@ -407,7 +423,9 @@ export default function TaskDetailScreen() {
               <LoopItemCapsule
                 key={capsule.item.id}
                 text={capsule.item.text}
-                pressAccessibilityLabel={`Complete capsule ${capsule.item.text}`}
+                pressAccessibilityLabel={t('tasks.completeCapsuleA11y', {
+                  text: capsule.item.text,
+                })}
                 onPress={() => {
                   void handleCompleteCapsule(capsule);
                 }}
@@ -416,17 +434,19 @@ export default function TaskDetailScreen() {
           </View>
           <Text style={[styles.muted, { color: colors.textSecondary }]}>
             {isSubtask
-              ? 'Open loop capsules from this task and its child capsules. Tap to complete.'
-              : 'Open loop capsules from this container’s child capsules. Tap to complete.'}
+              ? t('task.openCapsulesHintSubtask')
+              : t('task.openCapsulesHintContainer')}
           </Text>
         </View>
       ) : null}
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Loop history</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('task.loopHistory')}
+        </Text>
         {loops.length === 0 ? (
           <Text style={[styles.muted, { color: colors.textSecondary }]}>
-            No loops have been attached to this task yet.
+            {t('task.noLoops')}
           </Text>
         ) : (
           <View style={styles.loopList}>
@@ -445,7 +465,7 @@ export default function TaskDetailScreen() {
 
       <TaskFormModal
         visible={editVisible}
-        heading="Edit task"
+        heading={t('task.editTask')}
         initialTitle={task.title}
         initialDescription={task.description ?? ''}
         busy={saving}
@@ -457,7 +477,7 @@ export default function TaskDetailScreen() {
 
       <TaskFormModal
         visible={addSubtaskVisible}
-        heading="New capsule"
+        heading={t('task.newCapsule')}
         parentTitle={task.title}
         busy={saving}
         onSave={(values) => {
@@ -468,9 +488,9 @@ export default function TaskDetailScreen() {
 
       <ConfirmDialog
         visible={archiveVisible}
-        title="Archive task?"
-        message="The task and its capsules will be hidden from the task pool. Existing loops stay in history."
-        confirmLabel="Archive"
+        title={t('task.archiveTitle')}
+        message={t('task.archiveMessage')}
+        confirmLabel={t('task.archive')}
         destructive
         onConfirm={() => {
           void handleArchive();

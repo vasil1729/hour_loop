@@ -30,6 +30,8 @@ import {
   type LoopWithMetrics,
 } from '../../src/features/loops/loopMetrics';
 import { loopService } from '../../src/features/loops/loopService';
+import { useTranslation } from '../../src/i18n/I18nProvider';
+import { localizeError } from '../../src/i18n';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import { useActiveLoop } from '../../src/hooks/useActiveLoop';
 import { useIntentions } from '../../src/hooks/useIntentions';
@@ -40,6 +42,7 @@ export default function TodayScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { activeLoop, elapsedSeconds, refresh } = useActiveLoop();
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
   const { daily } = useIntentions();
@@ -86,8 +89,10 @@ export default function TodayScreen() {
       await refresh(db);
     } catch (error) {
       Alert.alert(
-        activeLoop.status === 'ACTIVE' ? 'Could not pause loop' : 'Could not resume loop',
-        error instanceof Error ? error.message : 'Please try again.'
+        activeLoop.status === 'ACTIVE'
+          ? t('today.couldNotPause')
+          : t('today.couldNotResume'),
+        localizeError(error)
       );
     } finally {
       setLoopActionBusy(false);
@@ -97,7 +102,9 @@ export default function TodayScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>TODAY</Text>
+        <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
+          {t('today.eyebrow')}
+        </Text>
         <Text style={[styles.title, { color: colors.text }]}>
           {formatDayLabel(todayKey)}
         </Text>
@@ -105,7 +112,7 @@ export default function TodayScreen() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Open daily overview"
+        accessibilityLabel={t('today.dailyOverview')}
         onPress={() =>
           router.push({
             pathname: '/day/[date]',
@@ -123,20 +130,24 @@ export default function TodayScreen() {
       >
         <View style={styles.dayCardHeader}>
           <Text style={[styles.dayCardLabel, { color: colors.textSecondary }]}>
-            DAILY
+            {t('today.daily')}
           </Text>
           <Text style={[styles.dayCardAction, { color: colors.accent }]}>
-            Open →
+            {t('today.openAction')}
           </Text>
         </View>
         <Text style={[styles.dayCardTitle, { color: colors.text }]}>
-          Daily overview
+          {t('today.dailyOverview')}
         </Text>
         <Text style={[styles.dayCardMeta, { color: colors.textSecondary }]}>
-          {formatDurationCompact(daily?.actualSeconds ?? 0)} focused today
+          {t('today.focusedToday', {
+            duration: formatDurationCompact(daily?.actualSeconds ?? 0),
+          })}
           {daily?.intention
-            ? ` · ${daily.progress.percent}% of target`
-            : ' · set targets in Settings'}
+            ? t('today.percentOfTarget', {
+                percent: daily.progress.percent,
+              })
+            : t('today.setTargets')}
         </Text>
         {daily?.intention ? (
           <View style={[styles.dayTrack, { backgroundColor: colors.surfaceAlt }]}>
@@ -164,9 +175,10 @@ export default function TodayScreen() {
         >
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Return to loop H${activeLoop.sequence_number}, ${Math.round(
-              activeProgress * 100
-            )}% of target complete`}
+            accessibilityLabel={t('today.returnA11y', {
+              sequence: activeLoop.sequence_number,
+              percent: Math.round(activeProgress * 100),
+            })}
             onPress={() => router.push('/loop/active')}
             style={({ pressed }) => [
               styles.activeCardBody,
@@ -179,10 +191,10 @@ export default function TodayScreen() {
                 <Text style={[styles.activeLabel, { color: colors.accent }]}>
                   H{activeLoop.sequence_number} ·{' '}
                   {activeTargetReached
-                    ? 'TARGET REACHED'
+                    ? t('today.statusTargetReached')
                     : activeLoop.status === 'PAUSED'
-                      ? 'PAUSED'
-                      : 'IN PROGRESS'}
+                      ? t('today.statusPaused')
+                      : t('today.statusInProgress')}
                 </Text>
               </View>
               <Text style={[styles.activeElapsed, { color: colors.text }]}>
@@ -217,20 +229,20 @@ export default function TodayScreen() {
               numberOfLines={2}
               style={[styles.activeFocus, { color: colors.text }]}
             >
-              {activeLoop.focus || 'Continue your focus loop'}
+              {activeLoop.focus || t('today.continueFocus')}
             </Text>
           </Pressable>
 
           <View style={styles.activeFooter}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Open active loop"
+              accessibilityLabel={t('today.returnToLoop')}
               onPress={() => router.push('/loop/active')}
               hitSlop={8}
               style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
             >
               <Text style={[styles.activeCta, { color: colors.accent }]}>
-                Return to loop →
+                {t('today.returnToLoop')}
               </Text>
             </Pressable>
 
@@ -238,7 +250,9 @@ export default function TodayScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={
-                  activeLoop.status === 'ACTIVE' ? 'Pause loop' : 'Resume loop'
+                  activeLoop.status === 'ACTIVE'
+                    ? t('today.pauseLoop')
+                    : t('today.resumeLoop')
                 }
                 accessibilityState={{
                   busy: loopActionBusy,
@@ -278,13 +292,13 @@ export default function TodayScreen() {
           ]}
         >
           <Text style={[styles.startTitle, { color: colors.text }]}>
-            Ready for an hour?
+            {t('today.readyTitle')}
           </Text>
           <Text style={[styles.startBody, { color: colors.textSecondary }]}>
-            Start a loop, protect your attention, and close it with a short journal.
+            {t('today.readyBody')}
           </Text>
           <Button
-            label="Start a loop"
+            label={t('today.startLoop')}
             onPress={() => router.push('/loop/start')}
             style={styles.startButton}
           />
@@ -294,16 +308,16 @@ export default function TodayScreen() {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Recent loops
+            {t('today.recentLoops')}
           </Text>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Open history"
+            accessibilityLabel={t('today.history')}
             onPress={() => router.push('/(tabs)/history')}
             hitSlop={10}
           >
             <Text style={[styles.sectionAction, { color: colors.accent }]}>
-              History
+              {t('today.history')}
             </Text>
           </Pressable>
         </View>
@@ -311,8 +325,8 @@ export default function TodayScreen() {
         {recentLoops.length === 0 ? (
           <View style={styles.emptyWrap}>
             <EmptyState
-              title="No closed loops yet"
-              message="Your first completed loop will show up here."
+              title={t('today.noClosedTitle')}
+              message={t('today.noClosedMessage')}
             />
           </View>
         ) : (
@@ -488,7 +502,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     fontSize: 17,
     fontWeight: '700',
-    textAlign: 'left',
   },
   sectionAction: {
     flexShrink: 0,

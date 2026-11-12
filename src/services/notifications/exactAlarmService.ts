@@ -7,6 +7,7 @@ import {
   getSetting,
   setSetting,
 } from '../../database/repositories/settingsRepository';
+import { t } from '../../i18n';
 
 const EXACT_ALARM_PROMPTED_KEY = 'exact_alarm_prompted';
 const ACTION_REQUEST_SCHEDULE_EXACT_ALARM =
@@ -54,12 +55,12 @@ export async function promptForExactAlarmAccess(
   await setSetting(db, EXACT_ALARM_PROMPTED_KEY, 'true');
 
   Alert.alert(
-    'Keep target alerts on time',
-    'Android may delay loop alerts when "Alarms & reminders" is off. Allow it for Hour Loop so the alert arrives exactly on time.',
+    t('notifications.exactAlarmTitle'),
+    t('notifications.exactAlarmBody'),
     [
-      { text: 'Not now', style: 'cancel' },
+      { text: t('notifications.notNow'), style: 'cancel' },
       {
-        text: 'Open settings',
+        text: t('notifications.openSettings'),
         onPress: () => {
           void openExactAlarmSettings();
         },

@@ -25,6 +25,8 @@ import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import type { LoopItem } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
 import { goToToday } from '../../src/services/navigation/navigationService';
 import {
   cancelLoopNotification,
@@ -38,6 +40,7 @@ export default function ActiveLoopScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { activeLoop, elapsedSeconds, loading, refresh, intervals } = useActiveLoop();
   const [busy, setBusy] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
@@ -97,8 +100,8 @@ export default function ActiveLoopScreen() {
         )
       );
       Alert.alert(
-        'Could not update capsule',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.couldNotUpdateCapsule'),
+        localizeError(error)
       );
     }
   };
@@ -115,8 +118,8 @@ export default function ActiveLoopScreen() {
     } catch (error) {
       setItems(previous);
       Alert.alert(
-        'Could not set the current capsule',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.couldNotSetCurrent'),
+        localizeError(error)
       );
     }
   };
@@ -132,8 +135,8 @@ export default function ActiveLoopScreen() {
       setNewCapsuleText('');
     } catch (error) {
       Alert.alert(
-        'Could not update capsule',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.couldNotUpdateCapsule'),
+        localizeError(error)
       );
     } finally {
       setAddingCapsule(false);
@@ -150,8 +153,8 @@ export default function ActiveLoopScreen() {
     } catch (error) {
       setItems(previous);
       Alert.alert(
-        'Could not update capsule',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.couldNotUpdateCapsule'),
+        localizeError(error)
       );
     } finally {
       setRemovingCapsuleId(null);
@@ -168,8 +171,8 @@ export default function ActiveLoopScreen() {
         await refresh(db);
       } catch (error) {
         Alert.alert(
-          'Could not stop the loop',
-          error instanceof Error ? error.message : 'Please try again.'
+          t('loopActive.couldNotStop'),
+          localizeError(error)
         );
         return;
       } finally {
@@ -191,8 +194,8 @@ export default function ActiveLoopScreen() {
       await refresh(db);
     } catch (error) {
       Alert.alert(
-        'Loop update failed',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.updateFailed'),
+        localizeError(error)
       );
     } finally {
       setBusy(false);
@@ -210,8 +213,8 @@ export default function ActiveLoopScreen() {
       goToToday(router);
     } catch (error) {
       Alert.alert(
-        'Could not delete loop',
-        error instanceof Error ? error.message : 'Please try again.'
+        t('loopActive.couldNotDelete'),
+        localizeError(error)
       );
     } finally {
       setDeleting(false);
@@ -219,18 +222,18 @@ export default function ActiveLoopScreen() {
   };
 
   if (loading) {
-    return <LoadingScreen message="Recovering your loop…" />;
+    return <LoadingScreen message={t('loopActive.recovering')} />;
   }
 
   if (!activeLoop) {
     return (
       <Screen>
         <EmptyState
-          title="No loop is running"
-          message="Start a loop when you are ready to focus."
+          title={t('loopActive.noLoopTitle')}
+          message={t('loopActive.noLoopMessage')}
           action={
             <Button
-              label="Start a loop"
+              label={t('loopActive.start')}
               onPress={() => router.replace('/loop/start')}
             />
           }
@@ -274,7 +277,11 @@ export default function ActiveLoopScreen() {
               },
             ]}
           >
-            {reachedTarget ? 'TARGET REACHED' : isPaused ? 'PAUSED' : 'FOCUSING'}
+            {reachedTarget
+              ? t('loopActive.statusTargetReached')
+              : isPaused
+                ? t('loopActive.statusPaused')
+                : t('loopActive.statusFocusing')}
           </Text>
         </View>
       </View>
@@ -292,7 +299,9 @@ export default function ActiveLoopScreen() {
             { backgroundColor: colors.accentSoft, borderColor: colors.accent },
           ]}
         >
-          <Text style={[styles.nowLabel, { color: colors.accent }]}>NOW</Text>
+          <Text style={[styles.nowLabel, { color: colors.accent }]}>
+            {t('loopActive.now')}
+          </Text>
           <Text style={[styles.nowText, { color: colors.text }]}>
             {currentItem.text}
           </Text>
@@ -302,14 +311,17 @@ export default function ActiveLoopScreen() {
       <View style={styles.itemsSection}>
         <View style={styles.itemsHeader}>
           <Text style={[styles.itemsTitle, { color: colors.textSecondary }]}>
-            CAPSULES
+            {t('loopActive.capsules')}
           </Text>
           <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
-            {items.filter((item) => item.done).length}/{items.length} done
+            {t('common.doneCount', {
+              done: items.filter((item) => item.done).length,
+              total: items.length,
+            })}
           </Text>
         </View>
         <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
-          Tap to focus · swipe right to complete
+          {t('loopActive.hint')}
         </Text>
         {items.length > 0 ? (
           <View style={styles.capsuleWrap}>
@@ -340,14 +352,14 @@ export default function ActiveLoopScreen() {
           </View>
         ) : (
           <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
-            No capsules yet.
+            {t('task.noCapsules')}
           </Text>
         )}
         <View style={styles.addRow}>
           <TextInput
             value={newCapsuleText}
             onChangeText={setNewCapsuleText}
-            placeholder="Add capsule"
+            placeholder={t('task.addCapsule')}
             placeholderTextColor={colors.textSecondary}
             editable={!addingCapsule}
             returnKeyType="done"
@@ -366,7 +378,7 @@ export default function ActiveLoopScreen() {
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Add capsule"
+            accessibilityLabel={t('task.addCapsule')}
             disabled={!newCapsuleText.trim() || addingCapsule}
             onPress={() => {
               void addCapsule();
@@ -393,7 +405,7 @@ export default function ActiveLoopScreen() {
           ]}
         >
           <Text style={[styles.focusLabel, { color: colors.textSecondary }]}>
-            FOCUS
+            {t('loopActive.focus')}
           </Text>
           <Text style={[styles.focusText, { color: colors.text }]}>
             {activeLoop.focus}
@@ -404,7 +416,7 @@ export default function ActiveLoopScreen() {
       {activeLoop.carry_in ? (
         <View style={styles.carryBlock}>
           <Text style={[styles.carryLabel, { color: colors.textSecondary }]}>
-            CARRY IN
+            {t('loopActive.carryIn')}
           </Text>
           <Text style={[styles.carryText, { color: colors.textSecondary }]}>
             {activeLoop.carry_in}
@@ -445,7 +457,7 @@ export default function ActiveLoopScreen() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Delete loop"
+        accessibilityLabel={t('loopActive.delete')}
         disabled={deleting}
         onPress={() => setDeleteVisible(true)}
         style={({ pressed }) => [
@@ -454,17 +466,19 @@ export default function ActiveLoopScreen() {
         ]}
       >
         <Text style={[styles.deleteText, { color: colors.danger }]}>
-          Delete loop
+          {t('loopActive.delete')}
         </Text>
       </Pressable>
 
       <ConfirmDialog
         visible={deleteVisible}
-        title={`Delete H${activeLoop.sequence_number}?`}
-        message={`This permanently removes this loop and ${formatElapsed(
-          elapsedSeconds
-        )} of recorded focus time. This cannot be undone.`}
-        confirmLabel={deleting ? 'Deleting…' : 'Delete'}
+        title={t('loopActive.deleteTitle', {
+          sequence: activeLoop.sequence_number,
+        })}
+        message={t('loopActive.deleteMessage', {
+          duration: formatElapsed(elapsedSeconds),
+        })}
+        confirmLabel={deleting ? t('common.deleting') : t('common.delete')}
         destructive
         onConfirm={() => {
           void handleDelete();

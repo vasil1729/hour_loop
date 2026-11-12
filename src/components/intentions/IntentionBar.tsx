@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import type { IntentionSummary } from '../../features/intentions/intentionsService';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
@@ -14,12 +15,13 @@ type IntentionBarProps = {
 
 export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const hasTarget = summary.targetSeconds > 0;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${label} intention`}
+      accessibilityLabel={t('intentionBar.a11y', { label })}
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
@@ -33,7 +35,7 @@ export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
       <View style={styles.topRow}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
         <Text style={[styles.action, { color: colors.accent }]}>
-          {hasTarget ? 'Edit' : 'Set'}
+          {hasTarget ? t('intentionBar.edit') : t('intentionBar.set')}
         </Text>
       </View>
 
@@ -69,15 +71,19 @@ export function IntentionBar({ label, summary, onPress }: IntentionBarProps) {
             />
           </View>
           <Text style={[styles.meta, { color: colors.textSecondary }]}>
-            {summary.isDefault ? 'Default target · ' : ''}
+            {summary.isDefault ? t('intentionBar.defaultPrefix') : ''}
             {summary.progress.reached
-              ? 'Intention reached'
-              : `${formatIntentionDuration(summary.progress.remainingSeconds)} to go`}
+              ? t('intentionBar.reached')
+              : t('intentionBar.toGo', {
+                  duration: formatIntentionDuration(
+                    summary.progress.remainingSeconds
+                  ),
+                })}
           </Text>
         </>
       ) : (
         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          Set a target for this {label.toLowerCase()}.
+          {t('intentionBar.empty', { period: label.toLowerCase() })}
         </Text>
       )}
     </Pressable>

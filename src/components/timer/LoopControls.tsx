@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { spacing } from '../../theme/tokens';
 import { Button } from '../common/Button';
@@ -25,13 +26,14 @@ export function LoopControls({
   onMinimize,
 }: LoopControlsProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         {!targetReached && status === 'ACTIVE' ? (
           <Button
-            label="Pause"
+            label={t('loopControls.pause')}
             variant="secondary"
             onPress={onPause}
             disabled={busy}
@@ -40,14 +42,16 @@ export function LoopControls({
         ) : null}
         {!targetReached && status === 'PAUSED' ? (
           <Button
-            label="Resume"
+            label={t('loopControls.resume')}
             onPress={onResume}
             disabled={busy}
             style={styles.primaryAction}
           />
         ) : null}
         <Button
-          label={targetReached ? 'Close loop' : 'Stop'}
+          label={
+            targetReached ? t('loopControls.close') : t('loopControls.stop')
+          }
           variant="danger"
           onPress={onStop}
           disabled={busy}
@@ -55,7 +59,11 @@ export function LoopControls({
         />
       </View>
       <View style={[styles.divider, { backgroundColor: colors.border }]} />
-      <Button label="Back to Today" variant="ghost" onPress={onMinimize} />
+      <Button
+        label={t('loopControls.backToToday')}
+        variant="ghost"
+        onPress={onMinimize}
+      />
     </View>
   );
 }

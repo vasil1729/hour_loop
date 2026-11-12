@@ -1,5 +1,26 @@
 import type { DayAllocation, LoopInterval, MonthAllocation } from '../types';
 import { getZonedParts, toLocalDateKey, zonedTimeToUtc } from '../shared/dateUtils';
+import { getActiveLanguage } from '../../i18n/localeState';
+
+function shortUnit(unit: 'h' | 'm' | 's'): string {
+  const language = getActiveLanguage();
+  if (language === 'ru') {
+    return unit === 'h' ? ' ч' : unit === 'm' ? ' м' : ' с';
+  }
+  if (language === 'ar') {
+    return unit === 'h' ? ' س' : unit === 'm' ? ' د' : ' ث';
+  }
+  if (language === 'zh') {
+    return unit === 'h' ? '小时' : unit === 'm' ? '分' : '秒';
+  }
+  if (language === 'tr') {
+    return unit === 'h' ? ' sa' : unit === 'm' ? ' dk' : ' sn';
+  }
+  if (language === 'ml') {
+    return unit === 'h' ? ' മണി.' : unit === 'm' ? ' മിനി.' : ' സെക.';
+  }
+  return unit;
+}
 
 export type IntervalRecord = Pick<
   LoopInterval,
@@ -106,10 +127,12 @@ export function formatDurationCompact(totalSeconds: number): string {
   const safe = Math.max(0, Math.floor(totalSeconds));
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
-  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}m`;
-  if (hours > 0) return `${hours}h`;
-  if (minutes > 0) return `${minutes}m`;
-  return `${safe}s`;
+  if (hours > 0 && minutes > 0) {
+    return `${hours}${shortUnit('h')} ${minutes}${shortUnit('m')}`;
+  }
+  if (hours > 0) return `${hours}${shortUnit('h')}`;
+  if (minutes > 0) return `${minutes}${shortUnit('m')}`;
+  return `${safe}${shortUnit('s')}`;
 }
 
 /**
@@ -122,9 +145,13 @@ export function formatDurationWithSeconds(totalSeconds: number): string {
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
   const seconds = safe % 60;
-  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  if (hours > 0) {
+    return `${hours}${shortUnit('h')} ${minutes}${shortUnit('m')} ${seconds}${shortUnit('s')}`;
+  }
+  if (minutes > 0) {
+    return `${minutes}${shortUnit('m')} ${seconds}${shortUnit('s')}`;
+  }
+  return `${seconds}${shortUnit('s')}`;
 }
 
 /**

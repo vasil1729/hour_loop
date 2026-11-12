@@ -22,6 +22,7 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 - **History** — day, week, and month views with a date picker, weekly bars, a monthly heatmap, and midnight-crossing allocation.
 - **Notifications** — configurable early warnings and target-reached reminders, reconciled on foreground.
 - **Backups** — export and restore all local data as a portable JSON file.
+- **Languages** — English, Russian, Arabic, Chinese, Turkish, and Malayalam, following the device language or chosen manually in Settings.
 - **Themes** — system, light, and dark.
 
 ## Tech stack

@@ -16,6 +16,11 @@ import {
   getDefaultIntentionSeconds,
   setDefaultIntentionSeconds,
 } from '../features/intentions/intentionDefaults';
+import {
+  SUPPORTED_LANGUAGES,
+  type Language,
+  type LanguagePreference,
+} from '../i18n/localeState';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 
@@ -25,6 +30,7 @@ type SettingsStore = {
   defaultMonthlyIntentionSeconds: number;
   earlyWarningMinutes: number;
   themePreference: ThemePreference;
+  languagePreference: LanguagePreference;
   notificationsEnabled: boolean;
   loaded: boolean;
   load: (db: SQLiteDatabase) => Promise<void>;
@@ -33,11 +39,22 @@ type SettingsStore = {
   setDefaultMonthlyIntention: (db: SQLiteDatabase, seconds: number) => Promise<void>;
   setEarlyWarningMinutes: (db: SQLiteDatabase, minutes: number) => Promise<void>;
   setThemePreference: (db: SQLiteDatabase, preference: ThemePreference) => Promise<void>;
+  setLanguagePreference: (
+    db: SQLiteDatabase,
+    preference: LanguagePreference
+  ) => Promise<void>;
   setNotificationsEnabled: (db: SQLiteDatabase, enabled: boolean) => Promise<void>;
 };
 
 function parseTheme(value: string | null): ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
+}
+
+function parseLanguage(value: string | null): LanguagePreference {
+  if (value === 'system') return 'system';
+  return SUPPORTED_LANGUAGES.includes(value as Language)
+    ? (value as LanguagePreference)
+    : 'system';
 }
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
@@ -46,6 +63,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   defaultMonthlyIntentionSeconds: DEFAULT_MONTHLY_INTENTION_SECONDS,
   earlyWarningMinutes: DEFAULT_EARLY_WARNING_MINUTES,
   themePreference: 'system',
+  languagePreference: 'system',
   notificationsEnabled: true,
   loaded: false,
 
@@ -56,6 +74,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       monthlyIntention,
       earlyWarning,
       theme,
+      language,
       notifications,
     ] = await Promise.all([
       getSetting(db, 'default_duration_seconds'),
@@ -63,6 +82,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       getDefaultIntentionSeconds(db, 'monthly'),
       getSetting(db, EARLY_WARNING_SETTING_KEY),
       getSetting(db, 'theme'),
+      getSetting(db, 'language'),
       getSetting(db, 'notifications_enabled'),
     ]);
     const parsedDuration = Number(duration);
@@ -75,6 +95,7 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       defaultMonthlyIntentionSeconds: monthlyIntention,
       earlyWarningMinutes: parseEarlyWarningMinutes(earlyWarning),
       themePreference: parseTheme(theme),
+      languagePreference: parseLanguage(language),
       notificationsEnabled: notifications !== 'false',
       loaded: true,
     });
@@ -104,6 +125,11 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   setThemePreference: async (db, preference) => {
     await setSetting(db, 'theme', preference);
     set({ themePreference: preference });
+  },
+
+  setLanguagePreference: async (db, preference) => {
+    await setSetting(db, 'language', preference);
+    set({ languagePreference: preference });
   },
 
   setNotificationsEnabled: async (db, enabled) => {

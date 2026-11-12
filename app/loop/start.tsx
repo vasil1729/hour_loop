@@ -26,6 +26,8 @@ import { isLoopTarget } from '../../src/domain/tasks/taskDomain';
 import type { Loop, LoopItem, Task } from '../../src/domain/types';
 import { listLooseCapsules } from '../../src/features/capsules/capsuleService';
 import { loopService } from '../../src/features/loops/loopService';
+import { localizeError } from '../../src/i18n';
+import { useTranslation } from '../../src/i18n/I18nProvider';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
 import {
   getSuggestedCarryIn,
@@ -53,6 +55,7 @@ export default function StartLoopScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ taskId?: string }>();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const refreshLoop = useLoopStore((state) => state.refresh);
   const defaultDurationSeconds = useSettingsStore(
     (state) => state.defaultDurationSeconds
@@ -150,7 +153,7 @@ export default function StartLoopScreen() {
     ? selectedTaskParent
       ? `${selectedTaskParent.title} / ${selectedTask.title}`
       : selectedTask.title
-    : 'No task capsule (loose loop capsules)';
+    : t('loopStart.noTaskCapsule');
   const availableLooseCapsules = looseCapsules.filter(
     (capsule) => capsule.loop.id !== carrySource?.loop.id
   );
@@ -230,10 +233,7 @@ export default function StartLoopScreen() {
       await refreshLoop(db);
       router.replace('/loop/active');
     } catch (error) {
-      Alert.alert(
-        'Could not start loop',
-        error instanceof Error ? error.message : 'Please try again.'
-      );
+      Alert.alert(t('loopStart.couldNotStart'), localizeError(error));
     } finally {
       setBusy(false);
     }
@@ -244,18 +244,24 @@ export default function StartLoopScreen() {
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Cancel"
+          accessibilityLabel={t('common.cancel')}
           onPress={() => router.back()}
           hitSlop={12}
         >
-          <Text style={[styles.cancel, { color: colors.textSecondary }]}>Cancel</Text>
+          <Text style={[styles.cancel, { color: colors.textSecondary }]}>
+            {t('common.cancel')}
+          </Text>
         </Pressable>
-        <Text style={[styles.title, { color: colors.text }]}>Start a loop</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('loopStart.title')}
+        </Text>
         <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>CAPSULES</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          {t('loopStart.capsules')}
+        </Text>
         {capsuleItems.length > 0 ? (
           <View style={styles.capsuleWrap}>
             {capsuleItems.map((item) => (
@@ -269,14 +275,14 @@ export default function StartLoopScreen() {
           </View>
         ) : (
           <Text style={[styles.helper, { color: colors.textSecondary }]}>
-            Break this loop into a few concrete capsules.
+            {t('loopStart.capsulesHelper')}
           </Text>
         )}
         <View style={styles.addRow}>
           <TextInput
             value={newCapsuleText}
             onChangeText={setNewCapsuleText}
-            placeholder="Add a capsule…"
+            placeholder={t('loopStart.addPlaceholder')}
             placeholderTextColor={colors.textSecondary}
             style={[
               styles.addInput,
@@ -293,7 +299,7 @@ export default function StartLoopScreen() {
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Add capsule"
+            accessibilityLabel={t('loopStart.addA11y')}
             onPress={addTypedCapsule}
             disabled={!newCapsuleText.trim()}
             style={[
@@ -312,12 +318,14 @@ export default function StartLoopScreen() {
       {carrySource && carrySource.items.length > 0 ? (
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
-            CARRY IN FROM H{carrySource.loop.sequence_number}
+            {t('loopStart.carryInFrom', {
+              sequence: carrySource.loop.sequence_number,
+            })}
           </Text>
           <Text style={[styles.helper, { color: colors.textSecondary }]}>
             {carrySource.items.every((item) => item.done)
-              ? 'Everything from the previous loop is done.'
-              : 'Tap an unfinished item to carry it into this loop.'}
+              ? t('loopStart.carryAllDone')
+              : t('loopStart.carryHint')}
           </Text>
           <View style={styles.capsuleWrap}>
             {carrySource.items.map((item) => (
@@ -336,11 +344,11 @@ export default function StartLoopScreen() {
 
       <View style={styles.field}>
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          TASK CAPSULE (OPTIONAL)
+          {t('loopStart.taskCapsule')}
         </Text>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Choose a task capsule for this loop"
+          accessibilityLabel={t('loopStart.chooseTaskA11y')}
           onPress={() => setTaskPickerVisible(true)}
           style={[
             styles.taskSelector,
@@ -357,25 +365,27 @@ export default function StartLoopScreen() {
             {selectedTaskLabel}
           </Text>
           <Text style={[styles.taskSelectorAction, { color: colors.accent }]}>
-            {selectedTask ? 'Change' : 'Choose'}
+            {selectedTask ? t('common.change') : t('common.choose')}
           </Text>
         </Pressable>
         <Text style={[styles.helper, { color: colors.textSecondary }]}>
           {selectedTask
-            ? 'Loop capsules are grouped under this task capsule.'
-            : 'No task capsule — new loop capsules stay loose and appear in Tasks.'}
+            ? t('loopStart.taskCapsuleHint')
+            : t('loopStart.noTaskCapsuleHint')}
         </Text>
         {suggestedCarryIn &&
         !capsuleItems.some((item) => item.text === suggestedCarryIn) ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Add suggested roll forward"
+            accessibilityLabel={t('loopStart.addSuggested')}
             onPress={() => {
               if (suggestedCarryIn) appendCapsule(suggestedCarryIn);
             }}
           >
             <Text style={[styles.suggestion, { color: colors.accent }]}>
-              Add previous roll forward: {suggestedCarryIn}
+              {t('loopStart.previousRollForward', {
+                text: suggestedCarryIn,
+              })}
             </Text>
           </Pressable>
         ) : null}
@@ -384,10 +394,10 @@ export default function StartLoopScreen() {
       {availableLooseCapsules.length > 0 ? (
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
-            LOOSE CAPSULES
+            {t('loopStart.looseCapsules')}
           </Text>
           <Text style={[styles.helper, { color: colors.textSecondary }]}>
-            From loops without a task capsule. Tap to bring one into this loop.
+            {t('loopStart.looseHint')}
           </Text>
           <View style={styles.capsuleWrap}>
             {availableLooseCapsules.map((capsule) => (
@@ -403,7 +413,9 @@ export default function StartLoopScreen() {
       ) : null}
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>TARGET</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          {t('loopStart.target')}
+        </Text>
         <View style={styles.chips}>
           {DURATION_PRESETS_MINUTES.map((minutes) => {
             const seconds = minutesToSeconds(minutes);
@@ -431,7 +443,8 @@ export default function StartLoopScreen() {
                     { color: selected ? '#FFFFFF' : colors.text },
                   ]}
                 >
-                  {minutes}m
+                  {minutes}
+                  {t('duration.minuteShort')}
                 </Text>
               </Pressable>
             );
@@ -448,14 +461,14 @@ export default function StartLoopScreen() {
             <TextInput
               value={customMinutes}
               onChangeText={handleCustomMinutesChange}
-              placeholder="Custom"
+              placeholder={t('loopStart.custom')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               style={[styles.customInput, { color: colors.text }]}
               maxLength={4}
             />
             <Text style={[styles.customSuffix, { color: colors.textSecondary }]}>
-              min
+              {t('loopStart.min')}
             </Text>
           </View>
         </View>
@@ -463,10 +476,12 @@ export default function StartLoopScreen() {
 
       <View style={styles.summary}>
         <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>
-          This loop will run for
+          {t('loopStart.willRun')}
         </Text>
         <Text style={[styles.summaryValue, { color: colors.text }]}>
-          {secondsToMinutes(durationSeconds)} minutes
+          {t('loopStart.minutes', {
+            count: secondsToMinutes(durationSeconds),
+          })}
         </Text>
       </View>
 
@@ -482,7 +497,7 @@ export default function StartLoopScreen() {
       />
 
       <Button
-        label="Start loop"
+        label={t('loopStart.start')}
         onPress={() => {
           void handleStart();
         }}
@@ -594,7 +609,7 @@ const styles = StyleSheet.create({
   customSuffix: {
     fontSize: 12,
     lineHeight: 16,
-    marginLeft: spacing.xs,
+    marginStart: spacing.xs,
     alignSelf: 'center',
   },
   taskSelector: {

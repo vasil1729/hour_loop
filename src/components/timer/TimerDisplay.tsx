@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { formatElapsed } from '../../domain/timer/timerEngine';
+import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { fontSize, spacing } from '../../theme/tokens';
 
@@ -17,13 +18,16 @@ export function TimerDisplay({
   paused = false,
 }: TimerDisplayProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <Text
-        accessibilityLabel={`${Math.floor(elapsedSeconds / 3600)} hours, ${Math.floor(
-          (elapsedSeconds % 3600) / 60
-        )} minutes, ${elapsedSeconds % 60} seconds elapsed`}
+        accessibilityLabel={t('timerDisplay.elapsedA11y', {
+          hours: Math.floor(elapsedSeconds / 3600),
+          minutes: Math.floor((elapsedSeconds % 3600) / 60),
+          seconds: elapsedSeconds % 60,
+        })}
         style={[
           styles.timer,
           { color: colors.text, opacity: paused ? 0.55 : 1 },
@@ -32,7 +36,7 @@ export function TimerDisplay({
         {formatElapsed(elapsedSeconds)}
       </Text>
       <Text style={[styles.target, { color: colors.textSecondary }]}>
-        target {formatElapsed(targetSeconds)}
+        {t('timerDisplay.target', { time: formatElapsed(targetSeconds) })}
       </Text>
     </View>
   );

@@ -13,6 +13,7 @@ import {
   remainingSeconds,
 } from '../../domain/timer/timerEngine';
 import { earlyWarningDelaySeconds } from '../../domain/timer/notificationTiming';
+import { t } from '../../i18n';
 import { getIntervalsForLoop } from '../../database/repositories/intervalsRepository';
 import {
   deleteSetting,
@@ -61,8 +62,8 @@ export async function setupNotifications(): Promise<void> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-      name: 'Loop alerts',
-      description: 'Alerts before and when a focus loop reaches its target.',
+      name: t('notifications.channelName'),
+      description: t('notifications.channelDescription'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#7B6EF6',
@@ -175,8 +176,10 @@ export async function syncLoopNotification(
 
   const targetIdentifier = await Notifications.scheduleNotificationAsync({
     content: {
-      title: `H${loop.sequence_number} target reached`,
-      body: "You've reached your target. Keep going or close the loop.",
+      title: t('notifications.targetTitle', {
+        sequence: loop.sequence_number,
+      }),
+      body: t('notifications.targetBody'),
       data: { loopId: loop.id, kind: 'target' },
       sound: 'default',
     },
@@ -198,8 +201,12 @@ export async function syncLoopNotification(
     try {
       const earlyIdentifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: `H${loop.sequence_number} ending soon`,
-          body: `Only ${formatDurationCompact(warningSeconds)} left. Wrap up or keep going.`,
+          title: t('notifications.earlyTitle', {
+            sequence: loop.sequence_number,
+          }),
+          body: t('notifications.earlyBody', {
+            duration: formatDurationCompact(warningSeconds),
+          }),
           data: { loopId: loop.id, kind: 'early' },
           sound: 'default',
         },
