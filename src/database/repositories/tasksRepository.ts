@@ -129,3 +129,17 @@ export async function updateTaskStatus(
 export async function deleteTask(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync('DELETE FROM tasks WHERE id = ?', [id]);
 }
+
+export async function getTasksByIds(
+  db: SQLiteDatabase,
+  ids: string[]
+): Promise<Task[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const placeholders = ids.map(() => '?').join(', ');
+  return db.getAllAsync<Task>(
+    `${SELECT_TASK} WHERE id IN (${placeholders})`,
+    ids
+  );
+}

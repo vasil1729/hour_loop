@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
@@ -32,6 +33,7 @@ import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import {
   getDayCapsuleData,
   type DayCapsuleData,
+  type DayCapsuleTotal,
 } from '../../src/features/days/dayCapsuleService';
 import { capsuleColor } from '../../src/theme/capsuleColors';
 import { useTheme } from '../../src/theme/ThemeContext';
@@ -51,6 +53,65 @@ function minutesOfDay(iso: string, timeZone: string): number {
   return parts.hour * 60 + parts.minute + parts.second / 60;
 }
 
+type TaskGroup = {
+  key: string;
+  title: string;
+  parentTitle: string | null;
+  totalSeconds: number;
+  items: DayCapsuleTotal[];
+  loose: boolean;
+};
+
+function buildTaskGroups(capsules: DayCapsuleTotal[]): TaskGroup[] {
+  const groups = new Map<string, TaskGroup>();
+  const loose: DayCapsuleTotal[] = [];
+
+  for (const capsule of capsules) {
+    if (!capsule.taskId) {
+      loose.push(capsule);
+      continue;
+    }
+    const existing = groups.get(capsule.taskId);
+    if (existing) {
+      existing.items.push(capsule);
+      existing.totalSeconds += capsule.seconds;
+    } else {
+      groups.set(capsule.taskId, {
+        key: capsule.taskId,
+        title: capsule.taskTitle ?? 'Task capsule',
+        parentTitle: capsule.parentTaskTitle,
+        totalSeconds: capsule.seconds,
+        items: [capsule],
+        loose: false,
+      });
+    }
+  }
+
+  const result = [...groups.values()].sort(
+    (a, b) =>
+      b.totalSeconds - a.totalSeconds || a.title.localeCompare(b.title)
+  );
+  for (const group of result) {
+    group.items.sort(
+      (a, b) => b.seconds - a.seconds || a.text.localeCompare(b.text)
+    );
+  }
+
+  if (loose.length > 0) {
+    loose.sort((a, b) => b.seconds - a.seconds || a.text.localeCompare(b.text));
+    result.push({
+      key: 'loose',
+      title: 'Loose capsules',
+      parentTitle: null,
+      totalSeconds: loose.reduce((sum, item) => sum + item.seconds, 0),
+      items: loose,
+      loose: true,
+    });
+  }
+
+  return result;
+}
+
 export default function DayViewScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
@@ -65,6 +126,7 @@ export default function DayViewScreen() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('timeline');
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   const [timelineTop, setTimelineTop] = useState(0);
 
@@ -96,8 +158,23 @@ export default function DayViewScreen() {
     return map;
   }, [data]);
 
+  const groups = useMemo(() => buildTaskGroups(data?.capsules ?? []), [data]);
+  const selectedCapsule =
+    data?.capsules.find((capsule) => capsule.itemId === selectedItemId) ?? null;
+  const selectedColor = selectedCapsule
+    ? colorByItem.get(selectedCapsule.itemId) ?? colors.accent
+    : colors.accent;
+
+  useEffect(() => {
+    setSelectedItemId(null);
+  }, [selectedDay]);
+
   const isToday = selectedDay >= today;
   const timeZone = getDeviceTimeZone();
+
+  const toggleSelectedItem = (itemId: string) => {
+    setSelectedItemId((current) => (current === itemId ? null : itemId));
+  };
 
   const jumpToTimeline = () => {
     const first = data?.segments[0];
@@ -208,49 +285,165 @@ export default function DayViewScreen() {
                 { backgroundColor: colors.surface, borderColor: colors.border },
               ]}
             >
-              <View style={styles.summaryHeader}>
+              <View style={styles.summaryStats}>
+                <View style={styles.summaryStat}>
+                  <Text style={[styles.summaryValue, { color: colors.text }]}>
+                    {formatDurationCompact(data.totalSeconds)}
+                  </Text>
+                  <Text
+                    style={[styles.summaryLabel, { color: colors.textSecondary }]}
+                  >
+                    FOCUSED
+                  </Text>
+                </View>
+                <View style={[styles.summaryDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.summaryStat}>
+                  <Text style={[styles.summaryValue, { color: colors.text }]}>
+                    {groups.filter((group) => !group.loose).length}
+                  </Text>
+                  <Text
+                    style={[styles.summaryLabel, { color: colors.textSecondary }]}
+                  >
+                    TASKS
+                  </Text>
+                </View>
+                <View style={[styles.summaryDivider, { backgroundColor: colors.border }]} />
+                <View style={styles.summaryStat}>
+                  <Text style={[styles.summaryValue, { color: colors.text }]}>
+                    {data.capsules.length}
+                  </Text>
+                  <Text
+                    style={[styles.summaryLabel, { color: colors.textSecondary }]}
+                  >
+                    CAPSULES
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.taskSection}>
+              <View style={styles.taskSectionHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                  Capsules
+                  Tasks
                 </Text>
                 <Text
-                  style={[styles.summaryTotal, { color: colors.textSecondary }]}
+                  style={[styles.sectionMeta, { color: colors.textSecondary }]}
                 >
-                  {data.capsules.length} ·{' '}
-                  {formatDurationCompact(data.totalSeconds)}
+                  {groups.filter((group) => !group.loose).length} task capsules
                 </Text>
               </View>
-              {data.capsules.map((capsule) => (
-                <View key={capsule.itemId} style={styles.capsuleRow}>
-                  <View
-                    style={[
-                      styles.colorDot,
-                      {
-                        backgroundColor:
-                          colorByItem.get(capsule.itemId) ?? colors.accent,
-                      },
-                    ]}
-                  />
-                  <View style={styles.capsuleBody}>
-                    <Text
-                      numberOfLines={1}
-                      style={[styles.capsuleText, { color: colors.text }]}
-                    >
-                      {capsule.text}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.capsuleMeta,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
-                      H{capsule.loopSequence}
-                    </Text>
+
+              {groups.map((group) => (
+                <View
+                  key={group.key}
+                  style={[
+                    styles.taskGroup,
+                    { backgroundColor: colors.surface, borderColor: colors.border },
+                  ]}
+                >
+                  <View style={styles.taskGroupHeader}>
+                    <View style={styles.taskGroupTitleBlock}>
+                      <View style={styles.groupDots}>
+                        {group.items.slice(0, 4).map((item) => (
+                          <View
+                            key={item.itemId}
+                            style={[
+                              styles.groupDot,
+                              {
+                                backgroundColor:
+                                  colorByItem.get(item.itemId) ?? colors.accent,
+                              },
+                            ]}
+                          />
+                        ))}
+                        {group.items.length > 4 ? (
+                          <Text
+                            style={[
+                              styles.groupMore,
+                              { color: colors.textSecondary },
+                            ]}
+                          >
+                            +{group.items.length - 4}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <Text
+                        numberOfLines={1}
+                        style={[styles.taskTitle, { color: colors.text }]}
+                      >
+                        {group.title}
+                      </Text>
+                      {group.parentTitle ? (
+                        <Text
+                          numberOfLines={1}
+                          style={[styles.taskParent, { color: colors.textSecondary }]}
+                        >
+                          {group.parentTitle}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <View style={styles.taskGroupTotalBlock}>
+                      <Text style={[styles.taskGroupTotal, { color: colors.text }]}>
+                        {formatDurationCompact(group.totalSeconds)}
+                      </Text>
+                      <Text
+                        style={[styles.taskGroupCount, { color: colors.textSecondary }]}
+                      >
+                        {group.items.length}{' '}
+                        {group.items.length === 1 ? 'capsule' : 'capsules'}
+                      </Text>
+                    </View>
                   </View>
-                  <Text
-                    style={[styles.capsuleDuration, { color: colors.text }]}
-                  >
-                    {formatDurationCompact(capsule.seconds)}
-                  </Text>
+
+                  {group.items.map((item) => {
+                    const selected = selectedItemId === item.itemId;
+                    const color = colorByItem.get(item.itemId) ?? colors.accent;
+                    return (
+                      <Pressable
+                        key={item.itemId}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={`${item.text}, ${formatDurationCompact(
+                          item.seconds
+                        )}${selected ? ', selected' : ''}`}
+                        onPress={() => toggleSelectedItem(item.itemId)}
+                        style={[
+                          styles.capsuleRow,
+                          {
+                            backgroundColor: selected
+                              ? colors.surfaceAlt
+                              : 'transparent',
+                            borderColor: selected ? color : 'transparent',
+                          },
+                        ]}
+                      >
+                        <View
+                          style={[styles.colorDot, { backgroundColor: color }]}
+                        />
+                        <View style={styles.capsuleBody}>
+                          <Text
+                            numberOfLines={1}
+                            style={[styles.capsuleText, { color: colors.text }]}
+                          >
+                            {item.text}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.capsuleMeta,
+                              { color: colors.textSecondary },
+                            ]}
+                          >
+                            H{item.loopSequence}
+                          </Text>
+                        </View>
+                        <Text
+                          style={[styles.capsuleDuration, { color: colors.text }]}
+                        >
+                          {formatDurationCompact(item.seconds)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
                 </View>
               ))}
             </View>
@@ -298,6 +491,50 @@ export default function DayViewScreen() {
               })}
             </View>
 
+            {selectedCapsule ? (
+              <View
+                style={[
+                  styles.selectionCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: selectedColor,
+                  },
+                ]}
+              >
+                <View
+                  style={[styles.colorDot, { backgroundColor: selectedColor }]}
+                />
+                <View style={styles.selectionBody}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.selectionTitle, { color: colors.text }]}
+                  >
+                    {selectedCapsule.text}
+                  </Text>
+                  <Text
+                    style={[styles.selectionMeta, { color: colors.textSecondary }]}
+                  >
+                    {selectedCapsule.taskTitle ?? 'Loose capsule'} ·{' '}
+                    {formatDurationCompact(selectedCapsule.seconds)}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear capsule highlight"
+                  onPress={() => setSelectedItemId(null)}
+                  hitSlop={8}
+                >
+                  <Text style={[styles.selectionClear, { color: colors.accent }]}>
+                    Clear
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <Text style={[styles.selectionHint, { color: colors.textSecondary }]}>
+                Tap a capsule or a wedge to highlight its time.
+              </Text>
+            )}
+
             {viewMode === 'timeline' ? (
               <>
                 <View style={styles.timelineActions}>
@@ -329,6 +566,8 @@ export default function DayViewScreen() {
                     colorByItem={colorByItem}
                     timeZone={timeZone}
                     isToday={isToday}
+                    selectedItemId={selectedItemId}
+                    onSelectItem={toggleSelectedItem}
                   />
                 </View>
               </>
@@ -338,6 +577,9 @@ export default function DayViewScreen() {
                 colorByItem={colorByItem}
                 timeZone={timeZone}
                 width={width}
+                isToday={isToday}
+                selectedItemId={selectedItemId}
+                onSelectItem={toggleSelectedItem}
               />
             )}
           </>
@@ -362,11 +604,15 @@ function TimelineView({
   colorByItem,
   timeZone,
   isToday,
+  selectedItemId,
+  onSelectItem,
 }: {
   data: DayCapsuleData;
   colorByItem: Map<string, string>;
   timeZone: string;
   isToday: boolean;
+  selectedItemId: string | null;
+  onSelectItem: (itemId: string) => void;
 }) {
   const { colors } = useTheme();
   const now = new Date();
@@ -421,15 +667,25 @@ function TimelineView({
             (entry) => entry.itemId === segment.itemId
           );
           const showText = height >= 28;
+          const selected = selectedItemId === segment.itemId;
+          const dimmed = selectedItemId !== null && !selected;
           return (
-            <View
+            <Pressable
               key={`${segment.itemId}-${segment.startAt}-${index}`}
+              accessibilityRole="button"
+              accessibilityLabel={`${capsule?.text ?? 'Capsule'}, ${formatDurationCompact(
+                segment.seconds
+              )}${selected ? ', highlighted' : ''}`}
+              onPress={() => onSelectItem(segment.itemId)}
               style={[
                 styles.timelineBlock,
                 {
                   top: (startMinutes / 60) * HOUR_HEIGHT,
                   height,
                   backgroundColor: color,
+                  opacity: dimmed ? 0.25 : 1,
+                  borderWidth: selected ? 1.5 : 0,
+                  borderColor: selected ? '#FFFFFF' : 'transparent',
                 },
               ]}
             >
@@ -441,7 +697,7 @@ function TimelineView({
                     : ''}
                 </Text>
               ) : null}
-            </View>
+            </Pressable>
           );
         })}
         {nowMinutes >= 0 ? (
@@ -466,17 +722,32 @@ function ClockView({
   colorByItem,
   timeZone,
   width,
+  isToday,
+  selectedItemId,
+  onSelectItem,
 }: {
   data: DayCapsuleData;
   colorByItem: Map<string, string>;
   timeZone: string;
   width: number;
+  isToday: boolean;
+  selectedItemId: string | null;
+  onSelectItem: (itemId: string) => void;
 }) {
   const { colors } = useTheme();
   const size = Math.min(Math.max(width - 72, 240), 360);
   const center = size / 2;
-  const radius = center - 24;
-  const point = (minutes: number, r: number = radius) => {
+  const outerRadius = center - 14;
+  const dataRadius = outerRadius - 32;
+  const labelRadius = outerRadius - 16;
+  const selected =
+    data.capsules.find((capsule) => capsule.itemId === selectedItemId) ?? null;
+  const now = new Date();
+  const nowMinutes = isToday
+    ? now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60
+    : -1;
+
+  const point = (minutes: number, r: number) => {
     const angle = (minutes / 1440) * Math.PI * 2;
     return {
       x: center + r * Math.sin(angle),
@@ -491,16 +762,25 @@ function ClockView({
           <Circle
             cx={center}
             cy={center}
-            r={radius}
+            r={outerRadius}
             fill="none"
             stroke={colors.border}
             strokeWidth={1}
           />
+          <Circle
+            cx={center}
+            cy={center}
+            r={dataRadius}
+            fill="none"
+            stroke={colors.border}
+            strokeWidth={1}
+          />
+
           {Array.from({ length: 96 }, (_, index) => {
             const minutes = index * 15;
             const hourTick = index % 4 === 0;
-            const outer = point(minutes, radius);
-            const inner = point(minutes, radius - (hourTick ? 12 : 6));
+            const outer = point(minutes, outerRadius);
+            const inner = point(minutes, outerRadius - (hourTick ? 8 : 4));
             return (
               <Line
                 key={minutes}
@@ -513,40 +793,84 @@ function ClockView({
               />
             );
           })}
+
+          {Array.from({ length: 12 }, (_, index) => {
+            const hour = index * 2;
+            const position = point(hour * 60, labelRadius);
+            return (
+              <SvgText
+                key={hour}
+                x={position.x}
+                y={position.y + 3}
+                fill={colors.textSecondary}
+                fontSize={9}
+                fontWeight="600"
+                textAnchor="middle"
+              >
+                {String(hour).padStart(2, '0')}
+              </SvgText>
+            );
+          })}
+
           {data.segments.map((segment, index) => {
             const start = minutesOfDay(segment.startAt, timeZone);
             const end = minutesOfDay(segment.endAt, timeZone);
-            const arcMinutes = Math.min(
-              Math.max(10, end - start),
-              Math.max(1, 1440 - start)
-            );
-            const startPoint = point(start, radius);
-            const endPoint = point(start + arcMinutes, radius);
+            const arcMinutes = Math.max(1, end - start);
             const largeArc = arcMinutes > 720 ? 1 : 0;
+            const startPoint = point(start, dataRadius);
+            const endPoint = point(start + arcMinutes, dataRadius);
             const color = colorByItem.get(segment.itemId) ?? colors.accent;
+            const isSelected = selectedItemId === segment.itemId;
+            const dimmed = selectedItemId !== null && !isSelected;
+
             return (
               <Path
                 key={`${segment.itemId}-${segment.startAt}-${index}`}
-                d={`M ${center} ${center} L ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y} Z`}
+                d={`M ${center} ${center} L ${startPoint.x} ${startPoint.y} A ${dataRadius} ${dataRadius} 0 ${largeArc} 1 ${endPoint.x} ${endPoint.y} Z`}
                 fill={color}
-                fillOpacity={0.82}
-                stroke={color}
-                strokeWidth={1}
+                fillOpacity={dimmed ? 0.18 : 0.9}
+                stroke={isSelected ? '#FFFFFF' : color}
+                strokeWidth={isSelected ? 2 : 1}
+                onPress={() => onSelectItem(segment.itemId)}
               />
             );
           })}
+
+          {nowMinutes >= 0 ? (
+            <>
+              <Line
+                x1={point(nowMinutes, dataRadius - 4).x}
+                y1={point(nowMinutes, dataRadius - 4).y}
+                x2={point(nowMinutes, outerRadius).x}
+                y2={point(nowMinutes, outerRadius).y}
+                stroke={colors.danger}
+                strokeWidth={2}
+              />
+              <Circle
+                cx={point(nowMinutes, outerRadius).x}
+                cy={point(nowMinutes, outerRadius).y}
+                r={3}
+                fill={colors.danger}
+              />
+            </>
+          ) : null}
         </Svg>
+
         <View pointerEvents="none" style={styles.clockCenter}>
           <Text style={[styles.clockTotal, { color: colors.text }]}>
-            {formatDurationCompact(data.totalSeconds)}
+            {formatDurationCompact(selected?.seconds ?? data.totalSeconds)}
           </Text>
           <Text style={[styles.clockLabel, { color: colors.textSecondary }]}>
-            FOCUSED
+            {selected ? 'SELECTED' : 'FOCUSED'}
           </Text>
         </View>
       </View>
       <Text style={[styles.clockHint, { color: colors.textSecondary }]}>
-        Each wedge is one capsule across the 24-hour day.
+        {selected
+          ? `Highlighting ${selected.text} · ${formatDurationCompact(
+              selected.seconds
+            )}`
+          : '24-hour clock · each wedge is a capsule. Tap a wedge to highlight it.'}
       </Text>
     </View>
   );
@@ -622,26 +946,109 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     gap: spacing.sm,
   },
-  summaryHeader: {
+  summaryStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+  },
+  summaryStat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  summaryLabel: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
+  summaryDivider: {
+    width: StyleSheet.hairlineWidth,
+    alignSelf: 'stretch',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
   },
-  summaryTotal: {
-    fontSize: 12,
+  sectionMeta: {
+    fontSize: 11,
     fontWeight: '600',
+  },
+  taskSection: {
+    gap: spacing.sm,
+  },
+  taskSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  taskGroup: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  taskGroupHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  taskGroupTitleBlock: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  groupDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginBottom: 2,
+  },
+  groupDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  groupMore: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  taskTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  taskParent: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  taskGroupTotalBlock: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  taskGroupTotal: {
+    fontSize: 14,
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
+  },
+  taskGroupCount: {
+    fontSize: 10,
+    fontWeight: '600',
   },
   capsuleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.sm,
   },
   colorDot: {
     width: 10,
@@ -667,6 +1074,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
+  },
+  selectionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  selectionBody: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  selectionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  selectionMeta: {
+    fontSize: 11,
+  },
+  selectionClear: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  selectionHint: {
+    fontSize: 11,
+    textAlign: 'center',
   },
   viewToggle: {
     flexDirection: 'row',

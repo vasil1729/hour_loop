@@ -8,6 +8,7 @@ import {
 import { getLoopItemIntervalsOverlapping } from '../../database/repositories/loopItemIntervalsRepository';
 import { getLoopItemsByIds } from '../../database/repositories/loopItemsRepository';
 import { getLoopsByIds } from '../../database/repositories/loopsRepository';
+import { getTasksByIds } from '../../database/repositories/tasksRepository';
 
 export type DayCapsuleSegment = {
   itemId: string;
@@ -23,6 +24,8 @@ export type DayCapsuleTotal = {
   text: string;
   loopSequence: number;
   taskId: string | null;
+  taskTitle: string | null;
+  parentTaskTitle: string | null;
   seconds: number;
 };
 
@@ -90,17 +93,43 @@ export async function getDayCapsuleData(
   const itemById = new Map<string, LoopItem>(items.map((item) => [item.id, item]));
   const loopById = new Map<string, Loop>(loops.map((loop) => [loop.id, loop]));
 
+  const taskIds = Array.from(
+    new Set(
+      loops
+        .map((loop) => loop.task_id)
+        .filter((taskId): taskId is string => taskId !== null)
+    )
+  );
+  const directTasks = await getTasksByIds(db, taskIds);
+  const parentIds = Array.from(
+    new Set(
+      directTasks
+        .map((task) => task.parent_task_id)
+        .filter((parentId): parentId is string => parentId !== null)
+    )
+  );
+  const parentTasks = await getTasksByIds(db, parentIds);
+  const taskById = new Map(
+    [...directTasks, ...parentTasks].map((task) => [task.id, task])
+  );
+
   const capsules: DayCapsuleTotal[] = [];
   for (const [itemId, seconds] of secondsByItem) {
     const item = itemById.get(itemId);
     const loop = item ? loopById.get(item.loop_id) : undefined;
     if (!item || !loop) continue;
+    const task = loop.task_id ? taskById.get(loop.task_id) : undefined;
+    const parent = task?.parent_task_id
+      ? taskById.get(task.parent_task_id)
+      : undefined;
     capsules.push({
       itemId,
       loopId: loop.id,
       text: item.text,
       loopSequence: loop.sequence_number,
       taskId: loop.task_id,
+      taskTitle: task?.title ?? null,
+      parentTaskTitle: parent?.title ?? null,
       seconds,
     });
   }
