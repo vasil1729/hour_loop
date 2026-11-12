@@ -49,7 +49,33 @@ export const ASSISTANT_SUGGESTED_MODELS: Record<
   anthropic: 'claude-sonnet-5-5',
   gemini: 'gemini-3.5-flash',
   openrouter: '~openai/gpt-sol-latest',
-  groq: 'llama-3.3-70b-versatile',
+  groq: 'openai/gpt-oss-120b',
   deepseek: 'deepseek-flash',
   opencode: 'deepseek-v4.1-flash',
+};
+
+/** Offline fallback lists; live model discovery supplements these. */
+export const ASSISTANT_MODEL_PRESETS: Record<
+  Exclude<AssistantProviderId, 'custom'>,
+  string[]
+> = {
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1'],
+  anthropic: ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-4-5'],
+  gemini: ['gemini-3.5-flash', 'gemini-3.1-pro', 'gemini-3-flash'],
+  openrouter: [
+    '~openai/gpt-sol-latest',
+    '~deepseek/deepseek-v4-flash-latest',
+  ],
+  groq: [
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+    'llama-3.3-70b-versatile',
+  ],
+  deepseek: ['deepseek-flash', 'deepseek-v4-pro'],
+  opencode: [
+    'deepseek-v4.1-flash',
+    'kimi-k3',
+    'claude-sonnet-5-5',
+    'gemini-3.5-flash',
+  ],
 };

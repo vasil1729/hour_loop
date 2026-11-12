@@ -30,4 +30,5 @@ export type AssistantProvider = {
   id: AssistantProviderId;
   chat: (request: ProviderRequest) => Promise<ProviderResponse>;
   test: (signal?: AbortSignal) => Promise<void>;
+  listModels?: (signal?: AbortSignal) => Promise<string[]>;
 };

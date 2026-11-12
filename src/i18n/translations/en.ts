@@ -689,6 +689,18 @@ export const en = {
     'The key is kept in memory only. It is never written to browser storage.',
   'settings.assistantModel': 'Model',
   'settings.assistantModelPlaceholder': 'Provider model identifier',
+  'settings.assistantModelChoose': 'Choose model',
+  'settings.modelPickerTitle': 'Choose a model',
+  'settings.modelPickerSearch': 'Search models',
+  'settings.modelPickerRefresh': 'Refresh model list',
+  'settings.modelPickerLoading': 'Loading available models…',
+  'settings.modelPickerEmpty':
+    'No models found. Enter a model ID below.',
+  'settings.modelPickerCustom': 'Custom model ID',
+  'settings.modelPickerCustomPlaceholder': 'Enter model ID',
+  'settings.modelPickerUse': 'Use model',
+  'settings.modelPickerNeedKey':
+    'Enter or save an API key to load models from the provider.',
   'settings.assistantBaseUrl': 'Base URL',
   'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
   'settings.assistantSave': 'Save assistant settings',

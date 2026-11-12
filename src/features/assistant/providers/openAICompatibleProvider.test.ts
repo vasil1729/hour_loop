@@ -1,7 +1,7 @@
 import type { AssistantConfig } from '../assistantTypes';
 import { ASSISTANT_SUGGESTED_MODELS } from '../../../constants/assistant';
 import { AssistantConfigError, normalizeBaseUrl } from '../storage/assistantSettings';
-import { chatCompletion } from './openAICompatibleProvider';
+import { chatCompletion, listModels } from './openAICompatibleProvider';
 import { AssistantProviderError } from './providerTypes';
 import { createAssistantProvider, createCustomProvider } from './providerFactory';
 
@@ -398,6 +398,30 @@ describe('OpenAI-compatible request handling', () => {
         { messages: [{ role: 'user', content: 'hi' }], tools: [] }
       ),
       'network'
+    );
+  });
+
+  it('loads and deduplicates model IDs from the provider', async () => {
+    const fetchMock = jest.fn().mockResolvedValue(
+      jsonResponse({
+        data: [
+          { id: 'model-z' },
+          { id: 'model-a' },
+          { id: 'model-a' },
+          { id: '' },
+        ],
+      })
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const models = await listModels({
+      baseUrl: 'https://api.example.com/v1',
+      apiKey: KEY,
+    });
+
+    expect(models).toEqual(['model-a', 'model-z']);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      'https://api.example.com/v1/models'
     );
   });
 

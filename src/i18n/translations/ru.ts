@@ -721,6 +721,18 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Ключ хранится только в памяти и не записывается в хранилище браузера.',
   'settings.assistantModel': 'Модель',
   'settings.assistantModelPlaceholder': 'Идентификатор модели провайдера',
+  'settings.assistantModelChoose': 'Выбрать модель',
+  'settings.modelPickerTitle': 'Выберите модель',
+  'settings.modelPickerSearch': 'Поиск моделей',
+  'settings.modelPickerRefresh': 'Обновить список моделей',
+  'settings.modelPickerLoading': 'Загрузка доступных моделей…',
+  'settings.modelPickerEmpty':
+    'Модели не найдены. Введите идентификатор ниже.',
+  'settings.modelPickerCustom': 'Свой идентификатор модели',
+  'settings.modelPickerCustomPlaceholder': 'Введите идентификатор модели',
+  'settings.modelPickerUse': 'Использовать модель',
+  'settings.modelPickerNeedKey':
+    'Введите или сохраните API-ключ, чтобы загрузить модели провайдера.',
   'settings.assistantBaseUrl': 'Базовый URL',
   'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
   'settings.assistantSave': 'Сохранить настройки ассистента',

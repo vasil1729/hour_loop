@@ -78,6 +78,7 @@ jest.mock('../../features/assistant/providers/providerFactory', () => ({
     chat: jest.fn(),
     test: () => mockProviderTest(),
   }),
+  listAssistantProviderModels: jest.fn(async () => ['model-a', 'model-b']),
 }));
 
 import { AssistantSettings } from './AssistantSettings';
@@ -110,6 +111,19 @@ describe('assistant settings UI', () => {
     });
     await fireEvent.press(openAI);
     expect(openAI.props.accessibilityState).toEqual({ selected: true });
+  });
+
+  it('selects a model from the model picker', async () => {
+    await render(<AssistantSettings />);
+
+    await fireEvent.press(
+      await screen.findByLabelText('settings.assistantModel')
+    );
+    const model = await screen.findByText('model-a');
+    await fireEvent.press(model);
+
+    expect(screen.getByText('model-a')).toBeTruthy();
+    expect(mockSetKey).not.toHaveBeenCalled();
   });
 
   it('shows a safe connection failure state', async () => {

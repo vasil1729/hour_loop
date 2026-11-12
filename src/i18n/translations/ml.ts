@@ -701,6 +701,18 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
     'കീ മെമ്മറിയിൽ മാത്രം സൂക്ഷിക്കുന്നു, ബ്രൗസർ സ്റ്റോറേജിൽ എഴുതില്ല.',
   'settings.assistantModel': 'മോഡൽ',
   'settings.assistantModelPlaceholder': 'ദാതാവിന്റെ മോഡൽ ഐഡന്റിഫയർ',
+  'settings.assistantModelChoose': 'മോഡൽ തിരഞ്ഞെടുക്കുക',
+  'settings.modelPickerTitle': 'ഒരു മോഡൽ തിരഞ്ഞെടുക്കുക',
+  'settings.modelPickerSearch': 'മോഡലുകൾ തിരയുക',
+  'settings.modelPickerRefresh': 'മോഡൽ പട്ടിക പുതുക്കുക',
+  'settings.modelPickerLoading': 'ലഭ്യമായ മോഡലുകൾ ലോഡ് ചെയ്യുന്നു…',
+  'settings.modelPickerEmpty':
+    'മോഡലുകളൊന്നും കണ്ടെത്തിയില്ല. താഴെ ഒരു മോഡൽ ഐഡന്റിഫയർ നൽകുക.',
+  'settings.modelPickerCustom': 'ഇഷ്ടാനുസൃത മോഡൽ ഐഡന്റിഫയർ',
+  'settings.modelPickerCustomPlaceholder': 'മോഡൽ ഐഡന്റിഫയർ നൽകുക',
+  'settings.modelPickerUse': 'മോഡൽ ഉപയോഗിക്കുക',
+  'settings.modelPickerNeedKey':
+    'ദാതാവിൽ നിന്ന് മോഡലുകൾ ലോഡ് ചെയ്യാൻ API കീ നൽകുകയോ സേവ് ചെയ്യുകയോ ചെയ്യുക.',
   'settings.assistantBaseUrl': 'അടിസ്ഥാന URL',
   'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
   'settings.assistantSave': 'അസിസ്റ്റന്റ് ക്രമീകരണങ്ങൾ സേവ് ചെയ്യുക',

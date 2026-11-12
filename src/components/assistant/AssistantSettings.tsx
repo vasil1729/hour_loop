@@ -8,14 +8,19 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import {
   ASSISTANT_MAX_KEY_LENGTH,
+  ASSISTANT_MODEL_PRESETS,
   ASSISTANT_SUGGESTED_MODELS,
 } from '../../constants/assistant';
 import { describeAssistantError } from '../../features/assistant/assistantErrors';
-import { createAssistantProvider } from '../../features/assistant/providers/providerFactory';
+import {
+  createAssistantProvider,
+  listAssistantProviderModels,
+} from '../../features/assistant/providers/providerFactory';
 import {
   assistantConfigIsUsable,
   loadAssistantConfig,
@@ -38,6 +43,7 @@ import type { TranslationKey } from '../../i18n/types';
 import { useAssistantStore } from '../../store/assistantStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { Button } from '../common/Button';
+import { ModelPickerModal } from './ModelPickerModal';
 import { fontSize, radius, spacing } from '../../theme/tokens';
 
 const PROVIDERS: { id: AssistantProviderId; labelKey: TranslationKey }[] = [
@@ -72,6 +78,10 @@ export function AssistantSettings({
   const [testState, setTestState] = useState<TestState>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [modelPickerVisible, setModelPickerVisible] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -202,6 +212,48 @@ export function AssistantSettings({
   const canSave =
     config !== null && (!config.enabled || assistantConfigIsUsable(config));
 
+  const presetModels = (current: AssistantConfig): string[] =>
+    current.provider === 'custom'
+      ? []
+      : ASSISTANT_MODEL_PRESETS[current.provider];
+
+  const mergeModels = (...groups: string[][]): string[] =>
+    Array.from(new Set(groups.flat().filter(Boolean)));
+
+  const refreshModels = async (current: AssistantConfig) => {
+    const presets = presetModels(current);
+    setModelsLoading(true);
+    setModelsError(null);
+    setAvailableModels((existing) => mergeModels(presets, existing));
+    try {
+      const key =
+        apiKeyDraft.trim() ||
+        (await getAssistantApiKey(current.provider));
+      if (!key) {
+        setModelsError(t('settings.modelPickerNeedKey'));
+        return;
+      }
+      const models = await listAssistantProviderModels(current, key);
+      setAvailableModels((existing) =>
+        mergeModels(models, presets, existing)
+      );
+    } catch (error) {
+      setModelsError(describeAssistantError(error));
+    } finally {
+      setModelsLoading(false);
+    }
+  };
+
+  const openModelPicker = () => {
+    if (!config) return;
+    setModelPickerVisible(true);
+    setModelsError(null);
+    setAvailableModels((existing) =>
+      mergeModels(presetModels(config), existing, config.model ? [config.model] : [])
+    );
+    void refreshModels(config);
+  };
+
   if (!loaded) {
     return null;
   }
@@ -282,6 +334,9 @@ export function AssistantSettings({
                 setApiKeyDraft('');
                 setTestState('idle');
                 setStatusMessage(null);
+                setAvailableModels([]);
+                setModelsError(null);
+                setModelPickerVisible(false);
                 updateConfig({
                   provider: provider.id,
                   baseUrl: provider.id === 'custom' ? config?.baseUrl ?? '' : null,
@@ -371,29 +426,36 @@ export function AssistantSettings({
             : t('settings.assistantApiKeyWebHelp')}
       </Text>
 
-      <TextInput
-        value={config?.model ?? ''}
-        onChangeText={(value) => updateConfig({ model: value })}
-        placeholder={
-          config?.provider === 'custom'
-            ? t('settings.assistantModelPlaceholder')
-            : ASSISTANT_SUGGESTED_MODELS[config?.provider ?? 'groq']
-        }
-        placeholderTextColor={colors.textSecondary}
-        autoCapitalize="none"
-        autoCorrect={false}
-        maxLength={128}
-        textAlign={isRTL ? 'right' : 'left'}
+      <Pressable
+        accessibilityRole="button"
         accessibilityLabel={t('settings.assistantModel')}
+        onPress={openModelPicker}
         style={[
           styles.input,
+          styles.modelRow,
           {
-            color: colors.text,
             borderColor: colors.border,
             backgroundColor: colors.surface,
           },
         ]}
-      />
+      >
+        <Text
+          numberOfLines={1}
+          style={[
+            styles.modelValue,
+            {
+              color: config?.model ? colors.text : colors.textSecondary,
+            },
+          ]}
+        >
+          {config?.model || t('settings.assistantModelChoose')}
+        </Text>
+        <Ionicons
+          name="chevron-down"
+          size={18}
+          color={colors.textSecondary}
+        />
+      </Pressable>
 
       {config?.provider === 'custom' ? (
         <TextInput
@@ -505,6 +567,22 @@ export function AssistantSettings({
       <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
         {t('settings.assistantPrivacyBody')}
       </Text>
+
+      <ModelPickerModal
+        visible={modelPickerVisible}
+        models={availableModels}
+        selected={config?.model ?? ''}
+        loading={modelsLoading}
+        error={modelsError}
+        onSelect={(model) => {
+          updateConfig({ model });
+          setModelPickerVisible(false);
+        }}
+        onRefresh={() => {
+          if (config) void refreshModels(config);
+        }}
+        onClose={() => setModelPickerVisible(false)}
+      />
     </View>
   );
 }
@@ -571,6 +649,16 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    fontSize: 15,
+  },
+  modelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  modelValue: {
+    flex: 1,
     fontSize: 15,
   },
   hint: {

@@ -674,6 +674,18 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Anahtar yalnızca bellekte tutulur ve tarayıcı deposuna yazılmaz.',
   'settings.assistantModel': 'Model',
   'settings.assistantModelPlaceholder': 'Sağlayıcı model tanımlayıcısı',
+  'settings.assistantModelChoose': 'Model seç',
+  'settings.modelPickerTitle': 'Bir model seç',
+  'settings.modelPickerSearch': 'Modellerde ara',
+  'settings.modelPickerRefresh': 'Model listesini yenile',
+  'settings.modelPickerLoading': 'Kullanılabilir modeller yükleniyor…',
+  'settings.modelPickerEmpty':
+    'Model bulunamadı. Aşağıya bir model kimliği girin.',
+  'settings.modelPickerCustom': 'Özel model kimliği',
+  'settings.modelPickerCustomPlaceholder': 'Model kimliğini girin',
+  'settings.modelPickerUse': 'Modeli kullan',
+  'settings.modelPickerNeedKey':
+    'Modelleri sağlayıcıdan yüklemek için bir API anahtarı girin veya kaydedin.',
   'settings.assistantBaseUrl': 'Temel URL',
   'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
   'settings.assistantSave': 'Asistan ayarlarını kaydet',

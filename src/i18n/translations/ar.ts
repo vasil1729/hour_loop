@@ -719,6 +719,18 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يُحفظ المفتاح في الذاكرة فقط ولا يُكتب في تخزين المتصفح.',
   'settings.assistantModel': 'الطراز',
   'settings.assistantModelPlaceholder': 'معرّف طراز المزود',
+  'settings.assistantModelChoose': 'اختيار الطراز',
+  'settings.modelPickerTitle': 'اختر طرازًا',
+  'settings.modelPickerSearch': 'بحث في الطرازات',
+  'settings.modelPickerRefresh': 'تحديث قائمة الطرازات',
+  'settings.modelPickerLoading': 'جارٍ تحميل الطرازات المتاحة…',
+  'settings.modelPickerEmpty':
+    'لم يتم العثور على طرازات. أدخل معرّف طراز أدناه.',
+  'settings.modelPickerCustom': 'معرّف طراز مخصص',
+  'settings.modelPickerCustomPlaceholder': 'أدخل معرّف الطراز',
+  'settings.modelPickerUse': 'استخدام الطراز',
+  'settings.modelPickerNeedKey':
+    'أدخل مفتاح API أو احفظه لتحميل الطرازات من المزود.',
   'settings.assistantBaseUrl': 'عنوان URL الأساسي',
   'settings.assistantBaseUrlPlaceholder': 'https://example.com/v1',
   'settings.assistantSave': 'حفظ إعدادات المساعد',

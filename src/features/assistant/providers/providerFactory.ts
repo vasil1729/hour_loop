@@ -4,11 +4,37 @@ import {
   resolveBaseUrl,
   AssistantConfigError,
 } from '../storage/assistantSettings';
-import { chatCompletion } from './openAICompatibleProvider';
+import { chatCompletion, listModels } from './openAICompatibleProvider';
 import {
   AssistantProviderError,
   type AssistantProvider,
 } from './providerTypes';
+
+const OPENCODE_MODELS_URL = 'https://opencode.ai/inference/v1/models';
+
+function modelListOptions(
+  config: AssistantConfig,
+  apiKey: string,
+  baseUrl: string
+): { baseUrl: string; apiKey: string; modelsUrl?: string } {
+  return {
+    baseUrl,
+    apiKey,
+    modelsUrl: config.provider === 'opencode' ? OPENCODE_MODELS_URL : undefined,
+  };
+}
+
+export async function listAssistantProviderModels(
+  config: AssistantConfig,
+  apiKey: string,
+  signal?: AbortSignal
+): Promise<string[]> {
+  const baseUrl = providerBaseUrl(config);
+  if (!apiKey.trim()) {
+    throw new AssistantProviderError('config', 'No API key is configured.');
+  }
+  return listModels(modelListOptions(config, apiKey, baseUrl), signal);
+}
 
 function providerBaseUrl(config: AssistantConfig): string {
   try {
@@ -40,6 +66,8 @@ export function createAssistantProvider(
     id: config.provider,
     chat: (request) =>
       chatCompletion({ baseUrl, apiKey, model }, request),
+    listModels: (signal) =>
+      listModels(modelListOptions(config, apiKey, baseUrl), signal),
     test: async (signal) => {
       const result = await chatCompletion(
         { baseUrl, apiKey, model, timeoutMs: 20_000 },
@@ -75,6 +103,11 @@ export function createCustomProvider(
     id: 'custom',
     chat: (request) =>
       chatCompletion({ baseUrl: normalized, apiKey, model }, request),
+    listModels: (signal) =>
+      listModels(
+        { baseUrl: normalized, apiKey, modelsUrl: `${normalized}/models` },
+        signal
+      ),
     test: async (signal) => {
       const result = await chatCompletion(
         { baseUrl: normalized, apiKey, model, timeoutMs: 20_000 },

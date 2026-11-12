@@ -12,6 +12,8 @@ const DEFAULT_TIMEOUT_MS = 45_000;
 const MAX_RESPONSE_BYTES = 1_000_000;
 const MAX_CONTENT_CHARS = 20_000;
 const MAX_TOOL_CALLS = 8;
+const NON_CHAT_MODEL_PATTERN =
+  /(embedding|embed-|whisper|tts|moderation|dall-e|prompt-guard|rerank|audio|image)/i;
 
 type StreamState = {
   content: string;
@@ -365,6 +367,171 @@ function redactSecret(value: string, apiKey: string): string {
   return value.split(apiKey).join('[redacted]');
 }
 
+function assertTrustedResponse(response: Response, baseUrl: string): void {
+  if (response.redirected) {
+    throw new AssistantProviderError(
+      'network',
+      'The provider redirected the request. Use its final HTTPS endpoint directly.'
+    );
+  }
+  if (!response.url) return;
+  let expectedOrigin = '';
+  let actualOrigin = '';
+  try {
+    expectedOrigin = new URL(baseUrl).origin;
+    actualOrigin = new URL(response.url).origin;
+  } catch {
+    return;
+  }
+  if (actualOrigin && expectedOrigin && actualOrigin !== expectedOrigin) {
+    throw new AssistantProviderError(
+      'network',
+      'The provider redirected the request to a different origin.'
+    );
+  }
+}
+
+function normalizeFetchError(
+  error: unknown,
+  timedOut: boolean,
+  externallyAborted: boolean,
+  apiKey: string
+): AssistantProviderError {
+  if (error instanceof AssistantProviderError) {
+    return new AssistantProviderError(
+      error.code,
+      redactSecret(error.message, apiKey)
+    );
+  }
+  if (timedOut) {
+    return new AssistantProviderError(
+      'timeout',
+      'The provider request timed out. Try again.'
+    );
+  }
+  if (
+    externallyAborted ||
+    (error instanceof Error && error.name === 'AbortError')
+  ) {
+    return new AssistantProviderError('cancelled', 'The request was cancelled.');
+  }
+  if (error instanceof TypeError) {
+    return new AssistantProviderError(
+      'network',
+      'Could not reach the provider. Check the endpoint and connection.'
+    );
+  }
+  return new AssistantProviderError(
+    'network',
+    'The provider request failed. Try again.'
+  );
+}
+
+type ListModelsOptions = {
+  baseUrl: string;
+  apiKey: string;
+  modelsUrl?: string;
+  timeoutMs?: number;
+};
+
+export async function listModels(
+  options: ListModelsOptions,
+  requestSignal?: AbortSignal
+): Promise<string[]> {
+  const apiKey = options.apiKey.trim();
+  if (!apiKey) {
+    throw new AssistantProviderError('config', 'No API key is configured.');
+  }
+  if (requestSignal?.aborted) {
+    throw new AssistantProviderError('cancelled', 'The request was cancelled.');
+  }
+
+  const endpoint = options.modelsUrl ?? `${options.baseUrl.replace(/\/+$/, '')}/models`;
+  const controller = new AbortController();
+  let timedOut = false;
+  let externallyAborted = false;
+  const onAbort = () => {
+    externallyAborted = true;
+    controller.abort();
+  };
+  requestSignal?.addEventListener('abort', onAbort, { once: true });
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, options.timeoutMs ?? 15_000);
+
+  try {
+    const requestInit = {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${apiKey}` },
+      credentials: 'omit' as const,
+      signal: controller.signal,
+    };
+    const response =
+      Platform.OS === 'web'
+        ? await globalThis.fetch(endpoint, {
+            ...requestInit,
+            redirect: 'error',
+          })
+        : await expoFetch(endpoint, requestInit);
+    assertTrustedResponse(response, options.baseUrl);
+    if (!response.ok) {
+      const message = await readErrorMessage(response);
+      throw providerErrorForStatus(response.status, message);
+    }
+    const text = await readBoundedText(response, MAX_RESPONSE_BYTES);
+    let payload: unknown;
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      throw new AssistantProviderError(
+        'malformed',
+        'The provider returned an invalid model list.'
+      );
+    }
+    const record =
+      typeof payload === 'object' && payload !== null
+        ? (payload as Record<string, unknown>)
+        : null;
+    const entries = Array.isArray(payload)
+      ? payload
+      : Array.isArray(record?.data)
+        ? record.data
+        : Array.isArray(record?.models)
+          ? record.models
+          : null;
+    if (!entries) {
+      throw new AssistantProviderError(
+        'malformed',
+        'The provider returned an invalid model list.'
+      );
+    }
+    const ids = new Set<string>();
+    for (const entry of entries.slice(0, 1000)) {
+      const id =
+        typeof entry === 'string'
+          ? entry
+          : typeof entry === 'object' &&
+              entry !== null &&
+              typeof (entry as Record<string, unknown>).id === 'string'
+            ? ((entry as Record<string, unknown>).id as string)
+            : null;
+      if (!id) continue;
+      const trimmed = id.trim();
+      if (!trimmed || trimmed.length > 200) continue;
+      if (NON_CHAT_MODEL_PATTERN.test(trimmed)) continue;
+      ids.add(trimmed);
+      if (ids.size >= 500) break;
+    }
+    return Array.from(ids).sort((a, b) => a.localeCompare(b));
+  } catch (error) {
+    throw normalizeFetchError(error, timedOut, externallyAborted, apiKey);
+  } finally {
+    clearTimeout(timeout);
+    requestSignal?.removeEventListener('abort', onAbort);
+  }
+}
+
 export async function chatCompletion(
   options: ChatOptions,
   request: ProviderRequest
@@ -420,27 +587,7 @@ export async function chatCompletion(
           })
         : await expoFetch(endpoint, requestInit);
 
-    if (response.redirected) {
-      throw new AssistantProviderError(
-        'network',
-        'The provider redirected the request. Use its final HTTPS endpoint directly.'
-      );
-    }
-    if (response.url) {
-      const expectedOrigin = new URL(options.baseUrl).origin;
-      let actualOrigin = '';
-      try {
-        actualOrigin = new URL(response.url).origin;
-      } catch {
-        actualOrigin = '';
-      }
-      if (actualOrigin && actualOrigin !== expectedOrigin) {
-        throw new AssistantProviderError(
-          'network',
-          'The provider redirected the request to a different origin.'
-        );
-      }
-    }
+    assertTrustedResponse(response, options.baseUrl);
 
     if (!response.ok) {
       const message = await readErrorMessage(response);
@@ -484,34 +631,7 @@ export async function chatCompletion(
     if (parsed.content) request.onTextDelta?.(parsed.content);
     return parsed;
   } catch (error) {
-    if (error instanceof AssistantProviderError) {
-      throw new AssistantProviderError(
-        error.code,
-        redactSecret(error.message, apiKey)
-      );
-    }
-    if (timedOut) {
-      throw new AssistantProviderError(
-        'timeout',
-        'The provider request timed out. Try again.'
-      );
-    }
-    if (
-      externallyAborted ||
-      (error instanceof Error && error.name === 'AbortError')
-    ) {
-      throw new AssistantProviderError('cancelled', 'The request was cancelled.');
-    }
-    if (error instanceof TypeError) {
-      throw new AssistantProviderError(
-        'network',
-        'Could not reach the provider. Check the endpoint and connection.'
-      );
-    }
-    throw new AssistantProviderError(
-      'network',
-      'The provider request failed. Try again.'
-    );
+    throw normalizeFetchError(error, timedOut, externallyAborted, apiKey);
   } finally {
     clearTimeout(timeout);
     request.signal?.removeEventListener('abort', onAbort);
