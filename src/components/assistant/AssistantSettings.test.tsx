@@ -78,7 +78,12 @@ jest.mock('../../features/assistant/providers/providerFactory', () => ({
     chat: jest.fn(),
     test: () => mockProviderTest(),
   }),
-  listAssistantProviderModels: jest.fn(async () => ['model-a', 'model-b']),
+  listAssistantProviderModels: jest.fn(async () => [
+    'openai/gpt-oss-120b',
+    'openai/gpt-oss-20b',
+    'qwen/qwen3.8-27b',
+    'unrelated/audio-model',
+  ]),
 }));
 
 import { AssistantSettings } from './AssistantSettings';
@@ -119,10 +124,11 @@ describe('assistant settings UI', () => {
     await fireEvent.press(
       await screen.findByLabelText('settings.assistantModel')
     );
-    const model = await screen.findByText('model-a');
+    const model = await screen.findByText('openai/gpt-oss-120b');
     await fireEvent.press(model);
 
-    expect(screen.getByText('model-a')).toBeTruthy();
+    expect(screen.getByText('openai/gpt-oss-120b')).toBeTruthy();
+    expect(screen.queryByText('unrelated/audio-model')).toBeNull();
     expect(mockSetKey).not.toHaveBeenCalled();
   });
 

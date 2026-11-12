@@ -234,8 +234,16 @@ export function AssistantSettings({
         return;
       }
       const models = await listAssistantProviderModels(current, key);
+      const relevant = presets.length
+        ? presets.filter((model) => models.includes(model))
+        : models;
       setAvailableModels((existing) =>
-        mergeModels(models, presets, existing)
+        mergeModels(
+          relevant.length > 0 ? relevant : presets,
+          presets,
+          current.model ? [current.model] : [],
+          existing
+        )
       );
     } catch (error) {
       setModelsError(describeAssistantError(error));

@@ -69,7 +69,7 @@ export const ASSISTANT_MODEL_PRESETS: Record<
   groq: [
     'openai/gpt-oss-120b',
     'openai/gpt-oss-20b',
-    'llama-3.3-70b-versatile',
+    'qwen/qwen3.8-27b',
   ],
   deepseek: ['deepseek-flash', 'deepseek-v4-pro'],
   opencode: [
