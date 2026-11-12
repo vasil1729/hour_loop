@@ -198,8 +198,12 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     db: SQLiteDatabase,
     loopId: string
   ): Promise<number> {
+    const loop = await requireLoop(db, loopId);
     const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
-    return calculateElapsedSeconds(intervals, deps.now());
+    const elapsed = calculateElapsedSeconds(intervals, deps.now());
+    return loop.status === 'ACTIVE'
+      ? Math.min(elapsed, loop.target_duration_seconds)
+      : elapsed;
   }
 
   async function getCurrentItem(
@@ -233,13 +237,24 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     loop: Loop,
     intervals: LoopInterval[]
   ): Promise<Loop> {
-    const targetAt = targetTimeForIntervals(
+    const now = deps.now();
+    let targetAt = targetTimeForIntervals(
       intervals,
       loop.target_duration_seconds,
-      deps.now()
+      now
     );
+
     if (!targetAt) {
-      return loop;
+      const elapsed = calculateElapsedSeconds(intervals, now);
+      if (elapsed < loop.target_duration_seconds) {
+        return loop;
+      }
+      // Defensive fallback: if interval math cannot locate the crossing,
+      // still stop further growth at the equivalent target instant.
+      targetAt = new Date(
+        now.getTime() -
+          (elapsed - loop.target_duration_seconds) * 1000
+      );
     }
 
     const targetIso = targetAt.toISOString();
@@ -510,10 +525,14 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     async getLoopWithElapsed(db, loopId) {
       const loop = await requireLoop(db, loopId);
       const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
+      const elapsed = calculateElapsedSeconds(intervals, deps.now());
       return {
         loop,
         intervals,
-        elapsedSeconds: calculateElapsedSeconds(intervals, deps.now()),
+        elapsedSeconds:
+          loop.status === 'ACTIVE'
+            ? Math.min(elapsed, loop.target_duration_seconds)
+            : elapsed,
       };
     },
   };

@@ -8,6 +8,7 @@ import { SystemBars } from 'react-native-edge-to-edge';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingScreen } from '../src/components/common/LoadingScreen';
+import { useTargetGuard } from '../src/hooks/useTargetGuard';
 import { WebPhoneFrame } from '../src/components/common/WebPhoneFrame';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
@@ -19,6 +20,7 @@ import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 
 function AppBootstrap({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
+  useTargetGuard(db);
   const loadSettings = useSettingsStore((state) => state.load);
 
   useEffect(() => {

@@ -388,6 +388,7 @@ describe('loopService', () => {
     const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
 
     harness.advanceSeconds(90);
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
     const paused = await service.pauseAtTarget(db, loop.id);
 
     expect(paused.status).toBe('PAUSED');
