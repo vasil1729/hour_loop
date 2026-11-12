@@ -1,5 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -35,6 +43,11 @@ export default function ActiveLoopScreen() {
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [items, setItems] = useState<LoopItem[]>([]);
+  const [newCapsuleText, setNewCapsuleText] = useState('');
+  const [addingCapsule, setAddingCapsule] = useState(false);
+  const [removingCapsuleId, setRemovingCapsuleId] = useState<string | null>(
+    null
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -105,6 +118,43 @@ export default function ActiveLoopScreen() {
         'Could not set the current capsule',
         error instanceof Error ? error.message : 'Please try again.'
       );
+    }
+  };
+
+  const addCapsule = async () => {
+    if (!activeLoop || addingCapsule) return;
+    const text = newCapsuleText.trim();
+    if (!text) return;
+    setAddingCapsule(true);
+    try {
+      const item = await loopService.addLoopItem(db, activeLoop.id, text);
+      setItems((previous) => [...previous, item]);
+      setNewCapsuleText('');
+    } catch (error) {
+      Alert.alert(
+        'Could not update capsule',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setAddingCapsule(false);
+    }
+  };
+
+  const removeCapsule = async (item: LoopItem) => {
+    if (!activeLoop || removingCapsuleId) return;
+    const previous = items;
+    setRemovingCapsuleId(item.id);
+    setItems((current) => current.filter((entry) => entry.id !== item.id));
+    try {
+      await loopService.deleteLoopItem(db, activeLoop.id, item.id);
+    } catch (error) {
+      setItems(previous);
+      Alert.alert(
+        'Could not update capsule',
+        error instanceof Error ? error.message : 'Please try again.'
+      );
+    } finally {
+      setRemovingCapsuleId(null);
     }
   };
 
@@ -249,19 +299,19 @@ export default function ActiveLoopScreen() {
         </View>
       ) : null}
 
-      {items.length > 0 ? (
-        <View style={styles.itemsSection}>
-          <View style={styles.itemsHeader}>
-            <Text style={[styles.itemsTitle, { color: colors.textSecondary }]}>
-              CAPSULES
-            </Text>
-            <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
-              {items.filter((item) => item.done).length}/{items.length} done
-            </Text>
-          </View>
-          <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
-            Tap to focus · swipe right to complete
+      <View style={styles.itemsSection}>
+        <View style={styles.itemsHeader}>
+          <Text style={[styles.itemsTitle, { color: colors.textSecondary }]}>
+            CAPSULES
           </Text>
+          <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
+            {items.filter((item) => item.done).length}/{items.length} done
+          </Text>
+        </View>
+        <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
+          Tap to focus · swipe right to complete
+        </Text>
+        {items.length > 0 ? (
           <View style={styles.capsuleWrap}>
             {items.map((item) => (
               <LoopItemCapsule
@@ -269,6 +319,7 @@ export default function ActiveLoopScreen() {
                 text={item.text}
                 done={item.done}
                 current={item.current}
+                disabled={removingCapsuleId === item.id}
                 onPress={() => {
                   void selectItem(item);
                 }}
@@ -281,11 +332,58 @@ export default function ActiveLoopScreen() {
                 onSwipeUndone={() => {
                   if (item.done) void toggleItem(item);
                 }}
+                onRemove={() => {
+                  void removeCapsule(item);
+                }}
               />
             ))}
           </View>
+        ) : (
+          <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
+            No capsules yet.
+          </Text>
+        )}
+        <View style={styles.addRow}>
+          <TextInput
+            value={newCapsuleText}
+            onChangeText={setNewCapsuleText}
+            placeholder="Add capsule"
+            placeholderTextColor={colors.textSecondary}
+            editable={!addingCapsule}
+            returnKeyType="done"
+            onSubmitEditing={() => {
+              void addCapsule();
+            }}
+            maxLength={120}
+            style={[
+              styles.addInput,
+              {
+                color: colors.text,
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add capsule"
+            disabled={!newCapsuleText.trim() || addingCapsule}
+            onPress={() => {
+              void addCapsule();
+            }}
+            style={[
+              styles.addButton,
+              {
+                backgroundColor: colors.accent,
+                opacity:
+                  newCapsuleText.trim() && !addingCapsule ? 1 : 0.45,
+              },
+            ]}
+          >
+            <Ionicons name="add" size={22} color="#FFFFFF" />
+          </Pressable>
         </View>
-      ) : null}
+      </View>
 
       {activeLoop.focus ? (
         <View
@@ -466,6 +564,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  addInput: {
+    flex: 1,
+    minHeight: 44,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   focusLabel: {
     fontSize: 10,

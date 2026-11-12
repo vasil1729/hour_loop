@@ -105,6 +105,7 @@ type IntervalRepositoryPort = {
 
 type LoopItemRepositoryPort = {
   createLoopItem: typeof loopItemsRepository.createLoopItem;
+  deleteLoopItem: typeof loopItemsRepository.deleteLoopItem;
   getLoopItemById: typeof loopItemsRepository.getLoopItemById;
   listLoopItems: typeof loopItemsRepository.listLoopItems;
   setCurrentLoopItem: typeof loopItemsRepository.setCurrentLoopItem;
@@ -158,6 +159,16 @@ export type LoopService = {
   getActiveLoop: (db: SQLiteDatabase) => Promise<Loop | null>;
   getLoop: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
   getLoopItems: (db: SQLiteDatabase, loopId: string) => Promise<LoopItem[]>;
+  addLoopItem: (
+    db: SQLiteDatabase,
+    loopId: string,
+    text: string
+  ) => Promise<LoopItem>;
+  deleteLoopItem: (
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string
+  ) => Promise<void>;
   setLoopItemDone: (
     db: SQLiteDatabase,
     loopId: string,
@@ -455,6 +466,56 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
     getLoopItems(db, loopId) {
       return deps.items.listLoopItems(db, loopId);
+    },
+
+    async addLoopItem(db, loopId, text) {
+      const loop = await requireLoop(db, loopId);
+      if (loop.status === 'COMPLETED') {
+        throw new InvalidStateTransitionError('This loop is already complete.');
+      }
+      const trimmed = text.trim();
+      if (!trimmed) {
+        throw new Error('A capsule needs a title.');
+      }
+      const existing = await deps.items.listLoopItems(db, loopId);
+      const sortOrder =
+        existing.reduce((max, item) => Math.max(max, item.sort_order), -1) + 1;
+      const nowIso = deps.now().toISOString();
+      const item: LoopItem = {
+        id: deps.newId(),
+        loop_id: loopId,
+        text: trimmed,
+        done: false,
+        current: false,
+        sort_order: sortOrder,
+        carried_from_item_id: null,
+        created_at: nowIso,
+        updated_at: nowIso,
+      };
+      await deps.items.createLoopItem(db, item);
+      return item;
+    },
+
+    async deleteLoopItem(db, loopId, itemId) {
+      const loop = await requireLoop(db, loopId);
+      if (loop.status === 'COMPLETED') {
+        throw new InvalidStateTransitionError('This loop is already complete.');
+      }
+      const item = await deps.items.getLoopItemById(db, itemId);
+      if (!item || item.loop_id !== loopId) {
+        throw new LoopItemNotFoundError(itemId);
+      }
+      const nowIso = deps.now().toISOString();
+      await db.withTransactionAsync(async () => {
+        if (item.current) {
+          await deps.itemIntervals.closeOpenLoopItemIntervals(
+            db,
+            loopId,
+            nowIso
+          );
+        }
+        await deps.items.deleteLoopItem(db, itemId);
+      });
     },
 
     async setLoopItemDone(db, loopId, itemId, done) {

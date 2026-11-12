@@ -56,6 +56,7 @@ All fields are optional, with focus and carry-in pre-filled when available:
 ### Capsules
 
 - Capsules are the small checklist units added while starting a loop.
+- An active or paused loop can still gain new capsules or have existing capsules removed.
 - A loop with a subtask groups all of its capsules under that subtask.
 - A loop without a subtask creates **loose capsules**. Open loose capsules appear in the Tasks screen under **Loose capsules**, even though they were created from the loop-start screen.
 - The start-loop screen also lists loose capsules from older loops so one can be brought into the next loop.
@@ -101,7 +102,7 @@ All fields are optional, with focus and carry-in pre-filled when available:
 |---|---|
 | Today | Date, daily/monthly intention bars, active-loop banner with live progress and pause/resume, recent loops |
 | Start loop | Capsules, loose capsules, carry-in, optional subtask, target duration |
-| Active loop | Live timer, progress, focus, capsules, session log, pause/resume/stop, back to Today, delete with confirmation |
+| Active loop | Live timer, progress, focus, capsules with add/remove, session log, pause/resume/stop, back to Today, delete with confirmation |
 | Complete loop | Journal form, capsule summary, elapsed summary, subtask link for roll-forward |
 | Tasks | Loose capsules, filterable flattened tree with expand/collapse and quick complete |
 | Task detail | Metrics, subtasks, open capsules, loop history, start loop from a subtask, edit, complete, archive |
