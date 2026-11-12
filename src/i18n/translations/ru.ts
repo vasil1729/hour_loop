@@ -308,13 +308,13 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.rollForwardPlaceholder':
     'Что должен подхватить следующий цикл?',
   'loopComplete.rollForwardCapsule':
-    'КАПСУЛА ДЛЯ ПЕРЕНОСА (НЕОБЯЗАТЕЛЬНО)',
-  'loopComplete.chooseFollowUpA11y': 'Выбрать капсулу для продолжения',
-  'loopComplete.noCapsuleLinked': 'Капсула не привязана',
+    'ЦЕЛЬ ДЛЯ ПЕРЕНОСА (НЕОБЯЗАТЕЛЬНО)',
+  'loopComplete.chooseFollowUpA11y': 'Выбрать цель для продолжения',
+  'loopComplete.noCapsuleLinked': 'Цель не привязана',
   'loopComplete.note': 'ЗАМЕТКА',
   'loopComplete.notePlaceholder': 'Что стоит запомнить?',
-  'loopComplete.linkFollowUp': 'Связать капсулу для продолжения',
-  'loopComplete.noFollowUp': 'Без капсулы для продолжения',
+  'loopComplete.linkFollowUp': 'Связать цель для продолжения',
+  'loopComplete.noFollowUp': 'Без цели для продолжения',
   'loopComplete.backToToday': 'Назад к «Сегодня»',
   'loopComplete.saveClose': 'Сохранить и закрыть цикл',
   'loopComplete.keepLooping': 'Продолжить цикл',
