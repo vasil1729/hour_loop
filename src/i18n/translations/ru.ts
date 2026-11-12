@@ -750,7 +750,16 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Ваши сообщения и только необходимые для запроса данные приложения отправляются выбранному провайдеру. Могут действовать тарифы и лимиты. Hour Loop не предоставляет бесплатный встроенный ИИ-сервис.',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'Другой',
   'settings.assistantCustomHint':
     'Используйте HTTPS-адрес, совместимый с OpenAI. Совместимость не гарантируется только по заявлению провайдера.',
+  'settings.assistantCompatibilityNote':
+    'Этот провайдер использует слой совместимости с OpenAI, который может быть бета-версией и поддерживать меньше возможностей. Если вызов инструментов не работает, попробуйте другого провайдера или модель.',
+  'settings.assistantOpenCodeHint':
+    'Бесплатные чат-модели OpenCode работают только внутри OpenCode. Для API используйте платную модель или подписку Go.',
 };

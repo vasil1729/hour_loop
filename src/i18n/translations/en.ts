@@ -717,7 +717,16 @@ export const en = {
     'Your messages and only the app data needed for a request are sent to the provider you configure. Provider charges and limits may apply. Hour Loop does not provide a free built-in AI service.',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'Custom',
   'settings.assistantCustomHint':
     'Use an HTTPS OpenAI-compatible endpoint. Compatibility is not guaranteed just because an endpoint uses that label.',
+  'settings.assistantCompatibilityNote':
+    'This provider uses an OpenAI compatibility layer that may be beta and support fewer features. If tool calling fails, try another provider or model.',
+  'settings.assistantOpenCodeHint':
+    'OpenCode free-tier chat models only work inside OpenCode. Use a paid model or a Go subscription for API access.',
 } as const;

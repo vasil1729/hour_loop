@@ -9,8 +9,13 @@ export const ASSISTANT_BASE_URL_KEY = 'assistant_base_url';
 export const ASSISTANT_WRITES_KEY = 'assistant_writes_enabled';
 
 export const ASSISTANT_PROVIDER_IDS: AssistantProviderId[] = [
-  'groq',
   'openai',
+  'anthropic',
+  'gemini',
+  'openrouter',
+  'groq',
+  'deepseek',
+  'opencode',
   'custom',
 ];
 
@@ -18,8 +23,13 @@ export const ASSISTANT_DEFAULT_BASE_URLS: Record<
   Exclude<AssistantProviderId, 'custom'>,
   string
 > = {
-  groq: 'https://api.groq.com/openai/v1',
   openai: 'https://api.openai.com/v1',
+  anthropic: 'https://api.anthropic.com/v1',
+  gemini: 'https://generativelanguage.googleapis.com/v1beta/openai',
+  openrouter: 'https://openrouter.ai/api/v1',
+  groq: 'https://api.groq.com/openai/v1',
+  deepseek: 'https://api.deepseek.com',
+  opencode: 'https://opencode.ai/inference/openai/v1',
 };
 
 export const ASSISTANT_MESSAGE_LIMIT = 40;
@@ -35,6 +45,11 @@ export const ASSISTANT_SUGGESTED_MODELS: Record<
   Exclude<AssistantProviderId, 'custom'>,
   string
 > = {
-  groq: 'llama-3.3-70b-versatile',
   openai: 'gpt-4o-mini',
+  anthropic: 'claude-sonnet-5-5',
+  gemini: 'gemini-3.5-flash',
+  openrouter: '~openai/gpt-sol-latest',
+  groq: 'llama-3.3-70b-versatile',
+  deepseek: 'deepseek-flash',
+  opencode: 'deepseek-v4.1-flash',
 };

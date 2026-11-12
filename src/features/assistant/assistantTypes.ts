@@ -1,6 +1,14 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-export type AssistantProviderId = 'groq' | 'openai' | 'custom';
+export type AssistantProviderId =
+  | 'openai'
+  | 'anthropic'
+  | 'gemini'
+  | 'openrouter'
+  | 'groq'
+  | 'deepseek'
+  | 'opencode'
+  | 'custom';
 
 export type AssistantConfig = {
   enabled: boolean;

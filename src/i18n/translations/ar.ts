@@ -747,7 +747,16 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'تُرسل رسائلك وبيانات التطبيق اللازمة للطلب فقط إلى المزود الذي تضبطه. قد تُطبق رسوم وحدود المزود. لا يوفر Hour Loop خدمة ذكاء اصطناعي مجانية مدمجة.',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'مخصص',
   'settings.assistantCustomHint':
     'استخدم عنوان HTTPS متوافقًا مع OpenAI. التوافق غير مضمون لمجرد أن المزود يصف نفسه كذلك.',
+  'settings.assistantCompatibilityNote':
+    'يستخدم هذا المزود طبقة توافق مع OpenAI قد تكون تجريبية وتدعم ميزات أقل. إذا فشل استدعاء الأدوات، جرّب مزودًا أو طرازًا آخر.',
+  'settings.assistantOpenCodeHint':
+    'طرازات الدردشة المجانية من OpenCode تعمل داخل OpenCode فقط. استخدم طرازًا مدفوعًا أو اشتراك Go للوصول عبر API.',
 };

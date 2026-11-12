@@ -1,4 +1,5 @@
 import type { AssistantConfig } from '../assistantTypes';
+import { ASSISTANT_SUGGESTED_MODELS } from '../../../constants/assistant';
 import { AssistantConfigError, normalizeBaseUrl } from '../storage/assistantSettings';
 import { chatCompletion } from './openAICompatibleProvider';
 import { AssistantProviderError } from './providerTypes';
@@ -81,6 +82,40 @@ describe('assistant provider configuration', () => {
       'https://api.openai.com/v1/chat/completions'
     );
   });
+
+  it.each([
+    ['anthropic', 'https://api.anthropic.com/v1/chat/completions'],
+    [
+      'gemini',
+      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    ],
+    ['openrouter', 'https://openrouter.ai/api/v1/chat/completions'],
+    ['deepseek', 'https://api.deepseek.com/chat/completions'],
+    [
+      'opencode',
+      'https://opencode.ai/inference/openai/v1/chat/completions',
+    ],
+  ] as const)(
+    'accepts a valid %s configuration',
+    async (providerId, expectedUrl) => {
+      const fetchMock = jest.fn().mockResolvedValue(
+        jsonResponse({ choices: [{ message: { content: 'OK' } }] })
+      );
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const provider = createAssistantProvider(
+        config({
+          provider: providerId,
+          model: ASSISTANT_SUGGESTED_MODELS[providerId],
+        }),
+        KEY
+      );
+      expect(provider.id).toBe(providerId);
+      await provider.test();
+
+      expect(String(fetchMock.mock.calls[0][0])).toBe(expectedUrl);
+    }
+  );
 
   it('accepts and normalizes a custom OpenAI-compatible endpoint', () => {
     expect(normalizeBaseUrl('https://ai.example.com/v1/')).toBe(

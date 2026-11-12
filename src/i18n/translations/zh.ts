@@ -650,6 +650,15 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantPrivacyBody': '你的消息以及请求所需的应用数据只会发送给你配置的服务商。可能产生服务商费用和限制。Hour Loop 不提供免费的内置 AI 服务。',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': '自定义',
   'settings.assistantCustomHint': '使用兼容 OpenAI 的 HTTPS 地址。仅因端点自称兼容并不保证兼容性。',
+  'settings.assistantCompatibilityNote':
+    '此服务商使用 OpenAI 兼容层，该层可能处于测试阶段且支持的功能较少。如果工具调用失败，请尝试其他服务商或模型。',
+  'settings.assistantOpenCodeHint':
+    'OpenCode 免费聊天模型只能在 OpenCode 内使用。通过 API 访问请使用付费模型或 Go 订阅。',
 }

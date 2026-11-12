@@ -41,8 +41,13 @@ import { Button } from '../common/Button';
 import { fontSize, radius, spacing } from '../../theme/tokens';
 
 const PROVIDERS: { id: AssistantProviderId; labelKey: TranslationKey }[] = [
-  { id: 'groq', labelKey: 'settings.assistantGroq' },
   { id: 'openai', labelKey: 'settings.assistantOpenAI' },
+  { id: 'anthropic', labelKey: 'settings.assistantAnthropic' },
+  { id: 'gemini', labelKey: 'settings.assistantGemini' },
+  { id: 'openrouter', labelKey: 'settings.assistantOpenRouter' },
+  { id: 'groq', labelKey: 'settings.assistantGroq' },
+  { id: 'deepseek', labelKey: 'settings.assistantDeepSeek' },
+  { id: 'opencode', labelKey: 'settings.assistantOpenCode' },
   { id: 'custom', labelKey: 'settings.assistantCustom' },
 ];
 
@@ -312,6 +317,18 @@ export function AssistantSettings({
           provider: t(providerLabel),
         })}
       </Text>
+
+      {config?.provider === 'opencode' ? (
+        <Text style={[styles.hint, { color: colors.textSecondary }]}>
+          {t('settings.assistantOpenCodeHint')}
+        </Text>
+      ) : null}
+
+      {config?.provider === 'anthropic' || config?.provider === 'gemini' ? (
+        <Text style={[styles.hint, { color: colors.textSecondary }]}>
+          {t('settings.assistantCompatibilityNote')}
+        </Text>
+      ) : null}
 
       <TextInput
         value={apiKeyDraft}

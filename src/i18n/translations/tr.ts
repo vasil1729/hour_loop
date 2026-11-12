@@ -702,7 +702,16 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Mesajlarınız ve bir istek için gereken uygulama verileri yalnızca yapılandırdığınız sağlayıcıya gönderilir. Sağlayıcı ücretleri ve sınırları geçerli olabilir. Hour Loop ücretsiz yerleşik bir yapay zekâ hizmeti sunmaz.',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'Özel',
   'settings.assistantCustomHint':
     'HTTPS destekli, OpenAI uyumlu bir adres kullanın. Bir uç noktanın kendisini uyumlu olarak adlandırması uyumluluğu garanti etmez.',
+  'settings.assistantCompatibilityNote':
+    'Bu sağlayıcı, beta olabilecek ve daha az özellik destekleyebilecek bir OpenAI uyumluluk katmanı kullanır. Araç çağrısı başarısız olursa başka bir sağlayıcı veya model deneyin.',
+  'settings.assistantOpenCodeHint':
+    'OpenCode ücretsiz sohbet modelleri yalnızca OpenCode içinde çalışır. API erişimi için ücretli bir model veya Go aboneliği kullanın.',
 }

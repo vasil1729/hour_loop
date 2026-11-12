@@ -40,6 +40,18 @@ describe('assistant settings', () => {
     expect(assistantConfigIsUsable(config)).toBe(false);
   });
 
+  it('loads a supported provider id', async () => {
+    mockGetSetting.mockImplementation(async (_db, key) => {
+      if (key === 'assistant_provider') return 'opencode';
+      if (key === 'assistant_model') return 'deepseek-v4.1-flash';
+      return null;
+    });
+
+    const config = await loadAssistantConfig(db);
+    expect(config.provider).toBe('opencode');
+    expect(config.model).toBe('deepseek-v4.1-flash');
+  });
+
   it('persists only non-secret assistant_* settings', async () => {
     await saveAssistantConfig(db, {
       enabled: true,

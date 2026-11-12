@@ -95,6 +95,11 @@ describe('assistant settings UI', () => {
     expect(await screen.findByText('settings.assistantEnable')).toBeTruthy();
     expect(screen.getByText('settings.assistantGroq')).toBeTruthy();
     expect(screen.getByText('settings.assistantOpenAI')).toBeTruthy();
+    expect(screen.getByText('settings.assistantAnthropic')).toBeTruthy();
+    expect(screen.getByText('settings.assistantGemini')).toBeTruthy();
+    expect(screen.getByText('settings.assistantOpenRouter')).toBeTruthy();
+    expect(screen.getByText('settings.assistantDeepSeek')).toBeTruthy();
+    expect(screen.getByText('settings.assistantOpenCode')).toBeTruthy();
     expect(screen.getByText('settings.assistantCustom')).toBeTruthy();
   });
 

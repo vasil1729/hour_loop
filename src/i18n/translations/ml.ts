@@ -729,7 +729,16 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
     'നിങ്ങളുടെ സന്ദേശങ്ങളും ഒരു അഭ്യർത്ഥനയ്ക്ക് ആവശ്യമായ ആപ്പ് ഡാറ്റയും മാത്രം നിങ്ങൾ കോൺഫിഗർ ചെയ്ത ദാതാവിന് അയയ്ക്കുന്നു. ദാതാവിന്റെ നിരക്കുകളും പരിധികളും ബാധകമായേക്കാം. Hour Loop സൗജന്യ ബിൽറ്റ്-ഇൻ AI സേവനം നൽകുന്നില്ല.',
   'settings.assistantGroq': 'Groq',
   'settings.assistantOpenAI': 'OpenAI',
+  'settings.assistantAnthropic': 'Anthropic',
+  'settings.assistantGemini': 'Google Gemini',
+  'settings.assistantOpenRouter': 'OpenRouter',
+  'settings.assistantDeepSeek': 'DeepSeek',
+  'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'ഇഷ്ടാനുസൃതം',
   'settings.assistantCustomHint':
     'HTTPS OpenAI-അനുയോജ്യമായ വിലാസം ഉപയോഗിക്കുക. ഒരു എൻഡ്പോയിന്റ് സ്വയം അനുയോജ്യമെന്ന് പറയുന്നത് മാത്രം അനുയോജ്യത ഉറപ്പാക്കുന്നില്ല.',
+  'settings.assistantCompatibilityNote':
+    'ഈ ദാതാവ് ബീറ്റ ആയിരിക്കാവുന്നതും കുറഞ്ഞ സവിശേഷതകൾ പിന്തുണയ്ക്കാവുന്നതുമായ OpenAI അനുയോജ്യതാ ലെയർ ഉപയോഗിക്കുന്നു. ടൂൾ കോൾ പരാജയപ്പെട്ടാൽ മറ്റൊരു ദാതാവോ മോഡലോ പരീക്ഷിക്കുക.',
+  'settings.assistantOpenCodeHint':
+    'OpenCode സൗജന്യ ചാറ്റ് മോഡലുകൾ OpenCode-നുള്ളിൽ മാത്രമേ പ്രവർത്തിക്കൂ. API ആക്സസിനായി പണമടച്ച മോഡലോ Go സബ്സ്ക്രിപ്ഷനോ ഉപയോഗിക്കുക.',
 }
