@@ -29,8 +29,9 @@ IDLE → ACTIVE → PAUSED → ACTIVE → COMPLETED
 - **Pause** closes the open interval. Elapsed time stops growing.
 - **Resume** opens a new interval.
 - **Stop** freezes the timer and opens the completion journal.
+- **Target reached** pauses the loop automatically at the exact target instant. It does not keep accumulating overtime, and it cannot be resumed past the target.
 - **Save & close** writes the journal and marks the loop complete.
-- **Keep looping** returns to the active loop and resumes timing if it was paused.
+- **Keep looping** returns to the active loop and resumes timing if it was paused before the target.
 
 ### Completion journal
 

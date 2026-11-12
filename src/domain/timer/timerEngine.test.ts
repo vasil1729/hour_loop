@@ -7,6 +7,7 @@ import {
   localMidnightAfter,
   progressRatio,
   remainingSeconds,
+  targetTimeForIntervals,
   type IntervalRecord,
 } from './timerEngine';
 
@@ -211,6 +212,59 @@ describe('formatElapsed', () => {
 
   it('floors fractional seconds', () => {
     expect(formatElapsed(59.9)).toBe('00:00:59');
+  });
+});
+
+describe('targetTimeForIntervals', () => {
+  it('finds the target inside a closed interval', () => {
+    const result = targetTimeForIntervals(
+      [
+        interval({
+          started_at: '2026-01-01T10:00:00.000Z',
+          ended_at: '2026-01-01T11:00:00.000Z',
+        }),
+      ],
+      1800
+    );
+    expect(result?.toISOString()).toBe('2026-01-01T10:30:00.000Z');
+  });
+
+  it('uses referenceTime for an open interval', () => {
+    const result = targetTimeForIntervals(
+      [interval({ started_at: '2026-01-01T10:00:00.000Z', ended_at: null })],
+      900,
+      new Date('2026-01-01T10:30:00.000Z')
+    );
+    expect(result?.toISOString()).toBe('2026-01-01T10:15:00.000Z');
+  });
+
+  it('continues across paused gaps', () => {
+    const result = targetTimeForIntervals(
+      [
+        interval({
+          id: 'a',
+          started_at: '2026-01-01T10:00:00.000Z',
+          ended_at: '2026-01-01T10:10:00.000Z',
+        }),
+        interval({
+          id: 'b',
+          started_at: '2026-01-01T10:20:00.000Z',
+          ended_at: '2026-01-01T10:40:00.000Z',
+        }),
+      ],
+      900
+    );
+    expect(result?.toISOString()).toBe('2026-01-01T10:25:00.000Z');
+  });
+
+  it('returns null before the target is reached', () => {
+    expect(
+      targetTimeForIntervals(
+        [interval({ started_at: '2026-01-01T10:00:00.000Z', ended_at: null })],
+        3600,
+        new Date('2026-01-01T10:10:00.000Z')
+      )
+    ).toBeNull();
   });
 });
 

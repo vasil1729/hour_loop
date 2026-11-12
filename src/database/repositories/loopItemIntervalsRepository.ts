@@ -83,3 +83,23 @@ export async function getAllLoopItemIntervals(
     `${SELECT_INTERVAL} ORDER BY started_at ASC`
   );
 }
+
+/** The capsule-interval equivalent of truncateIntervalsAfter. */
+export async function truncateLoopItemIntervalsAfter(
+  db: SQLiteDatabase,
+  loopId: string,
+  endedAt: string
+): Promise<void> {
+  await db.runAsync(
+    'DELETE FROM loop_item_intervals WHERE loop_id = ? AND started_at >= ?',
+    [loopId, endedAt]
+  );
+  await db.runAsync(
+    `UPDATE loop_item_intervals
+     SET ended_at = ?
+     WHERE loop_id = ?
+       AND started_at < ?
+       AND (ended_at IS NULL OR ended_at > ?)`,
+    [endedAt, loopId, endedAt, endedAt]
+  );
+}

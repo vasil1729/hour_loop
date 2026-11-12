@@ -128,6 +128,45 @@ export function formatDurationWithSeconds(totalSeconds: number): string {
 }
 
 /**
+ * The instant at which cumulative active time first reaches the target.
+ * Returns null when the target has not been reached yet.
+ */
+export function targetTimeForIntervals(
+  intervals: IntervalRecord[],
+  targetSeconds: number,
+  referenceTime: Date = new Date()
+): Date | null {
+  const target = Math.max(0, Math.floor(targetSeconds));
+  if (target <= 0) {
+    return null;
+  }
+
+  const ordered = [...intervals].sort((a, b) =>
+    a.started_at.localeCompare(b.started_at)
+  );
+  let elapsed = 0;
+
+  for (const interval of ordered) {
+    const start = Date.parse(interval.started_at);
+    const end = interval.ended_at
+      ? Date.parse(interval.ended_at)
+      : referenceTime.getTime();
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+      continue;
+    }
+
+    const duration = (end - start) / 1000;
+    if (elapsed + duration >= target) {
+      const secondsIntoInterval = Math.max(0, target - elapsed);
+      return new Date(start + secondsIntoInterval * 1000);
+    }
+    elapsed += duration;
+  }
+
+  return null;
+}
+
+/**
  * The UTC instant of the next local midnight in the given IANA time zone.
  */
 export function localMidnightAfter(date: Date, timeZone: string): Date {

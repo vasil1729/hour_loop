@@ -116,6 +116,21 @@ function createHarness() {
         state.intervals
           .filter((interval) => interval.loop_id === loopId)
           .sort((a, b) => a.started_at.localeCompare(b.started_at)),
+      truncateIntervalsAfter: async (_db, loopId, endedAt) => {
+        state.intervals = state.intervals.filter(
+          (interval) =>
+            interval.loop_id !== loopId || interval.started_at < endedAt
+        );
+        for (const interval of state.intervals) {
+          if (
+            interval.loop_id === loopId &&
+            interval.started_at < endedAt &&
+            (interval.ended_at === null || interval.ended_at > endedAt)
+          ) {
+            interval.ended_at = endedAt;
+          }
+        }
+      },
     },
     tasks: {
       getTaskById: async (_db, id) => {
@@ -171,6 +186,21 @@ function createHarness() {
         state.itemIntervals.find(
           (interval) => interval.loop_id === loopId && interval.ended_at === null
         ) ?? null,
+      truncateLoopItemIntervalsAfter: async (_db, loopId, endedAt) => {
+        state.itemIntervals = state.itemIntervals.filter(
+          (interval) =>
+            interval.loop_id !== loopId || interval.started_at < endedAt
+        );
+        for (const interval of state.itemIntervals) {
+          if (
+            interval.loop_id === loopId &&
+            interval.started_at < endedAt &&
+            (interval.ended_at === null || interval.ended_at > endedAt)
+          ) {
+            interval.ended_at = endedAt;
+          }
+        }
+      },
     },
   };
 
@@ -350,6 +380,45 @@ describe('loopService', () => {
     const second = await service.startLoop(db, { targetDurationSeconds: 600 });
 
     expect(second.sequence_number).toBe(2);
+  });
+
+  it('pauses exactly at the target when auto-stopped', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+
+    harness.advanceSeconds(90);
+    const paused = await service.pauseAtTarget(db, loop.id);
+
+    expect(paused.status).toBe('PAUSED');
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
+    expect(harness.state.intervals[0]?.ended_at).toBe(
+      '2026-01-01T10:01:00.000Z'
+    );
+  });
+
+  it('does not pause before the target', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+
+    harness.advanceSeconds(30);
+    const unchanged = await service.pauseAtTarget(db, loop.id);
+
+    expect(unchanged.status).toBe('ACTIVE');
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(30);
+  });
+
+  it('trims overtime when the pause action lands after the target', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+
+    harness.advanceSeconds(75);
+    const paused = await service.pauseLoop(db, loop.id);
+
+    expect(paused.status).toBe('PAUSED');
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
   });
 
   it('persists the completion journal fields', async () => {

@@ -5,6 +5,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { getIntervalsForLoop } from '../database/repositories/intervalsRepository';
 import { calculateElapsedSeconds } from '../domain/timer/timerEngine';
 import type { LoopInterval } from '../domain/types';
+import { loopService } from '../features/loops/loopService';
+import { syncLoopNotification } from '../services/notifications/notificationService';
 import { useLoopStore } from '../store/loopStore';
 
 /**
@@ -23,6 +25,7 @@ export function useActiveLoop() {
 
   const loopId = activeLoop?.id;
   const loopStatus = activeLoop?.status;
+  const targetSeconds = activeLoop?.target_duration_seconds ?? 0;
 
   useFocusEffect(
     useCallback(() => {
@@ -35,10 +38,21 @@ export function useActiveLoop() {
         }
         const nextIntervals = await getIntervalsForLoop(db, loopId);
         if (cancelled) return;
-        setIntervals(nextIntervals);
+
         if (loopStatus === 'ACTIVE') {
-          setElapsedSeconds(calculateElapsedSeconds(nextIntervals, new Date()));
+          const elapsed = calculateElapsedSeconds(nextIntervals, new Date());
+          if (elapsed >= targetSeconds) {
+            const paused = await loopService.pauseAtTarget(db, loopId);
+            await syncLoopNotification(db, paused).catch(() => undefined);
+            await refresh(db);
+            return;
+          }
+          setIntervals(nextIntervals);
+          setElapsedSeconds(elapsed);
+          return;
         }
+
+        setIntervals(nextIntervals);
       };
 
       void refresh(db);
@@ -58,7 +72,7 @@ export function useActiveLoop() {
         cancelled = true;
         clearInterval(timer);
       };
-    }, [db, loopId, loopStatus, refresh, setElapsedSeconds])
+    }, [db, loopId, loopStatus, refresh, setElapsedSeconds, targetSeconds])
   );
 
   return { activeLoop, elapsedSeconds, loading, refresh, intervals };

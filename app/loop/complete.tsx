@@ -226,6 +226,7 @@ export default function CompleteLoopScreen() {
   }
 
   const readOnly = loop.status === 'COMPLETED';
+  const targetReached = elapsedSeconds >= loop.target_duration_seconds;
 
   return (
     <Screen contentContainerStyle={styles.content}>
@@ -250,6 +251,21 @@ export default function CompleteLoopScreen() {
         >
           <Text style={[styles.noticeText, { color: colors.accent }]}>
             This loop is already complete. Its journal is shown below.
+          </Text>
+        </View>
+      ) : null}
+      {!readOnly && targetReached ? (
+        <View
+          style={[
+            styles.notice,
+            {
+              backgroundColor: colors.surfaceAlt,
+              borderColor: colors.success,
+            },
+          ]}
+        >
+          <Text style={[styles.noticeText, { color: colors.success }]}>
+            Target reached. The timer stopped at your target.
           </Text>
         </View>
       ) : null}
@@ -386,7 +402,7 @@ export default function CompleteLoopScreen() {
         }}
         loading={busy}
       />
-      {!readOnly ? (
+      {!readOnly && !targetReached ? (
         <Button
           label="Keep looping"
           variant="ghost"

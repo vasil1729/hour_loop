@@ -178,7 +178,11 @@ export default function TodayScreen() {
                 <View style={[styles.dot, { backgroundColor: colors.accent }]} />
                 <Text style={[styles.activeLabel, { color: colors.accent }]}>
                   H{activeLoop.sequence_number} ·{' '}
-                  {activeLoop.status === 'PAUSED' ? 'PAUSED' : 'IN PROGRESS'}
+                  {activeTargetReached
+                    ? 'TARGET REACHED'
+                    : activeLoop.status === 'PAUSED'
+                      ? 'PAUSED'
+                      : 'IN PROGRESS'}
                 </Text>
               </View>
               <Text style={[styles.activeElapsed, { color: colors.text }]}>
@@ -230,38 +234,40 @@ export default function TodayScreen() {
               </Text>
             </Pressable>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                activeLoop.status === 'ACTIVE' ? 'Pause loop' : 'Resume loop'
-              }
-              accessibilityState={{
-                busy: loopActionBusy,
-                disabled: loopActionBusy,
-              }}
-              disabled={loopActionBusy}
-              onPress={() => {
-                void handleToggleLoop();
-              }}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.loopActionButton,
-                {
-                  backgroundColor: colors.surface,
-                  opacity: loopActionBusy ? 0.6 : pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-              {loopActionBusy ? (
-                <ActivityIndicator size="small" color={colors.accent} />
-              ) : (
-                <Ionicons
-                  name={activeLoop.status === 'ACTIVE' ? 'pause' : 'play'}
-                  size={16}
-                  color={colors.accent}
-                />
-              )}
-            </Pressable>
+            {!activeTargetReached ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  activeLoop.status === 'ACTIVE' ? 'Pause loop' : 'Resume loop'
+                }
+                accessibilityState={{
+                  busy: loopActionBusy,
+                  disabled: loopActionBusy,
+                }}
+                disabled={loopActionBusy}
+                onPress={() => {
+                  void handleToggleLoop();
+                }}
+                hitSlop={8}
+                style={({ pressed }) => [
+                  styles.loopActionButton,
+                  {
+                    backgroundColor: colors.surface,
+                    opacity: loopActionBusy ? 0.6 : pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                {loopActionBusy ? (
+                  <ActivityIndicator size="small" color={colors.accent} />
+                ) : (
+                  <Ionicons
+                    name={activeLoop.status === 'ACTIVE' ? 'pause' : 'play'}
+                    size={16}
+                    color={colors.accent}
+                  />
+                )}
+              </Pressable>
+            ) : null}
           </View>
         </View>
       ) : (

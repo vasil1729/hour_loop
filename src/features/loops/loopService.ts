@@ -10,7 +10,10 @@ import {
   toLocalDateKey,
 } from '../../domain/shared/dateUtils';
 import { createId } from '../../domain/shared/id';
-import { calculateElapsedSeconds } from '../../domain/timer/timerEngine';
+import {
+  calculateElapsedSeconds,
+  targetTimeForIntervals,
+} from '../../domain/timer/timerEngine';
 import * as loopsRepository from '../../database/repositories/loopsRepository';
 import type { LoopJournalPatch } from '../../database/repositories/loopsRepository';
 import * as intervalsRepository from '../../database/repositories/intervalsRepository';
@@ -97,6 +100,7 @@ type IntervalRepositoryPort = {
   createInterval: typeof intervalsRepository.createInterval;
   closeOpenInterval: typeof intervalsRepository.closeOpenInterval;
   getIntervalsForLoop: typeof intervalsRepository.getIntervalsForLoop;
+  truncateIntervalsAfter: typeof intervalsRepository.truncateIntervalsAfter;
 };
 
 type LoopItemRepositoryPort = {
@@ -111,6 +115,7 @@ type LoopItemIntervalRepositoryPort = {
   createLoopItemInterval: typeof loopItemIntervalsRepository.createLoopItemInterval;
   closeOpenLoopItemIntervals: typeof loopItemIntervalsRepository.closeOpenLoopItemIntervals;
   getOpenLoopItemInterval: typeof loopItemIntervalsRepository.getOpenLoopItemInterval;
+  truncateLoopItemIntervalsAfter: typeof loopItemIntervalsRepository.truncateLoopItemIntervalsAfter;
 };
 
 type TaskRepositoryPort = {
@@ -142,6 +147,7 @@ const defaultDeps: LoopServiceDeps = {
 export type LoopService = {
   startLoop: (db: SQLiteDatabase, input: StartLoopInput) => Promise<Loop>;
   pauseLoop: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
+  pauseAtTarget: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
   resumeLoop: (db: SQLiteDatabase, loopId: string) => Promise<Loop>;
   completeLoop: (
     db: SQLiteDatabase,
@@ -220,6 +226,34 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       created_at: startedAt,
     };
     await deps.itemIntervals.createLoopItemInterval(db, interval);
+  }
+
+  async function pauseAtTargetInternal(
+    db: SQLiteDatabase,
+    loop: Loop,
+    intervals: LoopInterval[]
+  ): Promise<Loop> {
+    const targetAt = targetTimeForIntervals(
+      intervals,
+      loop.target_duration_seconds,
+      deps.now()
+    );
+    if (!targetAt) {
+      return loop;
+    }
+
+    const targetIso = targetAt.toISOString();
+    await db.withTransactionAsync(async () => {
+      await deps.intervals.truncateIntervalsAfter(db, loop.id, targetIso);
+      await deps.itemIntervals.truncateLoopItemIntervalsAfter(
+        db,
+        loop.id,
+        targetIso
+      );
+      await deps.loops.updateLoopStatus(db, loop.id, 'PAUSED', null);
+    });
+
+    return requireLoop(db, loop.id);
   }
 
   return {
@@ -307,6 +341,12 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         );
       }
 
+      const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
+      const elapsed = calculateElapsedSeconds(intervals, deps.now());
+      if (elapsed >= loop.target_duration_seconds) {
+        return pauseAtTargetInternal(db, loop, intervals);
+      }
+
       const endedAt = deps.now().toISOString();
       await db.withTransactionAsync(async () => {
         await deps.intervals.closeOpenInterval(db, loopId, endedAt);
@@ -315,6 +355,15 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       });
 
       return requireLoop(db, loopId);
+    },
+
+    async pauseAtTarget(db, loopId) {
+      const loop = await requireLoop(db, loopId);
+      if (loop.status !== 'ACTIVE') {
+        return loop;
+      }
+      const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
+      return pauseAtTargetInternal(db, loop, intervals);
     },
 
     async resumeLoop(db, loopId) {

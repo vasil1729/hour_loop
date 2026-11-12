@@ -13,13 +13,21 @@ export async function recoverAppState(
   db: SQLiteDatabase,
   options: { requestPermission?: boolean } = {}
 ): Promise<void> {
+  let activeLoop = await loopService.getActiveLoop(db);
+  if (activeLoop && activeLoop.status === 'ACTIVE') {
+    const elapsed = await loopService.getElapsedSeconds(db, activeLoop.id);
+    if (elapsed >= activeLoop.target_duration_seconds) {
+      activeLoop = await loopService.pauseAtTarget(db, activeLoop.id);
+    }
+  }
+
   await useLoopStore.getState().refresh(db);
-  const activeLoop = useLoopStore.getState().activeLoop;
-  if (activeLoop) {
+  const currentLoop = useLoopStore.getState().activeLoop;
+  if (currentLoop) {
     await loopService
-      .ensureCurrentItemInterval(db, activeLoop.id)
+      .ensureCurrentItemInterval(db, currentLoop.id)
       .catch(() => undefined);
-    await syncLoopNotification(db, activeLoop, options);
+    await syncLoopNotification(db, currentLoop, options);
   }
 }
 

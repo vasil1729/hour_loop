@@ -207,17 +207,24 @@ export default function ActiveLoopScreen() {
           style={[
             styles.statusPill,
             {
-              backgroundColor: isPaused ? colors.surfaceAlt : colors.accentSoft,
+              backgroundColor:
+                isPaused || reachedTarget ? colors.surfaceAlt : colors.accentSoft,
             },
           ]}
         >
           <Text
             style={[
               styles.statusText,
-              { color: isPaused ? colors.textSecondary : colors.accent },
+              {
+                color: reachedTarget
+                  ? colors.success
+                  : isPaused
+                    ? colors.textSecondary
+                    : colors.accent,
+              },
             ]}
           >
-            {isPaused ? 'PAUSED' : reachedTarget ? 'TARGET REACHED' : 'FOCUSING'}
+            {reachedTarget ? 'TARGET REACHED' : isPaused ? 'PAUSED' : 'FOCUSING'}
           </Text>
         </View>
       </View>
@@ -314,6 +321,7 @@ export default function ActiveLoopScreen() {
 
       <LoopControls
         status={isPaused ? 'PAUSED' : 'ACTIVE'}
+        targetReached={reachedTarget}
         busy={busy}
         onPause={() => {
           void runAction(async () => {

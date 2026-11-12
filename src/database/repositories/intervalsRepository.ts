@@ -92,3 +92,27 @@ export async function getAllIntervals(db: SQLiteDatabase): Promise<LoopInterval[
     `${SELECT_INTERVAL} ORDER BY started_at ASC`
   );
 }
+
+/**
+ * Keep only the portion of a loop's interval history up to `endedAt`.
+ * Later intervals are deleted and a spanning/open interval is closed at the
+ * cutoff, which is used when a loop reaches its target.
+ */
+export async function truncateIntervalsAfter(
+  db: SQLiteDatabase,
+  loopId: string,
+  endedAt: string
+): Promise<void> {
+  await db.runAsync(
+    'DELETE FROM loop_intervals WHERE loop_id = ? AND started_at >= ?',
+    [loopId, endedAt]
+  );
+  await db.runAsync(
+    `UPDATE loop_intervals
+     SET ended_at = ?
+     WHERE loop_id = ?
+       AND started_at < ?
+       AND (ended_at IS NULL OR ended_at > ?)`,
+    [endedAt, loopId, endedAt, endedAt]
+  );
+}
