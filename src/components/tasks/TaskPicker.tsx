@@ -194,6 +194,7 @@ const styles = StyleSheet.create({
   },
   taskBody: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   taskTitle: {

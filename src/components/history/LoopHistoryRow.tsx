@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     minWidth: 42,
+    flexShrink: 0,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.sm,
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   title: {
@@ -103,6 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   duration: {
+    flexShrink: 0,
     fontSize: 13,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],

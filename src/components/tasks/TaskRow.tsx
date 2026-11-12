@@ -112,7 +112,12 @@ export function TaskRow({
         ) : null}
       </View>
 
-      <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+      <Ionicons
+        name="chevron-forward"
+        size={16}
+        color={colors.textSecondary}
+        style={styles.trailing}
+      />
     </Pressable>
   );
 }
@@ -135,6 +140,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   title: {
@@ -144,5 +150,8 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 11,
     fontWeight: '600',
+  },
+  trailing: {
+    flexShrink: 0,
   },
 });

@@ -214,10 +214,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   eventLabel: {
+    flexShrink: 1,
     fontSize: 13,
     fontWeight: '600',
   },
   eventTime: {
+    flexShrink: 0,
     fontSize: 12,
     fontVariant: ['tabular-nums'],
   },

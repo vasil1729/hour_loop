@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 1,
+    textAlign: 'center',
   },
   divider: {
     width: StyleSheet.hairlineWidth,

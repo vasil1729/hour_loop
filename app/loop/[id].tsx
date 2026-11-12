@@ -286,6 +286,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   itemsCount: {
+    flexShrink: 0,
     fontSize: 11,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],

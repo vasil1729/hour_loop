@@ -532,6 +532,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   label: {
+    flexShrink: 1,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,
@@ -543,6 +544,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   itemsCount: {
+    flexShrink: 0,
     fontSize: 11,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],

@@ -577,10 +577,12 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionTitle: {
+    flexShrink: 1,
     fontSize: 17,
     fontWeight: '700',
   },
   sectionMeta: {
+    flexShrink: 0,
     fontSize: 11,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
