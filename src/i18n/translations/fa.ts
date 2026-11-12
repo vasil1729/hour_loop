@@ -572,6 +572,8 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'چطور می‌توانم کمک کنم؟',
   'assistant.emptyBody':
     'درباره زمان تمرکز، کارها یا کپسول‌های خود بپرسید. نوشتن و تغییر زمان‌سنج همیشه نیاز به تأیید شما دارد.',
+  'assistant.scopeNote':
+    'فقط Hour Loop: پرسش‌های دانش عمومی و نامرتبط پذیرفته نمی‌شوند.',
   'assistant.privacyNote':
     'پیام‌ها و زمینه انتخاب‌شده برنامه به سرویس‌دهنده پیکربندی‌شده شما فرستاده می‌شوند. دستیار هرگز دسترسی مستقیم به پایگاه داده، فایل یا شل ندارد.',
   'assistant.suggestStats': 'امروز چقدر تمرکز کردم؟',

@@ -582,6 +582,8 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'Como posso ajudar?',
   'assistant.emptyBody':
     'Pergunte sobre seu tempo de foco, tarefas ou cápsulas. Alterações nos dados e no cronômetro sempre exigem sua confirmação.',
+  'assistant.scopeNote':
+    'Apenas Hour Loop: perguntas de conhecimento geral e não relacionadas são recusadas.',
   'assistant.privacyNote':
     'Mensagens e o contexto selecionado do app são enviados ao provedor configurado. O assistente nunca tem acesso direto ao banco de dados, aos arquivos ou ao shell.',
   'assistant.suggestStats': 'Quanto tempo eu foquei hoje?',

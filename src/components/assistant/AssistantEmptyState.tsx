@@ -35,6 +35,9 @@ export function AssistantEmptyState({
       <Text style={[styles.body, { color: colors.textSecondary }]}>
         {t('assistant.emptyBody')}
       </Text>
+      <Text style={[styles.scope, { color: colors.textSecondary }]}>
+        {t('assistant.scopeNote')}
+      </Text>
       <SuggestedPrompts onSelect={onSelectPrompt} />
       <Text style={[styles.privacy, { color: colors.textSecondary }]}>
         {t('assistant.privacyNote')}
@@ -65,6 +68,11 @@ const styles = StyleSheet.create({
   body: {
     fontSize: fontSize.sm,
     lineHeight: lineHeight.body,
+  },
+  scope: {
+    fontSize: fontSize.xs,
+    lineHeight: 17,
+    fontWeight: '600',
   },
   privacy: {
     fontSize: fontSize.xs,

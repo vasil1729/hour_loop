@@ -582,6 +582,8 @@ export const es: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': '¿En qué puedo ayudarte?',
   'assistant.emptyBody':
     'Pregunta sobre tu tiempo de enfoque, tus tareas o tus cápsulas. Las acciones de escritura y los cambios del temporizador siempre requieren tu confirmación.',
+  'assistant.scopeNote':
+    'Solo Hour Loop: se rechazan las preguntas de conocimiento general y las no relacionadas.',
   'assistant.privacyNote':
     'Los mensajes y el contexto de la aplicación seleccionado se envían al proveedor que configures. El asistente nunca tiene acceso directo a la base de datos, los archivos ni el shell.',
   'assistant.suggestStats': '¿Cuánto me he enfocado hoy?',

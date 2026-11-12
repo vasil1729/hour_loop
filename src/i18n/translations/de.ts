@@ -573,6 +573,8 @@ export const de: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'Wobei kann ich helfen?',
   'assistant.emptyBody':
     'Frage nach deiner Fokuszeit, deinen Aufgaben oder Kapseln. Schreib- und Timer-Aktionen erfordern immer deine Bestätigung.',
+  'assistant.scopeNote':
+    'Nur Hour Loop: Allgemeinwissen und unbezogene Fragen werden abgelehnt.',
   'assistant.privacyNote':
     'Nachrichten und ausgewählter App-Kontext werden an deinen konfigurierten Anbieter gesendet. Der Assistent erhält nie direkten Zugriff auf Datenbanken, Dateien oder die Shell.',
   'assistant.suggestStats': 'Wie viel habe ich heute fokussiert?',

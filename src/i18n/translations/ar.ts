@@ -599,6 +599,8 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'كيف يمكنني المساعدة؟',
   'assistant.emptyBody':
     'اسأل عن وقت التركيز أو المهام أو الكبسولات. تتطلب الكتابة وتغييرات المؤقت تأكيدك دائمًا.',
+  'assistant.scopeNote':
+    'Hour Loop فقط: الأسئلة العامة وغير المتعلقة غير مدعومة.',
   'assistant.privacyNote':
     'تُرسل الرسائل وسياق التطبيق المحدد إلى المزود الذي تضبطه. لا يحصل المساعد على وصول مباشر إلى قاعدة البيانات أو الملفات أو الطرفية.',
   'assistant.suggestStats': 'كم ركزت اليوم؟',

@@ -545,6 +545,8 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'Nasıl yardımcı olabilirim?',
   'assistant.emptyBody':
     'Odak sürenizi, görevlerinizi veya kapsüllerinizi sorun. Yazma ve zamanlayıcı değişiklikleri her zaman onayınızı gerektirir.',
+  'assistant.scopeNote':
+    'Yalnızca Hour Loop: genel bilgi ve ilgisiz sorular yanıtlanmaz.',
   'assistant.privacyNote':
     'Mesajlar ve seçilen uygulama bağlamı yapılandırdığınız sağlayıcıya gönderilir. Asistanın veritabanına, dosyalara veya kabuğa doğrudan erişimi yoktur.',
   'assistant.suggestStats': 'Bugün ne kadar odaklandım?',

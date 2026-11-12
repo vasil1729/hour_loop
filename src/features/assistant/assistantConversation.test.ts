@@ -94,6 +94,33 @@ function makeTool(
 }
 
 describe('assistant conversation tool loop', () => {
+  it('enforces the Hour Loop-only scope in the system prompt', async () => {
+    const provider = scriptedProvider([
+      {
+        content: 'I can only help with Hour Loop.',
+        toolCalls: [],
+        finishReason: 'stop',
+      },
+    ]);
+
+    await runAssistantTurn({
+      db,
+      config: config(),
+      apiKey: 'sk-test-key',
+      history: [],
+      text: 'What is the capital of Delhi?',
+      provider,
+      tools: [],
+    });
+
+    const system = provider.requests[0]?.messages.find(
+      (message) => message.role === 'system'
+    )?.content;
+    expect(system).toContain('only permitted domain is Hour Loop');
+    expect(system).toContain('Do not answer general knowledge');
+    expect(system).toContain('capitals of countries');
+  });
+
   it('executes an allowed read tool automatically', async () => {
     const readTool = makeTool('get_status', 'read', {
       execute: jest.fn(async () => ({ summary: 'Active loop H2.' })),

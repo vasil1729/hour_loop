@@ -586,6 +586,8 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': 'Comment puis-je vous aider ?',
   'assistant.emptyBody':
     'Posez des questions sur votre temps de concentration, vos tâches ou vos capsules. Les modifications et les changements de minuteur nécessitent toujours votre confirmation.',
+  'assistant.scopeNote':
+    'Hour Loop uniquement : les questions de culture générale et hors sujet sont refusées.',
   'assistant.privacyNote':
     'Les messages et le contexte sélectionné de l’application sont envoyés au fournisseur que vous avez configuré. L’assistant n’a jamais accès directement à la base de données, aux fichiers ni au shell.',
   'assistant.suggestStats':

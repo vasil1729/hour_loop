@@ -570,6 +570,8 @@ export const en = {
   'assistant.emptyTitle': 'What can I help with?',
   'assistant.emptyBody':
     'Ask about your focus time, tasks, or capsules. Writes and timer changes always require your confirmation.',
+  'assistant.scopeNote':
+    'Hour Loop only: general knowledge and unrelated questions are refused.',
   'assistant.privacyNote':
     'Messages and selected app context are sent to your configured provider. The assistant never gets direct database, file, or shell access.',
   'assistant.suggestStats': 'How much did I focus today?',
