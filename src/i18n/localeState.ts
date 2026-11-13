@@ -11,6 +11,8 @@ export const SUPPORTED_LANGUAGES = [
   'pt',
   'fa',
   'de',
+  'si',
+  'ta',
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];

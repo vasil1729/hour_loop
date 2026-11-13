@@ -25,6 +25,8 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'common.chinese': '中文',
   'common.turkish': 'Türkçe',
   'common.malayalam': 'മലയാളം',
+  'common.sinhala': 'සිංහල',
+  'common.tamil': 'தமிழ்',
   'common.pleaseTryAgain': '请重试。',
   'common.loading': '正在加载…',
   'common.confirm': '确认',

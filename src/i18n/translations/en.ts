@@ -27,6 +27,8 @@ export const en = {
   'common.portuguese': 'Português',
   'common.persian': 'فارسی',
   'common.german': 'Deutsch',
+  'common.sinhala': 'සිංහල',
+  'common.tamil': 'தமிழ்',
   'common.pleaseTryAgain': 'Please try again.',
   'common.loading': 'Loading…',
   'common.confirm': 'Confirm',

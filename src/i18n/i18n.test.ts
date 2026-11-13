@@ -25,6 +25,8 @@ import { it as itTranslations } from './translations/it';
 import { ml } from './translations/ml';
 import { pt } from './translations/pt';
 import { ru } from './translations/ru';
+import { si } from './translations/si';
+import { ta } from './translations/ta';
 import { tr } from './translations/tr';
 import { zh } from './translations/zh';
 import type { TranslationEntry, TranslationKey } from './types';
@@ -46,6 +48,8 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('system', 'pt-BR')).toBe('pt');
     expect(resolveLanguage('system', 'fa-IR')).toBe('fa');
     expect(resolveLanguage('system', 'de-DE')).toBe('de');
+    expect(resolveLanguage('system', 'si-LK')).toBe('si');
+    expect(resolveLanguage('system', 'ta-IN')).toBe('ta');
     expect(resolveLanguage('system', 'fr-CA')).toBe('fr');
     expect(resolveLanguage('system', null)).toBe('en');
   });
@@ -61,6 +65,8 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('es', 'pt-BR')).toBe('es');
     expect(resolveLanguage('pt', 'fa-IR')).toBe('pt');
     expect(resolveLanguage('fa', 'de-DE')).toBe('fa');
+    expect(resolveLanguage('si', 'ta-IN')).toBe('si');
+    expect(resolveLanguage('ta', 'si-LK')).toBe('ta');
     expect(resolveLanguage('de', 'en-US')).toBe('de');
   });
 
@@ -83,7 +89,21 @@ describe('translate', () => {
   }
 
   it('keeps interpolation placeholders in every language', () => {
-    const dictionaries = { ar, ml, ru, tr, zh, it: itTranslations, fr, es, pt, fa, de };
+    const dictionaries = {
+      ar,
+      ml,
+      ru,
+      tr,
+      zh,
+      it: itTranslations,
+      fr,
+      es,
+      pt,
+      fa,
+      de,
+      si,
+      ta,
+    };
     for (const [language, dictionary] of Object.entries(dictionaries)) {
       for (const key of Object.keys(en) as TranslationKey[]) {
         const expected = placeholders(en[key]);
@@ -221,6 +241,22 @@ describe('localized dates and durations', () => {
     expect(formatDurationCompact(3660)).toBe('1 ساعت 1 دقیقه');
     expect(formatDurationWithSeconds(81)).toBe('1 دقیقه 21 ثانیه');
     expect(formatIntentionDuration(5400)).toBe('1 ساعت 30 دقیقه');
+  });
+
+  it('formats Sinhala dates and durations', () => {
+    setActiveLanguage('si');
+    expect(formatDayLabel('2026-11-12')).toContain('12');
+    expect(formatDurationCompact(3660)).toBe('1 පැය 1 මිනි');
+    expect(formatDurationWithSeconds(81)).toBe('1 මිනි 21 තත්');
+    expect(formatIntentionDuration(5400)).toBe('1 පැය 30 මිනි');
+  });
+
+  it('formats Tamil dates and durations', () => {
+    setActiveLanguage('ta');
+    expect(formatDayLabel('2026-11-12')).toContain('நவம்பர்');
+    expect(formatDurationCompact(3660)).toBe('1 மணி 1 நிமி');
+    expect(formatDurationWithSeconds(81)).toBe('1 நிமி 21 வினா');
+    expect(formatIntentionDuration(5400)).toBe('1 மணி 30 நிமி');
   });
 
   it('formats German dates and durations', () => {

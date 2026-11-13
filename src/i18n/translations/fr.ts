@@ -31,6 +31,8 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'common.portuguese': 'Português',
   'common.persian': 'فارسی',
   'common.german': 'Deutsch',
+  'common.sinhala': 'සිංහල',
+  'common.tamil': 'தமிழ்',
   'common.pleaseTryAgain': 'Veuillez réessayer.',
   'common.loading': 'Chargement…',
   'common.confirm': 'Confirmer',

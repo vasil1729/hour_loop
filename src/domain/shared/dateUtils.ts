@@ -18,6 +18,8 @@ const LOCALE_BY_LANGUAGE: Record<Language, string> = {
   pt: 'pt-BR',
   fa: 'fa-IR-u-ca-gregory-nu-latn',
   de: 'de-DE',
+  si: 'si-LK',
+  ta: 'ta-IN',
 };
 
 export function getLanguageLocale(

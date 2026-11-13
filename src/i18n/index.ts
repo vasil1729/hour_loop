@@ -16,6 +16,8 @@ import { it } from './translations/it';
 import { ml } from './translations/ml';
 import { pt } from './translations/pt';
 import { ru } from './translations/ru';
+import { si } from './translations/si';
+import { ta } from './translations/ta';
 import { tr } from './translations/tr';
 import { zh } from './translations/zh';
 import type {
@@ -47,6 +49,8 @@ const dictionaries: Record<Language, Record<TranslationKey, TranslationEntry>> =
   pt,
   fa,
   de,
+  si,
+  ta,
 };
 
 export function resolveLanguage(
@@ -67,6 +71,8 @@ export function resolveLanguage(
   if (code.startsWith('pt')) return 'pt';
   if (code.startsWith('fa')) return 'fa';
   if (code.startsWith('de')) return 'de';
+  if (code.startsWith('si')) return 'si';
+  if (code.startsWith('ta')) return 'ta';
   return DEFAULT_LANGUAGE;
 }
 

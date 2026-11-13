@@ -37,6 +37,12 @@ function shortUnit(unit: 'h' | 'm' | 's'): string {
   if (language === 'de') {
     return unit === 'h' ? ' Std.' : unit === 'm' ? ' Min.' : ' Sek.';
   }
+  if (language === 'si') {
+    return unit === 'h' ? ' පැය' : unit === 'm' ? ' මිනි' : ' තත්';
+  }
+  if (language === 'ta') {
+    return unit === 'h' ? ' மணி' : unit === 'm' ? ' நிமி' : ' வினா';
+  }
   return unit;
 }
 

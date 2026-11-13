@@ -31,6 +31,8 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'common.portuguese': 'Português',
   'common.persian': 'فارسی',
   'common.german': 'Deutsch',
+  'common.sinhala': 'සිංහල',
+  'common.tamil': 'தமிழ்',
   'common.pleaseTryAgain': 'دوباره تلاش کنید.',
   'common.loading': 'در حال بارگذاری…',
   'common.confirm': 'تأیید',

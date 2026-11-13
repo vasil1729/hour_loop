@@ -29,6 +29,8 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'common.portuguese': 'Português',
   'common.persian': 'فارسی',
   'common.german': 'Deutsch',
+  'common.sinhala': 'සිංහල',
+  'common.tamil': 'தமிழ்',
   'common.pleaseTryAgain': 'Попробуйте ещё раз.',
   'common.loading': 'Загрузка…',
   'common.confirm': 'Подтвердить',
