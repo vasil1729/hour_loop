@@ -305,6 +305,59 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     return requireLoop(db, loop.id);
   }
 
+  /**
+   * Pause an ACTIVE loop, clamping at the target when the target has already
+   * been crossed. Shared by the explicit pause action and by the invariant
+   * that an active timer must always have a current capsule.
+   */
+  async function pauseLoopInternal(
+    db: SQLiteDatabase,
+    loop: Loop
+  ): Promise<Loop> {
+    if (loop.status !== 'ACTIVE') return loop;
+    const intervals = await deps.intervals.getIntervalsForLoop(db, loop.id);
+    const elapsed = calculateElapsedSeconds(intervals, deps.now());
+    if (elapsed >= loop.target_duration_seconds) {
+      return pauseAtTargetInternal(db, loop, intervals);
+    }
+
+    const endedAt = deps.now().toISOString();
+    await db.withTransactionAsync(async () => {
+      await deps.intervals.closeOpenInterval(db, loop.id, endedAt);
+      await deps.itemIntervals.closeOpenLoopItemIntervals(db, loop.id, endedAt);
+      await deps.loops.updateLoopStatus(db, loop.id, 'PAUSED', null);
+    });
+
+    return requireLoop(db, loop.id);
+  }
+
+  async function pauseIfNoCurrentCapsule(
+    db: SQLiteDatabase,
+    loop: Loop
+  ): Promise<void> {
+    if (loop.status !== 'ACTIVE') return;
+    const current = await getCurrentItem(db, loop.id);
+    if (current && !current.done) return;
+
+    const items = await deps.items.listLoopItems(db, loop.id);
+    const candidate = items.find((item) => !item.done);
+    if (candidate) {
+      const nowIso = deps.now().toISOString();
+      await db.withTransactionAsync(async () => {
+        await deps.itemIntervals.closeOpenLoopItemIntervals(
+          db,
+          loop.id,
+          nowIso
+        );
+        await deps.items.setCurrentLoopItem(db, loop.id, candidate.id);
+        await openItemInterval(db, loop.id, candidate.id, nowIso);
+      });
+      return;
+    }
+
+    await pauseLoopInternal(db, loop);
+  }
+
   return {
     async startLoop(db, input) {
       const existing = await deps.loops.getActiveLoop(db);
@@ -397,20 +450,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         );
       }
 
-      const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
-      const elapsed = calculateElapsedSeconds(intervals, deps.now());
-      if (elapsed >= loop.target_duration_seconds) {
-        return pauseAtTargetInternal(db, loop, intervals);
-      }
-
-      const endedAt = deps.now().toISOString();
-      await db.withTransactionAsync(async () => {
-        await deps.intervals.closeOpenInterval(db, loopId, endedAt);
-        await deps.itemIntervals.closeOpenLoopItemIntervals(db, loopId, endedAt);
-        await deps.loops.updateLoopStatus(db, loopId, 'PAUSED', null);
-      });
-
-      return requireLoop(db, loopId);
+      return pauseLoopInternal(db, loop);
     },
 
     async pauseAtTarget(db, loopId) {
@@ -432,7 +472,14 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
       const now = deps.now();
       const nowIso = now.toISOString();
-      const currentItem = await getCurrentItem(db, loopId);
+      let currentItem = await getCurrentItem(db, loopId);
+      if (!currentItem || currentItem.done) {
+        const items = await deps.items.listLoopItems(db, loopId);
+        currentItem = items.find((item) => !item.done) ?? null;
+      }
+      if (!currentItem) {
+        throw new MissingCurrentCapsuleError();
+      }
       const interval: LoopInterval = {
         id: deps.newId(),
         loop_id: loopId,
@@ -445,9 +492,13 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       await db.withTransactionAsync(async () => {
         await deps.loops.updateLoopStatus(db, loopId, 'ACTIVE', null);
         await deps.intervals.createInterval(db, interval);
-        if (currentItem) {
-          await openItemInterval(db, loopId, currentItem.id, nowIso);
-        }
+        await deps.itemIntervals.closeOpenLoopItemIntervals(
+          db,
+          loopId,
+          nowIso
+        );
+        await deps.items.setCurrentLoopItem(db, loopId, currentItem.id);
+        await openItemInterval(db, loopId, currentItem.id, nowIso);
       });
 
       return requireLoop(db, loopId);
@@ -572,6 +623,9 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           }
         }
       });
+      if (loop.status === 'ACTIVE') {
+        await pauseIfNoCurrentCapsule(db, loop);
+      }
     },
 
     async setLoopItemDone(db, loopId, itemId, done) {
@@ -617,6 +671,9 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           }
         }
       });
+      if (loop.status === 'ACTIVE') {
+        await pauseIfNoCurrentCapsule(db, loop);
+      }
     },
 
     async setCurrentLoopItem(db, loopId, itemId) {
@@ -645,6 +702,9 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           await openItemInterval(db, loopId, itemId, nowIso);
         }
       });
+      if (loop.status === 'ACTIVE') {
+        await pauseIfNoCurrentCapsule(db, loop);
+      }
     },
 
     async ensureCurrentItemInterval(db, loopId) {
@@ -677,7 +737,10 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         }
         const items = await deps.items.listLoopItems(db, loopId);
         const candidate = items.find((item) => !item.done);
-        if (!candidate) return;
+        if (!candidate) {
+          await pauseLoopInternal(db, loop);
+          return;
+        }
         await deps.items.setCurrentLoopItem(db, loopId, candidate.id);
         currentItem = candidate;
       }

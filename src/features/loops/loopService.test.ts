@@ -663,6 +663,117 @@ describe('loopService', () => {
     expect(updated?.current).toBe(false);
   });
 
+  it('pauses the timer when the last unfinished capsule is completed', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Only unfinished capsule' }],
+    });
+    const [item] = await service.getLoopItems(db, loop.id);
+    if (!item) throw new Error('Expected an item');
+
+    harness.advanceSeconds(60);
+    await service.setLoopItemDone(db, loop.id, item.id, true);
+
+    const updated = await service.getLoop(db, loop.id);
+    expect(updated.status).toBe('PAUSED');
+    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+      true
+    );
+    expect(
+      state.itemIntervals.every((interval) => interval.ended_at !== null)
+    ).toBe(true);
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
+  });
+
+  it('pauses the timer when the last unfinished capsule is deleted', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Completed' }, { text: 'Last unfinished' }],
+    });
+    const [completed, lastUnfinished] = await service.getLoopItems(db, loop.id);
+    if (!completed || !lastUnfinished) {
+      throw new Error('Expected two items');
+    }
+
+    await service.setLoopItemDone(db, loop.id, completed.id, true);
+    expect((await service.getLoop(db, loop.id)).status).toBe('ACTIVE');
+
+    harness.advanceSeconds(60);
+    await service.deleteLoopItem(db, loop.id, lastUnfinished.id);
+
+    const updated = await service.getLoop(db, loop.id);
+    expect(updated.status).toBe('PAUSED');
+    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+      true
+    );
+    const remaining = await service.getLoopItems(db, loop.id);
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0]?.current).toBe(false);
+  });
+
+  it('rejects resuming when no unfinished capsule remains', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Only capsule' }],
+    });
+    const [item] = await service.getLoopItems(db, loop.id);
+    if (!item) throw new Error('Expected an item');
+
+    await service.setLoopItemDone(db, loop.id, item.id, true);
+    expect((await service.getLoop(db, loop.id)).status).toBe('PAUSED');
+
+    await expect(service.resumeLoop(db, loop.id)).rejects.toBeInstanceOf(
+      MissingCurrentCapsuleError
+    );
+  });
+
+  it('restores the first unfinished capsule when resuming a paused loop without a current', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    for (const item of state.items) {
+      item.current = false;
+    }
+    await service.pauseLoop(db, loop.id);
+
+    await service.resumeLoop(db, loop.id);
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.current)).toEqual([true, false]);
+    const open = state.itemIntervals.find(
+      (interval) => interval.item_id === items[0]?.id && interval.ended_at === null
+    );
+    expect(open).toBeDefined();
+  });
+
+  it('pauses an active timer with no unfinished capsule during reconciliation', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Legacy completed capsule' }],
+    });
+    for (const item of state.items) {
+      item.current = false;
+      item.done = true;
+    }
+
+    await service.ensureCurrentItemInterval(db, loop.id);
+
+    expect((await service.getLoop(db, loop.id)).status).toBe('PAUSED');
+    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+      true
+    );
+  });
+
   it('selects the next unfinished capsule when the current one is completed', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;

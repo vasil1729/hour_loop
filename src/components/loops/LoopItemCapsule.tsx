@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {
   Animated,
@@ -20,9 +20,12 @@ type LoopItemCapsuleProps = {
   selected?: boolean;
   carried?: boolean;
   disabled?: boolean;
+  paused?: boolean;
+  shakeSignal?: number;
   pressAccessibilityLabel?: string;
   onPress?: () => void;
   onToggleDone?: () => void;
+  onTogglePause?: () => void;
   onSwipeDone?: () => void;
   onSwipeUndone?: () => void;
   onRemove?: () => void;
@@ -37,9 +40,12 @@ export function LoopItemCapsule({
   selected = false,
   carried = false,
   disabled = false,
+  paused = false,
+  shakeSignal = 0,
   pressAccessibilityLabel,
   onPress,
   onToggleDone,
+  onTogglePause,
   onSwipeDone,
   onSwipeUndone,
   onRemove,
@@ -47,7 +53,41 @@ export function LoopItemCapsule({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
+  const shakeX = useRef(new Animated.Value(0)).current;
   const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone);
+
+  useEffect(() => {
+    if (!shakeSignal) return;
+    shakeX.stopAnimation();
+    shakeX.setValue(0);
+    Animated.sequence([
+      Animated.timing(shakeX, {
+        toValue: -8,
+        duration: 45,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeX, {
+        toValue: 8,
+        duration: 55,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeX, {
+        toValue: -6,
+        duration: 55,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeX, {
+        toValue: 6,
+        duration: 55,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeX, {
+        toValue: 0,
+        duration: 45,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [shakeSignal, shakeX]);
 
   const panResponder = useMemo(
     () =>
@@ -110,7 +150,7 @@ export function LoopItemCapsule({
           backgroundColor,
           borderColor,
           opacity: disabled ? 0.5 : 1,
-          transform: [{ translateX }],
+          transform: [{ translateX: Animated.add(translateX, shakeX) }],
         },
       ]}
     >
@@ -203,6 +243,25 @@ export function LoopItemCapsule({
         </View>
       )}
 
+      {onTogglePause ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${t(
+            paused ? 'loopControls.resume' : 'loopControls.pause'
+          )} ${text}`}
+          disabled={disabled}
+          hitSlop={8}
+          onPress={onTogglePause}
+          style={styles.pause}
+        >
+          <Ionicons
+            name={paused ? 'play' : 'pause'}
+            size={14}
+            color={colors.accent}
+          />
+        </Pressable>
+      ) : null}
+
       {onRemove ? (
         <Pressable
           accessibilityRole="button"
@@ -251,6 +310,9 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   remove: {
+    padding: spacing.xs,
+  },
+  pause: {
     padding: spacing.xs,
   },
 });

@@ -10,6 +10,7 @@ type LoopControlsProps = {
   status: 'ACTIVE' | 'PAUSED';
   targetReached?: boolean;
   busy?: boolean;
+  canResume?: boolean;
   onPause: () => void;
   onResume: () => void;
   onStop: () => void;
@@ -20,6 +21,7 @@ export function LoopControls({
   status,
   targetReached = false,
   busy = false,
+  canResume = true,
   onPause,
   onResume,
   onStop,
@@ -40,7 +42,7 @@ export function LoopControls({
             style={styles.primaryAction}
           />
         ) : null}
-        {!targetReached && status === 'PAUSED' ? (
+        {!targetReached && status === 'PAUSED' && canResume ? (
           <Button
             label={t('loopControls.resume')}
             onPress={onResume}

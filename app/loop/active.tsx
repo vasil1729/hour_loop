@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -52,8 +53,15 @@ export default function ActiveLoopScreen() {
   const [removingCapsuleId, setRemovingCapsuleId] = useState<string | null>(
     null
   );
-  const [lastCapsulePromptVisible, setLastCapsulePromptVisible] =
-    useState(false);
+  const [lastCapsuleHintVisible, setLastCapsuleHintVisible] = useState(false);
+  const lastCapsuleHintOpacity = useRef(new Animated.Value(0)).current;
+  const lastCapsuleHintAnimation = useRef<Animated.CompositeAnimation | null>(
+    null
+  );
+  const [shakeTarget, setShakeTarget] = useState<{
+    id: string;
+    signal: number;
+  } | null>(null);
   const addInputRef = useRef<TextInput>(null);
   const autoJournalLoopRef = useRef<string | null>(null);
 
@@ -69,7 +77,7 @@ export default function ActiveLoopScreen() {
       busy ||
       deleting ||
       deleteVisible ||
-      lastCapsulePromptVisible ||
+      lastCapsuleHintVisible ||
       addingCapsule ||
       removingCapsuleId !== null ||
       newCapsuleText.trim().length > 0
@@ -89,7 +97,7 @@ export default function ActiveLoopScreen() {
     deleteVisible,
     deleting,
     elapsedSeconds,
-    lastCapsulePromptVisible,
+    lastCapsuleHintVisible,
     loading,
     newCapsuleText,
     removingCapsuleId,
@@ -106,6 +114,7 @@ export default function ActiveLoopScreen() {
       let cancelled = false;
       void loopService
         .ensureCurrentItemInterval(db, loopId)
+        .then(() => refresh(db))
         .catch(() => undefined);
       void loopService
         .getLoopItems(db, loopId)
@@ -118,10 +127,48 @@ export default function ActiveLoopScreen() {
       return () => {
         cancelled = true;
       };
-    }, [db, activeLoop?.id])
+    }, [db, activeLoop?.id, refresh])
+  );
+
+  useEffect(
+    () => () => {
+      lastCapsuleHintAnimation.current?.stop();
+    },
+    []
   );
 
   const currentItem = items.find((item) => item.current) ?? null;
+
+  const showLastCapsuleHint = () => {
+    lastCapsuleHintAnimation.current?.stop();
+    lastCapsuleHintOpacity.setValue(1);
+    setLastCapsuleHintVisible(true);
+    lastCapsuleHintAnimation.current = Animated.sequence([
+      Animated.delay(2200),
+      Animated.timing(lastCapsuleHintOpacity, {
+        toValue: 0,
+        duration: 320,
+        useNativeDriver: true,
+      }),
+    ]);
+    lastCapsuleHintAnimation.current.start(({ finished }) => {
+      if (finished) setLastCapsuleHintVisible(false);
+    });
+  };
+
+  const hideLastCapsuleHint = () => {
+    lastCapsuleHintAnimation.current?.stop();
+    lastCapsuleHintOpacity.setValue(0);
+    setLastCapsuleHintVisible(false);
+  };
+
+  const denyLastCapsule = (itemId: string) => {
+    setShakeTarget((previous) => ({
+      id: itemId,
+      signal: (previous?.signal ?? 0) + 1,
+    }));
+    showLastCapsuleHint();
+  };
 
   const toggleItem = async (item: LoopItem) => {
     if (!activeLoop) return;
@@ -137,6 +184,7 @@ export default function ActiveLoopScreen() {
       await loopService.setLoopItemDone(db, activeLoop.id, item.id, nextDone);
       const updated = await loopService.getLoopItems(db, activeLoop.id);
       setItems(updated);
+      await refresh(db);
     } catch (error) {
       setItems((previous) =>
         previous.map((entry) =>
@@ -195,7 +243,7 @@ export default function ActiveLoopScreen() {
   const removeCapsule = async (item: LoopItem) => {
     if (!activeLoop || removingCapsuleId) return;
     if (items.length <= 1) {
-      setLastCapsulePromptVisible(true);
+      denyLastCapsule(item.id);
       return;
     }
     const previous = items;
@@ -204,10 +252,11 @@ export default function ActiveLoopScreen() {
       await loopService.deleteLoopItem(db, activeLoop.id, item.id);
       const updated = await loopService.getLoopItems(db, activeLoop.id);
       setItems(updated);
+      await refresh(db);
     } catch (error) {
       setItems(previous);
       if (error instanceof Error && error.name === 'LastLoopCapsuleError') {
-        setLastCapsulePromptVisible(true);
+        denyLastCapsule(item.id);
       } else {
         Alert.alert(
           t('loopActive.couldNotUpdateCapsule'),
@@ -258,6 +307,24 @@ export default function ActiveLoopScreen() {
     } finally {
       setBusy(false);
     }
+  };
+
+  const pauseActiveLoop = () => {
+    if (!activeLoop) return;
+    void runAction(async () => {
+      const paused = await loopService.pauseLoop(db, activeLoop.id);
+      await syncLoopNotification(db, paused).catch(() => undefined);
+    });
+  };
+
+  const resumeActiveLoop = () => {
+    if (!activeLoop) return;
+    void runAction(async () => {
+      const resumed = await loopService.resumeLoop(db, activeLoop.id);
+      await syncLoopNotification(db, resumed, {
+        requestPermission: true,
+      }).catch(() => undefined);
+    });
   };
 
   const handleDelete = async () => {
@@ -407,6 +474,34 @@ export default function ActiveLoopScreen() {
         <Text style={[styles.itemsHint, { color: colors.textSecondary }]}>
           {t('loopActive.hint')}
         </Text>
+        {lastCapsuleHintVisible ? (
+          <Animated.View style={{ opacity: lastCapsuleHintOpacity }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('loopActive.lastCapsuleBody')}
+              onPress={() => {
+                hideLastCapsuleHint();
+                addInputRef.current?.focus();
+              }}
+              style={[
+                styles.lastCapsuleHint,
+                {
+                  backgroundColor: colors.surfaceAlt,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.lastCapsuleHintText,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                {t('loopActive.lastCapsuleBody')}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        ) : null}
         {items.length > 0 ? (
           <View style={styles.capsuleWrap}>
             {items.map((item) => (
@@ -415,13 +510,24 @@ export default function ActiveLoopScreen() {
                 text={item.text}
                 done={item.done}
                 current={item.current}
-                disabled={removingCapsuleId === item.id}
+                paused={isPaused}
+                shakeSignal={
+                  shakeTarget?.id === item.id ? shakeTarget.signal : 0
+                }
+                disabled={removingCapsuleId === item.id || busy}
                 onPress={() => {
                   void selectItem(item);
                 }}
                 onToggleDone={() => {
                   void toggleItem(item);
                 }}
+                onTogglePause={
+                  item.current && !reachedTarget
+                    ? isPaused
+                      ? resumeActiveLoop
+                      : pauseActiveLoop
+                    : undefined
+                }
                 onSwipeDone={() => {
                   if (!item.done) void toggleItem(item);
                 }}
@@ -518,20 +624,9 @@ export default function ActiveLoopScreen() {
         status={isPaused ? 'PAUSED' : 'ACTIVE'}
         targetReached={reachedTarget}
         busy={busy}
-        onPause={() => {
-          void runAction(async () => {
-            const paused = await loopService.pauseLoop(db, activeLoop.id);
-            await syncLoopNotification(db, paused).catch(() => undefined);
-          });
-        }}
-        onResume={() => {
-          void runAction(async () => {
-            const resumed = await loopService.resumeLoop(db, activeLoop.id);
-            await syncLoopNotification(db, resumed, { requestPermission: true }).catch(
-              () => undefined
-            );
-          });
-        }}
+        canResume={Boolean(currentItem)}
+        onPause={pauseActiveLoop}
+        onResume={resumeActiveLoop}
         onStop={() => {
           void handleStop();
         }}
@@ -571,18 +666,6 @@ export default function ActiveLoopScreen() {
         onCancel={() => {
           if (!deleting) setDeleteVisible(false);
         }}
-      />
-
-      <ConfirmDialog
-        visible={lastCapsulePromptVisible}
-        title={t('loopActive.lastCapsuleTitle')}
-        message={t('loopActive.lastCapsuleBody')}
-        confirmLabel={t('task.addCapsule')}
-        onConfirm={() => {
-          setLastCapsulePromptVisible(false);
-          setTimeout(() => addInputRef.current?.focus(), 150);
-        }}
-        onCancel={() => setLastCapsulePromptVisible(false)}
       />
     </Screen>
   );
@@ -651,6 +734,16 @@ const styles = StyleSheet.create({
   itemsHint: {
     fontSize: 11,
     lineHeight: 16,
+  },
+  lastCapsuleHint: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  lastCapsuleHintText: {
+    fontSize: 12,
+    lineHeight: 17,
   },
   nowCard: {
     alignItems: 'flex-start',
