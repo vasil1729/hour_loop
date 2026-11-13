@@ -590,6 +590,12 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
     'Posez des questions sur votre temps de concentration, vos tâches ou vos capsules. Les modifications et les changements de minuteur nécessitent toujours votre confirmation.',
   'assistant.scopeNote':
     'Hour Loop uniquement : les questions de culture générale et hors sujet sont refusées.',
+  'assistant.scopeRefusal':
+    'Je peux vous aider avec votre activité Hour Loop, vos sessions de concentration, vos tâches et votre productivité. Je ne peux pas répondre aux questions sans rapport.',
+  'assistant.scopeMixed':
+    'Je peux aider pour la partie Hour Loop, mais pas prendre en charge la demande sans rapport. Posez uniquement des questions sur vos données ou actions Hour Loop.',
+  'assistant.scopeClarification':
+    'Je ne peux aider que pour Hour Loop. Précisez la boucle, la tâche, la capsule ou la statistique de concentration concernée.',
   'assistant.privacyNote':
     'Les messages et le contexte sélectionné de l’application sont envoyés au fournisseur que vous avez configuré. L’assistant n’a jamais accès directement à la base de données, aux fichiers ni au shell.',
   'assistant.suggestStats':

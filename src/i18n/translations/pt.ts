@@ -586,6 +586,12 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
     'Pergunte sobre seu tempo de foco, tarefas ou cápsulas. Alterações nos dados e no cronômetro sempre exigem sua confirmação.',
   'assistant.scopeNote':
     'Apenas Hour Loop: perguntas de conhecimento geral e não relacionadas são recusadas.',
+  'assistant.scopeRefusal':
+    'Posso ajudar com sua atividade no Hour Loop, sessões de foco, tarefas e produtividade. Não posso responder a perguntas não relacionadas.',
+  'assistant.scopeMixed':
+    'Posso ajudar com a parte do Hour Loop, mas não posso assumir a solicitação não relacionada. Pergunte apenas sobre seus dados ou ações do Hour Loop.',
+  'assistant.scopeClarification':
+    'Só posso ajudar com o Hour Loop. Diga qual loop, tarefa, cápsula ou estatística de foco você quer dizer.',
   'assistant.privacyNote':
     'Mensagens e o contexto selecionado do app são enviados ao provedor configurado. O assistente nunca tem acesso direto ao banco de dados, aos arquivos ou ao shell.',
   'assistant.suggestStats': 'Quanto tempo eu foquei hoje?',

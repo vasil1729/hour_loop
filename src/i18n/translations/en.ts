@@ -590,6 +590,12 @@ export const en = {
     'Ask about your focus time, tasks, or capsules. Writes and timer changes always require your confirmation.',
   'assistant.scopeNote':
     'Hour Loop only: general knowledge and unrelated questions are refused.',
+  'assistant.scopeRefusal':
+    'I can help with your Hour Loop activity, focus sessions, tasks and productivity. I can’t answer unrelated questions.',
+  'assistant.scopeMixed':
+    'I can help with the Hour Loop part, but I can’t take on the unrelated request. Please ask only about your Hour Loop data or actions.',
+  'assistant.scopeClarification':
+    'I can only help with Hour Loop. Please tell me which loop, task, capsule, or focus statistic you mean.',
   'assistant.privacyNote':
     'Messages and selected app context are sent to your configured provider. The assistant never gets direct database, file, or shell access.',
   'assistant.suggestStats': 'How much did I focus today?',

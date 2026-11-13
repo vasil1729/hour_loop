@@ -534,6 +534,12 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'assistant.emptyTitle': '我能帮什么忙？',
   'assistant.emptyBody': '询问专注时间、任务或胶囊。写入和计时器变更始终需要你确认。',
   'assistant.scopeNote': '仅限 Hour Loop：常识和无关问题不予回答。',
+  'assistant.scopeRefusal':
+    '我可以帮助处理你的 Hour Loop 活动、专注会话、任务和效率相关问题。我无法回答无关问题。',
+  'assistant.scopeMixed':
+    '我可以帮助处理与 Hour Loop 相关的部分，但无法处理无关请求。请只询问 Hour Loop 数据或操作。',
+  'assistant.scopeClarification':
+    '我只能帮助处理 Hour Loop。请说明你指的是哪个循环、任务、胶囊或专注统计。',
   'assistant.privacyNote': '消息和选定的应用上下文会发送给你配置的服务商。助手无法直接访问数据库、文件或终端。',
   'assistant.suggestStats': '今天我专注了多久？',
   'assistant.suggestActive': '我正在做什么？',

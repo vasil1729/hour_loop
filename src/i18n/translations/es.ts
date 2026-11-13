@@ -586,6 +586,12 @@ export const es: Record<TranslationKey, TranslationEntry> = {
     'Pregunta sobre tu tiempo de enfoque, tus tareas o tus cápsulas. Las acciones de escritura y los cambios del temporizador siempre requieren tu confirmación.',
   'assistant.scopeNote':
     'Solo Hour Loop: se rechazan las preguntas de conocimiento general y las no relacionadas.',
+  'assistant.scopeRefusal':
+    'Puedo ayudarte con tu actividad de Hour Loop, sesiones de enfoque, tareas y productividad. No puedo responder preguntas no relacionadas.',
+  'assistant.scopeMixed':
+    'Puedo ayudar con la parte de Hour Loop, pero no puedo asumir la solicitud no relacionada. Pregunta solo por tus datos o acciones de Hour Loop.',
+  'assistant.scopeClarification':
+    'Solo puedo ayudar con Hour Loop. Dime a qué ciclo, tarea, cápsula o estadística de enfoque te refieres.',
   'assistant.privacyNote':
     'Los mensajes y el contexto de la aplicación seleccionado se envían al proveedor que configures. El asistente nunca tiene acceso directo a la base de datos, los archivos ni el shell.',
   'assistant.suggestStats': '¿Cuánto me he enfocado hoy?',

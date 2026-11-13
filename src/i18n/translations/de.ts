@@ -577,6 +577,12 @@ export const de: Record<TranslationKey, TranslationEntry> = {
     'Frage nach deiner Fokuszeit, deinen Aufgaben oder Kapseln. Schreib- und Timer-Aktionen erfordern immer deine Bestätigung.',
   'assistant.scopeNote':
     'Nur Hour Loop: Allgemeinwissen und unbezogene Fragen werden abgelehnt.',
+  'assistant.scopeRefusal':
+    'Ich kann bei deiner Hour-Loop-Aktivität, deinen Fokus-Sitzungen, Aufgaben und deiner Produktivität helfen. Unbezogene Fragen kann ich nicht beantworten.',
+  'assistant.scopeMixed':
+    'Ich kann beim Hour-Loop-Teil helfen, aber die unbezogene Anfrage nicht übernehmen. Bitte frage nur nach deinen Hour-Loop-Daten oder -Aktionen.',
+  'assistant.scopeClarification':
+    'Ich kann nur bei Hour Loop helfen. Bitte sage, welchen Loop, welche Aufgabe, Kapsel oder Fokusstatistik du meinst.',
   'assistant.privacyNote':
     'Nachrichten und ausgewählter App-Kontext werden an deinen konfigurierten Anbieter gesendet. Der Assistent erhält nie direkten Zugriff auf Datenbanken, Dateien oder die Shell.',
   'assistant.suggestStats': 'Wie viel habe ich heute fokussiert?',

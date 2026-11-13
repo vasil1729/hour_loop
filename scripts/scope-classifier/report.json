@@ -1,0 +1,207 @@
+{
+  "generatedAt": "2026-11-13T10:33:23.312Z",
+  "model": "hashed multilingual word/char n-gram linear logistic classifier (int8); MIXED/AMBIGUOUS composed at runtime",
+  "dataset": {
+    "total": 2165,
+    "train": 1442,
+    "validation": 329,
+    "test": 394,
+    "languages": {
+      "en": 1161,
+      "hi": 55,
+      "hi-en": 449,
+      "ml": 53,
+      "ml-en": 447
+    },
+    "labelCounts": [
+      {
+        "label": "IN_SCOPE",
+        "count": 810
+      },
+      {
+        "label": "OUT_OF_SCOPE",
+        "count": 816
+      },
+      {
+        "label": "MIXED",
+        "count": 214
+      },
+      {
+        "label": "AMBIGUOUS",
+        "count": 325
+      }
+    ],
+    "provenance": "Synthetic examples authored for this repository; no private conversations; AGPL-3.0-or-later."
+  },
+  "modelSizeBytes": 32768,
+  "weightsBase64Chars": 43692,
+  "temperature": 0.5,
+  "validationNll": 0.17977920767262415,
+  "inScopeThreshold": 0.92,
+  "outOfScopeThreshold": 0.91,
+  "quantizationScale": 0.013577918368061697,
+  "trainEvaluation": {
+    "total": 1084,
+    "accuracy": 1,
+    "falseAcceptRate": 0,
+    "falseRejectRate": 0,
+    "confusionMatrix": {
+      "IN_SCOPE": {
+        "IN_SCOPE": 564,
+        "OUT_OF_SCOPE": 0,
+        "AMBIGUOUS": 0
+      },
+      "OUT_OF_SCOPE": {
+        "IN_SCOPE": 0,
+        "OUT_OF_SCOPE": 520,
+        "AMBIGUOUS": 0
+      }
+    },
+    "perLanguage": {
+      "ml-en": {
+        "total": 181,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "en": {
+        "total": 574,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "hi-en": {
+        "total": 248,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "ml": {
+        "total": 41,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "hi": {
+        "total": 40,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      }
+    }
+  },
+  "quantizedValidation": {
+    "total": 237,
+    "accuracy": 0.9113924050632911,
+    "falseAcceptRate": 0,
+    "falseRejectRate": 0.19607843137254902,
+    "confusionMatrix": {
+      "IN_SCOPE": {
+        "IN_SCOPE": 82,
+        "OUT_OF_SCOPE": 20,
+        "AMBIGUOUS": 0
+      },
+      "OUT_OF_SCOPE": {
+        "IN_SCOPE": 0,
+        "OUT_OF_SCOPE": 134,
+        "AMBIGUOUS": 1
+      }
+    },
+    "perLanguage": {
+      "en": {
+        "total": 117,
+        "accuracy": 0.8803418803418803,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.1111111111111111
+      },
+      "hi": {
+        "total": 6,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "hi-en": {
+        "total": 32,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "ml": {
+        "total": 7,
+        "accuracy": 0.8571428571428571,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.14285714285714285
+      },
+      "ml-en": {
+        "total": 75,
+        "accuracy": 0.92,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.08
+      }
+    }
+  },
+  "quantizedTest": {
+    "total": 305,
+    "accuracy": 0.9377049180327869,
+    "falseAcceptRate": 0,
+    "falseRejectRate": 0.125,
+    "confusionMatrix": {
+      "IN_SCOPE": {
+        "IN_SCOPE": 126,
+        "OUT_OF_SCOPE": 16,
+        "AMBIGUOUS": 2
+      },
+      "OUT_OF_SCOPE": {
+        "IN_SCOPE": 0,
+        "OUT_OF_SCOPE": 160,
+        "AMBIGUOUS": 1
+      }
+    },
+    "perLanguage": {
+      "en": {
+        "total": 142,
+        "accuracy": 0.9154929577464789,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.07746478873239436
+      },
+      "hi": {
+        "total": 9,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      },
+      "hi-en": {
+        "total": 64,
+        "accuracy": 0.90625,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.09375
+      },
+      "ml": {
+        "total": 5,
+        "accuracy": 0.8,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0.2
+      },
+      "ml-en": {
+        "total": 85,
+        "accuracy": 1,
+        "falseAcceptRate": 0,
+        "falseRejectRate": 0
+      }
+    }
+  },
+  "languages": [
+    "en",
+    "hi",
+    "hi-en",
+    "ml",
+    "ml-en"
+  ],
+  "limitations": [
+    "Synthetic dataset; accuracy on real users is not yet measured.",
+    "English, Hindi, Malayalam and English-Hindi/Malayalam code-switching are represented.",
+    "Other app locales are not represented in evaluation; uncertain cases fall back locally.",
+    "The model is a compact linear n-gram classifier, not a transformer.",
+    "MIXED and AMBIGUOUS are composed at runtime, not predicted by the binary head."
+  ]
+}

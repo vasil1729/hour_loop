@@ -1,6 +1,6 @@
 {
   "name": "hour-loop",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "license": "AGPL-3.0-or-later",
   "main": "expo-router/entry",
   "scripts": {
@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "doctor": "expo-doctor",
+    "scope:train": "node --experimental-strip-types scripts/scope-classifier/train.mjs",
     "apk:local": "bash scripts/build-android-apk.sh"
   },
   "dependencies": {

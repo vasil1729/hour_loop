@@ -9,6 +9,9 @@ import { AssistantActionError, executeAssistantAction, isActionExpired } from '.
 import { runAssistantTurn } from '../features/assistant/assistantConversation';
 import { describeAssistantError } from '../features/assistant/assistantErrors';
 import { createAssistantTools } from '../features/assistant/assistantTools';
+import { classifyScope } from '../features/assistant/scope/scopeClassifier';
+import { scopeResponseKey } from '../features/assistant/scope/scopeMessages';
+import type { ScopeCategory } from '../features/assistant/scope/scopeTypes';
 import type {
   AssistantChatMessage,
   AssistantConfig,
@@ -28,6 +31,7 @@ type AssistantStore = {
   status: AssistantStatus;
   error: string | null;
   lastFailedText: string | null;
+  lastScopeCategory: ScopeCategory | null;
   send: (db: SQLiteDatabase, config: AssistantConfig, text: string) => Promise<void>;
   stop: () => void;
   approve: (
@@ -86,6 +90,7 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
     status: 'idle',
     error: null,
     lastFailedText: null,
+    lastScopeCategory: null,
 
     send: async (db, config, rawText) => {
       const text = rawText.trim();
@@ -115,6 +120,52 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
         }
         pendingAction = null;
       }
+
+      const scope = (() => {
+        try {
+          return classifyScope(text, {
+            previousCategory: get().lastScopeCategory,
+          });
+        } catch {
+          return {
+            category: 'AMBIGUOUS' as const,
+            confidence: 0,
+            source: 'fallback' as const,
+            reason: 'model_error' as const,
+          };
+        }
+      })();
+      if (scope.category !== 'IN_SCOPE') {
+        const now = nowUtcIso();
+        const userMessage: AssistantChatMessage = {
+          id: createId(),
+          role: 'user',
+          content: text,
+          createdAt: now,
+          status: 'sent',
+        };
+        const localResponse: AssistantChatMessage = {
+          id: createId(),
+          role: 'assistant',
+          content: t(scopeResponseKey(scope.category)),
+          createdAt: now,
+          status: 'sent',
+        };
+        set((state) => ({
+          messages: trimMessages([
+            ...state.messages,
+            userMessage,
+            localResponse,
+          ]),
+          pendingAction,
+          status: 'idle',
+          error: null,
+          lastFailedText: null,
+          lastScopeCategory: scope.category,
+        }));
+        return;
+      }
+      set({ lastScopeCategory: 'IN_SCOPE' });
 
       const controller = new AbortController();
       activeController = controller;
@@ -383,6 +434,7 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
         status: 'idle',
         error: null,
         lastFailedText: null,
+        lastScopeCategory: null,
       });
     },
   };

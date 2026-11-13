@@ -581,6 +581,12 @@ export const it: Record<TranslationKey, TranslationEntry> = {
     'Chiedi del tuo tempo di focus, delle attività o delle capsule. Le modifiche ai dati e al timer richiedono sempre la tua conferma.',
   'assistant.scopeNote':
     'Solo Hour Loop: le domande di cultura generale e non pertinenti vengono rifiutate.',
+  'assistant.scopeRefusal':
+    'Posso aiutarti con la tua attività su Hour Loop, le sessioni di focus, le attività e la produttività. Non posso rispondere a domande non correlate.',
+  'assistant.scopeMixed':
+    'Posso aiutare con la parte Hour Loop, ma non posso occuparmi della richiesta non correlata. Chiedi solo dei tuoi dati o delle azioni Hour Loop.',
+  'assistant.scopeClarification':
+    'Posso aiutare solo con Hour Loop. Dimmi quale loop, attività, capsula o statistica di focus intendi.',
   'assistant.privacyNote':
     "I messaggi e il contesto dell'app selezionato vengono inviati al provider configurato. L'assistente non ottiene mai accesso diretto al database, ai file o alla shell.",
   'assistant.suggestStats': 'Quanto mi sono concentrato oggi?',

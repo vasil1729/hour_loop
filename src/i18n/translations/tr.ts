@@ -566,6 +566,12 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Odak sürenizi, görevlerinizi veya kapsüllerinizi sorun. Yazma ve zamanlayıcı değişiklikleri her zaman onayınızı gerektirir.',
   'assistant.scopeNote':
     'Yalnızca Hour Loop: genel bilgi ve ilgisiz sorular yanıtlanmaz.',
+  'assistant.scopeRefusal':
+    'Hour Loop etkinliğiniz, odak oturumlarınız, görevleriniz ve üretkenliğiniz konusunda yardımcı olabilirim. İlgisiz soruları yanıtlayamam.',
+  'assistant.scopeMixed':
+    'Hour Loop ile ilgili kısma yardımcı olabilirim, ancak ilgisiz isteği üstlenemem. Lütfen yalnızca Hour Loop verileriniz veya işlemleriniz hakkında sorun.',
+  'assistant.scopeClarification':
+    'Yalnızca Hour Loop konusunda yardımcı olabilirim. Hangi döngü, görev, kapsül veya odak istatistiğini kastettiğinizi belirtin.',
   'assistant.privacyNote':
     'Mesajlar ve seçilen uygulama bağlamı yapılandırdığınız sağlayıcıya gönderilir. Asistanın veritabanına, dosyalara veya kabuğa doğrudan erişimi yoktur.',
   'assistant.suggestStats': 'Bugün ne kadar odaklandım?',
