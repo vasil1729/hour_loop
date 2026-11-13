@@ -107,8 +107,8 @@ Measured in the desktop/Jest Node environment, not on a device:
 - Model weights: **32,768 bytes** (INT8)
 - Generated TypeScript model artifact: **~47 KB**
 - Android release APK before scope integration: **35,096,045 bytes**
-- Android release APK after scope integration: **35,204,793 bytes**
-- APK delta: **+108,748 bytes (~106 KB)**
+- Android release APK after scope integration: **35,205,597 bytes**
+- APK delta: **+109,552 bytes (~107 KB)**
 - Native runtime dependency: **none**
 - Additional native libraries: **none**
 - Web support: yes, pure JavaScript
