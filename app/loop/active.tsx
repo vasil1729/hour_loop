@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -51,6 +51,9 @@ export default function ActiveLoopScreen() {
   const [removingCapsuleId, setRemovingCapsuleId] = useState<string | null>(
     null
   );
+  const [lastCapsulePromptVisible, setLastCapsulePromptVisible] =
+    useState(false);
+  const addInputRef = useRef<TextInput>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,6 +94,8 @@ export default function ActiveLoopScreen() {
     );
     try {
       await loopService.setLoopItemDone(db, activeLoop.id, item.id, nextDone);
+      const updated = await loopService.getLoopItems(db, activeLoop.id);
+      setItems(updated);
     } catch (error) {
       setItems((previous) =>
         previous.map((entry) =>
@@ -107,14 +112,16 @@ export default function ActiveLoopScreen() {
   };
 
   const selectItem = async (item: LoopItem) => {
-    if (!activeLoop || item.done) return;
+    if (!activeLoop || item.done || item.current) return;
     const previous = items;
-    const nextId = item.current ? null : item.id;
     setItems((current) =>
-      current.map((entry) => ({ ...entry, current: entry.id === nextId }))
+      current.map((entry) => ({
+        ...entry,
+        current: entry.id === item.id,
+      }))
     );
     try {
-      await loopService.setCurrentLoopItem(db, activeLoop.id, nextId);
+      await loopService.setCurrentLoopItem(db, activeLoop.id, item.id);
     } catch (error) {
       setItems(previous);
       Alert.alert(
@@ -130,8 +137,9 @@ export default function ActiveLoopScreen() {
     if (!text) return;
     setAddingCapsule(true);
     try {
-      const item = await loopService.addLoopItem(db, activeLoop.id, text);
-      setItems((previous) => [...previous, item]);
+      await loopService.addLoopItem(db, activeLoop.id, text);
+      const updated = await loopService.getLoopItems(db, activeLoop.id);
+      setItems(updated);
       setNewCapsuleText('');
     } catch (error) {
       Alert.alert(
@@ -145,17 +153,26 @@ export default function ActiveLoopScreen() {
 
   const removeCapsule = async (item: LoopItem) => {
     if (!activeLoop || removingCapsuleId) return;
+    if (items.length <= 1) {
+      setLastCapsulePromptVisible(true);
+      return;
+    }
     const previous = items;
     setRemovingCapsuleId(item.id);
-    setItems((current) => current.filter((entry) => entry.id !== item.id));
     try {
       await loopService.deleteLoopItem(db, activeLoop.id, item.id);
+      const updated = await loopService.getLoopItems(db, activeLoop.id);
+      setItems(updated);
     } catch (error) {
       setItems(previous);
-      Alert.alert(
-        t('loopActive.couldNotUpdateCapsule'),
-        localizeError(error)
-      );
+      if (error instanceof Error && error.name === 'LastLoopCapsuleError') {
+        setLastCapsulePromptVisible(true);
+      } else {
+        Alert.alert(
+          t('loopActive.couldNotUpdateCapsule'),
+          localizeError(error)
+        );
+      }
     } finally {
       setRemovingCapsuleId(null);
     }
@@ -305,6 +322,33 @@ export default function ActiveLoopScreen() {
           <Text style={[styles.nowText, { color: colors.text }]}>
             {currentItem.text}
           </Text>
+          <Text style={[styles.nowHint, { color: colors.textSecondary }]}>
+            {t('loopActive.currentHint')}
+          </Text>
+        </View>
+      ) : items.length > 0 ? (
+        <View
+          style={[
+            styles.nowCard,
+            { backgroundColor: colors.surfaceAlt, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.nowLabel, { color: colors.textSecondary }]}>
+            {t('loopActive.allDoneTitle')}
+          </Text>
+          <Text style={[styles.nowHint, { color: colors.textSecondary }]}>
+            {t('loopActive.allDoneBody')}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('task.addCapsule')}
+            onPress={() => addInputRef.current?.focus()}
+            hitSlop={8}
+          >
+            <Text style={[styles.addCapsuleLink, { color: colors.accent }]}>
+              {t('task.addCapsule')}
+            </Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -357,6 +401,7 @@ export default function ActiveLoopScreen() {
         )}
         <View style={styles.addRow}>
           <TextInput
+            ref={addInputRef}
             value={newCapsuleText}
             onChangeText={setNewCapsuleText}
             placeholder={t('task.addCapsule')}
@@ -487,6 +532,18 @@ export default function ActiveLoopScreen() {
           if (!deleting) setDeleteVisible(false);
         }}
       />
+
+      <ConfirmDialog
+        visible={lastCapsulePromptVisible}
+        title={t('loopActive.lastCapsuleTitle')}
+        message={t('loopActive.lastCapsuleBody')}
+        confirmLabel={t('task.addCapsule')}
+        onConfirm={() => {
+          setLastCapsulePromptVisible(false);
+          setTimeout(() => addInputRef.current?.focus(), 150);
+        }}
+        onCancel={() => setLastCapsulePromptVisible(false)}
+      />
     </Screen>
   );
 }
@@ -556,9 +613,8 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   nowCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+    alignItems: 'flex-start',
+    gap: spacing.xs,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
@@ -571,8 +627,18 @@ const styles = StyleSheet.create({
   },
   nowText: {
     flexShrink: 1,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '700',
+  },
+  nowHint: {
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  addCapsuleLink: {
+    alignSelf: 'flex-start',
+    fontSize: 13,
+    fontWeight: '700',
   },
   capsuleWrap: {
     flexDirection: 'row',

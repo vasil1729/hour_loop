@@ -186,6 +186,15 @@ export function localizeError(
   if (error.name === 'LoopTaskNotSubtaskError') {
     return t('errors.loopTaskNotSubtask');
   }
+  if (error.name === 'LoopNeedsCapsuleError') {
+    return t('errors.loopNeedsCapsule');
+  }
+  if (error.name === 'LastLoopCapsuleError') {
+    return t('errors.lastLoopCapsule');
+  }
+  if (error.name === 'MissingCurrentCapsuleError') {
+    return t('errors.missingCurrentCapsule');
+  }
   if (error.name === 'LoopNotFoundError') {
     return t('errors.loopNotFound');
   }

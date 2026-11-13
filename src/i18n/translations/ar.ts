@@ -256,6 +256,11 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   },
   'loopStart.start': 'ابدأ الحلقة',
   'loopStart.couldNotStart': 'تعذّر بدء الحلقة',
+  'loopStart.needCapsule':
+    'أضف كبسولة واحدة على الأقل لبدء الحلقة.',
+  'loopStart.needCapsuleTitle': 'أضف كبسولة أولًا',
+  'loopStart.needCapsuleBody':
+    'تحتاج الحلقة إلى كبسولة واحدة على الأقل. أضف ما ستعمل عليه ثم ابدأ الحلقة.',
 
   'loopActive.recovering': 'جارٍ استعادة حلقتك…',
   'loopActive.noLoopTitle': 'لا توجد حلقة قيد التشغيل',
@@ -267,7 +272,8 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'loopActive.statusFocusing': 'قيد التركيز',
   'loopActive.now': 'الآن',
   'loopActive.capsules': 'الكبسولات',
-  'loopActive.hint': 'انقر للتركيز · اسحب يمينًا للإكمال',
+  'loopActive.hint':
+    'انقر على كبسولة لتبديل التركيز · اسحب يمينًا للإكمال',
   'loopActive.focus': 'التركيز',
   'loopActive.carryIn': 'ترحيل',
   'loopActive.delete': 'حذف الحلقة',
@@ -279,6 +285,14 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'loopActive.couldNotStop': 'تعذّر إيقاف الحلقة',
   'loopActive.updateFailed': 'تعذّر تحديث الحلقة',
   'loopActive.couldNotDelete': 'تعذّر حذف الحلقة',
+  'loopActive.currentHint':
+    'هذه كبسولتك الحالية. انقر على كبسولة أخرى للتبديل.',
+  'loopActive.allDoneTitle': 'اكتملت كل الكبسولات',
+  'loopActive.allDoneBody':
+    'أضف كبسولة جديدة أدناه لمتابعة التركيز، أو أغلق الحلقة.',
+  'loopActive.lastCapsuleTitle': 'أبقِ كبسولة واحدة على الأقل',
+  'loopActive.lastCapsuleBody':
+    'أضف كبسولة أخرى أولًا، ثم يمكنك حذف هذه.',
 
   'clock.target': 'الهدف {time}',
   'clock.remaining': 'متبقٍ {duration}',
@@ -572,6 +586,11 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'errors.taskNotFound': 'لم يتم العثور على هذه المهمة.',
   'errors.cannotPause': 'لا يمكن إيقاف هذه الحلقة مؤقتًا الآن.',
   'errors.cannotResume': 'لا يمكن استئناف هذه الحلقة الآن.',
+  'errors.loopNeedsCapsule': 'تحتاج الحلقة إلى كبسولة واحدة على الأقل.',
+  'errors.lastLoopCapsule':
+    'تحتاج الحلقة إلى كبسولة واحدة على الأقل. أضف كبسولة جديدة قبل حذف هذه.',
+  'errors.missingCurrentCapsule':
+    'اختر كبسولة حالية ما دامت هناك كبسولات غير مكتملة.',
   'errors.loopAlreadyComplete': 'هذه الحلقة مكتملة بالفعل.',
   'errors.completedCapsuleCurrent':
     'لا يمكن أن تكون الكبسولة المكتملة هي التركيز الحالي.',

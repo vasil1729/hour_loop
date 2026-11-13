@@ -252,6 +252,11 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   },
   'loopStart.start': 'Начать цикл',
   'loopStart.couldNotStart': 'Не удалось начать цикл',
+  'loopStart.needCapsule':
+    'Добавьте хотя бы одну капсулу, чтобы начать цикл.',
+  'loopStart.needCapsuleTitle': 'Сначала добавьте капсулу',
+  'loopStart.needCapsuleBody':
+    'Циклу нужна хотя бы одна капсула. Добавьте то, над чем будете работать, и начните цикл.',
 
   'loopActive.recovering': 'Восстанавливаем цикл…',
   'loopActive.noLoopTitle': 'Цикл не запущен',
@@ -264,7 +269,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'СЕЙЧАС',
   'loopActive.capsules': 'КАПСУЛЫ',
   'loopActive.hint':
-    'Нажмите, чтобы выбрать фокус · смахните вправо, чтобы завершить',
+    'Нажмите на капсулу, чтобы переключить фокус · смахните вправо, чтобы завершить',
   'loopActive.focus': 'ФОКУС',
   'loopActive.carryIn': 'ПЕРЕНОС',
   'loopActive.delete': 'Удалить цикл',
@@ -276,6 +281,14 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopActive.couldNotStop': 'Не удалось остановить цикл',
   'loopActive.updateFailed': 'Не удалось обновить цикл',
   'loopActive.couldNotDelete': 'Не удалось удалить цикл',
+  'loopActive.currentHint':
+    'Это ваша текущая капсула. Нажмите на другую, чтобы переключиться.',
+  'loopActive.allDoneTitle': 'Все капсулы выполнены',
+  'loopActive.allDoneBody':
+    'Добавьте новую капсулу ниже, чтобы продолжить, или закройте цикл.',
+  'loopActive.lastCapsuleTitle': 'Оставьте хотя бы одну капсулу',
+  'loopActive.lastCapsuleBody':
+    'Сначала добавьте ещё одну капсулу, затем эту можно будет удалить.',
 
   'clock.target': 'цель {time}',
   'clock.remaining': 'осталось {duration}',
@@ -567,6 +580,11 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'errors.taskNotFound': 'Задача не найдена.',
   'errors.cannotPause': 'Сейчас этот цикл нельзя поставить на паузу.',
   'errors.cannotResume': 'Сейчас этот цикл нельзя продолжить.',
+  'errors.loopNeedsCapsule': 'Циклу нужна хотя бы одна капсула.',
+  'errors.lastLoopCapsule':
+    'Циклу нужна хотя бы одна капсула. Добавьте новую, прежде чем удалять эту.',
+  'errors.missingCurrentCapsule':
+    'Выберите текущую капсулу, пока есть незавершённые.',
   'errors.loopAlreadyComplete': 'Этот цикл уже завершён.',
   'errors.completedCapsuleCurrent':
     'Завершённая капсула не может быть текущим фокусом.',

@@ -11,11 +11,14 @@ import type { LoopJournalPatch } from '../../database/repositories/loopsReposito
 import {
   createLoopService,
   InvalidStateTransitionError,
+  LastLoopCapsuleError,
   LoopAlreadyActiveError,
   LoopItemNotFoundError,
+  LoopNeedsCapsuleError,
   LoopNotFoundError,
   LoopTaskNotFoundError,
   LoopTaskNotSubtaskError,
+  MissingCurrentCapsuleError,
   type LoopServiceDeps,
 } from './loopService';
 
@@ -241,7 +244,7 @@ describe('loopService', () => {
   it('starts a loop with an open interval and per-day sequence number', async () => {
     const { db, service } = createHarness();
 
-    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
 
     expect(loop.status).toBe('ACTIVE');
     expect(loop.sequence_number).toBe(1);
@@ -258,6 +261,7 @@ describe('loopService', () => {
       harness.service.startLoop(harness.db, {
         targetDurationSeconds: 3600,
         taskId: 'container',
+        items: [{ text: 'Focus' }],
       })
     ).rejects.toBeInstanceOf(LoopTaskNotSubtaskError);
   });
@@ -276,6 +280,7 @@ describe('loopService', () => {
     const loop = await harness.service.startLoop(harness.db, {
       targetDurationSeconds: 3600,
       taskId: 'subtask',
+      items: [{ text: 'Focus' }],
     });
 
     expect(loop.task_id).toBe('subtask');
@@ -288,23 +293,24 @@ describe('loopService', () => {
       harness.service.startLoop(harness.db, {
         targetDurationSeconds: 3600,
         taskId: 'missing',
+        items: [{ text: 'Focus' }],
       })
     ).rejects.toBeInstanceOf(LoopTaskNotFoundError);
   });
 
   it('rejects starting a second loop while one is active', async () => {
     const { db, service } = createHarness();
-    await service.startLoop(db, { targetDurationSeconds: 3600 });
+    await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
 
     await expect(
-      service.startLoop(db, { targetDurationSeconds: 3600 })
+      service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] })
     ).rejects.toBeInstanceOf(LoopAlreadyActiveError);
   });
 
   it('freezes elapsed time on pause and continues on resume', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
 
     harness.advanceSeconds(600);
     expect(await service.getElapsedSeconds(db, loop.id)).toBe(600);
@@ -325,7 +331,7 @@ describe('loopService', () => {
   it('rejects pausing a completed loop', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
     await service.completeLoop(db, loop.id, {});
 
     await expect(service.pauseLoop(db, loop.id)).rejects.toBeInstanceOf(
@@ -339,7 +345,7 @@ describe('loopService', () => {
   it('walks the full start → pause → resume → complete transition sequence', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const started = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const started = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
     const paused = await service.pauseLoop(db, started.id);
     const resumed = await service.resumeLoop(db, started.id);
     harness.advanceSeconds(90);
@@ -362,7 +368,7 @@ describe('loopService', () => {
   it('keeps elapsed time stable across a simulated app restart', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
     harness.advanceSeconds(245);
     const before = await service.getElapsedSeconds(db, loop.id);
 
@@ -381,9 +387,9 @@ describe('loopService', () => {
   it('increments the sequence number for a second loop on the same day', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const first = await service.startLoop(db, { targetDurationSeconds: 600 });
+    const first = await service.startLoop(db, { targetDurationSeconds: 600, items: [{ text: 'Focus' }] });
     await service.completeLoop(db, first.id, {});
-    const second = await service.startLoop(db, { targetDurationSeconds: 600 });
+    const second = await service.startLoop(db, { targetDurationSeconds: 600, items: [{ text: 'Focus' }] });
 
     expect(second.sequence_number).toBe(2);
   });
@@ -391,7 +397,7 @@ describe('loopService', () => {
   it('pauses exactly at the target when auto-stopped', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60, items: [{ text: 'Focus' }] });
 
     harness.advanceSeconds(90);
     expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
@@ -407,7 +413,7 @@ describe('loopService', () => {
   it('does not pause before the target', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60, items: [{ text: 'Focus' }] });
 
     harness.advanceSeconds(30);
     const unchanged = await service.pauseAtTarget(db, loop.id);
@@ -419,7 +425,7 @@ describe('loopService', () => {
   it('trims overtime when the pause action lands after the target', async () => {
     const harness = createHarness();
     const { db, service } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 60 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60, items: [{ text: 'Focus' }] });
 
     harness.advanceSeconds(75);
     const paused = await service.pauseLoop(db, loop.id);
@@ -434,6 +440,7 @@ describe('loopService', () => {
     const loop = await service.startLoop(db, {
       targetDurationSeconds: 3600,
       focus: 'Write tests',
+      items: [{ text: 'Focus' }],
     });
     await service.completeLoop(db, loop.id, {
       focus: 'Write better tests',
@@ -457,7 +464,7 @@ describe('loopService', () => {
   it('deletes a loop and its intervals', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;
-    const loop = await service.startLoop(db, { targetDurationSeconds: 3600 });
+    const loop = await service.startLoop(db, { targetDurationSeconds: 3600, items: [{ text: 'Focus' }] });
     await service.completeLoop(db, loop.id, {});
 
     expect(state.intervals).toHaveLength(1);
@@ -552,6 +559,7 @@ describe('loopService', () => {
     await service.completeLoop(db, firstLoop.id, {});
     const secondLoop = await service.startLoop(db, {
       targetDurationSeconds: 3600,
+      items: [{ text: 'Focus' }],
     });
 
     await expect(
@@ -559,22 +567,55 @@ describe('loopService', () => {
     ).rejects.toBeInstanceOf(LoopItemNotFoundError);
   });
 
-  it('closes capsule focus intervals when the current capsule is deleted', async () => {
+  it('moves focus to the next capsule when the current capsule is deleted', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;
     const loop = await service.startLoop(db, {
       targetDurationSeconds: 3600,
-      items: [{ text: 'Current' }],
+      items: [{ text: 'Current' }, { text: 'Next' }],
+    });
+    const [current, next] = await service.getLoopItems(db, loop.id);
+    if (!current || !next) throw new Error('Expected two items');
+
+    await service.setCurrentLoopItem(db, loop.id, current.id);
+    harness.advanceSeconds(60);
+    await service.deleteLoopItem(db, loop.id, current.id);
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.id)).toEqual([next.id]);
+    expect(items[0]?.current).toBe(true);
+    expect(state.itemIntervals).toHaveLength(1);
+    expect(state.itemIntervals[0]?.item_id).toBe(next.id);
+    expect(state.itemIntervals[0]?.ended_at).toBeNull();
+  });
+
+  it('rejects deleting the last capsule', async () => {
+    const { db, service } = createHarness();
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'Only capsule' }],
     });
     const [item] = await service.getLoopItems(db, loop.id);
     if (!item) throw new Error('Expected an item');
 
-    await service.setCurrentLoopItem(db, loop.id, item.id);
-    harness.advanceSeconds(60);
-    await service.deleteLoopItem(db, loop.id, item.id);
+    await expect(
+      service.deleteLoopItem(db, loop.id, item.id)
+    ).rejects.toBeInstanceOf(LastLoopCapsuleError);
+    expect(await service.getLoopItems(db, loop.id)).toHaveLength(1);
+  });
 
-    expect(await service.getLoopItems(db, loop.id)).toHaveLength(0);
-    expect(state.itemIntervals).toHaveLength(0);
+  it('requires at least one capsule to start a loop', async () => {
+    const { db, service } = createHarness();
+
+    await expect(
+      service.startLoop(db, { targetDurationSeconds: 3600 })
+    ).rejects.toBeInstanceOf(LoopNeedsCapsuleError);
+    await expect(
+      service.startLoop(db, {
+        targetDurationSeconds: 3600,
+        items: [{ text: '   ' }],
+      })
+    ).rejects.toBeInstanceOf(LoopNeedsCapsuleError);
   });
 
   it('sets only one current capsule per loop', async () => {
@@ -594,9 +635,15 @@ describe('loopService', () => {
     items = await service.getLoopItems(db, loop.id);
     expect(items.map((item) => item.current)).toEqual([false, true]);
 
-    await service.setCurrentLoopItem(db, loop.id, null);
+    await expect(
+      service.setCurrentLoopItem(db, loop.id, null)
+    ).rejects.toBeInstanceOf(MissingCurrentCapsuleError);
+
+    await service.setLoopItemDone(db, loop.id, first.id, true);
+    await service.setLoopItemDone(db, loop.id, second.id, true);
     items = await service.getLoopItems(db, loop.id);
     expect(items.every((item) => !item.current)).toBe(true);
+    await service.setCurrentLoopItem(db, loop.id, null);
   });
 
   it('clears the current capsule when it is marked done', async () => {
@@ -614,6 +661,48 @@ describe('loopService', () => {
     const [updated] = await service.getLoopItems(db, loop.id);
     expect(updated?.done).toBe(true);
     expect(updated?.current).toBe(false);
+  });
+
+  it('selects the next unfinished capsule when the current one is completed', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    const [first, second] = await service.getLoopItems(db, loop.id);
+    if (!first || !second) throw new Error('Expected two items');
+
+    await service.setCurrentLoopItem(db, loop.id, first.id);
+    await service.setLoopItemDone(db, loop.id, first.id, true);
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.current)).toEqual([false, true]);
+    const nextInterval = state.itemIntervals.find(
+      (interval) => interval.item_id === second.id
+    );
+    expect(nextInterval?.ended_at).toBeNull();
+  });
+
+  it('restores a current capsule when an active loop has none', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    for (const item of state.items) {
+      item.current = false;
+    }
+
+    await service.ensureCurrentItemInterval(db, loop.id);
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items[0]?.current).toBe(true);
+    const open = state.itemIntervals.find(
+      (interval) => interval.item_id === items[0]?.id
+    );
+    expect(open?.ended_at).toBeNull();
   });
 
   it('rejects selecting a completed capsule as current', async () => {

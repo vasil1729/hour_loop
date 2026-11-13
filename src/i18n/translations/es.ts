@@ -1,6 +1,8 @@
 import type { TranslationEntry, TranslationKey } from '../types';
+import { en } from './en';
 
 export const es: Record<TranslationKey, TranslationEntry> = {
+  ...en,
   'common.cancel': 'Cancelar',
   'common.save': 'Guardar',
   'common.close': 'Cerrar',

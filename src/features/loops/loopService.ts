@@ -63,6 +63,29 @@ export class LoopTaskNotSubtaskError extends Error {
   }
 }
 
+export class LoopNeedsCapsuleError extends Error {
+  constructor() {
+    super('A loop needs at least one capsule.');
+    this.name = 'LoopNeedsCapsuleError';
+  }
+}
+
+export class LastLoopCapsuleError extends Error {
+  constructor() {
+    super(
+      'A loop needs at least one capsule. Add a new capsule before deleting this one.'
+    );
+    this.name = 'LastLoopCapsuleError';
+  }
+}
+
+export class MissingCurrentCapsuleError extends Error {
+  constructor() {
+    super('Choose a current capsule while unfinished capsules remain.');
+    this.name = 'MissingCurrentCapsuleError';
+  }
+}
+
 export type StartLoopItemInput = {
   text: string;
   carriedFromItemId?: string | null;
@@ -334,19 +357,26 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         created_at: nowIso,
       };
 
-      const items: LoopItem[] = (input.items ?? [])
-        .map((item, index) => ({
+      const items: LoopItem[] = [];
+      for (const item of input.items ?? []) {
+        const text = item.text.trim();
+        if (!text) continue;
+        items.push({
           id: deps.newId(),
           loop_id: loop.id,
-          text: item.text.trim(),
+          text,
           done: false,
-          current: false,
-          sort_order: index,
+          current: items.length === 0,
+          sort_order: items.length,
           carried_from_item_id: item.carriedFromItemId ?? null,
           created_at: nowIso,
           updated_at: nowIso,
-        }))
-        .filter((item) => item.text.length > 0);
+        });
+      }
+
+      if (items.length === 0) {
+        throw new LoopNeedsCapsuleError();
+      }
 
       await db.withTransactionAsync(async () => {
         await deps.loops.createLoop(db, loop);
@@ -478,6 +508,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         throw new Error('A capsule needs a title.');
       }
       const existing = await deps.items.listLoopItems(db, loopId);
+      const hasCurrent = existing.some((item) => item.current && !item.done);
       const sortOrder =
         existing.reduce((max, item) => Math.max(max, item.sort_order), -1) + 1;
       const nowIso = deps.now().toISOString();
@@ -486,13 +517,21 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         loop_id: loopId,
         text: trimmed,
         done: false,
-        current: false,
+        current: !hasCurrent,
         sort_order: sortOrder,
         carried_from_item_id: null,
         created_at: nowIso,
         updated_at: nowIso,
       };
       await deps.items.createLoopItem(db, item);
+      if (item.current && loop.status === 'ACTIVE') {
+        await deps.itemIntervals.closeOpenLoopItemIntervals(
+          db,
+          loopId,
+          nowIso
+        );
+        await openItemInterval(db, loopId, item.id, nowIso);
+      }
       return item;
     },
 
@@ -501,10 +540,17 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       if (loop.status === 'COMPLETED') {
         throw new InvalidStateTransitionError('This loop is already complete.');
       }
-      const item = await deps.items.getLoopItemById(db, itemId);
-      if (!item || item.loop_id !== loopId) {
+      const existing = await deps.items.listLoopItems(db, loopId);
+      const item = existing.find((entry) => entry.id === itemId);
+      if (!item) {
         throw new LoopItemNotFoundError(itemId);
       }
+      if (existing.length <= 1) {
+        throw new LastLoopCapsuleError();
+      }
+      const nextCurrent = item.current
+        ? existing.find((entry) => entry.id !== itemId && !entry.done) ?? null
+        : null;
       const nowIso = deps.now().toISOString();
       await db.withTransactionAsync(async () => {
         if (item.current) {
@@ -515,6 +561,16 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           );
         }
         await deps.items.deleteLoopItem(db, itemId);
+        if (item.current) {
+          await deps.items.setCurrentLoopItem(
+            db,
+            loopId,
+            nextCurrent?.id ?? null
+          );
+          if (nextCurrent && loop.status === 'ACTIVE') {
+            await openItemInterval(db, loopId, nextCurrent.id, nowIso);
+          }
+        }
       });
     },
 
@@ -523,6 +579,12 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       if (!item || item.loop_id !== loopId) {
         throw new LoopItemNotFoundError(itemId);
       }
+      const loop = await requireLoop(db, loopId);
+      const existing = await deps.items.listLoopItems(db, loopId);
+      const nextCurrent =
+        done && item.current
+          ? existing.find((entry) => entry.id !== itemId && !entry.done) ?? null
+          : null;
       const nowIso = deps.now().toISOString();
       await db.withTransactionAsync(async () => {
         if (done && item.current) {
@@ -533,6 +595,27 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           );
         }
         await deps.items.updateLoopItemDone(db, itemId, done);
+
+        if (done && item.current) {
+          await deps.items.setCurrentLoopItem(
+            db,
+            loopId,
+            nextCurrent?.id ?? null
+          );
+          if (nextCurrent && loop.status === 'ACTIVE') {
+            await openItemInterval(db, loopId, nextCurrent.id, nowIso);
+          }
+        } else if (!done && !item.current) {
+          const hasCurrent = existing.some(
+            (entry) => entry.current && entry.id !== itemId
+          );
+          if (!hasCurrent) {
+            await deps.items.setCurrentLoopItem(db, loopId, itemId);
+            if (loop.status === 'ACTIVE') {
+              await openItemInterval(db, loopId, itemId, nowIso);
+            }
+          }
+        }
       });
     },
 
@@ -548,6 +631,11 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
             'A completed capsule cannot be the current focus.'
           );
         }
+      } else {
+        const existing = await deps.items.listLoopItems(db, loopId);
+        if (existing.some((item) => !item.done)) {
+          throw new MissingCurrentCapsuleError();
+        }
       }
       const nowIso = deps.now().toISOString();
       await db.withTransactionAsync(async () => {
@@ -562,11 +650,40 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     async ensureCurrentItemInterval(db, loopId) {
       const loop = await requireLoop(db, loopId);
       if (loop.status !== 'ACTIVE') return;
-      const currentItem = await getCurrentItem(db, loopId);
-      if (!currentItem) return;
+
+      const nowIso = deps.now().toISOString();
+      let currentItem = await getCurrentItem(db, loopId);
+
+      if (currentItem?.done) {
+        await deps.itemIntervals.closeOpenLoopItemIntervals(
+          db,
+          loopId,
+          nowIso
+        );
+        currentItem = null;
+      }
+
+      if (!currentItem) {
+        const open = await deps.itemIntervals.getOpenLoopItemInterval(
+          db,
+          loopId
+        );
+        if (open) {
+          await deps.itemIntervals.closeOpenLoopItemIntervals(
+            db,
+            loopId,
+            nowIso
+          );
+        }
+        const items = await deps.items.listLoopItems(db, loopId);
+        const candidate = items.find((item) => !item.done);
+        if (!candidate) return;
+        await deps.items.setCurrentLoopItem(db, loopId, candidate.id);
+        currentItem = candidate;
+      }
+
       const open = await deps.itemIntervals.getOpenLoopItemInterval(db, loopId);
       if (open) return;
-      const nowIso = deps.now().toISOString();
       await openItemInterval(db, loopId, currentItem.id, nowIso);
     },
 

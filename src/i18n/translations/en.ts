@@ -241,6 +241,10 @@ export const en = {
   },
   'loopStart.start': 'Start loop',
   'loopStart.couldNotStart': 'Could not start loop',
+  'loopStart.needCapsule': 'Add at least one capsule to start a loop.',
+  'loopStart.needCapsuleTitle': 'Add a capsule first',
+  'loopStart.needCapsuleBody':
+    "A loop needs at least one capsule. Add what you're going to work on, then start the loop.",
 
   'loopActive.recovering': 'Recovering your loop…',
   'loopActive.noLoopTitle': 'No loop is running',
@@ -251,7 +255,8 @@ export const en = {
   'loopActive.statusFocusing': 'FOCUSING',
   'loopActive.now': 'NOW',
   'loopActive.capsules': 'CAPSULES',
-  'loopActive.hint': 'Tap to focus · swipe right to complete',
+  'loopActive.hint':
+    'Tap a capsule to switch focus · swipe right to complete',
   'loopActive.focus': 'FOCUS',
   'loopActive.carryIn': 'CARRY IN',
   'loopActive.delete': 'Delete loop',
@@ -263,6 +268,14 @@ export const en = {
   'loopActive.couldNotStop': 'Could not stop the loop',
   'loopActive.updateFailed': 'Loop update failed',
   'loopActive.couldNotDelete': 'Could not delete loop',
+  'loopActive.currentHint':
+    'This is your current capsule. Tap another capsule to switch.',
+  'loopActive.allDoneTitle': 'All capsules are done',
+  'loopActive.allDoneBody':
+    'Add a new capsule below to keep focusing, or close the loop.',
+  'loopActive.lastCapsuleTitle': 'Keep at least one capsule',
+  'loopActive.lastCapsuleBody':
+    'Add another capsule first, then you can delete this one.',
 
   'clock.target': 'target {time}',
   'clock.remaining': '{duration} remaining',
@@ -544,6 +557,11 @@ export const en = {
   'errors.taskNotFound': 'This task was not found.',
   'errors.cannotPause': 'This loop cannot be paused right now.',
   'errors.cannotResume': 'This loop cannot be resumed right now.',
+  'errors.loopNeedsCapsule': 'A loop needs at least one capsule.',
+  'errors.lastLoopCapsule':
+    'A loop needs at least one capsule. Add a new capsule before deleting this one.',
+  'errors.missingCurrentCapsule':
+    'Choose a current capsule while unfinished capsules remain.',
   'errors.loopAlreadyComplete': 'This loop is already complete.',
   'errors.completedCapsuleCurrent':
     'A completed capsule cannot be the current focus.',

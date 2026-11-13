@@ -237,6 +237,11 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopStart.minutes': '{count} മിനിറ്റ്',
   'loopStart.start': 'ലൂപ്പ് ആരംഭിക്കുക',
   'loopStart.couldNotStart': 'ലൂപ്പ് ആരംഭിക്കാനായില്ല',
+  'loopStart.needCapsule':
+    'ഒരു ലൂപ്പ് ആരംഭിക്കാൻ കുറഞ്ഞത് ഒരു ക്യാപ്സ്യൂൾ ചേർക്കുക.',
+  'loopStart.needCapsuleTitle': 'ആദ്യം ഒരു ക്യാപ്സ്യൂൾ ചേർക്കുക',
+  'loopStart.needCapsuleBody':
+    'ഒരു ലൂപ്പിന് കുറഞ്ഞത് ഒരു ക്യാപ്സ്യൂൾ വേണം. നിങ്ങൾ ചെയ്യാൻ പോകുന്നത് ചേർത്ത ശേഷം ലൂപ്പ് ആരംഭിക്കുക.',
 
   'loopActive.recovering': 'നിങ്ങളുടെ ലൂപ്പ് വീണ്ടെടുക്കുന്നു…',
   'loopActive.noLoopTitle': 'ലൂപ്പ് പ്രവർത്തിക്കുന്നില്ല',
@@ -249,7 +254,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'ഇപ്പോൾ',
   'loopActive.capsules': 'ക്യാപ്സ്യൂളുകൾ',
   'loopActive.hint':
-    'ഫോക്കസ് ചെയ്യാൻ തൊടുക · പൂർത്തിയാക്കാൻ വലത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക',
+    'ഫോക്കസ് മാറ്റാൻ ഒരു ക്യാപ്സ്യൂളിൽ ടാപ്പ് ചെയ്യുക · പൂർത്തിയാക്കാൻ വലത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക',
   'loopActive.focus': 'ഫോക്കസ്',
   'loopActive.carryIn': 'കൊണ്ടുവന്നത്',
   'loopActive.delete': 'ലൂപ്പ് ഇല്ലാതാക്കുക',
@@ -261,6 +266,14 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopActive.couldNotStop': 'ലൂപ്പ് നിർത്താനായില്ല',
   'loopActive.updateFailed': 'ലൂപ്പ് അപ്ഡേറ്റ് പരാജയപ്പെട്ടു',
   'loopActive.couldNotDelete': 'ലൂപ്പ് ഇല്ലാതാക്കാനായില്ല',
+  'loopActive.currentHint':
+    'ഇതാണ് നിങ്ങളുടെ നിലവിലെ ക്യാപ്സ്യൂൾ. മാറ്റാൻ മറ്റൊരു ക്യാപ്സ്യൂളിൽ ടാപ്പ് ചെയ്യുക.',
+  'loopActive.allDoneTitle': 'എല്ലാ ക്യാപ്സ്യൂളുകളും പൂർത്തിയായി',
+  'loopActive.allDoneBody':
+    'ഫോക്കസ് തുടരാൻ താഴെ പുതിയ ക്യാപ്സ്യൂൾ ചേർക്കുക, അല്ലെങ്കിൽ ലൂപ്പ് അടയ്ക്കുക.',
+  'loopActive.lastCapsuleTitle': 'കുറഞ്ഞത് ഒരു ക്യാപ്സ്യൂൾ നിലനിർത്തുക',
+  'loopActive.lastCapsuleBody':
+    'ആദ്യം മറ്റൊരു ക്യാപ്സ്യൂൾ ചേർക്കുക, തുടർന്ന് ഇത് ഇല്ലാതാക്കാം.',
 
   'clock.target': 'ലക്ഷ്യം {time}',
   'clock.remaining': '{duration} ശേഷിക്കുന്നു',
@@ -543,6 +556,11 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'errors.taskNotFound': 'ഈ ടാസ്ക് കണ്ടെത്തിയില്ല.',
   'errors.cannotPause': 'ഈ ലൂപ്പ് ഇപ്പോൾ താൽക്കാലികമായി നിർത്താനാകില്ല.',
   'errors.cannotResume': 'ഈ ലൂപ്പ് ഇപ്പോൾ തുടരാനാകില്ല.',
+  'errors.loopNeedsCapsule': 'ഒരു ലൂപ്പിന് കുറഞ്ഞത് ഒരു ക്യാപ്സ്യൂൾ വേണം.',
+  'errors.lastLoopCapsule':
+    'ഒരു ലൂപ്പിന് കുറഞ്ഞത് ഒരു ക്യാപ്സ്യൂൾ വേണം. ഇത് ഇല്ലാതാക്കുന്നതിന് മുമ്പ് പുതിയത് ചേർക്കുക.',
+  'errors.missingCurrentCapsule':
+    'പൂർത്തിയാകാത്ത ക്യാപ്സ്യൂളുകൾ ഉള്ളപ്പോൾ ഒരു നിലവിലെ ക്യാപ്സ്യൂൾ തിരഞ്ഞെടുക്കുക.',
   'errors.loopAlreadyComplete': 'ഈ ലൂപ്പ് ഇതിനകം പൂർത്തിയായി.',
   'errors.completedCapsuleCurrent':
     'പൂർത്തിയായ ഒരു ക്യാപ്സ്യൂൾ നിലവിലെ ഫോക്കസ് ആകാനാകില്ല.',

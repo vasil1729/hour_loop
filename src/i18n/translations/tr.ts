@@ -228,6 +228,11 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopStart.minutes': '{count} dakika',
   'loopStart.start': 'Döngüyü başlat',
   'loopStart.couldNotStart': 'Döngü başlatılamadı',
+  'loopStart.needCapsule':
+    'Bir döngü başlatmak için en az bir kapsül ekleyin.',
+  'loopStart.needCapsuleTitle': 'Önce bir kapsül ekleyin',
+  'loopStart.needCapsuleBody':
+    'Bir döngü en az bir kapsül gerektirir. Üzerinde çalışacağınız şeyi ekleyip döngüyü başlatın.',
 
   'loopActive.recovering': 'Döngün kurtarılıyor…',
   'loopActive.noLoopTitle': 'Çalışan döngü yok',
@@ -238,7 +243,8 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.statusFocusing': 'ODAKLANIYOR',
   'loopActive.now': 'ŞİMDİ',
   'loopActive.capsules': 'KAPSÜLLER',
-  'loopActive.hint': 'Odaklanmak için dokun · tamamlamak için sağa kaydır',
+  'loopActive.hint':
+    'Odağı değiştirmek için bir kapsüle dokun · tamamlamak için sağa kaydır',
   'loopActive.focus': 'ODAK',
   'loopActive.carryIn': 'TAŞINAN',
   'loopActive.delete': 'Döngüyü sil',
@@ -250,6 +256,14 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.couldNotStop': 'Döngü durdurulamadı',
   'loopActive.updateFailed': 'Döngü güncellemesi başarısız',
   'loopActive.couldNotDelete': 'Döngü silinemedi',
+  'loopActive.currentHint':
+    'Bu, geçerli kapsülünüz. Değiştirmek için başka bir kapsüle dokunun.',
+  'loopActive.allDoneTitle': 'Tüm kapsüller tamamlandı',
+  'loopActive.allDoneBody':
+    'Odaklanmaya devam etmek için aşağıya yeni bir kapsül ekleyin veya döngüyü kapatın.',
+  'loopActive.lastCapsuleTitle': 'En az bir kapsül bırakın',
+  'loopActive.lastCapsuleBody':
+    'Önce başka bir kapsül ekleyin, sonra bunu silebilirsiniz.',
 
   'clock.target': 'hedef {time}',
   'clock.remaining': '{duration} kaldı',
@@ -520,6 +534,11 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'errors.taskNotFound': 'Bu görev bulunamadı.',
   'errors.cannotPause': 'Bu döngü şu anda duraklatılamaz.',
   'errors.cannotResume': 'Bu döngüye şu anda devam edilemez.',
+  'errors.loopNeedsCapsule': 'Bir döngü en az bir kapsül gerektirir.',
+  'errors.lastLoopCapsule':
+    'Bir döngü en az bir kapsül gerektirir. Bunu silmeden önce yeni bir kapsül ekleyin.',
+  'errors.missingCurrentCapsule':
+    'Tamamlanmamış kapsüller varken geçerli bir kapsül seçin.',
   'errors.loopAlreadyComplete': 'Bu döngü zaten tamamlandı.',
   'errors.completedCapsuleCurrent':
     'Tamamlanmış bir kapsül geçerli odak olamaz.',
