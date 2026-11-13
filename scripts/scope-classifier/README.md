@@ -187,7 +187,7 @@ Generated evidence:
 - `scripts/scope-classifier/provider-isolation.json`
 - `scripts/scope-classifier/provider-isolation-failclosed.json`
 
-Recorded provider-isolation result: **15 rejected messages tested** (13
+Recorded provider-isolation result: **17 rejected messages tested** (15
 integration + 2 fail-closed), **0 API-key lookups**, **0 provider invocations**,
 and **0 database accesses** for rejected messages. Nine in-scope provider
 invocations were confirmed to still work.
@@ -279,7 +279,7 @@ classification policy.
 
 ## Regression coverage
 
-The hardening suite adds 256 tests:
+The hardening suite adds 257 tests:
 
 - 165 A–G regression tests covering clearly in-scope requests, clearly
   out-of-scope requests, contextual false-accept pairs under four previous
@@ -290,7 +290,7 @@ The hardening suite adds 256 tests:
   `IN_SCOPE`, `OUT_OF_SCOPE`, `MIXED`, and `AMBIGUOUS`.
 - 2 adversarial corpus sweeps that assert 80+ non-app requests stay out of
   scope under all five context states, while 37 app requests remain allowed.
-- 16 real-classifier assistant-store integration tests covering rejection,
+- 17 real-classifier assistant-store integration tests covering rejection,
   missing keys, disabled state, pending actions, repeated sends, reset, retry,
   and contextual-state updates.
 - 2 real-classifier model-failure store tests proving fail-closed behaviour.

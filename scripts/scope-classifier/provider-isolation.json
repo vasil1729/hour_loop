@@ -1,7 +1,7 @@
 {
   "generator": "src/store/assistantStore.scopeIntegration.test.ts",
   "runtime": "desktop/Jest Node environment",
-  "rejectedRequestsTested": 13,
+  "rejectedRequestsTested": 15,
   "apiKeyLookupsForRejected": 0,
   "providerInvocationsForRejected": 0,
   "databaseAccessesForRejected": 0,

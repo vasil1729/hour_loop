@@ -215,6 +215,21 @@ describe('real classifier + assistant store boundary', () => {
     expect(useAssistantStore.getState().status).toBe('idle');
   });
 
+  it('keeps the fixed media and shopping-list bypasses local', async () => {
+    for (const text of [
+      'Play a song during my focus session.',
+      'Add milk to my shopping list for my loop.',
+    ]) {
+      await useAssistantStore.getState().send(db, config, text);
+      recordRejectedRequest();
+      expect(key).not.toHaveBeenCalled();
+      expect(turn).not.toHaveBeenCalled();
+      expect(useAssistantStore.getState().messages.at(-1)?.content).toBe(
+        'assistant.scopeRefusal'
+      );
+    }
+  });
+
   it.each(['OUT_OF_SCOPE', 'MIXED', 'AMBIGUOUS'] as const)(
     'does not inherit a previous %s category',
     async (previousCategory) => {
