@@ -754,6 +754,27 @@ describe('loopService', () => {
     expect(open).toBeDefined();
   });
 
+  it('restores a current capsule for a paused loop without starting the timer', async () => {
+    const harness = createHarness();
+    const { db, service, state } = harness;
+    const loop = await service.startLoop(db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: 'First' }, { text: 'Second' }],
+    });
+    for (const item of state.items) {
+      item.current = false;
+    }
+    await service.pauseLoop(db, loop.id);
+    const closedIntervals = state.itemIntervals.length;
+
+    await service.ensureCurrentItemInterval(db, loop.id);
+
+    const items = await service.getLoopItems(db, loop.id);
+    expect(items.map((item) => item.current)).toEqual([true, false]);
+    expect((await service.getLoop(db, loop.id)).status).toBe('PAUSED');
+    expect(state.itemIntervals).toHaveLength(closedIntervals);
+  });
+
   it('pauses an active timer with no unfinished capsule during reconciliation', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;

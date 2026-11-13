@@ -709,7 +709,8 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
     async ensureCurrentItemInterval(db, loopId) {
       const loop = await requireLoop(db, loopId);
-      if (loop.status !== 'ACTIVE') return;
+      const isActive = loop.status === 'ACTIVE';
+      if (!isActive && loop.status !== 'PAUSED') return;
 
       const nowIso = deps.now().toISOString();
       let currentItem = await getCurrentItem(db, loopId);
@@ -738,12 +739,16 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         const items = await deps.items.listLoopItems(db, loopId);
         const candidate = items.find((item) => !item.done);
         if (!candidate) {
-          await pauseLoopInternal(db, loop);
+          if (isActive) {
+            await pauseLoopInternal(db, loop);
+          }
           return;
         }
         await deps.items.setCurrentLoopItem(db, loopId, candidate.id);
         currentItem = candidate;
       }
+
+      if (!isActive) return;
 
       const open = await deps.itemIntervals.getOpenLoopItemInterval(db, loopId);
       if (open) return;
