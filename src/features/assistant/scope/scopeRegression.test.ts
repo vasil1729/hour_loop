@@ -68,6 +68,22 @@ describe('C. contextual false-accept regressions', () => {
       expect(isDeicticFollowUp(second)).toBe(false);
     }
   );
+
+  it.each(pairs)(
+    'unrelated message %s never inherits any previous category',
+    (_first, second) => {
+      for (const previousCategory of [
+        'IN_SCOPE',
+        'OUT_OF_SCOPE',
+        'MIXED',
+        'AMBIGUOUS',
+      ] as const) {
+        expect(
+          classifyScope(second, { previousCategory }).category
+        ).not.toBe('IN_SCOPE');
+      }
+    }
+  );
 });
 
 describe('D. genuine contextual follow-ups', () => {
@@ -194,7 +210,12 @@ describe('app-help boundary and hard negatives', () => {
     'Mute the podcast.',
     'Start the music.',
     'Play my focus playlist.',
+    'Play a song during my focus session.',
+    'Stop the video in my loop.',
+    'Pause my loop playlist.',
     'Add milk to my shopping list.',
+    'Add milk to my shopping list for my loop.',
+    'Add milk to my Hour Loop shopping list.',
     'Add bread to my grocery list.',
     'Add milk to my shopping checklist.',
     'Create a shopping list.',
@@ -236,8 +257,27 @@ describe('app-help boundary and hard negatives', () => {
     'How do I pause a running loop in a video game?',
     "What is Hour Loop's stock price?",
     'How do I configure loop intervals in Gmail?',
+    'Recommend a good movie.',
+    'Explain how electrical relays work.',
   ])('%s', (text) => {
     expect(classifyScope(text).category).toBe('OUT_OF_SCOPE');
+  });
+
+  it('keeps app actions in scope at the guard boundary', () => {
+    expect(classifyScope('Pause this Hour Loop timer.').category).toBe(
+      'IN_SCOPE'
+    );
+    expect(
+      classifyScope(
+        'Add a task called "buy milk" to my Hour Loop checklist.'
+      ).category
+    ).toBe('IN_SCOPE');
+    expect(
+      classifyScope('Create a loop named "Pizza preparation".').category
+    ).toBe('IN_SCOPE');
+    expect(classifyScope('Explain how Hour Loop loops work.').category).toBe(
+      'IN_SCOPE'
+    );
   });
 
   it('still recognises app help when the platform is named', () => {

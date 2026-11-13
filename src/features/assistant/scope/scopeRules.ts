@@ -24,11 +24,14 @@ const FOLLOW_UP_PATTERNS: RegExp[] = [
   /^(?:the\s+)?(?:previous|last|same|earlier)(?:\s+(?:one|day|week|month|interval|loop|session|task))?[\s!?.,…]*$/iu,
   /^(?:yesterday|today|this week|last week|this month|last month)[\s!?.,…]*$/iu,
   /^(?:show|tell|give)\s+me\s+(?:more|that|this|it|them)[\s!?.,…]*$/iu,
-  /^how long\s+(?:has|have|did|does|do)\s+(?:it|that|this|they)\b[\s!?.,…]*$/iu,
+  /^how long\s+(?:has|have|did|does|do)\s+(?:it|that|this|they)(?:\s+(?:been|taken|took|take|run|running|lasted)){0,2}[\s!?.,…]*$/iu,
   /^(?:what about|what's|what is)\s+(?:the|its)\s+(?:target|status|progress|elapsed time|time left|next step|previous interval)[\s!?.,…]*$/iu,
   /^(?:pause|resume|stop|continue|complete|finish|start)\s+(?:it|that|this)[\s!?.,…]*$/iu,
   /^(?:can|could|would)\s+you\s+(?:explain|clarify|elaborate)(?:\s+(?:that|this|it))?(?:\s+(?:in\s+)?(?:more\s+)?detail)?[\s!?.,…]*$/iu,
   /^(?:can|could|would)\s+you\s+(?:give|show|provide)\s+me\s+(?:an?\s+)?example[\s!?.,…]*$/iu,
+  /^(?:give|show|tell)\s+me\s+(?:an?\s+)?example[\s!?.,…]*$/iu,
+  /^what\s+(?:happens|will\s+happen)\s+next[\s!?.,…]*$/iu,
+  /^(?:what's|what is)\s+next[\s!?.,…]*$/iu,
   /^(?:show|tell|give)\s+me\s+the\s+(?:steps|details|next\s+steps)[\s!?.,…]*$/iu,
   /^what\s+(?:happens|will\s+happen)\s+(?:when|if)\s+(?:i\s+)?(?:resume|pause|stop|complete|start|finish)\s+(?:it|that|this)[\s!?.,…]*$/iu,
   /^how\s+(?:do|can|should)\s+i\s+(?:stop|pause|resume|complete|start|finish)\s+(?:it|that|this)[\s!?.,…]*$/iu,
@@ -42,7 +45,7 @@ const FOLLOW_UP_PATTERNS: RegExp[] = [
   /^(?:athine|athu|athil|athinte|ithine|ithu|ithil)\s+(?:pause|resume|stop|complete|start)(?:\s+(?:cheyyu|chey|cheyyuka))?[\s!?.,…]*$/iu,
   /^(?:athine|athu|athil|athinte|ithine|ithu|ithil)\s+(?:thudar|nirth|cheyyu|chey)(?:uka)?[\s!?.,…]*$/iu,
   /^(?:athu\s+pole|athu\s+thanne|athu\s+thanneyum)\s+(?:cheyyu|chey|kaanikku|parayu)[\s!?.,…]*$/iu,
-  /^(?:അതിനെ|അത്|അതിൽ|ഇതിനെ|ഇത്|ഇതിൽ)\s*(?:പോസ്|തുടരുക|നിർത്തുക|പൂർത്തിയാക്കുക|ചെയ്യൂ|കാണിക്കൂ)[\s!?.,…]*$/iu,
+  /^(?:അതിനെ|അത്|അതിൽ|ഇതിനെ|ഇത്|ഇതിൽ)\s*(?:പോസ്|തുടരുക|നിർത്തുക|പൂർത്തിയാക്കുക|ചെയ്യൂ|കാണിക്കൂ)(?:\s*(?:ചെയ്യൂ|ചെയ്യുക|ചെയ്യാം))?[\s!?.,…]*$/iu,
   /^(?:അത്\s+പോലെ|അത്\s+തന്നെ)\s*(?:ചെയ്യൂ|കാണിക്കൂ|പറയൂ)[\s!?.,…]*$/iu,
   /^pinne\s+(?:enthu|entha)\s+(?:cheyyum|cheyyendath|cheyyanam)[\s!?.,…]*$/iu,
   // Hindi/Malayalam action follow-ups.
@@ -175,7 +178,7 @@ const ELLIPTICAL_APP_ACTION_PATTERN =
   /^(?:aur\s+)?(?:pause|resume|stop|complete|finish)\s+(?:kaise|kare|karun|karu|engane|cheyyam|cheyyum|cheyyan|cheyyaam)/iu;
 
 const NON_APP_MEDIA_PATTERN =
-  /^(?:pause|resume|play|stop|skip|mute|unmute|replay|restart|start)\b(?:\s+\S+){0,2}\s+(?:video|movie|song|music|track|playlist|podcast|episode|audio|film)\b/iu;
+  /^(?:pause|resume|play|stop|skip|mute|unmute|replay|restart|start)\b(?:\s+\S+){0,3}\s+(?:video|movie|song|music|track|playlist|podcast|episode|audio|film)\b/iu;
 
 const NON_APP_LIST_PATTERN =
   /(?:shopping|grocery|groceries)\s+(?:list|checklist)/iu;
@@ -192,7 +195,6 @@ export function isNonAppExternalAction(text: string): boolean {
 export function isNonAppMediaRequest(text: string): boolean {
   const normalized = normalizeScopeText(text);
   if (!normalized) return false;
-  if (APP_NOUN_PATTERN.test(normalized)) return false;
   return NON_APP_MEDIA_PATTERN.test(normalized);
 }
 
@@ -200,10 +202,10 @@ export function isNonAppListRequest(text: string): boolean {
   const normalized = normalizeScopeText(text);
   if (!normalized) return false;
   if (!NON_APP_LIST_PATTERN.test(normalized)) return false;
-  // An explicit Hour Loop task/capsule/loop creation remains in scope even if
+  // An explicit Hour Loop task or capsule creation remains in scope even if
   // the object name happens to contain "shopping list".
   if (
-    /\b(?:tasks?|capsules?|loops?)\b/.test(normalized) &&
+    /\b(?:tasks?|capsules?)\b/.test(normalized) &&
     /\b(?:create|add|make|new|rename)\b/.test(normalized)
   ) {
     return false;

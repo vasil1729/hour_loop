@@ -1,0 +1,9 @@
+{
+  "generator": "src/store/assistantStore.scopeFailure.test.ts",
+  "runtime": "desktop/Jest Node environment",
+  "failClosedRequestsTested": 2,
+  "apiKeyLookups": 0,
+  "providerInvocations": 0,
+  "databaseAccesses": 0,
+  "failClosed": true
+}
