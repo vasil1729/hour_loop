@@ -1,16 +1,12 @@
-export const CAPSULE_COLORS = [
-  '#7B6EF6',
-  '#22C55E',
-  '#F59E0B',
-  '#EF4444',
-  '#06B6D4',
-  '#EC4899',
-  '#8B5CF6',
-  '#14B8A6',
-  '#F97316',
-  '#64748B',
-] as const;
+/**
+ * Capsule colors are generated with a golden-angle hue step. This spreads any
+ * number of capsules around the color wheel instead of repeating a short
+ * palette, while staying deterministic for the same item order.
+ */
+const GOLDEN_ANGLE = 137.508;
+const BASE_HUE = 250;
 
 export function capsuleColor(index: number): string {
-  return CAPSULE_COLORS[index % CAPSULE_COLORS.length] ?? CAPSULE_COLORS[0];
+  const hue = (BASE_HUE + index * GOLDEN_ANGLE) % 360;
+  return `hsl(${Math.round(hue)}, 68%, 50%)`;
 }

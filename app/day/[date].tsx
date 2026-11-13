@@ -221,11 +221,13 @@ export default function DayViewScreen() {
   );
 
   const colorByItem = useMemo(() => {
-    const map = new Map<string, string>();
-    data?.capsules.forEach((capsule, index) => {
-      map.set(capsule.itemId, capsuleColor(index));
-    });
-    return map;
+    // Sort by item id so a capsule keeps its color while live durations change.
+    const itemIds = Array.from(
+      new Set((data?.capsules ?? []).map((capsule) => capsule.itemId))
+    ).sort();
+    return new Map(
+      itemIds.map((itemId, index) => [itemId, capsuleColor(index)])
+    );
   }, [data]);
 
   const groups = useMemo(
@@ -369,19 +371,11 @@ export default function DayViewScreen() {
 
         {loading && !data ? (
           <LoadingScreen />
-        ) : !data || data.capsules.length === 0 ? (
+        ) : !data ? (
           <View style={styles.emptyWrap}>
             <EmptyState
-              title={
-                period === 'day'
-                  ? t('day.noCapsuleTitle')
-                  : t('day.noPeriodCapsuleTitle')
-              }
-              message={
-                period === 'day'
-                  ? t('day.noCapsuleMessage')
-                  : t('day.noPeriodCapsuleMessage')
-              }
+              title={t('day.noCapsuleTitle')}
+              message={t('day.noCapsuleMessage')}
             />
           </View>
         ) : (
@@ -428,6 +422,30 @@ export default function DayViewScreen() {
               </View>
             </View>
 
+            {data.capsules.length === 0 ? (
+              period === 'day' ? (
+                <View style={styles.emptyHint}>
+                  <Text style={[styles.emptyHintTitle, { color: colors.text }]}>
+                    {t('day.noCapsuleTitle')}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.emptyHintBody,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {t('day.noCapsuleMessage')}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.emptyWrap}>
+                  <EmptyState
+                    title={t('day.noPeriodCapsuleTitle')}
+                    message={t('day.noPeriodCapsuleMessage')}
+                  />
+                </View>
+              )
+            ) : (
             <View style={styles.taskSection}>
               <View style={styles.taskSectionHeader}>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -572,7 +590,8 @@ export default function DayViewScreen() {
                   })}
                 </View>
               ))}
-            </View>
+              </View>
+            )}
 
             {period === 'day' ? (
               <>
@@ -619,7 +638,8 @@ export default function DayViewScreen() {
               })}
             </View>
 
-            {selectedCapsule ? (
+            {data.capsules.length > 0 ? (
+              selectedCapsule ? (
               <View
                 style={[
                   styles.selectionCard,
@@ -661,7 +681,8 @@ export default function DayViewScreen() {
               <Text style={[styles.selectionHint, { color: colors.textSecondary }]}>
                 {t('day.selectionHint')}
               </Text>
-            )}
+            )
+            ) : null}
 
             {viewMode === 'timeline' ? (
               <>
@@ -1074,6 +1095,23 @@ const styles = StyleSheet.create({
   emptyWrap: {
     minHeight: 260,
     justifyContent: 'center',
+  },
+  emptyHint: {
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyHintTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  emptyHintBody: {
+    maxWidth: 320,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
   },
   summaryCard: {
     borderWidth: StyleSheet.hairlineWidth,
