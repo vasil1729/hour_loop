@@ -14,6 +14,7 @@ import { WebPhoneFrame } from '../src/components/common/WebPhoneFrame';
 import { DATABASE_NAME } from '../src/database/client';
 import { migrateDbIfNeeded } from '../src/database/migrations';
 import { loopService } from '../src/features/loops/loopService';
+import { shouldOpenCompletionJournal } from '../src/features/loops/loopTarget';
 import { I18nProvider, useTranslation } from '../src/i18n/I18nProvider';
 import { recoverAppState, subscribeToForeground } from '../src/services/lifecycle/appLifecycleService';
 import { setupNotifications } from '../src/services/notifications/notificationService';
@@ -70,10 +71,28 @@ function NotificationResponseHandler() {
 
       const loopId = request.content.data?.loopId;
       if (typeof loopId !== 'string') return;
+      const kind = request.content.data?.kind;
 
       try {
-        const loop = await loopService.getLoop(db, loopId);
+        let loop = await loopService.getLoop(db, loopId);
         if (!active) return;
+
+        if (kind === 'target') {
+          if (loop.status === 'ACTIVE') {
+            loop = await loopService.pauseAtTarget(db, loopId);
+          }
+          if (loop.status === 'PAUSED') {
+            const elapsed = await loopService.getElapsedSeconds(db, loopId);
+            if (shouldOpenCompletionJournal(loop, elapsed)) {
+              router.navigate({
+                pathname: '/loop/complete',
+                params: { loopId },
+              });
+              return;
+            }
+          }
+        }
+
         if (loop.status === 'ACTIVE' || loop.status === 'PAUSED') {
           router.navigate('/loop/active');
         } else {

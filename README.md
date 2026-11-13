@@ -14,7 +14,7 @@ Everything is stored in local SQLite. No account, no network, no tracking.
 
 ## Features
 
-- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar and quick pause/resume on Today, and a local-time session log.
+- **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar and quick pause/resume on Today, and a local-time session log. When the target is reached, the loop pauses and opens the completion journal automatically.
 - **Completion journal** — capture focus, carry-in, done, roll-forward, and notes at the end of a loop.
 - **Task pool** — task containers with actionable subtasks, open capsules, progress, loop history, and aggregated focus time.
 - **Capsules** — loop-sized checklist items that can be added or removed during a running loop. Loose capsules can be created directly in the Tasks screen, and completed capsules remain visible in their completed list.

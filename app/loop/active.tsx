@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -25,6 +25,7 @@ import { formatElapsed } from '../../src/domain/timer/timerEngine';
 import type { LoopItem } from '../../src/domain/types';
 import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
+import { shouldOpenCompletionJournal } from '../../src/features/loops/loopTarget';
 import { localizeError } from '../../src/i18n';
 import { useTranslation } from '../../src/i18n/I18nProvider';
 import { goToToday } from '../../src/services/navigation/navigationService';
@@ -54,6 +55,46 @@ export default function ActiveLoopScreen() {
   const [lastCapsulePromptVisible, setLastCapsulePromptVisible] =
     useState(false);
   const addInputRef = useRef<TextInput>(null);
+  const autoJournalLoopRef = useRef<string | null>(null);
+
+  const reachedTarget = activeLoop
+    ? elapsedSeconds >= activeLoop.target_duration_seconds
+    : false;
+
+  useEffect(() => {
+    if (loading || !activeLoop) return;
+    if (!shouldOpenCompletionJournal(activeLoop, elapsedSeconds)) return;
+    if (autoJournalLoopRef.current === activeLoop.id) return;
+    if (
+      busy ||
+      deleting ||
+      deleteVisible ||
+      lastCapsulePromptVisible ||
+      addingCapsule ||
+      removingCapsuleId !== null ||
+      newCapsuleText.trim().length > 0
+    ) {
+      return;
+    }
+
+    autoJournalLoopRef.current = activeLoop.id;
+    router.replace({
+      pathname: '/loop/complete',
+      params: { loopId: activeLoop.id },
+    });
+  }, [
+    activeLoop,
+    addingCapsule,
+    busy,
+    deleteVisible,
+    deleting,
+    elapsedSeconds,
+    lastCapsulePromptVisible,
+    loading,
+    newCapsuleText,
+    removingCapsuleId,
+    router,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -260,7 +301,6 @@ export default function ActiveLoopScreen() {
   }
 
   const isPaused = activeLoop.status === 'PAUSED';
-  const reachedTarget = elapsedSeconds >= activeLoop.target_duration_seconds;
 
   return (
     <Screen contentContainerStyle={styles.content}>
