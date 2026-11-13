@@ -235,9 +235,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     const loop = await requireLoop(db, loopId);
     const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
     const elapsed = calculateElapsedSeconds(intervals, deps.now());
-    return loop.status === 'ACTIVE'
-      ? Math.min(elapsed, loop.target_duration_seconds)
-      : elapsed;
+    return Math.min(elapsed, loop.target_duration_seconds);
   }
 
   async function getCurrentItem(
@@ -455,10 +453,18 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
 
     async pauseAtTarget(db, loopId) {
       const loop = await requireLoop(db, loopId);
-      if (loop.status !== 'ACTIVE') {
+      if (loop.status === 'COMPLETED') {
         return loop;
       }
       const intervals = await deps.intervals.getIntervalsForLoop(db, loopId);
+      const elapsed = calculateElapsedSeconds(intervals, deps.now());
+      const needsClamp =
+        loop.status === 'ACTIVE'
+          ? elapsed >= loop.target_duration_seconds
+          : elapsed > loop.target_duration_seconds;
+      if (!needsClamp) {
+        return loop;
+      }
       return pauseAtTargetInternal(db, loop, intervals);
     },
 
@@ -775,10 +781,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       return {
         loop,
         intervals,
-        elapsedSeconds:
-          loop.status === 'ACTIVE'
-            ? Math.min(elapsed, loop.target_duration_seconds)
-            : elapsed,
+        elapsedSeconds: Math.min(elapsed, loop.target_duration_seconds),
       };
     },
   };

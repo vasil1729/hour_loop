@@ -35,7 +35,10 @@ export async function attachLoopMetrics(
     return {
       loop,
       intervals: loopIntervals,
-      elapsedSeconds: calculateElapsedSeconds(loopIntervals, now),
+      elapsedSeconds: Math.min(
+        calculateElapsedSeconds(loopIntervals, now),
+        loop.target_duration_seconds
+      ),
     };
   });
 }

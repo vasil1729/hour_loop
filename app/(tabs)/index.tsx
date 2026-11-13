@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -25,6 +25,7 @@ import {
   progressRatio,
 } from '../../src/domain/timer/timerEngine';
 import { listRecentLoops } from '../../src/database/repositories/loopsRepository';
+import type { LoopItem } from '../../src/domain/types';
 import {
   attachLoopMetrics,
   type LoopWithMetrics,
@@ -45,18 +46,27 @@ export default function TodayScreen() {
   const { t } = useTranslation();
   const { activeLoop, elapsedSeconds, refresh } = useActiveLoop();
   const [recentLoops, setRecentLoops] = useState<LoopWithMetrics[]>([]);
-  const { daily } = useIntentions();
+  const [currentCapsule, setCurrentCapsule] = useState<LoopItem | null>(null);
+  const { daily, refresh: refreshIntentions } = useIntentions();
   const [loopActionBusy, setLoopActionBusy] = useState(false);
+
+  const activeLoopId = activeLoop?.id;
 
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
 
       const load = async () => {
-        const recent = await listRecentLoops(db, 5);
+        const [recent, items] = await Promise.all([
+          listRecentLoops(db, 5),
+          activeLoopId
+            ? loopService.getLoopItems(db, activeLoopId)
+            : Promise.resolve([]),
+        ]);
         const withMetrics = await attachLoopMetrics(db, recent);
         if (!cancelled) {
           setRecentLoops(withMetrics);
+          setCurrentCapsule(items.find((item) => item.current) ?? null);
         }
       };
 
@@ -64,7 +74,7 @@ export default function TodayScreen() {
       return () => {
         cancelled = true;
       };
-    }, [db])
+    }, [activeLoopId, db])
   );
 
   const todayKey = currentDayKey();
@@ -74,6 +84,12 @@ export default function TodayScreen() {
   const activeTargetReached = activeLoop
     ? elapsedSeconds >= activeLoop.target_duration_seconds
     : false;
+
+  useEffect(() => {
+    if (activeLoop?.status === 'PAUSED' && activeTargetReached) {
+      void refreshIntentions();
+    }
+  }, [activeLoop?.status, activeTargetReached, refreshIntentions]);
 
   const handleToggleLoop = async () => {
     if (!activeLoop || loopActionBusy) return;
@@ -249,7 +265,9 @@ export default function TodayScreen() {
               numberOfLines={2}
               style={[styles.activeFocus, { color: colors.text }]}
             >
-              {activeLoop.focus || t('today.continueFocus')}
+              {currentCapsule?.text ||
+                activeLoop.focus ||
+                t('today.continueFocus')}
             </Text>
           </Pressable>
 

@@ -42,8 +42,14 @@ export function LoopHistoryRow({
   const content = (
     <>
       <View style={[styles.badge, { backgroundColor: colors.accentSoft }]}>
-        <Text style={[styles.badgeText, { color: colors.accent }]}>
-          H{loop.sequence_number}
+        <Text
+          numberOfLines={1}
+          maxFontSizeMultiplier={1.4}
+          style={[styles.badgeText, { color: colors.accent }]}
+        >
+          {Number.isFinite(loop.sequence_number)
+            ? `H${loop.sequence_number}`
+            : 'H?'}
         </Text>
       </View>
       <View style={styles.body}>
@@ -97,16 +103,19 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   badge: {
-    minWidth: 42,
+    minWidth: 48,
     flexShrink: 0,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.sm,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   badgeText: {
+    flexShrink: 0,
     fontSize: 12,
     fontWeight: '700',
+    textAlign: 'center',
   },
   body: {
     flex: 1,

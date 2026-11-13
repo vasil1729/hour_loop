@@ -434,6 +434,35 @@ describe('loopService', () => {
     expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
   });
 
+  it('trims overtime from a loop that is already paused', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60, items: [{ text: 'Focus' }] });
+
+    harness.advanceSeconds(75);
+    // Simulate a legacy paused row whose open interval was not clamped.
+    harness.state.loops[0]!.status = 'PAUSED';
+
+    const trimmed = await service.pauseAtTarget(db, loop.id);
+
+    expect(trimmed.status).toBe('PAUSED');
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
+    expect(harness.state.intervals[0]?.ended_at).toBe(
+      '2026-01-01T10:01:00.000Z'
+    );
+  });
+
+  it('never reports more than the target for a completed loop', async () => {
+    const harness = createHarness();
+    const { db, service } = harness;
+    const loop = await service.startLoop(db, { targetDurationSeconds: 60, items: [{ text: 'Focus' }] });
+
+    harness.advanceSeconds(75);
+    await service.completeLoop(db, loop.id, {});
+
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
+  });
+
   it('persists the completion journal fields', async () => {
     const harness = createHarness();
     const { db, service } = harness;

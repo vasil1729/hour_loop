@@ -39,20 +39,24 @@ export function useActiveLoop() {
         const nextIntervals = await getIntervalsForLoop(db, loopId);
         if (cancelled) return;
 
-        if (loopStatus === 'ACTIVE') {
-          const elapsed = calculateElapsedSeconds(nextIntervals, new Date());
-          if (elapsed >= targetSeconds) {
-            const paused = await loopService.pauseAtTarget(db, loopId);
-            await syncLoopNotification(db, paused).catch(() => undefined);
-            await refresh(db);
-            return;
-          }
-          setIntervals(nextIntervals);
-          setElapsedSeconds(elapsed);
+        const elapsed = calculateElapsedSeconds(nextIntervals, new Date());
+        const needsClamp =
+          loopStatus === 'ACTIVE'
+            ? elapsed >= targetSeconds
+            : elapsed > targetSeconds;
+        if (needsClamp) {
+          const paused = await loopService.pauseAtTarget(db, loopId);
+          await syncLoopNotification(db, paused).catch(() => undefined);
+          await refresh(db);
+          const trimmed = await getIntervalsForLoop(db, loopId);
+          if (!cancelled) setIntervals(trimmed);
           return;
         }
 
         setIntervals(nextIntervals);
+        if (loopStatus === 'ACTIVE') {
+          setElapsedSeconds(elapsed);
+        }
       };
 
       void refresh(db);
