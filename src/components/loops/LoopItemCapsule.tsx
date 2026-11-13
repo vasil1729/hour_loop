@@ -53,41 +53,40 @@ export function LoopItemCapsule({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
-  const shakeX = useRef(new Animated.Value(0)).current;
   const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone);
 
   useEffect(() => {
     if (!shakeSignal) return;
-    shakeX.stopAnimation();
-    shakeX.setValue(0);
+    translateX.stopAnimation();
+    translateX.setValue(0);
     Animated.sequence([
-      Animated.timing(shakeX, {
+      Animated.timing(translateX, {
         toValue: -8,
         duration: 45,
         useNativeDriver: true,
       }),
-      Animated.timing(shakeX, {
+      Animated.timing(translateX, {
         toValue: 8,
         duration: 55,
         useNativeDriver: true,
       }),
-      Animated.timing(shakeX, {
+      Animated.timing(translateX, {
         toValue: -6,
         duration: 55,
         useNativeDriver: true,
       }),
-      Animated.timing(shakeX, {
+      Animated.timing(translateX, {
         toValue: 6,
         duration: 55,
         useNativeDriver: true,
       }),
-      Animated.timing(shakeX, {
+      Animated.timing(translateX, {
         toValue: 0,
         duration: 45,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [shakeSignal, shakeX]);
+  }, [shakeSignal, translateX]);
 
   const panResponder = useMemo(
     () =>
@@ -150,7 +149,7 @@ export function LoopItemCapsule({
           backgroundColor,
           borderColor,
           opacity: disabled ? 0.5 : 1,
-          transform: [{ translateX: Animated.add(translateX, shakeX) }],
+          transform: [{ translateX }],
         },
       ]}
     >
