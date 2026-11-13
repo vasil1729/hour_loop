@@ -3,6 +3,10 @@ import {
   classifyDeterministicScope,
   isAmbiguousFragment,
   isDeicticFollowUp,
+  isExplicitAppHelp,
+  isNonAppExternalAction,
+  isNonAppListRequest,
+  isNonAppMediaRequest,
   splitScopeClauses,
 } from './scopeRules';
 import type {
@@ -15,9 +19,30 @@ type SegmentDecision = {
   category: ScopeCategory;
   probability: number;
   confidence: number;
+  source: 'rules' | 'model';
 };
 
 function classifySegment(text: string): SegmentDecision {
+  if (
+    isNonAppMediaRequest(text) ||
+    isNonAppListRequest(text) ||
+    isNonAppExternalAction(text)
+  ) {
+    return {
+      category: 'OUT_OF_SCOPE',
+      probability: 0,
+      confidence: 1,
+      source: 'rules',
+    };
+  }
+  if (isExplicitAppHelp(text)) {
+    return {
+      category: 'IN_SCOPE',
+      probability: 1,
+      confidence: 1,
+      source: 'rules',
+    };
+  }
   const probability = predictScopeProbability(text);
   const thresholds = getScopeModelThresholds();
   if (probability >= thresholds.inScope) {
@@ -25,6 +50,7 @@ function classifySegment(text: string): SegmentDecision {
       category: 'IN_SCOPE',
       probability,
       confidence: probability,
+      source: 'model',
     };
   }
   if (probability <= thresholds.outOfScope) {
@@ -32,12 +58,14 @@ function classifySegment(text: string): SegmentDecision {
       category: 'OUT_OF_SCOPE',
       probability,
       confidence: 1 - probability,
+      source: 'model',
     };
   }
   return {
     category: 'AMBIGUOUS',
     probability,
     confidence: Math.max(probability, 1 - probability),
+    source: 'model',
   };
 }
 
@@ -46,22 +74,22 @@ function decisionForSegment(segment: SegmentDecision): ScopeDecision {
     return {
       category: 'IN_SCOPE',
       confidence: segment.confidence,
-      source: 'model',
-      reason: 'model',
+      source: segment.source,
+      reason: segment.source === 'rules' ? 'app_help' : 'model',
     };
   }
   if (segment.category === 'OUT_OF_SCOPE') {
     return {
       category: 'OUT_OF_SCOPE',
       confidence: segment.confidence,
-      source: 'model',
-      reason: 'model',
+      source: segment.source,
+      reason: segment.source === 'rules' ? 'non_app' : 'model',
     };
   }
   return {
     category: 'AMBIGUOUS',
     confidence: segment.confidence,
-    source: 'model',
+    source: segment.source,
     reason: 'confidence',
   };
 }
@@ -113,7 +141,22 @@ export function classifyScope(
       return decisionForSegment(classifySegment(clauses[0] ?? normalized));
     }
 
-    const segments = clauses.map(classifySegment);
+    const segments: SegmentDecision[] = [];
+    for (const clause of clauses) {
+      const previous = segments[segments.length - 1];
+      if (previous?.category === 'IN_SCOPE' && isDeicticFollowUp(clause)) {
+        // A follow-up inside the same message ("...? Can you give me an
+        // example?") inherits the immediately preceding in-scope clause only.
+        segments.push({
+          category: 'IN_SCOPE',
+          probability: 1,
+          confidence: 0.95,
+          source: 'rules',
+        });
+      } else {
+        segments.push(classifySegment(clause));
+      }
+    }
     const hasIn = segments.some((segment) => segment.category === 'IN_SCOPE');
     const hasOut = segments.some(
       (segment) => segment.category === 'OUT_OF_SCOPE'

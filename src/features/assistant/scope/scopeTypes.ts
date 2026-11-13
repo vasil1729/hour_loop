@@ -15,9 +15,12 @@ export type ScopeDecisionReason =
   | 'oversized'
   | 'no_intent'
   | 'follow_up'
+  | 'app_help'
+  | 'non_app'
   | 'model'
   | 'confidence'
   | 'clause_mix'
+  | 'prompt_injection'
   | 'model_error';
 
 export type ScopeDecision = {

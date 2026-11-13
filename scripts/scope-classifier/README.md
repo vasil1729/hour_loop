@@ -56,10 +56,66 @@ This writes:
 
 ```bash
 npx jest src/features/assistant/scope/scopeClassifier.test.ts --runInBand
+npx jest src/features/assistant/scope/scopeRegression.test.ts --runInBand
+npx jest src/features/assistant/scope/scopeAdversarialSweep.test.ts --runInBand
 npx jest src/features/assistant/scope/scopeEvaluation.test.ts --runInBand
 npx jest src/features/assistant/scope/scopeBenchmark.test.ts --runInBand
 npx jest src/store/assistantStore.test.ts --runInBand
+npx jest src/store/assistantStore.scopeIntegration.test.ts --runInBand
 ```
+
+## Contextual follow-up policy
+
+The gate uses only the previous turn's scope category as context, and only as a
+necessary condition. A previous `IN_SCOPE` category is never sufficient
+evidence on its own.
+
+A follow-up is allowed only when the message itself contains an explicit
+reference to the ongoing task:
+
+- a pronoun/object plus an action: “pause it”, “how do I stop it?”;
+- an explicit anaphor: “uske baare mein aur batao”, “athine pause cheyyu”,
+  “അത് തന്നെ കാണിക്കൂ”;
+- a time window: “what about the previous day?”;
+- an explicit request to continue the explanation: “show me the steps”,
+  “can you give me an example?”.
+
+Generic sentence openers are not follow-ups. Messages beginning with `do`,
+`continue`, `go on`, `kal`, `pichle`, `innale`, `pinne`, etc. are classified on
+their own content. Regression tests assert that, after an `IN_SCOPE` turn,
+unrelated questions such as “Do you know the capital of France?”, “Continue with
+the history of India.”, “Kal India ka capital kya hai?”, “Innale Kerala-yude
+history parayu.” and “Pinne oru biryani recipe parayu.” stay local.
+
+Ambiguous fragments (`continue`, `do it`, `what about that?`, `why?`, `can
+you?`) remain `AMBIGUOUS` even with previous `IN_SCOPE` context.
+
+## Deterministic guards
+
+Before the model, a small rules layer handles:
+
+- empty, punctuation-only and oversized input;
+- greetings and short ambiguous fragments;
+- prompt-injection and credential-reveal phrases (`OUT_OF_SCOPE`, local);
+- explicit app-help questions containing Hour Loop terminology or app concepts
+  (`loop`, `timer`, `interval`, `capsule`, `focus session`, `backup`,
+  `checklist`) combined with an action and a help marker;
+- media-control requests, external shopping/grocery lists, and clear external
+  actions (ordering food, booking travel, recipes, movies) that the compact
+  model can confuse with app actions.
+
+The app-help rule is disabled when the message names a different domain
+(JavaScript, Python, music, video editing, physics, circuits, medicine, computer
+backups, graph theory, and similar), so hard negatives such as “Explain loops in
+JavaScript” and “How does a timer circuit work?” still fail closed.
+
+## Mixed-intent handling
+
+Clauses are split at sentence boundaries, newlines, semicolons, `and`/`aur`/
+`plus`/`और`/`ഒപ്പം`/`കൂടാതെ`, and `, pinne`/`, phir`/`, then`. A message with
+both an in-scope and an out-of-scope clause is `MIXED` and never reaches the
+provider. Sentence boundaries matter: “How do I create a loop? Write me a poem.”
+is `MIXED`, not an accepted app-help request.
 
 ## Measured results
 
@@ -80,10 +136,10 @@ claims about real-user accuracy.
 ### Composite held-out test split (394 samples, including MIXED/AMBIGUOUS)
 
 - Exact category accuracy: **92.1%**
-- Safe routing rate (in-scope allowed, all non-in-scope kept local): **94.9%**
+- Safe routing rate (in-scope allowed, all non-in-scope kept local): **95.4%**
 - False acceptance (non-in-scope routed to the provider): **0%**
 - MIXED examples routed to MIXED: **40/40**
-- AMBIGUOUS examples kept local: **49/49** (39 AMBIGUOUS, 10 safe OUT)
+- AMBIGUOUS examples kept local: **49/49** (37 AMBIGUOUS, 12 safe OUT)
 
 Per-language composite results:
 
@@ -93,7 +149,7 @@ Per-language composite results:
 | Hindi | 9 | 100% | 100% | 0 |
 | English–Hindi | 77 | 92.2% | 92.2% | 0 |
 | Malayalam | 5 | 80.0% | 80.0% | 0 |
-| English–Malayalam | 109 | 94.5% | 98.2% | 0 |
+| English–Malayalam | 109 | 94.5% | 100% | 0 |
 
 The Malayalam/Hindi script test partitions are small; the numbers are reported
 with their sample counts rather than presented as broad language claims.
@@ -102,13 +158,14 @@ with their sample counts rather than presented as broad language claims.
 
 Measured in the desktop/Jest Node environment, not on a device:
 
-- Cold initialization/inference: **~6–10 ms**
-- Warm inference average (2,000 calls): **~0.14–0.17 ms**
+- Cold initialization/inference: **~6–22 ms** (desktop/Jest, load-dependent)
+- Warm inference average (2,000 calls): **~0.11–0.23 ms**
 - Model weights: **32,768 bytes** (INT8)
 - Generated TypeScript model artifact: **~47 KB**
-- Android release APK before scope integration: **35,096,045 bytes**
-- Android release APK after scope integration: **35,205,597 bytes**
-- APK delta: **+109,552 bytes (~107 KB)**
+- Android release APK before scope integration (1.7.3): **35,096,045 bytes**
+- Android release APK with scope integration (1.8.0): **35,205,597 bytes**
+- Scope integration delta: **+109,552 bytes (~107 KB)**
+- Current hardened release APK (1.8.3): **35,251,177 bytes**
 - Native runtime dependency: **none**
 - Additional native libraries: **none**
 - Web support: yes, pure JavaScript
@@ -126,10 +183,28 @@ local response and return to idle immediately. No key is read and
 provider. If the model/inference fails, the decision is AMBIGUOUS (fail closed).
 
 The classifier uses one bounded bit of context: the previous turn's scope
-category, which enables deictic follow-ups such as “What about the previous
-day?” or “Pause it.” It does not feed raw conversation history or application
-records into the classifier, which prevents record content from changing the
+category. That bit is necessary but not sufficient: a message must also contain
+an explicit deictic/referential expression to inherit the previous topic. Raw
+conversation history and application records are not fed into the classifier,
+which prevents record content or prompt-injection text from changing the
 classification policy.
+
+## Regression coverage
+
+The hardening suite adds 152 tests:
+
+- 144 A–G regression tests covering clearly in-scope requests, clearly
+  out-of-scope requests, contextual false-accept pairs, genuine follow-ups,
+  mixed intent, ambiguous fragments with and without context, multilingual and
+  code-switched input, hard negatives, app-help boundaries, prompt injection,
+  and clause splitting.
+- 2 adversarial corpus sweeps that assert 60+ non-app requests stay out of
+  scope both with and without previous `IN_SCOPE` context, while 30+ app
+  requests remain allowed.
+- 6 real-classifier assistant-store integration tests proving that
+  `OUT_OF_SCOPE`, `MIXED`, and `AMBIGUOUS` messages after an in-scope turn never
+  call `getAssistantApiKey()` or `runAssistantTurn()`, while a genuine
+  follow-up still does.
 
 ## Limitations
 
@@ -138,7 +213,10 @@ classification policy.
   locales are not yet evaluated.
 - Linear n-gram model rather than a transformer; unusual paraphrases may fall
   back to local clarification.
-- MIXED/AMBIGUOUS are composed from clause splitting and calibrated confidence,
-  not a transformer head.
-- No device benchmark was performed in this environment.
+- `MIXED`/`AMBIGUOUS` are composed from clause splitting and calibrated
+  confidence, not a transformer head.
+- The deterministic app-help/media/list guards are deliberately narrow and
+  English/Romanized-Hindi/Romanized-Malayalam-centric; unusual phrasings fall
+  back to the statistical model or local clarification.
+- No physical-device benchmark or iOS build was performed in this environment.
 - The model weights are repository-generated and licensed AGPL-3.0-or-later.
