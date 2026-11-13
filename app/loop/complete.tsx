@@ -172,6 +172,9 @@ export default function CompleteLoopScreen() {
 
     setBusy(true);
     try {
+      // Cancel first so a crash between closing the loop and cancelling cannot
+      // leave a target notification scheduled for a completed loop.
+      await cancelLoopNotification(db, loop.id).catch(() => undefined);
       await loopService.completeLoop(db, loop.id, {
         focus,
         carryIn,
@@ -180,7 +183,6 @@ export default function CompleteLoopScreen() {
         rollForwardTaskId,
         note,
       });
-      await cancelLoopNotification(db, loop.id).catch(() => undefined);
       await refreshLoop(db);
       goToToday(router);
     } catch (caught) {

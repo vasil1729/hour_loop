@@ -3,7 +3,10 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { useLoopStore } from '../../store/loopStore';
 import { loopService } from '../../features/loops/loopService';
-import { syncLoopNotification } from '../notifications/notificationService';
+import {
+  reconcileLoopNotifications,
+  syncLoopNotification,
+} from '../notifications/notificationService';
 
 /**
  * Rehydrate display state and reconcile the scheduled target notification
@@ -23,6 +26,7 @@ export async function recoverAppState(
 
   await useLoopStore.getState().refresh(db);
   const currentLoop = useLoopStore.getState().activeLoop;
+  await reconcileLoopNotifications(db, currentLoop?.id ?? null);
   if (currentLoop) {
     await loopService
       .ensureCurrentItemInterval(db, currentLoop.id)

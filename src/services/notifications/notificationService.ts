@@ -105,11 +105,37 @@ export async function cancelLoopNotification(
   db: SQLiteDatabase,
   loopId: string
 ): Promise<void> {
-  cancelTargetFeedback(loopId);
+  // Only one loop can be active at a time, so any scheduled in-app feedback is
+  // stale once we are cancelling a loop.
+  cancelTargetFeedback();
   await Promise.all([
     cancelScheduledNotification(db, targetNotificationKey(loopId)),
     cancelScheduledNotification(db, earlyNotificationKey(loopId)),
   ]);
+}
+
+/**
+ * Drops every scheduled loop notification that does not belong to the current
+ * active loop. This clears notifications left behind by a completed/deleted
+ * loop when the app was killed before it could cancel them.
+ */
+export async function reconcileLoopNotifications(
+  db: SQLiteDatabase,
+  activeLoopId: string | null
+): Promise<void> {
+  cancelTargetFeedback();
+
+  const settings = await getAllSettings(db);
+  const activeTargetKey = activeLoopId ? targetNotificationKey(activeLoopId) : null;
+  const activeEarlyKey = activeLoopId ? earlyNotificationKey(activeLoopId) : null;
+
+  for (const setting of settings) {
+    if (!setting.key.startsWith('notif_')) continue;
+    if (setting.key === activeTargetKey || setting.key === activeEarlyKey) {
+      continue;
+    }
+    await cancelScheduledNotification(db, setting.key);
+  }
 }
 
 export async function cancelAllLoopNotifications(
