@@ -172,7 +172,6 @@ openwiki/            Generated product, architecture, and operations wiki
 - [Architecture](openwiki/architecture/system-overview.md)
 - [Database schema](openwiki/database/persistence.md)
 - [Backup and restore](openwiki/operations/backup-and-restore.md)
-- [Monetization plan](MONETIZATION.md)
 
 ## Design principles
 
