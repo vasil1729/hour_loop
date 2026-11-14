@@ -642,6 +642,7 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantApiKeyWeb': 'வலையில் விசை நினைவகத்தில் இருக்கும்; இந்தப் பக்கம் மூடும்போது அழிக்கப்படும்.',
   'settings.assistantApiKeyHelp': 'விசை செயலி தரவுத்தளத்திற்கு வெளியே வைக்கப்பட்டு, தேர்ந்தெடுத்த வழங்குநருக்கு மட்டும் அனுப்பப்படும்.',
   'settings.assistantApiKeyWebHelp': 'விசை நினைவகத்தில் மட்டும் வைக்கப்படும். அது உலாவி சேமிப்பில் ஒருபோதும் எழுதப்படாது.',
+  'settings.assistantGroqKeyHelp': 'Groq API விசையை இலவசமாகப் பெறுங்கள்',
   'settings.assistantModel': 'மாதிரி',
   'settings.assistantModelPlaceholder': 'வழங்குநர் மாதிரி அடையாளம்',
   'settings.assistantModelChoose': 'மாதிரியைத் தேர்ந்தெடு',

@@ -1,5 +1,6 @@
 /* eslint-disable import/first */
 import React from 'react';
+import { Linking } from 'react-native';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import { AssistantProviderError } from '../../features/assistant/providers/providerTypes';
@@ -116,6 +117,21 @@ describe('assistant settings UI', () => {
     });
     await fireEvent.press(openAI);
     expect(openAI.props.accessibilityState).toEqual({ selected: true });
+  });
+
+  it('links to the free Groq API key page for the default provider', async () => {
+    const openURL = jest
+      .spyOn(Linking, 'openURL')
+      .mockResolvedValue(true as never);
+
+    await render(<AssistantSettings />);
+    const link = await screen.findByRole('link', {
+      name: 'settings.assistantGroqKeyHelp',
+    });
+    await fireEvent.press(link);
+
+    expect(openURL).toHaveBeenCalledWith('https://console.groq.com/keys');
+    openURL.mockRestore();
   });
 
   it('selects a model from the model picker', async () => {

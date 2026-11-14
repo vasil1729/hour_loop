@@ -726,6 +726,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
     'A chave é mantida fora do banco de dados do app e é enviada apenas ao provedor selecionado.',
   'settings.assistantApiKeyWebHelp':
     'A chave fica apenas na memória. Ela nunca é gravada no armazenamento do navegador.',
+  'settings.assistantGroqKeyHelp': 'Obtenha uma chave de API Groq gratuita',
   'settings.assistantModel': 'Modelo',
   'settings.assistantModelPlaceholder': 'Identificador do modelo do provedor',
   'settings.assistantModelChoose': 'Escolher modelo',

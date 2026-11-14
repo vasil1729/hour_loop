@@ -722,6 +722,7 @@ export const en = {
     'The key is kept outside the app database and is sent only to the selected provider.',
   'settings.assistantApiKeyWebHelp':
     'The key is kept in memory only. It is never written to browser storage.',
+  'settings.assistantGroqKeyHelp': 'Get a free Groq API key',
   'settings.assistantModel': 'Model',
   'settings.assistantModelPlaceholder': 'Provider model identifier',
   'settings.assistantModelChoose': 'Choose model',

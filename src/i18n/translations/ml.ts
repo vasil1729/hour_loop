@@ -728,6 +728,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
     'കീ ആപ്പ് ഡാറ്റാബേസിന് പുറത്താണ്, തിരഞ്ഞെടുത്ത ദാതാവിന് മാത്രം അയയ്ക്കുന്നു.',
   'settings.assistantApiKeyWebHelp':
     'കീ മെമ്മറിയിൽ മാത്രം സൂക്ഷിക്കുന്നു, ബ്രൗസർ സ്റ്റോറേജിൽ എഴുതില്ല.',
+  'settings.assistantGroqKeyHelp': 'സൗജന്യ Groq API കീ നേടുക',
   'settings.assistantModel': 'മോഡൽ',
   'settings.assistantModelPlaceholder': 'ദാതാവിന്റെ മോഡൽ ഐഡന്റിഫയർ',
   'settings.assistantModelChoose': 'മോഡൽ തിരഞ്ഞെടുക്കുക',

@@ -646,6 +646,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantApiKeyWeb': '在 Web 上，密钥仅保存在内存中，页面关闭时清除。',
   'settings.assistantApiKeyHelp': '密钥保存在应用数据库之外，只会发送给所选服务商。',
   'settings.assistantApiKeyWebHelp': '密钥仅保存在内存中，绝不会写入浏览器存储。',
+  'settings.assistantGroqKeyHelp': '获取免费的 Groq API 密钥',
   'settings.assistantModel': '模型',
   'settings.assistantModelPlaceholder': '服务商模型标识符',
   'settings.assistantModelChoose': '选择模型',

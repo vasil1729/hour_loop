@@ -643,6 +643,7 @@ export const si: Record<TranslationKey, TranslationEntry> = {
   'settings.assistantApiKeyWeb': 'වෙබ් එකේ යතුර මතකයේ රැඳී, මෙම පිටුව වසන විට ඉවත් වේ.',
   'settings.assistantApiKeyHelp': 'යතුර යෙදුම් දත්ත ගබඩාවෙන් පිටත තබා, තෝරාගත් සැපයුම්කරුට පමණක් යවනු ලැබේ.',
   'settings.assistantApiKeyWebHelp': 'යතුර මතකයේ පමණක් තබා ඇත. එය කිසිවිටෙක බ්‍රව්සර් ගබඩාවට ලියන්නේ නැත.',
+  'settings.assistantGroqKeyHelp': 'Groq API යතුරක් නොමිලේ ලබා ගන්න',
   'settings.assistantModel': 'ආකෘතිය',
   'settings.assistantModelPlaceholder': 'සැපයුම්කරු ආකෘති හැඳුනුම',
   'settings.assistantModelChoose': 'ආකෘතිය තෝරන්න',

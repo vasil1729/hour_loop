@@ -754,6 +754,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Ключ хранится вне базы приложения и отправляется только выбранному провайдеру.',
   'settings.assistantApiKeyWebHelp':
     'Ключ хранится только в памяти и не записывается в хранилище браузера.',
+  'settings.assistantGroqKeyHelp': 'Получите бесплатный API-ключ Groq',
   'settings.assistantModel': 'Модель',
   'settings.assistantModelPlaceholder': 'Идентификатор модели провайдера',
   'settings.assistantModelChoose': 'Выбрать модель',

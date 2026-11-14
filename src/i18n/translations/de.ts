@@ -709,6 +709,7 @@ export const de: Record<TranslationKey, TranslationEntry> = {
     'Der Schlüssel wird außerhalb der App-Datenbank aufbewahrt und nur an den ausgewählten Anbieter gesendet.',
   'settings.assistantApiKeyWebHelp':
     'Der Schlüssel wird nur im Arbeitsspeicher gehalten. Er wird nie im Browserspeicher abgelegt.',
+  'settings.assistantGroqKeyHelp': 'Kostenlosen Groq-API-Schlüssel erhalten',
   'settings.assistantModel': 'Modell',
   'settings.assistantModelPlaceholder': 'Modellkennung des Anbieters',
   'settings.assistantModelChoose': 'Modell auswählen',

@@ -708,6 +708,7 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
     'کلید خارج از پایگاه داده برنامه نگهداری می‌شود و فقط به سرویس‌دهنده انتخاب‌شده فرستاده می‌شود.',
   'settings.assistantApiKeyWebHelp':
     'کلید فقط در حافظه نگهداری می‌شود. هرگز در حافظه مرورگر نوشته نمی‌شود.',
+  'settings.assistantGroqKeyHelp': 'یک کلید API رایگان Groq دریافت کنید',
   'settings.assistantModel': 'مدل',
   'settings.assistantModelPlaceholder': 'شناسه مدل سرویس‌دهنده',
   'settings.assistantModelChoose': 'انتخاب مدل',

@@ -731,6 +731,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
     'La clé est conservée en dehors de la base de données de l’application et n’est envoyée qu’au fournisseur sélectionné.',
   'settings.assistantApiKeyWebHelp':
     'La clé est uniquement conservée en mémoire. Elle n’est jamais écrite dans le stockage du navigateur.',
+  'settings.assistantGroqKeyHelp': 'Obtenez une clé API Groq gratuite',
   'settings.assistantModel': 'Modèle',
   'settings.assistantModelPlaceholder': 'Identifiant de modèle du fournisseur',
   'settings.assistantModelChoose': 'Choisir un modèle',

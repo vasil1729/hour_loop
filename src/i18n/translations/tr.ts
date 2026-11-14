@@ -702,6 +702,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Anahtar uygulama veritabanının dışında tutulur ve yalnızca seçilen sağlayıcıya gönderilir.',
   'settings.assistantApiKeyWebHelp':
     'Anahtar yalnızca bellekte tutulur ve tarayıcı deposuna yazılmaz.',
+  'settings.assistantGroqKeyHelp': 'Ücretsiz Groq API anahtarı alın',
   'settings.assistantModel': 'Model',
   'settings.assistantModelPlaceholder': 'Sağlayıcı model tanımlayıcısı',
   'settings.assistantModelChoose': 'Model seç',

@@ -753,6 +753,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يُحفظ المفتاح خارج قاعدة بيانات التطبيق ويُرسل فقط إلى المزود المحدد.',
   'settings.assistantApiKeyWebHelp':
     'يُحفظ المفتاح في الذاكرة فقط ولا يُكتب في تخزين المتصفح.',
+  'settings.assistantGroqKeyHelp': 'احصل على مفتاح API مجاني من Groq',
   'settings.assistantModel': 'الطراز',
   'settings.assistantModelPlaceholder': 'معرّف طراز المزود',
   'settings.assistantModelChoose': 'اختيار الطراز',

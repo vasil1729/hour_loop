@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Linking,
   Pressable,
   StyleSheet,
   Switch,
@@ -58,6 +59,8 @@ const PROVIDERS: { id: AssistantProviderId; labelKey: TranslationKey }[] = [
 ];
 
 type TestState = 'idle' | 'testing' | 'success' | 'error';
+
+const GROQ_KEY_URL = 'https://console.groq.com/keys';
 
 type AssistantSettingsProps = {
   reloadToken?: number;
@@ -434,6 +437,28 @@ export function AssistantSettings({
             : t('settings.assistantApiKeyWebHelp')}
       </Text>
 
+      {config?.provider === 'groq' ? (
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={t('settings.assistantGroqKeyHelp')}
+          onPress={() => {
+            void Linking.openURL(GROQ_KEY_URL).catch(() => undefined);
+          }}
+          hitSlop={8}
+          style={[
+            styles.keyHelpLink,
+            { flexDirection: isRTL ? 'row-reverse' : 'row' },
+          ]}
+        >
+          <Ionicons name="open-outline" size={14} color={colors.accent} />
+          <Text
+            style={[styles.keyHelpLinkText, { color: colors.accent }]}
+          >
+            {t('settings.assistantGroqKeyHelp')}
+          </Text>
+        </Pressable>
+      ) : null}
+
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('settings.assistantModel')}
@@ -672,6 +697,16 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: fontSize.xs,
     lineHeight: 17,
+  },
+  keyHelpLink: {
+    alignSelf: 'flex-start',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  keyHelpLinkText: {
+    flexShrink: 1,
+    fontSize: fontSize.xs,
+    fontWeight: '600',
   },
   status: {
     fontSize: fontSize.sm,
