@@ -409,6 +409,7 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Hour Loop காப்பைச் சேமி',
   'settings.import': 'தரவை இறக்குமதி செய்',
   'settings.about': 'பற்றி',
+  'settings.howItWorks': 'Hour Loop எவ்வாறு செயல்படுகிறது',
   'settings.aboutBody':
     'அனைத்துத் தரவும் இந்தச் சாதனத்தின் உள்ளூர் SQLite தரவுத்தளத்தில் உள்ளது. காப்புகள் சாதாரண JSON கோப்புகள், கணக்கு அல்லது கிளவுட் சேவை இல்லாமல் எங்கும் நகர்த்தலாம்.',
   'settings.license': 'GNU Affero General Public License v3.0 அல்லது அதற்குப் பின் பதிப்பின் கீழ் திறந்த மூலம்.',

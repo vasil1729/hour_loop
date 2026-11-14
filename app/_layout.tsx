@@ -170,6 +170,7 @@ function RootNavigator() {
           <Stack.Screen name="loop/[id]" />
           <Stack.Screen name="task/[id]" />
           <Stack.Screen name="day/[date]" />
+          <Stack.Screen name="about" />
           <Stack.Screen name="assistant/index" />
         </Stack>
         <NotificationResponseHandler />

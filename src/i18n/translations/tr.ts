@@ -422,6 +422,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Hour Loop yedeğini kaydet',
   'settings.import': 'Verileri içe aktar',
   'settings.about': 'Hakkında',
+  'settings.howItWorks': 'Hour Loop nasıl çalışır',
   'settings.aboutBody':
     'Tüm veriler bu cihazdaki yerel bir SQLite veritabanında yaşar. Yedekler düz JSON dosyalarıdır; böylece bunları hesap veya bulut hizmeti olmadan istediğin yere taşıyabilirsin.',
   'settings.license':

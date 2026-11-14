@@ -441,6 +441,7 @@ export const en = {
   'settings.saveBackupDialog': 'Save Hour Loop backup',
   'settings.import': 'Import data',
   'settings.about': 'About',
+  'settings.howItWorks': 'How Hour Loop works',
   'settings.aboutBody':
     'All data lives in a local SQLite database on this device. Backups are plain JSON files, so you can move them anywhere without an account or cloud service.',
   'settings.license':

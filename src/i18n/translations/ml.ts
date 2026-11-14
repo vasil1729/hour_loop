@@ -436,6 +436,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Hour Loop ബാക്കപ്പ് സംരക്ഷിക്കുക',
   'settings.import': 'ഡാറ്റ ഇമ്പോർട്ട് ചെയ്യുക',
   'settings.about': 'കുറിച്ച്',
+  'settings.howItWorks': 'Hour Loop എങ്ങനെ പ്രവർത്തിക്കുന്നു',
   'settings.aboutBody':
     'എല്ലാ ഡാറ്റയും ഈ ഉപകരണത്തിലെ പ്രാദേശിക SQLite ഡാറ്റാബേസിൽ സൂക്ഷിക്കുന്നു. ബാക്കപ്പുകൾ സാധാരണ JSON ഫയലുകളാണ്, അതിനാൽ അക്കൗണ്ടോ ക്ലൗഡ് സേവനമോ ഇല്ലാതെ അവ എവിടേക്കും നീക്കാം.',
   'settings.license':

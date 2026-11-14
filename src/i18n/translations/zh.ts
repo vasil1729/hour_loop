@@ -403,6 +403,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': '保存 Hour Loop 备份',
   'settings.import': '导入数据',
   'settings.about': '关于',
+  'settings.howItWorks': 'Hour Loop 如何运作',
   'settings.aboutBody':
     '所有数据都存储在此设备上的本地 SQLite 数据库中。备份是纯 JSON 文件，因此你可以将其移动到任何地方，无需账户或云服务。',
   'settings.license':

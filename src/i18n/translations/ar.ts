@@ -466,6 +466,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'حفظ نسخة Hour Loop الاحتياطية',
   'settings.import': 'استيراد البيانات',
   'settings.about': 'حول',
+  'settings.howItWorks': 'كيف يعمل Hour Loop',
   'settings.aboutBody':
     'كل البيانات في قاعدة SQLite محلية على هذا الجهاز. النسخ الاحتياطية ملفات JSON عادية، لذا يمكنك نقلها أينما شئت دون حساب أو خدمة سحابية.',
   'settings.license':

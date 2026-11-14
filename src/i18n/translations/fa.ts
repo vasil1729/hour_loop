@@ -432,6 +432,7 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'ذخیره پشتیبان Hour Loop',
   'settings.import': 'وارد کردن داده‌ها',
   'settings.about': 'درباره',
+  'settings.howItWorks': 'Hour Loop چگونه کار می‌کند',
   'settings.aboutBody':
     'همه داده‌ها در یک پایگاه داده SQLite محلی روی این دستگاه قرار دارند. نسخه‌های پشتیبان فایل‌های JSON ساده‌اند، بنابراین می‌توانید آن‌ها را بدون حساب یا سرویس ابری به هر جایی منتقل کنید.',
   'settings.license':

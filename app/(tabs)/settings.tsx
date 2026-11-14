@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
@@ -90,6 +91,7 @@ const LANGUAGES: { key: LanguagePreference; labelKey: TranslationKey }[] = [
 
 export default function SettingsScreen() {
   const db = useSQLiteContext();
+  const router = useRouter();
   const { colors } = useTheme();
   const { t, isRTL } = useTranslation();
   const defaultDurationSeconds = useSettingsStore(
@@ -887,6 +889,22 @@ export default function SettingsScreen() {
           <Text style={[styles.aboutBody, { color: colors.textSecondary }]}>
             {t('settings.license')}
           </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.howItWorks')}
+            onPress={() => router.push('/about')}
+            style={[styles.aboutLink, { borderColor: colors.border }]}
+          >
+            <View style={styles.aboutLinkLabel}>
+              <Ionicons name="book-outline" size={18} color={colors.accent} />
+              <Text style={[styles.aboutLinkText, { color: colors.accent }]}>
+                {t('settings.howItWorks')}
+              </Text>
+            </View>
+            <Text style={[styles.infoChevron, { color: colors.accent }]}>
+              {isRTL ? '‹' : '›'}
+            </Text>
+          </Pressable>
         </View>
       </View>
 
@@ -1109,5 +1127,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     marginTop: spacing.xs,
+  },
+  aboutLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: spacing.md,
+    marginTop: spacing.xs,
+  },
+  aboutLinkLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flexShrink: 1,
+  },
+  aboutLinkText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

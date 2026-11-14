@@ -438,6 +438,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Salvar backup do Hour Loop',
   'settings.import': 'Importar dados',
   'settings.about': 'Sobre',
+  'settings.howItWorks': 'Como o Hour Loop funciona',
   'settings.aboutBody':
     'Todos os dados ficam em um banco de dados SQLite local neste dispositivo. Os backups são arquivos JSON simples, então você pode movê-los para onde quiser, sem conta ou serviço na nuvem.',
   'settings.license':

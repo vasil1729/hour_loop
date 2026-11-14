@@ -410,6 +410,7 @@ export const si: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Hour Loop උපස්ථය සුරකින්න',
   'settings.import': 'දත්ත ආනයනය',
   'settings.about': 'පිළිබඳව',
+  'settings.howItWorks': 'Hour Loop ක්‍රියා කරන්නේ කෙසේද',
   'settings.aboutBody':
     'සියලු දත්ත මෙම උපාංගයේ දේශීය SQLite දත්ත ගබඩාවක ඇත. උපස්ථ සාමාන්‍ය JSON ගොනු වන අතර ගිණුමක් හෝ ක්ලවුඩ් සේවාවක් නොමැතිව ඕනෑම තැනකට ගෙන යා හැක.',
   'settings.license': 'GNU Affero General Public License v3.0 හෝ ඊට පසු යටතේ විවෘත මූලාශ්‍ර.',

@@ -10,7 +10,7 @@
 
 A **Loop** is a timestamped focus session that can be paused, resumed, and closed with a short completion journal. An independent hierarchical task pool, daily and monthly time intentions, and a full history view sit alongside the timer.
 
-Everything is stored in local SQLite. No account, no network, no tracking.
+Everything is stored in local SQLite. No account is required. The focus timer and your data work fully offline; the optional AI assistant and any ad-supported Play Store build use the network.
 
 ## Features
 
@@ -161,11 +161,12 @@ openwiki/            Generated product, architecture, and operations wiki
 - [Architecture](openwiki/architecture/system-overview.md)
 - [Database schema](openwiki/database/persistence.md)
 - [Backup and restore](openwiki/operations/backup-and-restore.md)
+- [Monetization plan](MONETIZATION.md)
 
 ## Design principles
 
 1. **SQLite is the source of truth.** Timer state is derived from persisted UTC intervals; display ticks never accumulate.
-2. **Offline by default.** All features work in airplane mode.
+2. **Offline by default.** The timer, tasks, history, intentions, and backups work in airplane mode. Optional network features degrade gracefully.
 3. **Small, transparent layers.** Raw SQL repositories and pure domain functions keep behaviour testable and debuggable.
 
 ## License

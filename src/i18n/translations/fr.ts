@@ -438,6 +438,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Enregistrer la sauvegarde Hour Loop',
   'settings.import': 'Importer des données',
   'settings.about': 'À propos',
+  'settings.howItWorks': 'Comment fonctionne Hour Loop',
   'settings.aboutBody':
     'Toutes les données sont stockées dans une base SQLite locale sur cet appareil. Les sauvegardes sont de simples fichiers JSON, que vous pouvez déplacer où vous voulez sans compte ni service cloud.',
   'settings.license':

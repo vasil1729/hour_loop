@@ -459,6 +459,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'settings.saveBackupDialog': 'Сохранить резервную копию Hour Loop',
   'settings.import': 'Импортировать данные',
   'settings.about': 'О приложении',
+  'settings.howItWorks': 'Как работает Hour Loop',
   'settings.aboutBody':
     'Все данные хранятся в локальной базе SQLite на этом устройстве. Резервные копии — обычные JSON-файлы, их можно переносить без аккаунта и облака.',
   'settings.license':
