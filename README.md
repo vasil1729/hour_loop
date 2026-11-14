@@ -22,6 +22,7 @@ Everything is stored in local SQLite. No account is required. The focus timer an
 - **History** — day, week, and month views with a date picker, weekly bars, a monthly heatmap, and midnight-crossing allocation.
 - **Notifications** — configurable early warnings and target-reached reminders, reconciled on foreground.
 - **Backups** — export and restore all local data as a portable JSON file.
+- **Optional AI assistant** — chat with your own AI provider; Groq is the default and has a free tier for trying it out.
 - **Languages** — English, Russian, Arabic, Chinese, Turkish, Malayalam, Italian, French, Spanish, Portuguese, Persian, German, Sinhala, and Tamil, following the device language or chosen manually in Settings.
 - **Themes** — system, light, and dark.
 
@@ -41,6 +42,16 @@ npx expo start
 ```
 
 Press `a` for an Android emulator, `i` for iOS, or scan the QR code with Expo Go. Local notifications require a development build on some platforms.
+
+### Optional AI assistant
+
+The assistant is optional and does not include a bundled API key. The quickest way to try it is with Groq, which currently offers a free tier:
+
+1. Create an API key at [console.groq.com/keys](https://console.groq.com/keys).
+2. Open **Settings → Assistant**.
+3. Select **Groq**, paste the key, choose a model, and enable the assistant.
+
+Requests go directly from your device to the provider you choose. Provider limits, availability, and any charges apply; Hour Loop does not proxy or pay for API usage.
 
 ### Web preview (development only)
 
