@@ -7,6 +7,7 @@ import {
   ASSISTANT_MODEL_KEY,
   ASSISTANT_PROVIDER_IDS,
   ASSISTANT_PROVIDER_KEY,
+  ASSISTANT_SUGGESTED_MODELS,
   ASSISTANT_WRITES_KEY,
 } from '../../../constants/assistant';
 import {
@@ -97,10 +98,16 @@ export async function loadAssistantConfig(
     getSetting(db, ASSISTANT_BASE_URL_KEY),
     getSetting(db, ASSISTANT_WRITES_KEY),
   ]);
+  const parsedProvider = parseProvider(provider);
+  const storedModel = model?.trim() ?? '';
   return {
     enabled: parseBoolean(enabled, true),
-    provider: parseProvider(provider),
-    model: model?.trim() ?? '',
+    provider: parsedProvider,
+    model:
+      storedModel ||
+      (parsedProvider === 'custom'
+        ? ''
+        : ASSISTANT_SUGGESTED_MODELS[parsedProvider]),
     baseUrl: baseUrl?.trim() || null,
     writesEnabled: parseBoolean(writesEnabled, true),
   };

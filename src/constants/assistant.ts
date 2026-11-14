@@ -79,3 +79,41 @@ export const ASSISTANT_MODEL_PRESETS: Record<
     'gemini-3.5-flash',
   ],
 };
+
+const MODEL_LABELS: Record<string, string> = {
+  'gpt-4o-mini': 'GPT-4o mini',
+  'gpt-4o': 'GPT-4o',
+  'gpt-4.1-mini': 'GPT-4.1 mini',
+  'gpt-4.1': 'GPT-4.1',
+  'claude-sonnet-5-5': 'Claude Sonnet 5.5',
+  'claude-opus-5-5': 'Claude Opus 5.5',
+  'claude-haiku-4-5': 'Claude Haiku 4.5',
+  'gemini-3.5-flash': 'Gemini 3.5 Flash',
+  'gemini-3.1-pro': 'Gemini 3.1 Pro',
+  'gemini-3-flash': 'Gemini 3 Flash',
+  '~openai/gpt-sol-latest': 'GPT Sol',
+  '~deepseek/deepseek-v4-flash-latest': 'DeepSeek V4 Flash',
+  'openai/gpt-oss-120b': 'GPT OSS 120B',
+  'openai/gpt-oss-20b': 'GPT OSS 20B',
+  'qwen/qwen3.8-27b': 'Qwen 3.8 27B',
+  'deepseek-flash': 'DeepSeek Flash',
+  'deepseek-v4-pro': 'DeepSeek V4 Pro',
+  'deepseek-v4.1-flash': 'DeepSeek V4.1 Flash',
+  'kimi-k3': 'Kimi K3',
+};
+
+export type AssistantModelOption = {
+  provider: Exclude<AssistantProviderId, 'custom'>;
+  model: string;
+  label: string;
+};
+
+export const ASSISTANT_MODEL_OPTIONS: AssistantModelOption[] = (
+  Object.keys(ASSISTANT_MODEL_PRESETS) as Exclude<AssistantProviderId, 'custom'>[]
+).flatMap((provider) =>
+  ASSISTANT_MODEL_PRESETS[provider].map((model) => ({
+    provider,
+    model,
+    label: MODEL_LABELS[model] ?? model,
+  }))
+);

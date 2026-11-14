@@ -11,7 +11,7 @@ let mockScheme: 'light' | 'dark' = 'dark';
 const mockConfig: AssistantConfig = {
   enabled: true,
   provider: 'groq',
-  model: 'llama-3.3-70b-versatile',
+  model: 'openai/gpt-oss-120b',
   baseUrl: null,
   writesEnabled: true,
 };
@@ -79,12 +79,6 @@ jest.mock('../../features/assistant/providers/providerFactory', () => ({
     chat: jest.fn(),
     test: () => mockProviderTest(),
   }),
-  listAssistantProviderModels: jest.fn(async () => [
-    'openai/gpt-oss-120b',
-    'openai/gpt-oss-20b',
-    'qwen/qwen3.8-27b',
-    'unrelated/audio-model',
-  ]),
 }));
 
 import { AssistantSettings } from './AssistantSettings';
@@ -100,23 +94,21 @@ describe('assistant settings UI', () => {
     mockScheme = scheme;
     await render(<AssistantSettings />);
     expect(await screen.findByText('settings.assistantEnable')).toBeTruthy();
+    expect(screen.getByText('GPT OSS 120B')).toBeTruthy();
     expect(screen.getByText('settings.assistantGroq')).toBeTruthy();
-    expect(screen.getByText('settings.assistantOpenAI')).toBeTruthy();
-    expect(screen.getByText('settings.assistantAnthropic')).toBeTruthy();
-    expect(screen.getByText('settings.assistantGemini')).toBeTruthy();
-    expect(screen.getByText('settings.assistantOpenRouter')).toBeTruthy();
-    expect(screen.getByText('settings.assistantDeepSeek')).toBeTruthy();
-    expect(screen.getByText('settings.assistantOpenCode')).toBeTruthy();
-    expect(screen.getByText('settings.assistantCustom')).toBeTruthy();
   });
 
-  it('updates the selected provider', async () => {
+  it('selects a friendly model and its provider', async () => {
     await render(<AssistantSettings />);
-    const openAI = await screen.findByRole('button', {
-      name: 'settings.assistantOpenAI',
-    });
-    await fireEvent.press(openAI);
-    expect(openAI.props.accessibilityState).toEqual({ selected: true });
+
+    await fireEvent.press(
+      await screen.findByLabelText('settings.assistantModel')
+    );
+    await fireEvent.press(await screen.findByText('Claude Opus 5.5'));
+
+    expect(screen.getByText('Claude Opus 5.5')).toBeTruthy();
+    expect(screen.getByText('settings.assistantAnthropic')).toBeTruthy();
+    expect(mockSetKey).not.toHaveBeenCalled();
   });
 
   it('links to the free Groq API key page for the default provider', async () => {
@@ -134,17 +126,18 @@ describe('assistant settings UI', () => {
     openURL.mockRestore();
   });
 
-  it('selects a model from the model picker', async () => {
+  it('shows friendly model names without raw model ids', async () => {
     await render(<AssistantSettings />);
 
     await fireEvent.press(
       await screen.findByLabelText('settings.assistantModel')
     );
-    const model = await screen.findByText('openai/gpt-oss-120b');
-    await fireEvent.press(model);
+    await fireEvent.press(await screen.findByText('GPT-4o mini'));
 
-    expect(screen.getByText('openai/gpt-oss-120b')).toBeTruthy();
-    expect(screen.queryByText('unrelated/audio-model')).toBeNull();
+    expect(screen.getByText('GPT-4o mini')).toBeTruthy();
+    expect(screen.getByText('settings.assistantOpenAI')).toBeTruthy();
+    expect(screen.queryByText('gpt-4o-mini')).toBeNull();
+    expect(screen.queryByText('settings.modelPickerCustom')).toBeNull();
     expect(mockSetKey).not.toHaveBeenCalled();
   });
 

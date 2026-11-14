@@ -14,14 +14,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import {
   ASSISTANT_MAX_KEY_LENGTH,
-  ASSISTANT_MODEL_PRESETS,
-  ASSISTANT_SUGGESTED_MODELS,
+  ASSISTANT_MODEL_OPTIONS,
 } from '../../constants/assistant';
 import { describeAssistantError } from '../../features/assistant/assistantErrors';
-import {
-  createAssistantProvider,
-  listAssistantProviderModels,
-} from '../../features/assistant/providers/providerFactory';
+import { createAssistantProvider } from '../../features/assistant/providers/providerFactory';
 import {
   assistantConfigIsUsable,
   loadAssistantConfig,
@@ -47,16 +43,16 @@ import { Button } from '../common/Button';
 import { ModelPickerModal } from './ModelPickerModal';
 import { fontSize, radius, spacing } from '../../theme/tokens';
 
-const PROVIDERS: { id: AssistantProviderId; labelKey: TranslationKey }[] = [
-  { id: 'openai', labelKey: 'settings.assistantOpenAI' },
-  { id: 'anthropic', labelKey: 'settings.assistantAnthropic' },
-  { id: 'gemini', labelKey: 'settings.assistantGemini' },
-  { id: 'openrouter', labelKey: 'settings.assistantOpenRouter' },
-  { id: 'groq', labelKey: 'settings.assistantGroq' },
-  { id: 'deepseek', labelKey: 'settings.assistantDeepSeek' },
-  { id: 'opencode', labelKey: 'settings.assistantOpenCode' },
-  { id: 'custom', labelKey: 'settings.assistantCustom' },
-];
+const PROVIDER_LABEL_KEYS: Record<AssistantProviderId, TranslationKey> = {
+  openai: 'settings.assistantOpenAI',
+  anthropic: 'settings.assistantAnthropic',
+  gemini: 'settings.assistantGemini',
+  openrouter: 'settings.assistantOpenRouter',
+  groq: 'settings.assistantGroq',
+  deepseek: 'settings.assistantDeepSeek',
+  opencode: 'settings.assistantOpenCode',
+  custom: 'settings.assistantCustom',
+};
 
 type TestState = 'idle' | 'testing' | 'success' | 'error';
 
@@ -82,9 +78,6 @@ export function AssistantSettings({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [modelPickerVisible, setModelPickerVisible] = useState(false);
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [modelsLoading, setModelsLoading] = useState(false);
-  const [modelsError, setModelsError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -209,61 +202,20 @@ export function AssistantSettings({
     );
   };
 
-  const providerLabel =
-    PROVIDERS.find((provider) => provider.id === config?.provider)?.labelKey ??
-    'settings.assistantGroq';
   const canSave =
     config !== null && (!config.enabled || assistantConfigIsUsable(config));
-
-  const presetModels = (current: AssistantConfig): string[] =>
-    current.provider === 'custom'
-      ? []
-      : ASSISTANT_MODEL_PRESETS[current.provider];
-
-  const mergeModels = (...groups: string[][]): string[] =>
-    Array.from(new Set(groups.flat().filter(Boolean)));
-
-  const refreshModels = async (current: AssistantConfig) => {
-    const presets = presetModels(current);
-    setModelsLoading(true);
-    setModelsError(null);
-    setAvailableModels((existing) => mergeModels(presets, existing));
-    try {
-      const key =
-        apiKeyDraft.trim() ||
-        (await getAssistantApiKey(current.provider));
-      if (!key) {
-        setModelsError(t('settings.modelPickerNeedKey'));
-        return;
-      }
-      const models = await listAssistantProviderModels(current, key);
-      const relevant = presets.length
-        ? presets.filter((model) => models.includes(model))
-        : models;
-      setAvailableModels((existing) =>
-        mergeModels(
-          relevant.length > 0 ? relevant : presets,
-          presets,
-          current.model ? [current.model] : [],
-          existing
-        )
-      );
-    } catch (error) {
-      setModelsError(describeAssistantError(error));
-    } finally {
-      setModelsLoading(false);
-    }
-  };
-
-  const openModelPicker = () => {
-    if (!config) return;
-    setModelPickerVisible(true);
-    setModelsError(null);
-    setAvailableModels((existing) =>
-      mergeModels(presetModels(config), existing, config.model ? [config.model] : [])
-    );
-    void refreshModels(config);
-  };
+  const modelOptions = ASSISTANT_MODEL_OPTIONS.map((option) => ({
+    ...option,
+    providerLabel: t(PROVIDER_LABEL_KEYS[option.provider]),
+  }));
+  const selectedModel =
+    modelOptions.find(
+      (option) =>
+        option.provider === config?.provider && option.model === config?.model
+    ) ?? null;
+  const selectedModelLabel =
+    selectedModel?.label ?? (config?.model || t('settings.assistantModelChoose'));
+  const selectedProviderLabel = selectedModel?.providerLabel ?? null;
 
   if (!loaded) {
     return null;
@@ -320,69 +272,46 @@ export function AssistantSettings({
       </View>
 
       <Text style={[styles.groupTitle, { color: colors.text }]}>
-        {t('settings.assistantProvider')}
+        {t('settings.assistantModel')}
       </Text>
-      <View style={styles.chips}>
-        {PROVIDERS.map((provider) => {
-          const selected = config?.provider === provider.id;
-          return (
-            <Pressable
-              key={provider.id}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              onPress={() => {
-                const suggestion =
-                  provider.id === 'custom'
-                    ? ''
-                    : ASSISTANT_SUGGESTED_MODELS[provider.id];
-                const previousSuggestion =
-                  config && config.provider !== 'custom'
-                    ? ASSISTANT_SUGGESTED_MODELS[config.provider]
-                    : null;
-                const currentModel = config?.model.trim() ?? '';
-                const shouldReplaceModel =
-                  !currentModel || currentModel === previousSuggestion;
-                setApiKeyDraft('');
-                setTestState('idle');
-                setStatusMessage(null);
-                setAvailableModels([]);
-                setModelsError(null);
-                setModelPickerVisible(false);
-                updateConfig({
-                  provider: provider.id,
-                  baseUrl: provider.id === 'custom' ? config?.baseUrl ?? '' : null,
-                  model: shouldReplaceModel ? suggestion : currentModel,
-                });
-              }}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: selected ? colors.accent : colors.surface,
-                  borderColor: selected ? colors.accent : colors.border,
-                },
-              ]}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('settings.assistantModel')}
+        onPress={() => setModelPickerVisible(true)}
+        style={[
+          styles.modelRow,
+          {
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          },
+        ]}
+      >
+        <View style={styles.modelInfo}>
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.modelValue,
+              {
+                color: config?.model ? colors.text : colors.textSecondary,
+              },
+            ]}
+          >
+            {selectedModelLabel}
+          </Text>
+          {selectedProviderLabel ? (
+            <Text
+              style={[styles.modelProvider, { color: colors.textSecondary }]}
             >
-              <Text
-                style={[
-                  styles.chipText,
-                  { color: selected ? '#FFFFFF' : colors.text },
-                ]}
-              >
-                {t(provider.labelKey)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Text style={[styles.groupTitle, { color: colors.text }]}>
-        {t('settings.assistantConnection')}
-      </Text>
-      <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
-        {t('settings.assistantProviderHint', {
-          provider: t(providerLabel),
-        })}
-      </Text>
+              {selectedProviderLabel}
+            </Text>
+          ) : null}
+        </View>
+        <Ionicons
+          name="chevron-down"
+          size={18}
+          color={colors.textSecondary}
+        />
+      </Pressable>
 
       {config?.provider === 'opencode' ? (
         <Text style={[styles.hint, { color: colors.textSecondary }]}>
@@ -396,6 +325,9 @@ export function AssistantSettings({
         </Text>
       ) : null}
 
+      <Text style={[styles.groupTitle, { color: colors.text }]}>
+        {t('settings.assistantApiKey')}
+      </Text>
       <TextInput
         value={apiKeyDraft}
         onChangeText={(value) => {
@@ -457,66 +389,6 @@ export function AssistantSettings({
             {t('settings.assistantGroqKeyHelp')}
           </Text>
         </Pressable>
-      ) : null}
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('settings.assistantModel')}
-        onPress={openModelPicker}
-        style={[
-          styles.input,
-          styles.modelRow,
-          {
-            borderColor: colors.border,
-            backgroundColor: colors.surface,
-          },
-        ]}
-      >
-        <Text
-          numberOfLines={1}
-          style={[
-            styles.modelValue,
-            {
-              color: config?.model ? colors.text : colors.textSecondary,
-            },
-          ]}
-        >
-          {config?.model || t('settings.assistantModelChoose')}
-        </Text>
-        <Ionicons
-          name="chevron-down"
-          size={18}
-          color={colors.textSecondary}
-        />
-      </Pressable>
-
-      {config?.provider === 'custom' ? (
-        <TextInput
-          value={config.baseUrl ?? ''}
-          onChangeText={(value) => updateConfig({ baseUrl: value })}
-          placeholder={t('settings.assistantBaseUrlPlaceholder')}
-          placeholderTextColor={colors.textSecondary}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="url"
-          maxLength={400}
-          textAlign={isRTL ? 'right' : 'left'}
-          accessibilityLabel={t('settings.assistantBaseUrl')}
-          style={[
-            styles.input,
-            {
-              color: colors.text,
-              borderColor: colors.border,
-              backgroundColor: colors.surface,
-            },
-          ]}
-        />
-      ) : null}
-
-      {config?.provider === 'custom' ? (
-        <Text style={[styles.hint, { color: colors.textSecondary }]}>
-          {t('settings.assistantCustomHint')}
-        </Text>
       ) : null}
 
       {statusMessage ? (
@@ -603,16 +475,19 @@ export function AssistantSettings({
 
       <ModelPickerModal
         visible={modelPickerVisible}
-        models={availableModels}
-        selected={config?.model ?? ''}
-        loading={modelsLoading}
-        error={modelsError}
-        onSelect={(model) => {
-          updateConfig({ model });
+        options={modelOptions}
+        selectedProvider={config?.provider ?? ''}
+        selectedModel={config?.model ?? ''}
+        onSelect={(option) => {
+          setApiKeyDraft('');
+          setTestState('idle');
+          setStatusMessage(null);
+          updateConfig({
+            provider: option.provider,
+            model: option.model,
+            baseUrl: null,
+          });
           setModelPickerVisible(false);
-        }}
-        onRefresh={() => {
-          if (config) void refreshModels(config);
         }}
         onClose={() => setModelPickerVisible(false)}
       />
@@ -662,21 +537,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
   },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  chipText: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-  },
   input: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.md,
@@ -689,10 +549,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    minHeight: 50,
+  },
+  modelInfo: {
+    flex: 1,
+    gap: 2,
   },
   modelValue: {
-    flex: 1,
     fontSize: 15,
+    fontWeight: '600',
+  },
+  modelProvider: {
+    fontSize: 12,
   },
   hint: {
     fontSize: fontSize.xs,

@@ -1,57 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
-  ActivityIndicator,
-  FlatList,
   Modal,
   Pressable,
+  SectionList,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import type { AssistantProviderId } from '../../features/assistant/assistantTypes';
 import { useTranslation } from '../../i18n/I18nProvider';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
-import { Button } from '../common/Button';
+
+export type ModelPickerOption = {
+  provider: AssistantProviderId;
+  model: string;
+  label: string;
+  providerLabel: string;
+};
 
 type ModelPickerModalProps = {
   visible: boolean;
-  models: string[];
-  selected: string;
-  loading: boolean;
-  error: string | null;
-  onSelect: (model: string) => void;
-  onRefresh: () => void;
+  options: ModelPickerOption[];
+  selectedProvider: string;
+  selectedModel: string;
+  onSelect: (option: ModelPickerOption) => void;
   onClose: () => void;
 };
 
 export function ModelPickerModal({
   visible,
-  models,
-  selected,
-  loading,
-  error,
+  options,
+  selectedProvider,
+  selectedModel,
   onSelect,
-  onRefresh,
   onClose,
 }: ModelPickerModalProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const [search, setSearch] = useState('');
-  const [customModel, setCustomModel] = useState('');
 
-  useEffect(() => {
-    if (!visible) return;
-    setSearch('');
-    setCustomModel('');
-  }, [visible]);
-
-  const query = search.trim().toLowerCase();
-  const filtered = query
-    ? models.filter((model) => model.toLowerCase().includes(query))
-    : models;
+  const sections = useMemo(() => {
+    const groups = new Map<string, ModelPickerOption[]>();
+    for (const option of options) {
+      const group = groups.get(option.providerLabel) ?? [];
+      group.push(option);
+      groups.set(option.providerLabel, group);
+    }
+    return Array.from(groups, ([title, data]) => ({ title, data }));
+  }, [options]);
 
   return (
     <Modal
@@ -80,145 +78,57 @@ export function ModelPickerModal({
             </Pressable>
           </View>
 
-          <View style={styles.searchRow}>
-            <TextInput
-              value={search}
-              onChangeText={setSearch}
-              placeholder={t('settings.modelPickerSearch')}
-              placeholderTextColor={colors.textSecondary}
-              accessibilityLabel={t('settings.modelPickerSearch')}
-              autoCapitalize="none"
-              autoCorrect={false}
-              style={[
-                styles.searchInput,
-                {
-                  color: colors.text,
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
-                },
-              ]}
-            />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('settings.modelPickerRefresh')}
-              onPress={onRefresh}
-              disabled={loading}
-              hitSlop={8}
-              style={[
-                styles.refreshButton,
-                {
-                  backgroundColor: colors.surfaceAlt,
-                  opacity: loading ? 0.5 : 1,
-                },
-              ]}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color={colors.accent} />
-              ) : (
-                <Ionicons name="refresh" size={18} color={colors.accent} />
-              )}
-            </Pressable>
-          </View>
-
-          {error ? (
-            <Text
-              accessibilityLiveRegion="polite"
-              style={[styles.error, { color: colors.danger }]}
-            >
-              {error}
-            </Text>
-          ) : null}
-
-          {loading && models.length === 0 ? (
-            <View style={styles.loadingRow}>
-              <ActivityIndicator size="small" color={colors.accent} />
-              <Text style={[styles.helper, { color: colors.textSecondary }]}>
-                {t('settings.modelPickerLoading')}
+          <SectionList
+            sections={sections}
+            keyExtractor={(option) => `${option.provider}:${option.model}`}
+            stickySectionHeadersEnabled={false}
+            style={styles.list}
+            contentContainerStyle={styles.listContent}
+            renderSectionHeader={({ section }) => (
+              <Text style={[styles.groupLabel, { color: colors.textSecondary }]}>
+                {section.title}
               </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={filtered}
-              keyExtractor={(model) => model}
-              keyboardShouldPersistTaps="handled"
-              style={styles.list}
-              contentContainerStyle={styles.listContent}
-              ListEmptyComponent={
-                <Text style={[styles.helper, { color: colors.textSecondary }]}>
-                  {t('settings.modelPickerEmpty')}
-                </Text>
-              }
-              renderItem={({ item }) => {
-                const isSelected = item === selected;
-                return (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isSelected }}
-                    accessibilityLabel={item}
-                    onPress={() => onSelect(item)}
+            )}
+            renderItem={({ item }) => {
+              const isSelected =
+                item.provider === selectedProvider &&
+                item.model === selectedModel;
+              return (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`${item.label}, ${item.providerLabel}`}
+                  onPress={() => onSelect(item)}
+                  style={[
+                    styles.modelRow,
+                    {
+                      backgroundColor: isSelected
+                        ? colors.accentSoft
+                        : colors.background,
+                      borderColor: isSelected ? colors.accent : colors.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    numberOfLines={2}
                     style={[
-                      styles.modelRow,
-                      {
-                        backgroundColor: isSelected
-                          ? colors.accentSoft
-                          : colors.background,
-                        borderColor: isSelected
-                          ? colors.accent
-                          : colors.border,
-                      },
+                      styles.modelText,
+                      { color: isSelected ? colors.accent : colors.text },
                     ]}
                   >
-                    <Text
-                      numberOfLines={2}
-                      style={[
-                        styles.modelText,
-                        { color: isSelected ? colors.accent : colors.text },
-                      ]}
-                    >
-                      {item}
-                    </Text>
-                    {isSelected ? (
-                      <Ionicons
-                        name="checkmark"
-                        size={18}
-                        color={colors.accent}
-                      />
-                    ) : null}
-                  </Pressable>
-                );
-              }}
-            />
-          )}
-
-          <Text style={[styles.groupLabel, { color: colors.textSecondary }]}>
-            {t('settings.modelPickerCustom')}
-          </Text>
-          <View style={styles.customRow}>
-            <TextInput
-              value={customModel}
-              onChangeText={setCustomModel}
-              placeholder={t('settings.modelPickerCustomPlaceholder')}
-              placeholderTextColor={colors.textSecondary}
-              accessibilityLabel={t('settings.modelPickerCustomPlaceholder')}
-              autoCapitalize="none"
-              autoCorrect={false}
-              maxLength={200}
-              style={[
-                styles.searchInput,
-                {
-                  color: colors.text,
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
-                },
-              ]}
-            />
-            <Button
-              label={t('settings.modelPickerUse')}
-              onPress={() => onSelect(customModel.trim())}
-              disabled={!customModel.trim()}
-              style={styles.useButton}
-            />
-          </View>
+                    {item.label}
+                  </Text>
+                  {isSelected ? (
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={colors.accent}
+                    />
+                  ) : null}
+                </Pressable>
+              );
+            }}
+          />
         </View>
       </View>
     </Modal>
@@ -235,7 +145,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 520,
-    maxHeight: '86%',
+    maxHeight: '78%',
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.sm,
@@ -255,75 +165,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  searchRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: 15,
-  },
-  refreshButton: {
-    width: 42,
-    height: 42,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  error: {
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  helper: {
-    fontSize: 13,
-    lineHeight: 19,
-  },
   list: {
     flexGrow: 0,
-    maxHeight: 300,
   },
   listContent: {
-    gap: spacing.xs,
-    paddingVertical: spacing.xs,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+  },
+  groupLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.1,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
   },
   modelRow: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   modelText: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  groupLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    marginTop: spacing.xs,
-  },
-  customRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  useButton: {
-    minHeight: 42,
-    paddingHorizontal: spacing.md,
   },
 });

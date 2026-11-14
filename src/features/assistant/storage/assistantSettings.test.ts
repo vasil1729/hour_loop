@@ -33,11 +33,11 @@ describe('assistant settings', () => {
     expect(config).toEqual({
       enabled: true,
       provider: 'groq',
-      model: '',
+      model: 'openai/gpt-oss-120b',
       baseUrl: null,
       writesEnabled: true,
     });
-    expect(assistantConfigIsUsable(config)).toBe(false);
+    expect(assistantConfigIsUsable(config)).toBe(true);
   });
 
   it('loads a supported provider id', async () => {
