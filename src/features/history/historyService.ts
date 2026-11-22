@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { Loop } from '../../domain/types';
+import type { Loop, LoopItem } from '../../domain/types';
+import { listLoopItemsForLoops } from '../../database/repositories/loopItemsRepository';
 import {
   addDaysToDayKey,
   currentDayKey,
@@ -22,6 +23,7 @@ import {
 export type HistoryLoopEntry = {
   loop: Loop;
   elapsedSeconds: number;
+  capsules: LoopItem[];
 };
 
 export type DayHistory = {
@@ -83,10 +85,22 @@ export async function getDayHistory(
   }
 
   const loops = await getLoopsByIds(db, Array.from(secondsByLoop.keys()));
+  const loopItems = await listLoopItemsForLoops(
+    db,
+    loops.map((loop) => loop.id)
+  );
+  const itemsByLoop = new Map<string, LoopItem[]>();
+  for (const item of loopItems) {
+    const list = itemsByLoop.get(item.loop_id) ?? [];
+    list.push(item);
+    itemsByLoop.set(item.loop_id, list);
+  }
+
   const entries: HistoryLoopEntry[] = loops
     .map((loop) => ({
       loop,
       elapsedSeconds: Math.round(secondsByLoop.get(loop.id) ?? 0),
+      capsules: itemsByLoop.get(loop.id) ?? [],
     }))
     .filter((entry) => entry.elapsedSeconds > 0)
     .sort((a, b) => a.loop.started_at.localeCompare(b.loop.started_at));

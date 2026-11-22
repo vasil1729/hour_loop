@@ -62,11 +62,12 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
     'Veuillez recharger l’application. Détails : {message}',
   'app.reload': 'Recharger',
 
-  'tabs.today': 'Aujourd’hui',
+  'tabs.today': 'Minuteur',
   'tabs.tasks': 'Tâches',
   'tabs.history': 'Historique',
   'tabs.settings': 'Réglages',
 
+  'timer.statusRunning': 'EN COURS',
   'today.eyebrow': 'AUJOURD’HUI',
   'today.daily': 'QUOTIDIEN',
   'today.openAction': 'Ouvrir →',
@@ -262,7 +263,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'MAINTENANT',
   'loopActive.capsules': 'CAPSULES',
   'loopActive.hint':
-    'Touchez pour vous concentrer · balayez vers la droite pour terminer',
+    'Touchez pour changer · glissez à droite pour terminer · glissez à gauche pour supprimer',
   'loopActive.focus': 'INTENTION',
   'loopActive.carryIn': 'REPRIS',
   'loopActive.delete': 'Supprimer la boucle',
@@ -320,7 +321,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'Quelque chose à retenir ?',
   'loopComplete.linkFollowUp': 'Lier une capsule de suivi',
   'loopComplete.noFollowUp': 'Aucune capsule de suivi',
-  'loopComplete.backToToday': 'Revenir à aujourd’hui',
+  'loopComplete.backToToday': 'Retour au minuteur',
   'loopComplete.saveClose': 'Enregistrer et clôturer la boucle',
   'loopComplete.keepLooping': 'Continuer la boucle',
   'loopComplete.delete': 'Supprimer la boucle',
@@ -508,6 +509,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'daySummary.noIntention':
     'Aucune intention quotidienne n’a été définie pour ce jour.',
 
+  'loopRow.hourLabel': 'Heure {count}',
   'loopRow.untitled': 'Boucle sans titre',
   'loopRow.paused': 'En pause',
   'loopRow.running': 'En cours',

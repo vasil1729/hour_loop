@@ -61,11 +61,12 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'app.databaseErrorBody': "Ricarica l'app. Dettagli: {message}",
   'app.reload': 'Ricarica',
 
-  'tabs.today': 'Oggi',
+  'tabs.today': 'Timer',
   'tabs.tasks': 'Attività',
   'tabs.history': 'Cronologia',
   'tabs.settings': 'Impostazioni',
 
+  'timer.statusRunning': 'IN CORSO',
   'today.eyebrow': 'OGGI',
   'today.daily': 'QUOTIDIANO',
   'today.openAction': 'Apri →',
@@ -259,7 +260,7 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'loopActive.statusFocusing': 'CONCENTRAZIONE',
   'loopActive.now': 'ORA',
   'loopActive.capsules': 'CAPSULE',
-  'loopActive.hint': 'Tocca per mettere a fuoco · scorri a destra per completare',
+  'loopActive.hint': 'Tocca per cambiare · scorri a destra per completare · scorri a sinistra per eliminare',
   'loopActive.focus': 'FOCUS',
   'loopActive.carryIn': 'RIPORTATI',
   'loopActive.delete': 'Elimina ciclo',
@@ -316,7 +317,7 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'Qualcosa da ricordare?',
   'loopComplete.linkFollowUp': 'Collega una capsula di follow-up',
   'loopComplete.noFollowUp': 'Nessuna capsula di follow-up',
-  'loopComplete.backToToday': 'Torna a Oggi',
+  'loopComplete.backToToday': 'Torna al timer',
   'loopComplete.saveClose': 'Salva e chiudi il ciclo',
   'loopComplete.keepLooping': 'Continua il ciclo',
   'loopComplete.delete': 'Elimina ciclo',
@@ -505,6 +506,7 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'daySummary.noIntention':
     'Non è stato impostato un obiettivo giornaliero per questo giorno.',
 
+  'loopRow.hourLabel': 'Ora {count}',
   'loopRow.untitled': 'Ciclo senza titolo',
   'loopRow.paused': 'In pausa',
   'loopRow.running': 'In corso',

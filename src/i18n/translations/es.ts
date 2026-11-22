@@ -62,11 +62,12 @@ export const es: Record<TranslationKey, TranslationEntry> = {
     'Vuelve a cargar la aplicación. Detalles: {message}',
   'app.reload': 'Recargar',
 
-  'tabs.today': 'Hoy',
+  'tabs.today': 'Temporizador',
   'tabs.tasks': 'Tareas',
   'tabs.history': 'Historial',
   'tabs.settings': 'Ajustes',
 
+  'timer.statusRunning': 'EN CURSO',
   'today.eyebrow': 'HOY',
   'today.daily': 'DIARIO',
   'today.openAction': 'Abrir →',
@@ -261,7 +262,7 @@ export const es: Record<TranslationKey, TranslationEntry> = {
   'loopActive.statusFocusing': 'ENFOCANDO',
   'loopActive.now': 'AHORA',
   'loopActive.capsules': 'CÁPSULAS',
-  'loopActive.hint': 'Toca para enfocar · desliza a la derecha para completar',
+  'loopActive.hint': 'Toca para cambiar · desliza a la derecha para completar · desliza a la izquierda para eliminar',
   'loopActive.focus': 'ENFOQUE',
   'loopActive.carryIn': 'TRAÍDO',
   'loopActive.delete': 'Eliminar ciclo',
@@ -318,7 +319,7 @@ export const es: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': '¿Algo que vale la pena recordar?',
   'loopComplete.linkFollowUp': 'Vincular una cápsula de seguimiento',
   'loopComplete.noFollowUp': 'Sin cápsula de seguimiento',
-  'loopComplete.backToToday': 'Volver a Hoy',
+  'loopComplete.backToToday': 'Volver al temporizador',
   'loopComplete.saveClose': 'Guardar y cerrar ciclo',
   'loopComplete.keepLooping': 'Seguir en el ciclo',
   'loopComplete.delete': 'Eliminar ciclo',
@@ -506,6 +507,7 @@ export const es: Record<TranslationKey, TranslationEntry> = {
   'daySummary.noIntention':
     'No se definió una intención diaria para este día.',
 
+  'loopRow.hourLabel': 'Hora {count}',
   'loopRow.untitled': 'Ciclo sin título',
   'loopRow.paused': 'En pausa',
   'loopRow.running': 'En curso',

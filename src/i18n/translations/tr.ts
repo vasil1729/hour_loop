@@ -56,11 +56,12 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
     'Lütfen uygulamayı yeniden yükleyin. Ayrıntılar: {message}',
   'app.reload': 'Yeniden yükle',
 
-  'tabs.today': 'Bugün',
+  'tabs.today': 'Zamanlayıcı',
   'tabs.tasks': 'Görevler',
   'tabs.history': 'Geçmiş',
   'tabs.settings': 'Ayarlar',
 
+  'timer.statusRunning': 'ÇALIŞIYOR',
   'today.eyebrow': 'BUGÜN',
   'today.daily': 'GÜNLÜK',
   'today.openAction': 'Aç →',
@@ -247,7 +248,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'ŞİMDİ',
   'loopActive.capsules': 'KAPSÜLLER',
   'loopActive.hint':
-    'Odağı değiştirmek için bir kapsüle dokun · tamamlamak için sağa kaydır',
+    'Değiştirmek için dokun · tamamlamak için sağa kaydır · silmek için sola kaydır',
   'loopActive.focus': 'ODAK',
   'loopActive.carryIn': 'TAŞINAN',
   'loopActive.delete': 'Döngüyü sil',
@@ -310,7 +311,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'Hatırlanmaya değer bir şey?',
   'loopComplete.linkFollowUp': 'Takip kapsülü bağla',
   'loopComplete.noFollowUp': 'Takip kapsülü yok',
-  'loopComplete.backToToday': 'Bugüne dön',
+  'loopComplete.backToToday': 'Zamanlayıcıya dön',
   'loopComplete.saveClose': 'Kaydet ve döngüyü kapat',
   'loopComplete.keepLooping': 'Döngüye devam et',
   'loopComplete.delete': 'Döngüyü sil',
@@ -486,6 +487,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'daySummary.intended': '{target} hedefinin {actual} kadarı',
   'daySummary.noIntention': 'Bu gün için günlük niyet belirlenmedi.',
 
+  'loopRow.hourLabel': 'Saat {count}',
   'loopRow.untitled': 'Başlıksız döngü',
   'loopRow.paused': 'Duraklatıldı',
   'loopRow.running': 'Çalışıyor',

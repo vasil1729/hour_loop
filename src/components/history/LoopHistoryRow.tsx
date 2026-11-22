@@ -3,15 +3,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { formatShortDayLabel, formatTimeOfDay } from '../../domain/shared/dateUtils';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
-import type { Loop } from '../../domain/types';
+import type { Loop, LoopItem } from '../../domain/types';
 import { useTranslation } from '../../i18n/I18nProvider';
-import type { TranslationKey } from '../../i18n/types';
 import { useTheme } from '../../theme/ThemeContext';
 import { radius, spacing } from '../../theme/tokens';
 
 type LoopHistoryRowProps = {
   loop: Loop;
   elapsedSeconds: number;
+  capsules?: LoopItem[];
   showDate?: boolean;
   onPress?: () => void;
 };
@@ -19,25 +19,24 @@ type LoopHistoryRowProps = {
 export function LoopHistoryRow({
   loop,
   elapsedSeconds,
+  capsules = [],
   showDate = false,
   onPress,
 }: LoopHistoryRowProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const title = loop.done?.trim() || loop.focus?.trim() || t('loopRow.untitled');
-  const timeLabel = loop.stopped_at
-    ? formatTimeOfDay(loop.stopped_at)
-    : loop.status === 'PAUSED'
-      ? t('loopRow.paused')
-      : t('loopRow.running');
-  const statusLabelKey: TranslationKey | null =
-    loop.status === 'ACTIVE'
-      ? 'loopRow.statusActive'
-      : loop.status === 'PAUSED'
-        ? 'loopRow.statusPaused'
-        : loop.status === 'COMPLETED'
-          ? 'loopRow.statusCompleted'
-          : null;
+  const title = t('loopRow.hourLabel', { count: loop.sequence_number });
+  const started = formatTimeOfDay(loop.started_at);
+  const stopped = loop.stopped_at ? formatTimeOfDay(loop.stopped_at) : null;
+  const timeLabel = stopped
+    ? `${started}–${stopped}`
+    : `${started} · ${
+        loop.status === 'PAUSED'
+          ? t('loopRow.paused')
+          : t('loopRow.running')
+      }`;
+  const visibleCapsules = capsules.slice(0, 3);
+  const hiddenCapsuleCount = Math.max(0, capsules.length - visibleCapsules.length);
 
   const content = (
     <>
@@ -47,9 +46,7 @@ export function LoopHistoryRow({
           maxFontSizeMultiplier={1.4}
           style={[styles.badgeText, { color: colors.accent }]}
         >
-          {Number.isFinite(loop.sequence_number)
-            ? `H${loop.sequence_number}`
-            : 'H?'}
+          H{loop.sequence_number}
         </Text>
       </View>
       <View style={styles.body}>
@@ -59,10 +56,39 @@ export function LoopHistoryRow({
         <Text style={[styles.meta, { color: colors.textSecondary }]}>
           {showDate ? `${formatShortDayLabel(loop.local_date)} · ` : ''}
           {timeLabel}
-          {loop.status === 'COMPLETED' || !statusLabelKey
-            ? ''
-            : ` · ${t(statusLabelKey)}`}
         </Text>
+        {visibleCapsules.length > 0 ? (
+          <View style={styles.capsuleRow}>
+            {visibleCapsules.map((capsule) => (
+              <View
+                key={capsule.id}
+                style={[
+                  styles.capsule,
+                  {
+                    backgroundColor: colors.surfaceAlt,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.capsuleText,
+                    { color: colors.textSecondary },
+                    capsule.done ? styles.capsuleDone : null,
+                  ]}
+                >
+                  {capsule.text}
+                </Text>
+              </View>
+            ))}
+            {hiddenCapsuleCount > 0 ? (
+              <Text style={[styles.moreCapsules, { color: colors.textSecondary }]}>
+                +{hiddenCapsuleCount}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
       </View>
       <Text style={[styles.duration, { color: colors.textSecondary }]}>
         {formatDurationCompact(elapsedSeconds)}
@@ -97,7 +123,7 @@ export function LoopHistoryRow({
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.md,
@@ -110,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 1,
   },
   badgeText: {
     flexShrink: 0,
@@ -120,7 +147,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
+    gap: 3,
   },
   title: {
     fontSize: 15,
@@ -129,10 +156,36 @@ const styles = StyleSheet.create({
   meta: {
     fontSize: 12,
   },
+  capsuleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: 2,
+  },
+  capsule: {
+    maxWidth: '100%',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+  },
+  capsuleText: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  capsuleDone: {
+    textDecorationLine: 'line-through',
+  },
+  moreCapsules: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
   duration: {
     flexShrink: 0,
     fontSize: 13,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
+    marginTop: 2,
   },
 });

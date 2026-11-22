@@ -31,7 +31,7 @@ export default function TabsLayout() {
         options={{
           title: t('tabs.today'),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="sunny-outline" color={color} size={size} />
+            <Ionicons name="timer-outline" color={color} size={size} />
           ),
         }}
       />

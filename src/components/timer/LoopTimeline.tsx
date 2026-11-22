@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   formatShortDayLabel,
@@ -30,13 +31,20 @@ type TimelineEvent = LoopEvent | { kind: 'NOW'; at: string };
 type LoopTimelineProps = {
   events: LoopEvent[];
   referenceTime?: Date;
+  collapsible?: boolean;
 };
 
-export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
+export function LoopTimeline({
+  events,
+  referenceTime,
+  collapsible = false,
+}: LoopTimelineProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(!collapsible);
   if (events.length === 0) return null;
 
+  const pauseCount = events.filter((event) => event.kind === 'PAUSED').length;
   const timeZone = getDeviceTimeZone();
   const last = events[events.length - 1];
   const showNow =
@@ -46,18 +54,52 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
     ? [...events, { kind: 'NOW', at: referenceTime.toISOString() }]
     : events;
 
-  return (
-    <View style={styles.section}>
+  const header = (
+    <View style={styles.titleRow}>
       <Text style={[styles.title, { color: colors.textSecondary }]}>
         {t('timeline.title')}
       </Text>
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        {allEvents.map((event, index) => {
+      {pauseCount > 0 ? (
+        <View style={styles.pauseCount}>
+          <Ionicons name="pause" size={10} color={colors.textSecondary} />
+          <Text style={[styles.pauseCountText, { color: colors.textSecondary }]}>
+            {pauseCount}
+          </Text>
+        </View>
+      ) : null}
+      {collapsible ? (
+        <Ionicons
+          name={expanded ? 'chevron-up' : 'chevron-down'}
+          size={14}
+          color={colors.textSecondary}
+        />
+      ) : null}
+    </View>
+  );
+
+  return (
+    <View style={styles.section}>
+      {collapsible ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('timeline.title')}
+          accessibilityState={{ expanded }}
+          onPress={() => setExpanded((value) => !value)}
+          hitSlop={8}
+        >
+          {header}
+        </Pressable>
+      ) : (
+        header
+      )}
+      {expanded ? (
+        <View
+          style={[
+            styles.card,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          {allEvents.map((event, index) => {
           const nextEvent = allEvents[index + 1];
           const dayKey = toLocalDateKey(new Date(event.at), timeZone);
           const previousEvent = index > 0 ? allEvents[index - 1] : undefined;
@@ -164,7 +206,8 @@ export function LoopTimeline({ events, referenceTime }: LoopTimelineProps) {
             </View>
           );
         })}
-      </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -173,7 +216,23 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.xs,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  pauseCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  pauseCountText: {
+    fontSize: 10,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
   title: {
+    flex: 1,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.2,

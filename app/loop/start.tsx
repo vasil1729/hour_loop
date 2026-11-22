@@ -12,7 +12,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { Button } from '../../src/components/common/Button';
-import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskPicker } from '../../src/components/tasks/TaskPicker';
@@ -30,6 +29,7 @@ import { loopService } from '../../src/features/loops/loopService';
 import { localizeError } from '../../src/i18n';
 import { useTranslation } from '../../src/i18n/I18nProvider';
 import { syncLoopNotification } from '../../src/services/notifications/notificationService';
+import { goToTimer } from '../../src/services/navigation/navigationService';
 import {
   getSuggestedCarryIn,
   listTasks,
@@ -76,7 +76,6 @@ export default function StartLoopScreen() {
   const [customMinutes, setCustomMinutes] = useState('');
   const [durationTouched, setDurationTouched] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [capsulePromptVisible, setCapsulePromptVisible] = useState(false);
   const capsuleInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -217,11 +216,6 @@ export default function StartLoopScreen() {
   };
 
   const handleStart = async () => {
-    if (capsuleItems.length === 0) {
-      setCapsulePromptVisible(true);
-      return;
-    }
-
     setBusy(true);
     try {
       const loop = await loopService.startLoop(db, {
@@ -239,12 +233,8 @@ export default function StartLoopScreen() {
         await markTaskInProgress(db, selectedTaskId).catch(() => undefined);
       }
       await refreshLoop(db);
-      router.replace('/loop/active');
+      goToTimer(router);
     } catch (error) {
-      if (error instanceof Error && error.name === 'LoopNeedsCapsuleError') {
-        setCapsulePromptVisible(true);
-        return;
-      }
       Alert.alert(t('loopStart.couldNotStart'), localizeError(error));
     } finally {
       setBusy(false);
@@ -326,11 +316,6 @@ export default function StartLoopScreen() {
             <Ionicons name="add" size={22} color="#FFFFFF" />
           </Pressable>
         </View>
-        {capsuleItems.length === 0 ? (
-          <Text style={[styles.needCapsule, { color: colors.danger }]}>
-            {t('loopStart.needCapsule')}
-          </Text>
-        ) : null}
       </View>
 
       {carrySource && carrySource.items.length > 0 ? (
@@ -521,18 +506,6 @@ export default function StartLoopScreen() {
         }}
         loading={busy}
         disabled={durationSeconds <= 0}
-      />
-
-      <ConfirmDialog
-        visible={capsulePromptVisible}
-        title={t('loopStart.needCapsuleTitle')}
-        message={t('loopStart.needCapsuleBody')}
-        confirmLabel={t('task.addCapsule')}
-        onConfirm={() => {
-          setCapsulePromptVisible(false);
-          setTimeout(() => capsuleInputRef.current?.focus(), 150);
-        }}
-        onCancel={() => setCapsulePromptVisible(false)}
       />
     </Screen>
   );

@@ -283,6 +283,7 @@ export default function HistoryScreen() {
                     key={entry.loop.id}
                     loop={entry.loop}
                     elapsedSeconds={entry.elapsedSeconds}
+                    capsules={entry.capsules}
                     onPress={() => router.push(`/loop/${entry.loop.id}`)}
                   />
                 ))}

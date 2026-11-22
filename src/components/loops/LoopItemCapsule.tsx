@@ -20,14 +20,15 @@ type LoopItemCapsuleProps = {
   selected?: boolean;
   carried?: boolean;
   disabled?: boolean;
-  paused?: boolean;
   shakeSignal?: number;
   pressAccessibilityLabel?: string;
+  removeAccessibilityLabel?: string;
+  removeIcon?: 'close' | 'archive-outline';
   onPress?: () => void;
   onToggleDone?: () => void;
-  onTogglePause?: () => void;
   onSwipeDone?: () => void;
   onSwipeUndone?: () => void;
+  onSwipeDelete?: () => void;
   onRemove?: () => void;
 };
 
@@ -40,20 +41,21 @@ export function LoopItemCapsule({
   selected = false,
   carried = false,
   disabled = false,
-  paused = false,
   shakeSignal = 0,
   pressAccessibilityLabel,
+  removeAccessibilityLabel,
+  removeIcon = 'close',
   onPress,
   onToggleDone,
-  onTogglePause,
   onSwipeDone,
   onSwipeUndone,
+  onSwipeDelete,
   onRemove,
 }: LoopItemCapsuleProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const translateX = useRef(new Animated.Value(0)).current;
-  const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone);
+  const swipeEnabled = Boolean(onSwipeDone || onSwipeUndone || onSwipeDelete);
 
   useEffect(() => {
     if (!shakeSignal) return;
@@ -107,7 +109,11 @@ export function LoopItemCapsule({
           if (gesture.dx > SWIPE_THRESHOLD) {
             onSwipeDone?.();
           } else if (gesture.dx < -SWIPE_THRESHOLD) {
-            onSwipeUndone?.();
+            if (onSwipeDelete) {
+              onSwipeDelete();
+            } else {
+              onSwipeUndone?.();
+            }
           }
           Animated.spring(translateX, {
             toValue: 0,
@@ -123,7 +129,7 @@ export function LoopItemCapsule({
           }).start();
         },
       }),
-    [onSwipeDone, onSwipeUndone, swipeEnabled, translateX]
+    [onSwipeDelete, onSwipeDone, onSwipeUndone, swipeEnabled, translateX]
   );
 
   const backgroundColor =
@@ -171,7 +177,7 @@ export function LoopItemCapsule({
               done
                 ? 'checkmark-circle'
                 : current
-                  ? 'play-circle'
+                  ? 'ellipse'
                   : 'ellipse-outline'
             }
             size={18}
@@ -196,7 +202,7 @@ export function LoopItemCapsule({
               : t('loopItem.focusA11y', { text }))
           }
           accessibilityState={{ selected: current || selected, disabled }}
-          disabled={disabled || done}
+          disabled={disabled}
           onPress={onPress}
           style={styles.main}
         >
@@ -242,34 +248,23 @@ export function LoopItemCapsule({
         </View>
       )}
 
-      {onTogglePause ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t(
-            paused ? 'loopControls.resume' : 'loopControls.pause'
-          )} ${text}`}
-          disabled={disabled}
-          hitSlop={8}
-          onPress={onTogglePause}
-          style={styles.pause}
-        >
-          <Ionicons
-            name={paused ? 'play' : 'pause'}
-            size={14}
-            color={colors.accent}
-          />
-        </Pressable>
-      ) : null}
-
       {onRemove ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('loopItem.removeA11y', { text })}
+          accessibilityLabel={
+            removeAccessibilityLabel ?? t('loopItem.removeA11y', { text })
+          }
+          accessibilityState={{ disabled }}
+          disabled={disabled}
           hitSlop={8}
           onPress={onRemove}
           style={styles.remove}
         >
-          <Ionicons name="close" size={14} color={colors.textSecondary} />
+          <Ionicons
+            name={removeIcon}
+            size={14}
+            color={colors.textSecondary}
+          />
         </Pressable>
       ) : null}
     </Animated.View>
@@ -309,9 +304,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
   remove: {
-    padding: spacing.xs,
-  },
-  pause: {
     padding: spacing.xs,
   },
 });

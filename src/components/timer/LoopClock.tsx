@@ -1,13 +1,7 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, G, Line } from 'react-native-svg';
 
-import type { Loop } from '../../domain/types';
 import {
   formatDurationCompact,
   formatElapsed,
@@ -20,36 +14,42 @@ import { spacing } from '../../theme/tokens';
 
 const TICK_COUNT = 60;
 
+type LoopClockStatus = 'IDLE' | 'ACTIVE' | 'PAUSED' | 'COMPLETED';
+
 type LoopClockProps = {
-  loop: Loop;
   elapsedSeconds: number;
   targetSeconds: number;
+  status: LoopClockStatus;
 };
 
 export function LoopClock({
-  loop,
   elapsedSeconds,
   targetSeconds,
+  status,
 }: LoopClockProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const size = Math.min(Math.max(width - 88, 220), 320);
+  const size = Math.min(Math.max(width - 104, 210), 260);
   const center = size / 2;
-  const ratio = progressRatio(targetSeconds, elapsedSeconds);
-  const remaining = remainingSeconds(targetSeconds, elapsedSeconds);
-  const reached = remaining === 0;
-  const isPaused = loop.status === 'PAUSED';
+  const isIdle = status === 'IDLE';
+  const isPaused = status === 'PAUSED';
+  const ratio = isIdle ? 0 : progressRatio(targetSeconds, elapsedSeconds);
+  const remaining = isIdle
+    ? targetSeconds
+    : remainingSeconds(targetSeconds, elapsedSeconds);
+  const reached = !isIdle && remaining === 0;
   const progressColor = reached ? colors.success : colors.accent;
+  const progressLabel = t('clock.a11y', {
+    elapsed: formatElapsed(isIdle ? 0 : elapsedSeconds),
+    target: formatElapsed(targetSeconds),
+  });
 
   const outerRadius = center - 4;
   const ringRadius = outerRadius - 24;
-  const strokeWidth = Math.max(7, Math.round(size * 0.028));
+  const strokeWidth = Math.max(7, Math.round(size * 0.03));
   const circumference = 2 * Math.PI * ringRadius;
   const dashOffset = circumference * (1 - ratio);
-  const knobAngle = ratio * 2 * Math.PI - Math.PI / 2;
-  const knobX = center + ringRadius * Math.cos(knobAngle);
-  const knobY = center + ringRadius * Math.sin(knobAngle);
   const litTicks = ratio > 0 ? Math.max(1, Math.round(ratio * TICK_COUNT)) : 0;
 
   return (
@@ -57,10 +57,7 @@ export function LoopClock({
       accessible
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(ratio * 100) }}
-      accessibilityLabel={t('clock.a11y', {
-        elapsed: formatElapsed(elapsedSeconds),
-        target: formatElapsed(targetSeconds),
-      })}
+      accessibilityLabel={progressLabel}
       style={styles.wrapper}
     >
       <View style={[styles.face, { width: size, height: size }]}>
@@ -107,33 +104,12 @@ export function LoopClock({
                 cy={center}
                 r={ringRadius}
                 stroke={progressColor}
-                strokeWidth={strokeWidth * 1.9}
-                strokeLinecap="round"
-                fill="none"
-                strokeDasharray={[circumference, circumference]}
-                strokeDashoffset={dashOffset}
-                transform={`rotate(-90 ${center} ${center})`}
-                opacity={0.14}
-              />
-              <Circle
-                cx={center}
-                cy={center}
-                r={ringRadius}
-                stroke={progressColor}
                 strokeWidth={strokeWidth}
-                strokeLinecap="round"
+                strokeLinecap="butt"
                 fill="none"
                 strokeDasharray={[circumference, circumference]}
                 strokeDashoffset={dashOffset}
                 transform={`rotate(-90 ${center} ${center})`}
-              />
-              <Circle
-                cx={knobX}
-                cy={knobY}
-                r={strokeWidth * 0.9}
-                fill={progressColor}
-                stroke={colors.background}
-                strokeWidth={Math.max(2, strokeWidth * 0.3)}
               />
             </G>
           ) : null}
@@ -145,27 +121,31 @@ export function LoopClock({
               styles.elapsed,
               {
                 color: colors.text,
-                fontSize: Math.max(30, Math.round(size * 0.12)),
+                fontSize: Math.max(30, Math.round(size * 0.13)),
                 opacity: isPaused ? 0.55 : 1,
               },
             ]}
           >
-            {formatElapsed(elapsedSeconds)}
+            {formatElapsed(isIdle ? targetSeconds : elapsedSeconds)}
           </Text>
-          <Text style={[styles.target, { color: colors.textSecondary }]}>
-            {t('clock.target', { time: formatElapsed(targetSeconds) })}
-          </Text>
+          {!isIdle ? (
+            <Text style={[styles.target, { color: colors.textSecondary }]}>
+              {t('clock.target', { time: formatElapsed(targetSeconds) })}
+            </Text>
+          ) : null}
           <Text
             style={[
               styles.remaining,
               { color: reached ? colors.success : colors.textSecondary },
             ]}
           >
-            {reached
-              ? t('clock.reached')
-              : t('clock.remaining', {
-                  duration: formatDurationCompact(remaining),
-                })}
+            {isIdle
+              ? t('loopActive.noLoopMessage')
+              : reached
+                ? t('clock.reached')
+                : t('clock.remaining', {
+                    duration: formatDurationCompact(remaining),
+                  })}
           </Text>
         </View>
       </View>

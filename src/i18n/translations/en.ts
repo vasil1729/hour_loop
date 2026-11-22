@@ -57,11 +57,12 @@ export const en = {
   'app.databaseErrorBody': 'Please reload the app. Details: {message}',
   'app.reload': 'Reload',
 
-  'tabs.today': 'Today',
+  'tabs.today': 'Timer',
   'tabs.tasks': 'Tasks',
   'tabs.history': 'History',
   'tabs.settings': 'Settings',
 
+  'timer.statusRunning': 'RUNNING',
   'today.eyebrow': 'TODAY',
   'today.daily': 'DAILY',
   'today.openAction': 'Open →',
@@ -259,7 +260,7 @@ export const en = {
   'loopActive.now': 'NOW',
   'loopActive.capsules': 'CAPSULES',
   'loopActive.hint':
-    'Tap a capsule to switch focus · swipe right to complete',
+    'Tap a capsule to switch · swipe right to complete · swipe left to delete',
   'loopActive.focus': 'FOCUS',
   'loopActive.carryIn': 'CARRY IN',
   'loopActive.delete': 'Delete loop',
@@ -324,7 +325,7 @@ export const en = {
   'loopComplete.notePlaceholder': 'Anything worth remembering?',
   'loopComplete.linkFollowUp': 'Link a follow-up capsule',
   'loopComplete.noFollowUp': 'No follow-up capsule',
-  'loopComplete.backToToday': 'Back to Today',
+  'loopComplete.backToToday': 'Back to Timer',
   'loopComplete.saveClose': 'Save & close loop',
   'loopComplete.keepLooping': 'Keep looping',
   'loopComplete.delete': 'Delete loop',
@@ -509,6 +510,7 @@ export const en = {
   'daySummary.intended': '{actual} of {target} intended',
   'daySummary.noIntention': 'No daily intention was set for this day.',
 
+  'loopRow.hourLabel': 'Hour {count}',
   'loopRow.untitled': 'Untitled loop',
   'loopRow.paused': 'Paused',
   'loopRow.running': 'Running',

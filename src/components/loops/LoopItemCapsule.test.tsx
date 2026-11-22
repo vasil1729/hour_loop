@@ -21,40 +21,26 @@ jest.mock('../../theme/ThemeContext', () => {
   };
 });
 
-describe('LoopItemCapsule pause control', () => {
-  it('shows a pause action for the current capsule', async () => {
-    const onTogglePause = jest.fn();
+describe('LoopItemCapsule actions', () => {
+  it('does not render a per-capsule pause control', async () => {
+    await render(<LoopItemCapsule text="Write the outline" current />);
+
+    expect(screen.queryByLabelText('loopControls.pause')).toBeNull();
+    expect(screen.queryByLabelText('loopControls.resume')).toBeNull();
+  });
+
+  it('uses the archive action label and icon when provided', async () => {
+    const onRemove = jest.fn();
     await render(
       <LoopItemCapsule
         text="Write the outline"
-        current
-        onTogglePause={onTogglePause}
-        onRemove={jest.fn()}
+        removeAccessibilityLabel="Archive Write the outline"
+        removeIcon="archive-outline"
+        onRemove={onRemove}
       />
     );
 
-    await fireEvent.press(screen.getByLabelText('loopControls.pause Write the outline'));
-    expect(onTogglePause).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows a resume action while the capsule is paused', async () => {
-    await render(
-      <LoopItemCapsule
-        text="Write the outline"
-        current
-        paused
-        onTogglePause={jest.fn()}
-      />
-    );
-
-    expect(screen.getByLabelText('loopControls.resume Write the outline')).toBeTruthy();
-    expect(screen.queryByLabelText('loopControls.pause Write the outline')).toBeNull();
-  });
-
-  it('does not show a pause action for non-current capsules', async () => {
-    await render(<LoopItemCapsule text="Write the outline" current={false} />);
-
-    expect(screen.queryByLabelText('loopControls.pause Write the outline')).toBeNull();
-    expect(screen.queryByLabelText('loopControls.resume Write the outline')).toBeNull();
+    await fireEvent.press(screen.getByLabelText('Archive Write the outline'));
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });

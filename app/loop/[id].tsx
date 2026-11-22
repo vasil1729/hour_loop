@@ -158,9 +158,9 @@ export default function LoopDetailScreen() {
       </View>
 
       <LoopClock
-        loop={loop}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={loop.target_duration_seconds}
+        status={loop.status}
       />
 
       <LoopTimeline events={buildLoopTimeline(loop, intervals)} />

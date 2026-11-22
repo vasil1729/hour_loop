@@ -60,11 +60,12 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Перезагрузите приложение. Подробности: {message}',
   'app.reload': 'Перезагрузить',
 
-  'tabs.today': 'Сегодня',
+  'tabs.today': 'Таймер',
   'tabs.tasks': 'Задачи',
   'tabs.history': 'История',
   'tabs.settings': 'Настройки',
 
+  'timer.statusRunning': 'ИДЁТ',
   'today.eyebrow': 'СЕГОДНЯ',
   'today.daily': 'ДЕНЬ',
   'today.openAction': 'Открыть →',
@@ -272,7 +273,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'СЕЙЧАС',
   'loopActive.capsules': 'КАПСУЛЫ',
   'loopActive.hint':
-    'Нажмите на капсулу, чтобы переключить фокус · смахните вправо, чтобы завершить',
+    'Нажмите на капсулу, чтобы переключиться · смахните вправо, чтобы завершить · смахните влево, чтобы удалить',
   'loopActive.focus': 'ФОКУС',
   'loopActive.carryIn': 'ПЕРЕНОС',
   'loopActive.delete': 'Удалить цикл',
@@ -337,7 +338,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'Что стоит запомнить?',
   'loopComplete.linkFollowUp': 'Связать цель для продолжения',
   'loopComplete.noFollowUp': 'Без цели для продолжения',
-  'loopComplete.backToToday': 'Назад к «Сегодня»',
+  'loopComplete.backToToday': 'К таймеру',
   'loopComplete.saveClose': 'Сохранить и закрыть цикл',
   'loopComplete.keepLooping': 'Продолжить цикл',
   'loopComplete.delete': 'Удалить цикл',
@@ -532,6 +533,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'daySummary.intended': '{actual} из {target} запланировано',
   'daySummary.noIntention': 'На этот день цель не задана.',
 
+  'loopRow.hourLabel': 'Час {count}',
   'loopRow.untitled': 'Цикл без названия',
   'loopRow.paused': 'Пауза',
   'loopRow.running': 'Идёт',

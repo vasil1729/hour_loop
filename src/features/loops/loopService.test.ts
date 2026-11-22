@@ -11,10 +11,8 @@ import type { LoopJournalPatch } from '../../database/repositories/loopsReposito
 import {
   createLoopService,
   InvalidStateTransitionError,
-  LastLoopCapsuleError,
   LoopAlreadyActiveError,
   LoopItemNotFoundError,
-  LoopNeedsCapsuleError,
   LoopNotFoundError,
   LoopTaskNotFoundError,
   LoopTaskNotSubtaskError,
@@ -618,7 +616,7 @@ describe('loopService', () => {
     expect(state.itemIntervals[0]?.ended_at).toBeNull();
   });
 
-  it('rejects deleting the last capsule', async () => {
+  it('deletes the last capsule and keeps the loop running', async () => {
     const { db, service } = createHarness();
     const loop = await service.startLoop(db, {
       targetDurationSeconds: 3600,
@@ -627,24 +625,26 @@ describe('loopService', () => {
     const [item] = await service.getLoopItems(db, loop.id);
     if (!item) throw new Error('Expected an item');
 
-    await expect(
-      service.deleteLoopItem(db, loop.id, item.id)
-    ).rejects.toBeInstanceOf(LastLoopCapsuleError);
-    expect(await service.getLoopItems(db, loop.id)).toHaveLength(1);
+    await service.deleteLoopItem(db, loop.id, item.id);
+
+    expect(await service.getLoopItems(db, loop.id)).toHaveLength(0);
+    expect((await service.getLoop(db, loop.id)).status).toBe('ACTIVE');
   });
 
-  it('requires at least one capsule to start a loop', async () => {
-    const { db, service } = createHarness();
+  it('starts without capsules and ignores blank capsule drafts', async () => {
+    const first = createHarness();
+    const started = await first.service.startLoop(first.db, {
+      targetDurationSeconds: 3600,
+    });
+    expect(started.status).toBe('ACTIVE');
+    expect(await first.service.getLoopItems(first.db, started.id)).toEqual([]);
 
-    await expect(
-      service.startLoop(db, { targetDurationSeconds: 3600 })
-    ).rejects.toBeInstanceOf(LoopNeedsCapsuleError);
-    await expect(
-      service.startLoop(db, {
-        targetDurationSeconds: 3600,
-        items: [{ text: '   ' }],
-      })
-    ).rejects.toBeInstanceOf(LoopNeedsCapsuleError);
+    const second = createHarness();
+    const blank = await second.service.startLoop(second.db, {
+      targetDurationSeconds: 3600,
+      items: [{ text: '   ' }],
+    });
+    expect(await second.service.getLoopItems(second.db, blank.id)).toEqual([]);
   });
 
   it('sets only one current capsule per loop', async () => {
@@ -692,7 +692,7 @@ describe('loopService', () => {
     expect(updated?.current).toBe(false);
   });
 
-  it('pauses the timer when the last unfinished capsule is completed', async () => {
+  it('keeps the timer running when the last capsule is completed', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;
     const loop = await service.startLoop(db, {
@@ -704,19 +704,20 @@ describe('loopService', () => {
 
     harness.advanceSeconds(60);
     await service.setLoopItemDone(db, loop.id, item.id, true);
+    harness.advanceSeconds(60);
 
     const updated = await service.getLoop(db, loop.id);
-    expect(updated.status).toBe('PAUSED');
-    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+    expect(updated.status).toBe('ACTIVE');
+    expect(state.intervals.some((interval) => interval.ended_at === null)).toBe(
       true
     );
     expect(
       state.itemIntervals.every((interval) => interval.ended_at !== null)
     ).toBe(true);
-    expect(await service.getElapsedSeconds(db, loop.id)).toBe(60);
+    expect(await service.getElapsedSeconds(db, loop.id)).toBe(120);
   });
 
-  it('pauses the timer when the last unfinished capsule is deleted', async () => {
+  it('keeps the timer running when the last capsule is deleted', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;
     const loop = await service.startLoop(db, {
@@ -735,8 +736,8 @@ describe('loopService', () => {
     await service.deleteLoopItem(db, loop.id, lastUnfinished.id);
 
     const updated = await service.getLoop(db, loop.id);
-    expect(updated.status).toBe('PAUSED');
-    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+    expect(updated.status).toBe('ACTIVE');
+    expect(state.intervals.some((interval) => interval.ended_at === null)).toBe(
       true
     );
     const remaining = await service.getLoopItems(db, loop.id);
@@ -744,7 +745,7 @@ describe('loopService', () => {
     expect(remaining[0]?.current).toBe(false);
   });
 
-  it('rejects resuming when no unfinished capsule remains', async () => {
+  it('resumes without a current capsule when none remain', async () => {
     const { db, service } = createHarness();
     const loop = await service.startLoop(db, {
       targetDurationSeconds: 3600,
@@ -754,11 +755,14 @@ describe('loopService', () => {
     if (!item) throw new Error('Expected an item');
 
     await service.setLoopItemDone(db, loop.id, item.id, true);
+    await service.pauseLoop(db, loop.id);
     expect((await service.getLoop(db, loop.id)).status).toBe('PAUSED');
 
-    await expect(service.resumeLoop(db, loop.id)).rejects.toBeInstanceOf(
-      MissingCurrentCapsuleError
-    );
+    const resumed = await service.resumeLoop(db, loop.id);
+    expect(resumed.status).toBe('ACTIVE');
+    expect(
+      (await service.getLoopItems(db, loop.id)).every((entry) => !entry.current)
+    ).toBe(true);
   });
 
   it('restores the first unfinished capsule when resuming a paused loop without a current', async () => {
@@ -804,7 +808,7 @@ describe('loopService', () => {
     expect(state.itemIntervals).toHaveLength(closedIntervals);
   });
 
-  it('pauses an active timer with no unfinished capsule during reconciliation', async () => {
+  it('keeps an active timer running when no unfinished capsule remains during reconciliation', async () => {
     const harness = createHarness();
     const { db, service, state } = harness;
     const loop = await service.startLoop(db, {
@@ -818,8 +822,8 @@ describe('loopService', () => {
 
     await service.ensureCurrentItemInterval(db, loop.id);
 
-    expect((await service.getLoop(db, loop.id)).status).toBe('PAUSED');
-    expect(state.intervals.every((interval) => interval.ended_at !== null)).toBe(
+    expect((await service.getLoop(db, loop.id)).status).toBe('ACTIVE');
+    expect(state.intervals.some((interval) => interval.ended_at === null)).toBe(
       true
     );
   });

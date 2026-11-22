@@ -56,11 +56,12 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
     'ആപ്പ് വീണ്ടും ലോഡ് ചെയ്യുക. വിശദാംശങ്ങൾ: {message}',
   'app.reload': 'വീണ്ടും ലോഡ് ചെയ്യുക',
 
-  'tabs.today': 'ഇന്ന്',
+  'tabs.today': 'ടൈമർ',
   'tabs.tasks': 'ടാസ്ക്കുകൾ',
   'tabs.history': 'ചരിത്രം',
   'tabs.settings': 'ക്രമീകരണങ്ങൾ',
 
+  'timer.statusRunning': 'പ്രവർത്തിക്കുന്നു',
   'today.eyebrow': 'ഇന്ന്',
   'today.daily': 'ദൈനംദിനം',
   'today.openAction': 'തുറക്കുക →',
@@ -257,7 +258,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'ഇപ്പോൾ',
   'loopActive.capsules': 'ക്യാപ്സ്യൂളുകൾ',
   'loopActive.hint':
-    'ഫോക്കസ് മാറ്റാൻ ഒരു ക്യാപ്സ്യൂളിൽ ടാപ്പ് ചെയ്യുക · പൂർത്തിയാക്കാൻ വലത്തോട്ട് സ്വൈപ്പ് ചെയ്യുക',
+    'മാറാൻ ടാപ്പ് ചെയ്യുക · പൂർത്തിയാക്കാൻ വലത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക · ഇല്ലാതാക്കാൻ ഇടത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക',
   'loopActive.focus': 'ഫോക്കസ്',
   'loopActive.carryIn': 'കൊണ്ടുവന്നത്',
   'loopActive.delete': 'ലൂപ്പ് ഇല്ലാതാക്കുക',
@@ -321,7 +322,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'ഓർക്കാൻ യോഗ്യമായ എന്തെങ്കിലും?',
   'loopComplete.linkFollowUp': 'തുടർ ക്യാപ്സ്യൂൾ ബന്ധിപ്പിക്കുക',
   'loopComplete.noFollowUp': 'തുടർ ക്യാപ്സ്യൂൾ ഇല്ല',
-  'loopComplete.backToToday': 'ഇന്നത്തേക്ക് മടങ്ങുക',
+  'loopComplete.backToToday': 'ടൈമറിലേക്ക് മടങ്ങുക',
   'loopComplete.saveClose': 'സംരക്ഷിച്ച് ലൂപ്പ് അടയ്ക്കുക',
   'loopComplete.keepLooping': 'ലൂപ്പ് തുടരുക',
   'loopComplete.delete': 'ലൂപ്പ് ഇല്ലാതാക്കുക',
@@ -507,6 +508,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'daySummary.noIntention':
     'ഈ ദിവസത്തിന് ദൈനംദിന ഉദ്ദേശ്യം സെറ്റ് ചെയ്തിട്ടില്ല.',
 
+  'loopRow.hourLabel': 'മണിക്കൂർ {count}',
   'loopRow.untitled': 'ശീർഷകമില്ലാത്ത ലൂപ്പ്',
   'loopRow.paused': 'താൽക്കാലികമായി നിർത്തി',
   'loopRow.running': 'പ്രവർത്തിക്കുന്നു',

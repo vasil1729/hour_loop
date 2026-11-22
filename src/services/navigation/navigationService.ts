@@ -1,11 +1,10 @@
 import type { Router } from 'expo-router';
 
 /**
- * Return to the Today tab by dismissing any stacked/modal routes and then
- * switching to the tabs root. Dismissing alone keeps whichever tab the loop was
- * started from, which is not necessarily Today.
+ * Return to the Timer tab by dismissing any stacked/modal routes and then
+ * switching to the tabs root.
  */
-export function goToToday(router: Router): void {
+export function goToTimer(router: Router): void {
   if (router.canDismiss()) {
     router.dismissAll();
   }

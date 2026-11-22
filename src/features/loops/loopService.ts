@@ -329,7 +329,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     return requireLoop(db, loop.id);
   }
 
-  async function pauseIfNoCurrentCapsule(
+  async function reconcileCurrentCapsule(
     db: SQLiteDatabase,
     loop: Loop
   ): Promise<void> {
@@ -338,22 +338,23 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
     if (current && !current.done) return;
 
     const items = await deps.items.listLoopItems(db, loop.id);
-    const candidate = items.find((item) => !item.done);
-    if (candidate) {
-      const nowIso = deps.now().toISOString();
-      await db.withTransactionAsync(async () => {
-        await deps.itemIntervals.closeOpenLoopItemIntervals(
-          db,
-          loop.id,
-          nowIso
-        );
-        await deps.items.setCurrentLoopItem(db, loop.id, candidate.id);
+    const candidate = items.find((item) => !item.done) ?? null;
+    const nowIso = deps.now().toISOString();
+    await db.withTransactionAsync(async () => {
+      await deps.itemIntervals.closeOpenLoopItemIntervals(
+        db,
+        loop.id,
+        nowIso
+      );
+      await deps.items.setCurrentLoopItem(
+        db,
+        loop.id,
+        candidate?.id ?? null
+      );
+      if (candidate) {
         await openItemInterval(db, loop.id, candidate.id, nowIso);
-      });
-      return;
-    }
-
-    await pauseLoopInternal(db, loop);
+      }
+    });
   }
 
   return {
@@ -425,10 +426,6 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         });
       }
 
-      if (items.length === 0) {
-        throw new LoopNeedsCapsuleError();
-      }
-
       await db.withTransactionAsync(async () => {
         await deps.loops.createLoop(db, loop);
         await deps.intervals.createInterval(db, interval);
@@ -483,9 +480,6 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         const items = await deps.items.listLoopItems(db, loopId);
         currentItem = items.find((item) => !item.done) ?? null;
       }
-      if (!currentItem) {
-        throw new MissingCurrentCapsuleError();
-      }
       const interval: LoopInterval = {
         id: deps.newId(),
         loop_id: loopId,
@@ -503,8 +497,14 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           loopId,
           nowIso
         );
-        await deps.items.setCurrentLoopItem(db, loopId, currentItem.id);
-        await openItemInterval(db, loopId, currentItem.id, nowIso);
+        await deps.items.setCurrentLoopItem(
+          db,
+          loopId,
+          currentItem?.id ?? null
+        );
+        if (currentItem) {
+          await openItemInterval(db, loopId, currentItem.id, nowIso);
+        }
       });
 
       return requireLoop(db, loopId);
@@ -602,9 +602,6 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       if (!item) {
         throw new LoopItemNotFoundError(itemId);
       }
-      if (existing.length <= 1) {
-        throw new LastLoopCapsuleError();
-      }
       const nextCurrent = item.current
         ? existing.find((entry) => entry.id !== itemId && !entry.done) ?? null
         : null;
@@ -630,7 +627,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         }
       });
       if (loop.status === 'ACTIVE') {
-        await pauseIfNoCurrentCapsule(db, loop);
+        await reconcileCurrentCapsule(db, loop);
       }
     },
 
@@ -678,7 +675,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         }
       });
       if (loop.status === 'ACTIVE') {
-        await pauseIfNoCurrentCapsule(db, loop);
+        await reconcileCurrentCapsule(db, loop);
       }
     },
 
@@ -709,7 +706,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         }
       });
       if (loop.status === 'ACTIVE') {
-        await pauseIfNoCurrentCapsule(db, loop);
+        await reconcileCurrentCapsule(db, loop);
       }
     },
 
@@ -745,9 +742,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         const items = await deps.items.listLoopItems(db, loopId);
         const candidate = items.find((item) => !item.done);
         if (!candidate) {
-          if (isActive) {
-            await pauseLoopInternal(db, loop);
-          }
+          await deps.items.setCurrentLoopItem(db, loopId, null);
           return;
         }
         await deps.items.setCurrentLoopItem(db, loopId, candidate.id);

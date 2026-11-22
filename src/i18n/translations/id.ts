@@ -66,6 +66,7 @@ export const id: Record<TranslationKey, TranslationEntry> = {
   'tabs.history': 'Riwayat',
   'tabs.settings': 'Pengaturan',
 
+  'timer.statusRunning': 'BERJALAN',
   'today.eyebrow': 'HARI INI',
   'today.daily': 'HARIAN',
   'today.openAction': 'Buka →',
@@ -260,7 +261,7 @@ export const id: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'SEKARANG',
   'loopActive.capsules': 'KAPSUL',
   'loopActive.hint':
-    'Ketuk kapsul untuk beralih · geser kanan untuk selesai · geser kiri untuk menghapus',
+    'Ketuk kapsul untuk beralih · geser ke kanan untuk menyelesaikan · geser ke kiri untuk menghapus',
   'loopActive.focus': 'FOKUS',
   'loopActive.carryIn': 'BAWA MASUK',
   'loopActive.delete': 'Hapus loop',
@@ -506,6 +507,7 @@ export const id: Record<TranslationKey, TranslationEntry> = {
   'daySummary.intended': '{actual} dari {target} direncanakan',
   'daySummary.noIntention': 'Tidak ada niat harian untuk hari ini.',
 
+  'loopRow.hourLabel': 'Jam {count}',
   'loopRow.untitled': 'Loop tanpa judul',
   'loopRow.paused': 'Dijeda',
   'loopRow.running': 'Berjalan',

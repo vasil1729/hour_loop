@@ -59,11 +59,12 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'app.databaseErrorBody': 'أعد تحميل التطبيق. التفاصيل: {message}',
   'app.reload': 'إعادة التحميل',
 
-  'tabs.today': 'اليوم',
+  'tabs.today': 'المؤقت',
   'tabs.tasks': 'المهام',
   'tabs.history': 'السجل',
   'tabs.settings': 'الإعدادات',
 
+  'timer.statusRunning': 'قيد التشغيل',
   'today.eyebrow': 'اليوم',
   'today.daily': 'يومي',
   'today.openAction': 'فتح ←',
@@ -276,7 +277,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'الآن',
   'loopActive.capsules': 'الكبسولات',
   'loopActive.hint':
-    'انقر على كبسولة لتبديل التركيز · اسحب يمينًا للإكمال',
+    'انقر على الكبسولة للتبديل · اسحب لليمين للإكمال · اسحب لليسار للحذف',
   'loopActive.focus': 'التركيز',
   'loopActive.carryIn': 'ترحيل',
   'loopActive.delete': 'حذف الحلقة',
@@ -340,7 +341,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'أي شيء يستحق التذكر؟',
   'loopComplete.linkFollowUp': 'ربط كبسولة متابعة',
   'loopComplete.noFollowUp': 'بلا كبسولة متابعة',
-  'loopComplete.backToToday': 'العودة إلى اليوم',
+  'loopComplete.backToToday': 'العودة إلى المؤقت',
   'loopComplete.saveClose': 'حفظ وإغلاق الحلقة',
   'loopComplete.keepLooping': 'متابعة الحلقة',
   'loopComplete.delete': 'حذف الحلقة',
@@ -538,6 +539,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'daySummary.intended': '{actual} من {target} مخطط',
   'daySummary.noIntention': 'لم تُحدد نية يومية لهذا اليوم.',
 
+  'loopRow.hourLabel': 'الساعة {count}',
   'loopRow.untitled': 'حلقة بلا عنوان',
   'loopRow.paused': 'متوقف مؤقتًا',
   'loopRow.running': 'جارٍ',

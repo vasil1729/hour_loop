@@ -61,11 +61,12 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'app.databaseErrorBody': 'Recarregue o app. Detalhes: {message}',
   'app.reload': 'Recarregar',
 
-  'tabs.today': 'Hoje',
+  'tabs.today': 'Timer',
   'tabs.tasks': 'Tarefas',
   'tabs.history': 'Histórico',
   'tabs.settings': 'Configurações',
 
+  'timer.statusRunning': 'EM ANDAMENTO',
   'today.eyebrow': 'HOJE',
   'today.daily': 'DIÁRIO',
   'today.openAction': 'Abrir →',
@@ -263,7 +264,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'loopActive.statusFocusing': 'EM FOCO',
   'loopActive.now': 'AGORA',
   'loopActive.capsules': 'CÁPSULAS',
-  'loopActive.hint': 'Toque para focar · deslize para a direita para concluir',
+  'loopActive.hint': 'Toque para alternar · deslize para a direita para concluir · deslize para a esquerda para excluir',
   'loopActive.focus': 'FOCO',
   'loopActive.carryIn': 'TRAZER',
   'loopActive.delete': 'Excluir loop',
@@ -320,7 +321,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'loopComplete.notePlaceholder': 'Algo que vale a pena lembrar?',
   'loopComplete.linkFollowUp': 'Vincular uma cápsula de acompanhamento',
   'loopComplete.noFollowUp': 'Nenhuma cápsula de acompanhamento',
-  'loopComplete.backToToday': 'Voltar para hoje',
+  'loopComplete.backToToday': 'Voltar ao timer',
   'loopComplete.saveClose': 'Salvar e encerrar loop',
   'loopComplete.keepLooping': 'Continuar o loop',
   'loopComplete.delete': 'Excluir loop',
@@ -509,6 +510,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'daySummary.noIntention':
     'Nenhuma intenção diária foi definida para este dia.',
 
+  'loopRow.hourLabel': 'Hora {count}',
   'loopRow.untitled': 'Loop sem título',
   'loopRow.paused': 'Pausado',
   'loopRow.running': 'Em andamento',

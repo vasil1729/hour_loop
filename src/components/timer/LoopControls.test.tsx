@@ -9,48 +9,51 @@ jest.mock('../../i18n/I18nProvider', () => ({
   }),
 }));
 
-jest.mock('../../theme/ThemeContext', () => {
-  const tokens = jest.requireActual('../../theme/tokens') as {
-    palette: Record<'light' | 'dark', unknown>;
-  };
-  return {
-    useTheme: () => ({
-      colors: tokens.palette.light,
-      scheme: 'light',
-    }),
-  };
-});
-
 const noop = jest.fn();
 
-describe('LoopControls resume availability', () => {
-  it('hides resume when there is no capsule to resume', async () => {
+describe('LoopControls', () => {
+  it('shows pause and stop while the loop is running', async () => {
     await render(
       <LoopControls
-        status="PAUSED"
-        canResume={false}
+        status="ACTIVE"
         onPause={noop}
         onResume={noop}
         onStop={noop}
-        onMinimize={noop}
       />
     );
 
-    expect(screen.queryByText('loopControls.resume')).toBeNull();
+    expect(screen.getByText('loopControls.pause')).toBeTruthy();
     expect(screen.getByText('loopControls.stop')).toBeTruthy();
+    expect(screen.queryByText('loopControls.resume')).toBeNull();
   });
 
-  it('shows resume when a capsule is available', async () => {
+  it('shows resume and stop while paused', async () => {
     await render(
       <LoopControls
         status="PAUSED"
         onPause={noop}
         onResume={noop}
         onStop={noop}
-        onMinimize={noop}
       />
     );
 
     expect(screen.getByText('loopControls.resume')).toBeTruthy();
+    expect(screen.getByText('loopControls.stop')).toBeTruthy();
+    expect(screen.queryByText('loopControls.pause')).toBeNull();
+  });
+
+  it('shows only close after the target is reached', async () => {
+    await render(
+      <LoopControls
+        status="PAUSED"
+        targetReached
+        onPause={noop}
+        onResume={noop}
+        onStop={noop}
+      />
+    );
+
+    expect(screen.getByText('loopControls.close')).toBeTruthy();
+    expect(screen.queryByText('loopControls.resume')).toBeNull();
   });
 });

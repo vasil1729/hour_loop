@@ -26,7 +26,7 @@ import { loopService } from '../../src/features/loops/loopService';
 import { buildLoopTimeline } from '../../src/features/loops/loopTimeline';
 import { localizeError } from '../../src/i18n';
 import { useTranslation } from '../../src/i18n/I18nProvider';
-import { goToToday } from '../../src/services/navigation/navigationService';
+import { goToTimer } from '../../src/services/navigation/navigationService';
 import {
   cancelLoopNotification,
   syncLoopNotification,
@@ -166,7 +166,7 @@ export default function CompleteLoopScreen() {
   const handleSave = async () => {
     if (!loop) return;
     if (loop.status === 'COMPLETED') {
-      goToToday(router);
+      goToTimer(router);
       return;
     }
 
@@ -184,7 +184,7 @@ export default function CompleteLoopScreen() {
         note,
       });
       await refreshLoop(db);
-      goToToday(router);
+      goToTimer(router);
     } catch (caught) {
       Alert.alert(
         t('loopComplete.couldNotClose'),
@@ -203,7 +203,7 @@ export default function CompleteLoopScreen() {
       await loopService.deleteLoop(db, loop.id);
       await refreshLoop(db);
       setDeleteVisible(false);
-      goToToday(router);
+      goToTimer(router);
     } catch (caught) {
       Alert.alert(
         t('loopComplete.couldNotDelete'),
@@ -227,7 +227,7 @@ export default function CompleteLoopScreen() {
           action={
             <Button
               label={t('loopComplete.backToToday')}
-              onPress={() => goToToday(router)}
+              onPress={() => goToTimer(router)}
             />
           }
         />
@@ -281,9 +281,9 @@ export default function CompleteLoopScreen() {
       ) : null}
 
       <LoopClock
-        loop={loop}
         elapsedSeconds={elapsedSeconds}
         targetSeconds={loop.target_duration_seconds}
+        status={loop.status}
       />
 
       <LoopTimeline

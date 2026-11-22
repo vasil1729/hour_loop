@@ -94,7 +94,7 @@ function NotificationResponseHandler() {
         }
 
         if (loop.status === 'ACTIVE' || loop.status === 'PAUSED') {
-          router.navigate('/loop/active');
+          router.navigate('/');
         } else {
           router.navigate({
             pathname: '/loop/[id]',
