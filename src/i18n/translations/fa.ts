@@ -33,6 +33,7 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'دوباره تلاش کنید.',
   'common.loading': 'در حال بارگذاری…',
   'common.confirm': 'تأیید',

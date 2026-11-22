@@ -31,6 +31,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'Попробуйте ещё раз.',
   'common.loading': 'Загрузка…',
   'common.confirm': 'Подтвердить',

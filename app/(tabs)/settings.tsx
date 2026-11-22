@@ -87,6 +87,7 @@ const LANGUAGES: { key: LanguagePreference; labelKey: TranslationKey }[] = [
   { key: 'de', labelKey: 'common.german' },
   { key: 'si', labelKey: 'common.sinhala' },
   { key: 'ta', labelKey: 'common.tamil' },
+  { key: 'id', labelKey: 'common.indonesian' },
 ];
 
 export default function SettingsScreen() {

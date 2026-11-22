@@ -13,6 +13,7 @@ export const SUPPORTED_LANGUAGES = [
   'de',
   'si',
   'ta',
+  'id',
 ] as const;
 
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];

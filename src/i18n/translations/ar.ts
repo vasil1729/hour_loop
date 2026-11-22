@@ -31,6 +31,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'حاول مرة أخرى.',
   'common.loading': 'جارٍ التحميل…',
   'common.confirm': 'تأكيد',

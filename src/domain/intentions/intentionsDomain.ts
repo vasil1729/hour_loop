@@ -20,6 +20,7 @@ function durationUnits(): { hour: string; minute: string } {
   if (language === 'de') return { hour: ' Std.', minute: ' Min.' };
   if (language === 'si') return { hour: ' පැය', minute: ' මිනි' };
   if (language === 'ta') return { hour: ' மணி', minute: ' நிமி' };
+  if (language === 'id') return { hour: ' jam', minute: ' menit' };
   return { hour: 'h', minute: 'min' };
 }
 

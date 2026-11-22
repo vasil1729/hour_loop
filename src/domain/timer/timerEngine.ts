@@ -43,6 +43,9 @@ function shortUnit(unit: 'h' | 'm' | 's'): string {
   if (language === 'ta') {
     return unit === 'h' ? ' மணி' : unit === 'm' ? ' நிமி' : ' வினா';
   }
+  if (language === 'id') {
+    return unit === 'h' ? ' j' : unit === 'm' ? ' mnt' : ' dtk';
+  }
   return unit;
 }
 

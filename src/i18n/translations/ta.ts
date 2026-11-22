@@ -33,6 +33,7 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'மீண்டும் முயற்சிக்கவும்.',
   'common.loading': 'ஏற்றுகிறது…',
   'common.confirm': 'உறுதிப்படுத்து',

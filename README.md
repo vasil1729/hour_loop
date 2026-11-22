@@ -23,7 +23,7 @@ Everything is stored in local SQLite. No account is required. The focus timer an
 - **Notifications** — configurable early warnings and target-reached reminders, reconciled on foreground.
 - **Backups** — export and restore all local data as a portable JSON file.
 - **Optional AI assistant** — chat with your own AI provider; Groq is the default and has a free tier for trying it out.
-- **Languages** — English, Russian, Arabic, Chinese, Turkish, Malayalam, Italian, French, Spanish, Portuguese, Persian, German, Sinhala, and Tamil, following the device language or chosen manually in Settings.
+- **Languages** — English, Russian, Arabic, Chinese, Turkish, Malayalam, Italian, French, Spanish, Portuguese, Persian, German, Sinhala, Tamil, and Indonesian, following the device language or chosen manually in Settings.
 - **Themes** — system, light, and dark.
 
 ## Tech stack

@@ -12,6 +12,7 @@ import { en } from './translations/en';
 import { es } from './translations/es';
 import { fa } from './translations/fa';
 import { fr } from './translations/fr';
+import { id } from './translations/id';
 import { it } from './translations/it';
 import { ml } from './translations/ml';
 import { pt } from './translations/pt';
@@ -51,6 +52,7 @@ const dictionaries: Record<Language, Record<TranslationKey, TranslationEntry>> =
   de,
   si,
   ta,
+  id,
 };
 
 export function resolveLanguage(
@@ -73,6 +75,9 @@ export function resolveLanguage(
   if (code.startsWith('de')) return 'de';
   if (code.startsWith('si')) return 'si';
   if (code.startsWith('ta')) return 'ta';
+  if (code.startsWith('id')) return 'id';
+  // Android may still report the legacy ISO 639 code for Indonesian.
+  if (code === 'in' || code.startsWith('in-')) return 'id';
   return DEFAULT_LANGUAGE;
 }
 

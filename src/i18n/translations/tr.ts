@@ -27,6 +27,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'common.malayalam': 'മലയാളം',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'Lütfen tekrar deneyin.',
   'common.loading': 'Yükleniyor…',
   'common.confirm': 'Onayla',

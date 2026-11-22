@@ -29,6 +29,7 @@ export const en = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'Please try again.',
   'common.loading': 'Loading…',
   'common.confirm': 'Confirm',

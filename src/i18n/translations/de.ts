@@ -33,6 +33,7 @@ export const de: Record<TranslationKey, TranslationEntry> = {
   'common.german': 'Deutsch',
   'common.sinhala': 'සිංහල',
   'common.tamil': 'தமிழ்',
+  'common.indonesian': 'Bahasa Indonesia',
   'common.pleaseTryAgain': 'Bitte versuche es erneut.',
   'common.loading': 'Wird geladen…',
   'common.confirm': 'Bestätigen',

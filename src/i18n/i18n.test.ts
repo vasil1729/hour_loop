@@ -21,6 +21,7 @@ import { en } from './translations/en';
 import { es } from './translations/es';
 import { fa } from './translations/fa';
 import { fr } from './translations/fr';
+import { id as idTranslations } from './translations/id';
 import { it as itTranslations } from './translations/it';
 import { ml } from './translations/ml';
 import { pt } from './translations/pt';
@@ -50,6 +51,8 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('system', 'de-DE')).toBe('de');
     expect(resolveLanguage('system', 'si-LK')).toBe('si');
     expect(resolveLanguage('system', 'ta-IN')).toBe('ta');
+    expect(resolveLanguage('system', 'id-ID')).toBe('id');
+    expect(resolveLanguage('system', 'in-ID')).toBe('id');
     expect(resolveLanguage('system', 'fr-CA')).toBe('fr');
     expect(resolveLanguage('system', null)).toBe('en');
   });
@@ -67,6 +70,7 @@ describe('resolveLanguage', () => {
     expect(resolveLanguage('fa', 'de-DE')).toBe('fa');
     expect(resolveLanguage('si', 'ta-IN')).toBe('si');
     expect(resolveLanguage('ta', 'si-LK')).toBe('ta');
+    expect(resolveLanguage('id', 'en-US')).toBe('id');
     expect(resolveLanguage('de', 'en-US')).toBe('de');
   });
 
@@ -103,6 +107,7 @@ describe('translate', () => {
       de,
       si,
       ta,
+      id: idTranslations,
     };
     for (const [language, dictionary] of Object.entries(dictionaries)) {
       for (const key of Object.keys(en) as TranslationKey[]) {
@@ -133,6 +138,12 @@ describe('translate', () => {
     expect(
       translate('ml', 'clock.remaining', { duration: '38 മിനി.' })
     ).toBe('38 മിനി. ശേഷിക്കുന്നു');
+    expect(
+      translate('id', 'clock.remaining', { duration: '38 mnt' })
+    ).toBe('38 mnt tersisa');
+    expect(translate('id', 'loopStart.minutes', { count: 1 })).toBe(
+      '1 menit'
+    );
   });
 
   it('uses Russian plural forms', () => {
@@ -257,6 +268,14 @@ describe('localized dates and durations', () => {
     expect(formatDurationCompact(3660)).toBe('1 மணி 1 நிமி');
     expect(formatDurationWithSeconds(81)).toBe('1 நிமி 21 வினா');
     expect(formatIntentionDuration(5400)).toBe('1 மணி 30 நிமி');
+  });
+
+  it('formats Indonesian dates and durations', () => {
+    setActiveLanguage('id');
+    expect(formatDayLabel('2026-11-12')).toContain('November');
+    expect(formatDurationCompact(3660)).toBe('1 j 1 mnt');
+    expect(formatDurationWithSeconds(81)).toBe('1 mnt 21 dtk');
+    expect(formatIntentionDuration(5400)).toBe('1 jam 30 menit');
   });
 
   it('formats German dates and durations', () => {

@@ -20,6 +20,7 @@ const LOCALE_BY_LANGUAGE: Record<Language, string> = {
   de: 'de-DE',
   si: 'si-LK',
   ta: 'ta-IN',
+  id: 'id-ID',
 };
 
 export function getLanguageLocale(
