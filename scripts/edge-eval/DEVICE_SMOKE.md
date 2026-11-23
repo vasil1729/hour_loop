@@ -1,9 +1,17 @@
 # On-device device smoke test
 
-Date: 2026-11-22  
-Target: Android emulator API 36, x86_64, 4 GB RAM, 4 vCPU, CPU-only  
-Build: release APK from the working tree  
-Model: `qwen3.5-0.8b` Q4_K_M, 532,517,120 bytes, SHA-256 verified
+Date: 2026-11-22 (emulator), 2026-11-23 (physical device)
+Targets:
+- Android emulator API 36, x86_64, 4 GB RAM, 4 vCPU, CPU-only
+- Xiaomi Pad 6 (`23043RP34I`), Android 14, arm64-v8a, 7.8 GB RAM
+
+Build: release APK from the working tree (`v1.9.0`)
+Models verified end-to-end (download, SHA-256, activation, real arm64 load,
+and a read request):
+- `qwen3.5-0.8b` Q4_K_M, 532,517,120 bytes
+- `lfm2.5-1.2b` Q4_K_M, 730,895,168 bytes
+- `qwen3.5-2b` Q4_K_M, 1,280,835,840 bytes
+- `gemma-4-e2b` Q4_K_M, 3,106,738,272 bytes
 
 This is real emulator evidence, not a Jest substitute. It covers the parts that
 unit tests cannot prove: Expo prebuild/autolinking, native `llama.rn` loading,
@@ -37,6 +45,24 @@ and the scope gate.
    - The running loop survived leaving the assistant screen and reopening the
      app.
 
+## Physical-device results (Xiaomi Pad 6)
+
+- Fresh install of the arm64 APK via `pm install` (Xiaomi blocks normal
+  `adb install` behind its “Install via USB” account prompt).
+- Qwen3.5 0.8B: downloaded and SHA-verified in **116 s**, activated, loaded the
+  `arm64-v8a` `librnllama` engine, answered a read request, prepared
+  `start_loop`, and started `H1` only after the native **Confirm** tap.
+- Out-of-scope “What is the capital of France?” produced the local refusal with
+  **zero new `RNLlama` log lines**.
+- The on-device privacy note and the saved active-model selection rendered
+  correctly.
+- LFM2.5 1.2B: downloaded and SHA-verified in **104 s**, activated, loaded, and
+  answered after the fixes below.
+- Qwen3.5 2B: downloaded and SHA-verified in **174 s**, activated, loaded, and
+  answered a read request.
+- Gemma 4 E2B: downloaded and SHA-verified in **300 s**, activated, loaded on
+  the arm64 tablet, and answered a read request.
+
 ## Defects found and fixed during this test
 
 - **SHA-256 verification was effectively unusable.** The first emulator run
@@ -59,15 +85,21 @@ and the scope gate.
   deterministic IN_SCOPE rule now covers this existing training-set phrase.
 - **On-device privacy copy claimed messages were sent to a provider.** The
   assistant now shows an on-device-specific privacy note.
+- **LFM2.5 repeated tool calls until the loop limit.** On-device turns now
+  remove tools after a read tool result, forcing a final answer from the data.
+- **LFM2.5 streaming emitted cumulative prefixes.** The on-device provider now
+  uses the final completion text and does not render token deltas.
 
 ## Limits
 
-- This is one x86_64 emulator run, not a physical 4 GB phone.
-- Only Qwen3.5 0.8B was exercised end-to-end on device. LFM2.5 1.2B,
-  Qwen3.5 2B, and Gemma 4 E2B have not been device-smoke-tested.
+- The physical device is a 7.8 GB tablet, not a 4 GB or 6 GB phone. Real
+  low-RAM pressure and thermal throttling remain untested.
+- The action-confirmation flow was exercised with Qwen3.5 0.8B only. The other
+  three models were exercised for load + read requests.
+- iOS was not built or tested.
 - The runtime used for this test is `llama.rn@0.13.0-rc.12`. The stable
-  0.12.9 engine failed to produce tool calls with this GGUF on the emulator.
-- The JSON tool protocol is a compatibility path, not the native tool-calling
-  path. It is covered by provider tests and this smoke test, but a larger
-  device evaluation is still needed before calling the feature production-ready
-  on all four models.
+  0.12.9 engine failed to produce tool calls with this GGUF.
+- The JSON tool protocol is a compatibility path for GGUF templates without a
+  `tool_use` variant. It is covered by provider tests and this smoke test, but
+  a larger device evaluation is still needed before calling all four models
+  production-ready.
