@@ -22,9 +22,9 @@ describe('LoopControls', () => {
       />
     );
 
-    expect(screen.getByText('loopControls.pause')).toBeTruthy();
-    expect(screen.getByText('loopControls.stop')).toBeTruthy();
-    expect(screen.queryByText('loopControls.resume')).toBeNull();
+    expect(screen.getByLabelText('loopControls.pause')).toBeTruthy();
+    expect(screen.getByLabelText('loopControls.stop')).toBeTruthy();
+    expect(screen.queryByLabelText('loopControls.resume')).toBeNull();
   });
 
   it('shows resume and stop while paused', async () => {
@@ -37,9 +37,9 @@ describe('LoopControls', () => {
       />
     );
 
-    expect(screen.getByText('loopControls.resume')).toBeTruthy();
-    expect(screen.getByText('loopControls.stop')).toBeTruthy();
-    expect(screen.queryByText('loopControls.pause')).toBeNull();
+    expect(screen.getByLabelText('loopControls.resume')).toBeTruthy();
+    expect(screen.getByLabelText('loopControls.stop')).toBeTruthy();
+    expect(screen.queryByLabelText('loopControls.pause')).toBeNull();
   });
 
   it('shows only close after the target is reached', async () => {
@@ -53,7 +53,7 @@ describe('LoopControls', () => {
       />
     );
 
-    expect(screen.getByText('loopControls.close')).toBeTruthy();
-    expect(screen.queryByText('loopControls.resume')).toBeNull();
+    expect(screen.getByLabelText('loopControls.close')).toBeTruthy();
+    expect(screen.queryByLabelText('loopControls.resume')).toBeNull();
   });
 });
