@@ -157,6 +157,39 @@ describe('assistant conversation tool loop', () => {
     expect(toolMessage?.content).toContain('Active loop H2.');
   });
 
+  it('removes tools on the follow-up pass after an on-device read', async () => {
+    const readTool = makeTool('get_status', 'read', {
+      execute: jest.fn(async () => ({ summary: 'Active loop H2.' })),
+    });
+    const provider = scriptedProvider([
+      {
+        content: '',
+        toolCalls: [toolCall('call-1', 'get_status', {})],
+        finishReason: 'tool_calls',
+      },
+      {
+        content: 'You are on H2.',
+        toolCalls: [],
+        finishReason: 'stop',
+      },
+    ]);
+    provider.id = 'on-device';
+
+    const result = await runAssistantTurn({
+      db,
+      config: config({ provider: 'on-device', model: 'qwen3.5-0.8b' }),
+      apiKey: '',
+      history: [],
+      text: 'What am I doing?',
+      provider,
+      tools: [readTool],
+    });
+
+    expect(provider.requests[0]?.tools).toHaveLength(1);
+    expect(provider.requests[1]?.tools).toHaveLength(0);
+    expect(result.content).toBe('You are on H2.');
+  });
+
   it('rejects an unknown tool without executing anything', async () => {
     const provider = scriptedProvider([
       {

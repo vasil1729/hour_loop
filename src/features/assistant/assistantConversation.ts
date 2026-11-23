@@ -122,6 +122,9 @@ export async function runAssistantTurn(
   let pendingAction: AssistantPendingAction | null = null;
   let extraActionCount = 0;
   let toolResultBudget = ASSISTANT_MAX_TURN_TOOL_RESULT_CHARS;
+  let readToolExecuted = false;
+  const onDevice =
+    input.config.provider === 'on-device' || provider.id === 'on-device';
 
   for (let iteration = 0; iteration < ASSISTANT_TOOL_ITERATION_LIMIT; iteration += 1) {
     ensureNotAborted(input.signal);
@@ -134,7 +137,7 @@ export async function runAssistantTurn(
 
     const response = await provider.chat({
       messages,
-      tools: providerTools,
+      tools: onDevice && readToolExecuted ? [] : providerTools,
       signal: input.signal,
       onTextDelta: (delta) => {
         streamedThisIteration = true;
@@ -206,6 +209,7 @@ export async function runAssistantTurn(
             { db: input.db, signal: input.signal },
             args
           );
+          readToolExecuted = true;
           let serialized = serializeToolResult(result);
           if (serialized.length > toolResultBudget) {
             serialized = `${serialized.slice(0, toolResultBudget)}…[truncated]`;
