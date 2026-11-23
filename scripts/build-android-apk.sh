@@ -89,6 +89,17 @@ if [[ -n "$RNLLAMA_VARIANTS" ]]; then
   GRADLE_ARCH_ARGS+=("-PrnllamaVariants=$RNLLAMA_VARIANTS")
 fi
 
+# HTP DSP assets are only useful with the Hexagon/OpenCL engine variant.
+# Drop them whenever that variant is not being built; keep them for the
+# unrestricted universal/x86_64 builds.
+if [[ -z "$HEXAGON_ASSETS" ]]; then
+  if [[ -z "$RNLLAMA_VARIANTS" || "$RNLLAMA_VARIANTS" == *hexagon* ]]; then
+    HEXAGON_ASSETS="keep"
+  else
+    HEXAGON_ASSETS="remove"
+  fi
+fi
+
 if [[ ! -d "$SDK_DIR/platforms/android-35" ]]; then
   echo "warning: Android platform 35 is missing from $SDK_DIR." >&2
   echo "         Install it with: sdkmanager 'platforms;android-35'" >&2
