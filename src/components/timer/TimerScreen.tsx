@@ -100,6 +100,7 @@ export function TimerScreen() {
           await loopService
             .ensureCurrentItemInterval(db, activeLoopId)
             .catch(() => undefined);
+          await refresh(db);
           const result = await loopService
             .getLoopItems(db, activeLoopId)
             .catch(() => []);
@@ -120,7 +121,7 @@ export function TimerScreen() {
       return () => {
         cancelled = true;
       };
-    }, [activeLoopId, db, todayKey])
+    }, [activeLoopId, db, refresh, todayKey])
   );
 
   useEffect(() => {
@@ -168,21 +169,8 @@ export function TimerScreen() {
     }
   };
 
-  const handleStart = async () => {
-    setBusy(true);
-    try {
-      const loop = await loopService.startLoop(db, {
-        targetDurationSeconds: defaultDurationSeconds,
-      });
-      await syncLoopNotification(db, loop, { requestPermission: true }).catch(
-        () => undefined
-      );
-      await refresh(db);
-    } catch (error) {
-      Alert.alert(t('loopStart.couldNotStart'), localizeError(error));
-    } finally {
-      setBusy(false);
-    }
+  const handleStart = () => {
+    router.push('/loop/start');
   };
 
   const handlePause = () => {
