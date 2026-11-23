@@ -1,0 +1,14 @@
+// Gradle init script for APK size experiments that drop the Hexagon/OpenCL
+// llama.rn variant. llama.rn syncs five libggml-htp-*.so DSP libraries into the
+// app's assets on every preBuild, even when no Hexagon backend is compiled.
+// Those assets are useless without the Hexagon variant, so disable the sync.
+//
+// Usage: ./gradlew -I scripts/android-no-hexagon.gradle :app:assembleRelease
+// The build script also removes any stale assets/ggml-hexagon directory from
+// the staging copy before invoking Gradle.
+
+gradle.allprojects { project ->
+    project.tasks.matching { it.name == 'syncRNLlamaHtpAssets' }.configureEach {
+        enabled = false
+    }
+}

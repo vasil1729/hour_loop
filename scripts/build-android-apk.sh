@@ -7,6 +7,13 @@ cd "$ROOT_DIR"
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/builds}"
 STAGE_DIR="${STAGE_DIR:-$ROOT_DIR/.apk-build}"
 APK_ARCH="${APK_ARCH:-arm64-v8a}"
+# Optional build-experiment knobs (see scripts/edge-eval/APK_SIZE_INVESTIGATION.md):
+#   RNLLAMA_VARIANTS  comma-separated llama.rn engine variants to compile
+#   HEXAGON_ASSETS    "remove" drops the unused libggml-htp-*.so DSP assets
+#   APK_NAME_SUFFIX   suffix for the output filename (keeps baseline artifacts intact)
+RNLLAMA_VARIANTS="${RNLLAMA_VARIANTS:-}"
+HEXAGON_ASSETS="${HEXAGON_ASSETS:-keep}"
+APK_NAME_SUFFIX="${APK_NAME_SUFFIX:-}"
 
 die() {
   echo "error: $*" >&2
@@ -72,6 +79,10 @@ case "$APK_ARCH" in
     ;;
 esac
 
+if [[ -n "$RNLLAMA_VARIANTS" ]]; then
+  GRADLE_ARCH_ARGS+=("-PrnllamaVariants=$RNLLAMA_VARIANTS")
+fi
+
 if [[ ! -d "$SDK_DIR/platforms/android-35" ]]; then
   echo "warning: Android platform 35 is missing from $SDK_DIR." >&2
   echo "         Install it with: sdkmanager 'platforms;android-35'" >&2
@@ -112,10 +123,19 @@ echo "Building Hour Loop v$VERSION for $APK_ARCH…"
   cd "$STAGE_DIR"
   CI=1 npx expo prebuild --platform android --no-install
 
+  if [[ "$HEXAGON_ASSETS" == "remove" ]]; then
+    # The sync task is disabled by the init script below; drop stale copies
+    # left by previous staged builds as well.
+    rm -rf "$STAGE_DIR/android/app/src/main/assets/ggml-hexagon"
+  fi
+
   cd android
   GRADLE_ARGS=(--build-cache --parallel --console=plain)
   if [[ ${#GRADLE_ARCH_ARGS[@]} -gt 0 ]]; then
     GRADLE_ARGS+=("${GRADLE_ARCH_ARGS[@]}")
+  fi
+  if [[ "$HEXAGON_ASSETS" == "remove" ]]; then
+    GRADLE_ARGS+=("-I" "$ROOT_DIR/scripts/android-no-hexagon.gradle")
   fi
   if [[ "${CI:-}" == "1" || "${CI:-}" == "true" ]]; then
     GRADLE_ARGS+=(--no-daemon)
@@ -127,7 +147,7 @@ echo "Building Hour Loop v$VERSION for $APK_ARCH…"
 )
 
 mkdir -p "$OUTPUT_DIR"
-APK_NAME="hour-loop-v${VERSION}-${ARCH_LABEL}.apk"
+APK_NAME="hour-loop-v${VERSION}-${ARCH_LABEL}${APK_NAME_SUFFIX}.apk"
 APK_PATH="$OUTPUT_DIR/$APK_NAME"
 STAGE_APK="$STAGE_DIR/android/app/build/outputs/apk/release/app-release.apk"
 
