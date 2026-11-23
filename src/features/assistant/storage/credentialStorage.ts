@@ -22,6 +22,7 @@ function storageKey(provider: AssistantProviderId): string {
 export async function getAssistantApiKey(
   provider: AssistantProviderId
 ): Promise<string | null> {
+  if (provider === 'on-device') return null;
   if (Platform.OS === 'web') {
     return memoryKeys.get(storageKey(provider)) ?? null;
   }
@@ -38,6 +39,7 @@ export async function setAssistantApiKey(
   provider: AssistantProviderId,
   key: string
 ): Promise<void> {
+  if (provider === 'on-device') return;
   const value = key.trim();
   if (!value) {
     throw new CredentialStorageError('Enter an API key.');
@@ -60,6 +62,7 @@ export async function setAssistantApiKey(
 export async function deleteAssistantApiKey(
   provider: AssistantProviderId
 ): Promise<void> {
+  if (provider === 'on-device') return;
   if (Platform.OS === 'web') {
     memoryKeys.delete(storageKey(provider));
     return;
@@ -76,5 +79,6 @@ export async function deleteAssistantApiKey(
 export async function hasAssistantApiKey(
   provider: AssistantProviderId
 ): Promise<boolean> {
+  if (provider === 'on-device') return false;
   return Boolean(await getAssistantApiKey(provider));
 }

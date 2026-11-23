@@ -8,6 +8,7 @@ export type AssistantProviderId =
   | 'groq'
   | 'deepseek'
   | 'opencode'
+  | 'on-device'
   | 'custom';
 
 export type AssistantConfig = {

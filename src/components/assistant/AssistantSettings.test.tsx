@@ -86,6 +86,7 @@ import { AssistantSettings } from './AssistantSettings';
 beforeEach(() => {
   jest.clearAllMocks();
   mockScheme = 'dark';
+  mockLoadConfig.mockResolvedValue({ ...mockConfig });
   mockProviderTest.mockResolvedValue(undefined);
 });
 
@@ -138,6 +139,37 @@ describe('assistant settings UI', () => {
     expect(screen.getByText('settings.assistantOpenAI')).toBeTruthy();
     expect(screen.queryByText('gpt-4o-mini')).toBeNull();
     expect(screen.queryByText('settings.modelPickerCustom')).toBeNull();
+    expect(mockSetKey).not.toHaveBeenCalled();
+  });
+
+  it('hides API key controls when an on-device model is active', async () => {
+    mockLoadConfig.mockResolvedValue({
+      ...mockConfig,
+      provider: 'on-device',
+      model: 'qwen3.5-0.8b',
+    });
+    await render(<AssistantSettings />);
+
+    expect(
+      (await screen.findAllByText('settings.assistantOnDeviceHint')).length
+    ).toBeGreaterThan(0);
+    expect(screen.queryByLabelText('settings.assistantApiKey')).toBeNull();
+    expect(screen.getAllByText('Qwen3.5 0.8B').length).toBeGreaterThan(0);
+  });
+
+  it('selects an on-device model from the picker without a key', async () => {
+    await render(<AssistantSettings />);
+
+    await fireEvent.press(
+      await screen.findByLabelText('settings.assistantModel')
+    );
+    await fireEvent.press(
+      await screen.findByLabelText(
+        'Qwen3.5 2B, settings.assistantOnDevice'
+      )
+    );
+
+    expect(screen.queryByLabelText('settings.assistantApiKey')).toBeNull();
     expect(mockSetKey).not.toHaveBeenCalled();
   });
 

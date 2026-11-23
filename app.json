@@ -63,7 +63,13 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "llama.rn",
+        {
+          "enableOpenCLAndHexagon": false
+        }
+      ]
     ]
   }
 }

@@ -1,0 +1,690 @@
+{
+  "version": 1,
+  "description": "Real-model evaluation for Hour Loop on-device GGUFs. All cases are executed against a real llama.cpp server; no synthetic results are stored here.",
+  "cases": [
+    {
+      "id": "read-active-loop",
+      "prompt": "What is my current loop?",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_active_loop",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "loop",
+        "read"
+      ]
+    },
+    {
+      "id": "read-time-left",
+      "prompt": "How much time is left on my timer?",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_active_loop",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "loop",
+        "read"
+      ]
+    },
+    {
+      "id": "read-stats-today",
+      "prompt": "Show my focus stats for today.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_focus_stats",
+      "expectedArgs": {
+        "period": "day"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "stats",
+        "read"
+      ]
+    },
+    {
+      "id": "read-stats-week",
+      "prompt": "How much did I focus this week?",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_focus_stats",
+      "expectedArgs": {
+        "period": "week"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "stats",
+        "read"
+      ]
+    },
+    {
+      "id": "read-stats-month",
+      "prompt": "Show my focus time this month.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_focus_stats",
+      "expectedArgs": {
+        "period": "month"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "stats",
+        "read"
+      ]
+    },
+    {
+      "id": "read-recent-loops",
+      "prompt": "Show my five most recent loops.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_recent_loops",
+      "expectedArgs": {
+        "limit": 5
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "stats",
+        "read"
+      ]
+    },
+    {
+      "id": "read-previous-loop",
+      "prompt": "What was my previous loop?",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_previous_loop",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "stats",
+        "read"
+      ]
+    },
+    {
+      "id": "read-tasks",
+      "prompt": "Show my tasks.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_tasks",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "task",
+        "read"
+      ]
+    },
+    {
+      "id": "read-task-detail",
+      "prompt": "Show details for task task-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_task_detail",
+      "expectedArgs": {
+        "taskId": "task-1"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "task",
+        "read"
+      ]
+    },
+    {
+      "id": "read-loose-capsules",
+      "prompt": "Show my loose capsules.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_loose_capsules",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "capsule",
+        "read"
+      ]
+    },
+    {
+      "id": "read-standalone-capsules",
+      "prompt": "List my standalone capsules.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_standalone_capsules",
+      "expectedArgs": {},
+      "expectedRisk": "read",
+      "tags": [
+        "capsule",
+        "read"
+      ]
+    },
+    {
+      "id": "read-intention-day",
+      "prompt": "What is my focus target for today?",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_intention",
+      "expectedArgs": {
+        "period": "day"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "intention",
+        "read"
+      ]
+    },
+    {
+      "id": "read-intention-month",
+      "prompt": "Show my monthly intention.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_intention",
+      "expectedArgs": {
+        "period": "month"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "intention",
+        "read"
+      ]
+    },
+    {
+      "id": "read-loop-detail",
+      "prompt": "Show details for loop loop-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_loop",
+      "expectedArgs": {
+        "loopId": "loop-1"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "loop",
+        "read"
+      ]
+    },
+    {
+      "id": "read-loop-items",
+      "prompt": "Show the capsules in loop loop-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "get_loop_items",
+      "expectedArgs": {
+        "loopId": "loop-1"
+      },
+      "expectedRisk": "read",
+      "tags": [
+        "capsule",
+        "read"
+      ]
+    },
+    {
+      "id": "action-start-25",
+      "prompt": "Start a 25 minute focus loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "start_loop",
+      "expectedArgs": {
+        "durationMinutes": 25
+      },
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-start-50",
+      "prompt": "Start a 50 minute loop to write the report.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "start_loop",
+      "expectedArgs": {
+        "durationMinutes": 50
+      },
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-start-15",
+      "prompt": "Start a 15 minute focus session on emails.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "start_loop",
+      "expectedArgs": {
+        "durationMinutes": 15
+      },
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-pause-timer",
+      "prompt": "Pause my timer.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "pause_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-pause-loop",
+      "prompt": "Pause the current focus loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "pause_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-resume-loop",
+      "prompt": "Resume my loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "resume_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-resume-paused",
+      "prompt": "Resume the paused loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "resume_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-complete-loop",
+      "prompt": "Complete the current loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "complete_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-finish-loop",
+      "prompt": "Finish my loop.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "complete_loop",
+      "expectedArgs": {},
+      "expectedRisk": "timer",
+      "tags": [
+        "loop",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-add-capsule",
+      "prompt": "Add a capsule \"run tests\" to loop loop-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "add_loop_item",
+      "expectedArgs": {
+        "loopId": "loop-1",
+        "text": "run tests"
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "capsule",
+        "write"
+      ]
+    },
+    {
+      "id": "action-complete-capsule",
+      "prompt": "Complete capsule item-1 in loop loop-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "complete_loop_item",
+      "expectedArgs": {
+        "loopId": "loop-1",
+        "itemId": "item-1"
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "capsule",
+        "write"
+      ]
+    },
+    {
+      "id": "action-switch-capsule",
+      "prompt": "Move focus to capsule item-2 in loop loop-1.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "set_current_loop_item",
+      "expectedArgs": {
+        "loopId": "loop-1",
+        "itemId": "item-2"
+      },
+      "expectedRisk": "timer",
+      "tags": [
+        "capsule",
+        "timer"
+      ]
+    },
+    {
+      "id": "action-create-task",
+      "prompt": "Create a task called \"Launch report\".",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "create_task",
+      "expectedArgs": {
+        "title": "Launch report"
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "task",
+        "write"
+      ]
+    },
+    {
+      "id": "action-rename-task",
+      "prompt": "Rename task task-1 to Final report.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "update_task",
+      "expectedArgs": {
+        "taskId": "task-1",
+        "title": "Final report"
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "task",
+        "write"
+      ]
+    },
+    {
+      "id": "action-move-task",
+      "prompt": "Move task task-1 under task-2.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "move_task",
+      "expectedArgs": {
+        "taskId": "task-1",
+        "newParentId": "task-2"
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "task",
+        "write"
+      ]
+    },
+    {
+      "id": "action-set-intention",
+      "prompt": "Set my daily focus target to 90 minutes.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "set_intention",
+      "expectedArgs": {
+        "period": "day",
+        "targetMinutes": 90
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "intention",
+        "write"
+      ]
+    },
+    {
+      "id": "action-clear-intention",
+      "prompt": "Clear my monthly focus target.",
+      "expectedScope": "IN_SCOPE",
+      "expectedTool": "set_intention",
+      "expectedArgs": {
+        "period": "month",
+        "targetMinutes": 0
+      },
+      "expectedRisk": "write",
+      "tags": [
+        "intention",
+        "write"
+      ]
+    },
+    {
+      "id": "block-capital",
+      "prompt": "What is the capital of France?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-recipe",
+      "prompt": "Give me a chicken biryani recipe.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-poem",
+      "prompt": "Write me a romantic poem.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-code",
+      "prompt": "Write a Python sorting algorithm.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-physics",
+      "prompt": "Explain quantum physics.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-weather",
+      "prompt": "What is the weather in Paris today?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-stocks",
+      "prompt": "Tell me today's stock market news.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-person",
+      "prompt": "Who is Elon Musk?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-history",
+      "prompt": "Explain the history of ancient Rome.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-movie",
+      "prompt": "Recommend a good movie.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-translation",
+      "prompt": "Translate hello into Spanish.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-math",
+      "prompt": "What is 17 times 24?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-medical",
+      "prompt": "What should I take for a headache?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-legal",
+      "prompt": "Can my landlord keep my deposit?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-laptop",
+      "prompt": "Recommend a good gaming laptop.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-sports",
+      "prompt": "Who won the FIFA World Cup?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-travel",
+      "prompt": "Find me a cheap flight to Tokyo.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-science",
+      "prompt": "Explain Einstein's theory of relativity.",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "id": "block-mixed-joke",
+      "prompt": "Start a 25 minute loop and tell me a joke.",
+      "expectedScope": "MIXED",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "mixed"
+      ]
+    },
+    {
+      "id": "block-mixed-movie",
+      "prompt": "Show my tasks and recommend a movie.",
+      "expectedScope": "MIXED",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "mixed"
+      ]
+    },
+    {
+      "id": "block-ambiguous-help",
+      "prompt": "Can you help me?",
+      "expectedScope": "OUT_OF_SCOPE",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "block-ambiguous-followup",
+      "prompt": "What about yesterday?",
+      "expectedScope": "AMBIGUOUS",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "ambiguous"
+      ]
+    },
+    {
+      "id": "block-ambiguous-more",
+      "prompt": "Tell me more.",
+      "expectedScope": "AMBIGUOUS",
+      "expectedTool": null,
+      "expectedArgs": null,
+      "expectedRisk": null,
+      "tags": [
+        "ambiguous"
+      ]
+    }
+  ]
+}

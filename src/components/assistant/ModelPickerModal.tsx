@@ -19,6 +19,7 @@ export type ModelPickerOption = {
   model: string;
   label: string;
   providerLabel: string;
+  description?: string;
 };
 
 type ModelPickerModalProps = {
@@ -83,6 +84,7 @@ export function ModelPickerModal({
             keyExtractor={(option) => `${option.provider}:${option.model}`}
             stickySectionHeadersEnabled={false}
             style={styles.list}
+            initialNumToRender={50}
             contentContainerStyle={styles.listContent}
             renderSectionHeader={({ section }) => (
               <Text style={[styles.groupLabel, { color: colors.textSecondary }]}>
@@ -109,15 +111,28 @@ export function ModelPickerModal({
                     },
                   ]}
                 >
-                  <Text
-                    numberOfLines={2}
-                    style={[
-                      styles.modelText,
-                      { color: isSelected ? colors.accent : colors.text },
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
+                  <View style={styles.modelBody}>
+                    <Text
+                      numberOfLines={2}
+                      style={[
+                        styles.modelText,
+                        { color: isSelected ? colors.accent : colors.text },
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                    {item.description ? (
+                      <Text
+                        numberOfLines={2}
+                        style={[
+                          styles.modelDescription,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        {item.description}
+                      </Text>
+                    ) : null}
+                  </View>
                   {isSelected ? (
                     <Ionicons
                       name="checkmark"
@@ -189,9 +204,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
+  modelBody: {
+    flex: 1,
+    gap: 2,
+  },
   modelText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '600',
+  },
+  modelDescription: {
+    fontSize: 11,
+    lineHeight: 15,
   },
 });

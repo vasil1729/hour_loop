@@ -147,6 +147,45 @@ describe('assistant store local scope enforcement', () => {
     expect(state.lastScopeCategory).toBe('IN_SCOPE');
   });
 
+  it('bypasses key storage for on-device input but keeps the scope gate', async () => {
+    scope.mockReturnValue(scopeDecision('IN_SCOPE'));
+    turn.mockResolvedValue({ content: 'H1 is running.', pendingAction: null });
+    const onDeviceConfig: AssistantConfig = {
+      ...config,
+      provider: 'on-device',
+      model: 'qwen3.5-0.8b',
+    };
+
+    await useAssistantStore
+      .getState()
+      .send(db, onDeviceConfig, 'Show my focus stats');
+
+    expect(key).not.toHaveBeenCalled();
+    expect(turn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: '',
+        config: onDeviceConfig,
+        text: 'Show my focus stats',
+      })
+    );
+  });
+
+  it('never wakes an on-device model for out-of-scope input', async () => {
+    scope.mockReturnValue(scopeDecision('OUT_OF_SCOPE'));
+
+    await useAssistantStore.getState().send(
+      db,
+      { ...config, provider: 'on-device', model: 'qwen3.5-0.8b' },
+      'What is the capital of France?'
+    );
+
+    expect(key).not.toHaveBeenCalled();
+    expect(turn).not.toHaveBeenCalled();
+    expect(useAssistantStore.getState().messages[1]?.content).toBe(
+      'assistant.scopeRefusal'
+    );
+  });
+
   it('passes only the previous scope category as bounded context', async () => {
     useAssistantStore.setState({ lastScopeCategory: 'IN_SCOPE' });
     scope.mockReturnValue(scopeDecision('IN_SCOPE'));

@@ -16,6 +16,12 @@ import {
   ASSISTANT_MAX_KEY_LENGTH,
   ASSISTANT_MODEL_OPTIONS,
 } from '../../constants/assistant';
+import {
+  EDGE_MODELS,
+  formatEdgeModelSize,
+} from '../../constants/edgeModels';
+import { edgeModelManager } from '../../features/assistant/edge/edgeModelManager';
+import { EdgeModelSection } from './EdgeModelSection';
 import { describeAssistantError } from '../../features/assistant/assistantErrors';
 import { createAssistantProvider } from '../../features/assistant/providers/providerFactory';
 import {
@@ -51,6 +57,7 @@ const PROVIDER_LABEL_KEYS: Record<AssistantProviderId, TranslationKey> = {
   groq: 'settings.assistantGroq',
   deepseek: 'settings.assistantDeepSeek',
   opencode: 'settings.assistantOpenCode',
+  'on-device': 'settings.assistantOnDevice',
   custom: 'settings.assistantCustom',
 };
 
@@ -99,6 +106,10 @@ export function AssistantSettings({
 
   useEffect(() => {
     if (!provider) return;
+    if (provider === 'on-device') {
+      setHasSavedKey(false);
+      return;
+    }
     let cancelled = false;
     void hasAssistantApiKey(provider).then((value) => {
       if (!cancelled) setHasSavedKey(value);
@@ -132,13 +143,15 @@ export function AssistantSettings({
         throw new Error('The API key is too long.');
       }
       const saved = await saveAssistantConfig(db, config);
-      if (key) {
+      if (key && saved.provider !== 'on-device') {
         await setAssistantApiKey(saved.provider, key);
       }
       setConfig(saved);
       setApiKeyDraft('');
       setHasSavedKey(
-        await hasAssistantApiKey(saved.provider).catch(() => false)
+        saved.provider === 'on-device'
+          ? false
+          : await hasAssistantApiKey(saved.provider).catch(() => false)
       );
       setStatusMessage(t('settings.assistantSaved'));
     } catch (error) {
@@ -156,8 +169,13 @@ export function AssistantSettings({
     setTestState('testing');
     setStatusMessage(null);
     try {
-      const key = apiKeyDraft.trim() || (await getAssistantApiKey(config.provider));
-      if (!key) {
+      const key =
+        config.provider === 'on-device'
+          ? ''
+          : apiKeyDraft.trim() ||
+            (await getAssistantApiKey(config.provider)) ||
+            '';
+      if (config.provider !== 'on-device' && !key) {
         setTestState('error');
         setStatusMessage(t('settings.assistantKeyRequired'));
         return;
@@ -204,10 +222,22 @@ export function AssistantSettings({
 
   const canSave =
     config !== null && (!config.enabled || assistantConfigIsUsable(config));
-  const modelOptions = ASSISTANT_MODEL_OPTIONS.map((option) => ({
-    ...option,
-    providerLabel: t(PROVIDER_LABEL_KEYS[option.provider]),
-  }));
+  const modelOptions = [
+    ...ASSISTANT_MODEL_OPTIONS.map((option) => ({
+      ...option,
+      providerLabel: t(PROVIDER_LABEL_KEYS[option.provider]),
+    })),
+    ...EDGE_MODELS.map((model) => ({
+      provider: 'on-device' as const,
+      model: model.id,
+      label: model.displayName,
+      providerLabel: t('settings.assistantOnDevice'),
+      description: `${formatEdgeModelSize(model.downloadSizeBytes)} · ${t(
+        'settings.edgeRam',
+        { ram: model.minRamGb }
+      )}`,
+    })),
+  ];
   const selectedModel =
     modelOptions.find(
       (option) =>
@@ -216,6 +246,47 @@ export function AssistantSettings({
   const selectedModelLabel =
     selectedModel?.label ?? (config?.model || t('settings.assistantModelChoose'));
   const selectedProviderLabel = selectedModel?.providerLabel ?? null;
+
+  const handleUseEdgeModel = async (modelId: string) => {
+    if (!config) return;
+    const nextConfig: AssistantConfig = {
+      ...config,
+      provider: 'on-device',
+      model: modelId,
+      baseUrl: null,
+    };
+    setConfig(nextConfig);
+    setTestState('idle');
+    try {
+      await saveAssistantConfig(db, nextConfig);
+      setStatusMessage(t('settings.assistantSaved'));
+    } catch (error) {
+      Alert.alert(
+        t('settings.assistantSaveFailed'),
+        describeAssistantError(error)
+      );
+    }
+  };
+
+  const handleEdgeModelDeleted = async (deletedId: string) => {
+    if (
+      !config ||
+      config.provider !== 'on-device' ||
+      config.model !== deletedId
+    ) {
+      return;
+    }
+    const remaining = await edgeModelManager
+      .listDownloadedModels()
+      .catch(() => []);
+    const nextConfig = {
+      ...config,
+      model: remaining[0]?.id ?? '',
+    };
+    setConfig(nextConfig);
+    setStatusMessage(t('settings.edgeActiveDeleted'));
+    await saveAssistantConfig(db, nextConfig).catch(() => undefined);
+  };
 
   if (!loaded) {
     return null;
@@ -325,6 +396,24 @@ export function AssistantSettings({
         </Text>
       ) : null}
 
+      <EdgeModelSection
+        activeModelId={
+          config?.provider === 'on-device' ? config.model : null
+        }
+        onUseModel={(modelId) => {
+          void handleUseEdgeModel(modelId);
+        }}
+        onActiveModelDeleted={(modelId) => {
+          void handleEdgeModelDeleted(modelId);
+        }}
+      />
+
+      {config?.provider === 'on-device' ? (
+        <Text style={[styles.hint, { color: colors.textSecondary }]}>
+          {t('settings.assistantOnDeviceHint')}
+        </Text>
+      ) : (
+        <>
       <Text style={[styles.groupTitle, { color: colors.text }]}>
         {t('settings.assistantApiKey')}
       </Text>
@@ -391,6 +480,9 @@ export function AssistantSettings({
         </Pressable>
       ) : null}
 
+        </>
+      )}
+
       {statusMessage ? (
         <Text
           accessibilityLiveRegion="polite"
@@ -436,7 +528,7 @@ export function AssistantSettings({
         />
       </View>
 
-      {hasSavedKey ? (
+      {hasSavedKey && config?.provider !== 'on-device' ? (
         <Button
           label={t('settings.assistantClearKey')}
           variant="danger"

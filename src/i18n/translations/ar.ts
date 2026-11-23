@@ -639,6 +639,8 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يمكنني المساعدة في الجزء المتعلق بـ Hour Loop، لكن لا يمكنني تنفيذ الطلب غير المتعلق. اسأل فقط عن بيانات أو إجراءات Hour Loop.',
   'assistant.scopeClarification':
     'يمكنني المساعدة في Hour Loop فقط. أخبرني أي حلقة أو مهمة أو كبسولة أو إحصائية تركيز تقصد.',
+  'assistant.privacyNoteOnDevice':
+    'تبقى الرسائل على هذا الجهاز. لا يملك النموذج وصولًا مباشرًا إلى قاعدة البيانات أو الملفات أو الطرفية.',
   'assistant.privacyNote':
     'تُرسل الرسائل وسياق التطبيق المحدد إلى المزود الذي تضبطه. لا يحصل المساعد على وصول مباشر إلى قاعدة البيانات أو الملفات أو الطرفية.',
   'assistant.suggestStats': 'كم ركزت اليوم؟',
@@ -656,6 +658,8 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'assistant.setupTitle': 'إعداد المساعد',
   'assistant.setupBody':
     'أضف مفتاح API الخاص بمزودك والطراز في الإعدادات لبدء المحادثة.',
+  'assistant.setupOnDeviceBody':
+    'نزّل نموذجًا على الجهاز من الإعدادات لاستخدام المساعد دون اتصال.',
   'assistant.openSettings': 'فتح الإعدادات',
   'assistant.errorHint':
     'يمكنك إعادة المحاولة أو متابعة استخدام Hour Loop كالمعتاد.',
@@ -818,4 +822,39 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يستخدم هذا المزود طبقة توافق مع OpenAI قد تكون تجريبية وتدعم ميزات أقل. إذا فشل استدعاء الأدوات، جرّب مزودًا أو طرازًا آخر.',
   'settings.assistantOpenCodeHint':
     'طرازات الدردشة المجانية من OpenCode تعمل داخل OpenCode فقط. استخدم طرازًا مدفوعًا أو اشتراك Go للوصول عبر API.',
+  'settings.assistantOnDevice': 'على الجهاز (دون اتصال)',
+  'settings.assistantOnDeviceHint':
+    'نزّل النموذج مرة واحدة ثم شغّله دون اتصال بالكامل. لا يُستخدم مفتاح API للمحادثة على الجهاز.',
+  'settings.assistantOnDeviceWeb':
+    'النماذج على الجهاز متاحة في إصدارات Android.',
+  'settings.edgeTierLight': 'ذاكرة 4 GB · خفيف',
+  'settings.edgeTierBalanced': 'ذاكرة 6 GB · متوازن',
+  'settings.edgeRam': 'ذاكرة {ram} GB',
+  'settings.edgeContext': 'سياق {tokens}',
+  'settings.edgeDownload': 'تنزيل',
+  'settings.edgeCancel': 'إلغاء',
+  'settings.edgeDelete': 'حذف',
+  'settings.edgeDeleteTitle': 'حذف {model}؟',
+  'settings.edgeDeleteBody':
+    'سيحرر هذا {size}. يمكنك تنزيل النموذج مرة أخرى لاحقًا.',
+  'settings.edgeUse': 'استخدام',
+  'settings.edgeActive': 'نشط',
+  'settings.edgeDownloading': 'جارٍ التنزيل {percent}%',
+  'settings.edgeVerifying': 'جارٍ التحقق…',
+  'settings.edgeDownloadFailed': 'تعذّر تنزيل النموذج.',
+  'settings.edgeStorageBody':
+    'لا توجد مساحة كافية. حرّر {size} على الأقل وحاول مرة أخرى.',
+  'settings.edgeChecksumFailed':
+    'فشل التحقق من سلامة التنزيل وتمت إزالته.',
+  'settings.edgeCellularTitle': 'تنزيل عبر بيانات الهاتف؟',
+  'settings.edgeCellularBody':
+    'حجم هذا النموذج {size}. يُنصح باستخدام Wi-Fi للتنزيل الأول.',
+  'settings.edgeActiveDeleted':
+    'تم حذف النموذج النشط على الجهاز. اختر نموذجًا آخر أو نزّله.',
+  'settings.edgeNoteQwen08': 'الخيار الأسرع؛ الأنسب للأجهزة بذاكرة 4 GB.',
+  'settings.edgeNoteLfm': 'يتبع التعليمات جيدًا على الهواتف ذات الذاكرة المحدودة.',
+  'settings.edgeNoteQwen2':
+    'أفضل توازن بين دقة استدعاء الأدوات والسرعة.',
+  'settings.edgeNoteGemma':
+    'الخيار الأكبر. ملف Q4_K_M الذي تم التحقق منه بحجم 3.11 GB، أعلى من الهدف الأصلي 1.4–1.6 GB؛ يُنصح بذاكرة 8 GB.',
 };

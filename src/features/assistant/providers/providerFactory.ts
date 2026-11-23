@@ -4,7 +4,9 @@ import {
   resolveBaseUrl,
   AssistantConfigError,
 } from '../storage/assistantSettings';
+import { EDGE_MODELS } from '../../../constants/edgeModels';
 import { chatCompletion, listModels } from './openAICompatibleProvider';
+import { createOnDeviceProvider } from './onDeviceProvider';
 import {
   AssistantProviderError,
   type AssistantProvider,
@@ -29,6 +31,9 @@ export async function listAssistantProviderModels(
   apiKey: string,
   signal?: AbortSignal
 ): Promise<string[]> {
+  if (config.provider === 'on-device') {
+    return EDGE_MODELS.map((model) => model.id);
+  }
   const baseUrl = providerBaseUrl(config);
   if (!apiKey.trim()) {
     throw new AssistantProviderError('config', 'No API key is configured.');
@@ -37,6 +42,12 @@ export async function listAssistantProviderModels(
 }
 
 function providerBaseUrl(config: AssistantConfig): string {
+  if (config.provider === 'on-device') {
+    throw new AssistantProviderError(
+      'config',
+      'On-device models do not use a base URL.'
+    );
+  }
   try {
     return resolveBaseUrl(config);
   } catch (error) {
@@ -53,11 +64,14 @@ export function createAssistantProvider(
   config: AssistantConfig,
   apiKey: string
 ): AssistantProvider {
-  const baseUrl = providerBaseUrl(config);
   const model = config.model.trim();
   if (!model) {
     throw new AssistantProviderError('config', 'No model is configured.');
   }
+  if (config.provider === 'on-device') {
+    return createOnDeviceProvider(model);
+  }
+  const baseUrl = providerBaseUrl(config);
   if (!apiKey.trim()) {
     throw new AssistantProviderError('config', 'No API key is configured.');
   }

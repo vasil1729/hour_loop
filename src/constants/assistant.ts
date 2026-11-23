@@ -16,11 +16,12 @@ export const ASSISTANT_PROVIDER_IDS: AssistantProviderId[] = [
   'groq',
   'deepseek',
   'opencode',
+  'on-device',
   'custom',
 ];
 
 export const ASSISTANT_DEFAULT_BASE_URLS: Record<
-  Exclude<AssistantProviderId, 'custom'>,
+  Exclude<AssistantProviderId, 'custom' | 'on-device'>,
   string
 > = {
   openai: 'https://api.openai.com/v1',
@@ -42,7 +43,7 @@ export const ASSISTANT_MAX_TURN_TOOL_RESULT_CHARS = 60000;
 export const ASSISTANT_MAX_TOOL_ARGUMENT_CHARS = 20000;
 
 export const ASSISTANT_SUGGESTED_MODELS: Record<
-  Exclude<AssistantProviderId, 'custom'>,
+  Exclude<AssistantProviderId, 'custom' | 'on-device'>,
   string
 > = {
   openai: 'gpt-4o-mini',
@@ -56,7 +57,7 @@ export const ASSISTANT_SUGGESTED_MODELS: Record<
 
 /** Offline fallback lists; live model discovery supplements these. */
 export const ASSISTANT_MODEL_PRESETS: Record<
-  Exclude<AssistantProviderId, 'custom'>,
+  Exclude<AssistantProviderId, 'custom' | 'on-device'>,
   string[]
 > = {
   openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1'],
@@ -103,13 +104,16 @@ const MODEL_LABELS: Record<string, string> = {
 };
 
 export type AssistantModelOption = {
-  provider: Exclude<AssistantProviderId, 'custom'>;
+  provider: Exclude<AssistantProviderId, 'custom' | 'on-device'>;
   model: string;
   label: string;
 };
 
 export const ASSISTANT_MODEL_OPTIONS: AssistantModelOption[] = (
-  Object.keys(ASSISTANT_MODEL_PRESETS) as Exclude<AssistantProviderId, 'custom'>[]
+  Object.keys(ASSISTANT_MODEL_PRESETS) as Exclude<
+    AssistantProviderId,
+    'custom' | 'on-device'
+  >[]
 ).flatMap((provider) =>
   ASSISTANT_MODEL_PRESETS[provider].map((model) => ({
     provider,

@@ -52,6 +52,57 @@ describe('assistant settings', () => {
     expect(config.model).toBe('deepseek-v4.1-flash');
   });
 
+  it('defaults an on-device provider to the light model', async () => {
+    mockGetSetting.mockImplementation(async (_db, key) => {
+      if (key === 'assistant_provider') return 'on-device';
+      return null;
+    });
+
+    const config = await loadAssistantConfig(db);
+    expect(config.provider).toBe('on-device');
+    expect(config.model).toBe('qwen3.5-0.8b');
+    expect(config.baseUrl).toBeNull();
+    expect(assistantConfigIsUsable(config)).toBe(true);
+  });
+
+  it('rejects an unknown on-device model when enabled', async () => {
+    await expect(
+      saveAssistantConfig(db, {
+        enabled: true,
+        provider: 'on-device',
+        model: 'not-a-model',
+        baseUrl: null,
+        writesEnabled: true,
+      })
+    ).rejects.toBeInstanceOf(AssistantConfigError);
+    expect(mockSetSetting).not.toHaveBeenCalled();
+  });
+
+  it('allows an empty on-device model after active deletion but marks it unusable', async () => {
+    const saved = await saveAssistantConfig(db, {
+      enabled: true,
+      provider: 'on-device',
+      model: '',
+      baseUrl: null,
+      writesEnabled: true,
+    });
+
+    expect(saved.model).toBe('');
+    expect(assistantConfigIsUsable(saved)).toBe(false);
+  });
+
+  it('does not treat a cloud model id as a usable on-device model', () => {
+    expect(
+      assistantConfigIsUsable({
+        enabled: true,
+        provider: 'on-device',
+        model: 'gpt-4o-mini',
+        baseUrl: null,
+        writesEnabled: true,
+      })
+    ).toBe(false);
+  });
+
   it('persists only non-secret assistant_* settings', async () => {
     await saveAssistantConfig(db, {
       enabled: true,

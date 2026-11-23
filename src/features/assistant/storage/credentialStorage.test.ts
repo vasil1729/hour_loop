@@ -55,6 +55,16 @@ describe('assistant credential storage', () => {
     expect(mockDeleteItem).toHaveBeenCalledWith('hour-loop.assistant.key.groq');
   });
 
+  it('never touches secure storage for on-device models', async () => {
+    expect(await getAssistantApiKey('on-device')).toBeNull();
+    await setAssistantApiKey('on-device', 'ignored');
+    await deleteAssistantApiKey('on-device');
+    expect(await hasAssistantApiKey('on-device')).toBe(false);
+    expect(mockGetItem).not.toHaveBeenCalled();
+    expect(mockSetItem).not.toHaveBeenCalled();
+    expect(mockDeleteItem).not.toHaveBeenCalled();
+  });
+
   it('replaces an existing key for the same provider', async () => {
     await setAssistantApiKey('groq', 'sk-first');
     await setAssistantApiKey('groq', 'sk-second');

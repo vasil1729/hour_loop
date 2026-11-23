@@ -198,8 +198,11 @@ export const useAssistantStore = create<AssistantStore>((set, get) => {
       }));
 
       try {
-        const apiKey = await getAssistantApiKey(config.provider);
-        if (!apiKey) {
+        const apiKey =
+          config.provider === 'on-device'
+            ? ''
+            : (await getAssistantApiKey(config.provider)) ?? '';
+        if (config.provider !== 'on-device' && !apiKey) {
           finishWithError(assistantId, text, t('assistant.errorNoKey'));
           return;
         }

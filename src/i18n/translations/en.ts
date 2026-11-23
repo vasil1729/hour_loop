@@ -609,6 +609,8 @@ export const en = {
     'I can help with the Hour Loop part, but I can’t take on the unrelated request. Please ask only about your Hour Loop data or actions.',
   'assistant.scopeClarification':
     'I can only help with Hour Loop. Please tell me which loop, task, capsule, or focus statistic you mean.',
+  'assistant.privacyNoteOnDevice':
+    'Messages stay on this device. The model has no direct database, file, or shell access.',
   'assistant.privacyNote':
     'Messages and selected app context are sent to your configured provider. The assistant never gets direct database, file, or shell access.',
   'assistant.suggestStats': 'How much did I focus today?',
@@ -626,6 +628,8 @@ export const en = {
   'assistant.setupTitle': 'Set up the assistant',
   'assistant.setupBody':
     'Add your own provider API key and model in Settings to start chatting.',
+  'assistant.setupOnDeviceBody':
+    'Download an on-device model in Settings to use the offline assistant.',
   'assistant.openSettings': 'Open Settings',
   'assistant.errorHint': 'You can retry or keep using Hour Loop normally.',
   'assistant.errorGeneric': 'The assistant could not complete that request.',
@@ -689,6 +693,7 @@ export const en = {
   'assistant.resultTaskMoved': 'Task moved.',
   'assistant.resultCapsuleCreated': 'Capsule created.',
   'assistant.resultCapsuleAdded': 'Capsule added.',
+
   'assistant.resultCapsuleCompleted': 'Capsule completed.',
   'assistant.resultLoopStarted':
     'Started H{sequence} for {duration} minutes.',
@@ -781,10 +786,45 @@ export const en = {
   'settings.assistantDeepSeek': 'DeepSeek',
   'settings.assistantOpenCode': 'OpenCode',
   'settings.assistantCustom': 'Custom',
+  'settings.assistantOnDevice': 'On-device (offline)',
+  'settings.assistantOnDeviceHint':
+    'Download a model once and run it fully offline. No API key is used for on-device chat.',
+  'settings.assistantOnDeviceWeb':
+    'On-device models are available on Android builds.',
+  'settings.edgeTierLight': '4 GB RAM · LIGHT',
+  'settings.edgeTierBalanced': '6 GB RAM · BALANCED',
+  'settings.edgeRam': '{ram} GB RAM',
+  'settings.edgeContext': '{tokens} context',
+  'settings.edgeDownload': 'Download',
+  'settings.edgeCancel': 'Cancel',
+  'settings.edgeDelete': 'Delete',
+  'settings.edgeDeleteTitle': 'Delete {model}?',
+  'settings.edgeDeleteBody':
+    'This frees {size}. You can download the model again later.',
+  'settings.edgeUse': 'Use',
+  'settings.edgeActive': 'ACTIVE',
+  'settings.edgeDownloading': 'Downloading {percent}%',
+  'settings.edgeVerifying': 'Verifying…',
+  'settings.edgeDownloadFailed': 'Could not download the model.',
+  'settings.edgeStorageBody':
+    'Not enough free space. Free at least {size} and try again.',
+  'settings.edgeChecksumFailed':
+    'The download failed integrity verification and was removed.',
+  'settings.edgeCellularTitle': 'Download over cellular data?',
+  'settings.edgeCellularBody':
+    'This model is {size}. Wi-Fi is recommended for the initial download.',
+  'settings.edgeActiveDeleted':
+    'The active on-device model was deleted. Choose or download another model.',
   'settings.assistantCustomHint':
     'Use an HTTPS OpenAI-compatible endpoint. Compatibility is not guaranteed just because an endpoint uses that label.',
   'settings.assistantCompatibilityNote':
     'This provider uses an OpenAI compatibility layer that may be beta and support fewer features. If tool calling fails, try another provider or model.',
   'settings.assistantOpenCodeHint':
     'OpenCode free-tier chat models only work inside OpenCode. Use a paid model or a Go subscription for API access.',
+  'settings.edgeNoteQwen08': 'Fastest option; best fit for 4 GB devices.',
+  'settings.edgeNoteLfm': 'Strong instruction following for low-RAM phones.',
+  'settings.edgeNoteQwen2':
+    'Best balance of native tool-calling accuracy and speed.',
+  'settings.edgeNoteGemma':
+    'Largest option. The verified Q4_K_M artifact is 3.11 GB, above the original 1.4–1.6 GB target; 8 GB RAM is recommended.',
 } as const;

@@ -633,6 +633,8 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Я могу помочь с частью, связанной с Hour Loop, но не могу выполнить посторонний запрос. Спрашивайте только о данных или действиях Hour Loop.',
   'assistant.scopeClarification':
     'Я помогаю только с Hour Loop. Уточните, какой цикл, задача, капсула или показатель фокуса вам нужен.',
+  'assistant.privacyNoteOnDevice':
+    'Сообщения остаются на этом устройстве. У модели нет прямого доступа к базе данных, файлам или командной строке.',
   'assistant.privacyNote':
     'Сообщения и выбранный контекст приложения отправляются вашему провайдеру. Ассистент не имеет прямого доступа к базе данных, файлам или оболочке.',
   'assistant.suggestStats': 'Сколько я фокусировался сегодня?',
@@ -650,6 +652,8 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'assistant.setupTitle': 'Настройте ассистента',
   'assistant.setupBody':
     'Добавьте свой API-ключ провайдера и модель в настройках, чтобы начать.',
+  'assistant.setupOnDeviceBody':
+    'Скачайте модель на устройстве в настройках, чтобы использовать офлайн-ассистента.',
   'assistant.openSettings': 'Открыть настройки',
   'assistant.errorHint':
     'Можно повторить или продолжить пользоваться Hour Loop.',
@@ -820,4 +824,39 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Этот провайдер использует слой совместимости с OpenAI, который может быть бета-версией и поддерживать меньше возможностей. Если вызов инструментов не работает, попробуйте другого провайдера или модель.',
   'settings.assistantOpenCodeHint':
     'Бесплатные чат-модели OpenCode работают только внутри OpenCode. Для API используйте платную модель или подписку Go.',
+  'settings.assistantOnDevice': 'На устройстве (офлайн)',
+  'settings.assistantOnDeviceHint':
+    'Скачайте модель один раз и запускайте её полностью офлайн. Для чата на устройстве API-ключ не нужен.',
+  'settings.assistantOnDeviceWeb':
+    'Модели на устройстве доступны в сборках для Android.',
+  'settings.edgeTierLight': '4 ГБ ОЗУ · лёгкая',
+  'settings.edgeTierBalanced': '6 ГБ ОЗУ · сбалансированная',
+  'settings.edgeRam': 'ОЗУ {ram} ГБ',
+  'settings.edgeContext': 'контекст {tokens}',
+  'settings.edgeDownload': 'Скачать',
+  'settings.edgeCancel': 'Отмена',
+  'settings.edgeDelete': 'Удалить',
+  'settings.edgeDeleteTitle': 'Удалить {model}?',
+  'settings.edgeDeleteBody':
+    'Это освободит {size}. Модель можно будет скачать снова позже.',
+  'settings.edgeUse': 'Использовать',
+  'settings.edgeActive': 'АКТИВНА',
+  'settings.edgeDownloading': 'Скачивание {percent}%',
+  'settings.edgeVerifying': 'Проверка…',
+  'settings.edgeDownloadFailed': 'Не удалось скачать модель.',
+  'settings.edgeStorageBody':
+    'Недостаточно свободного места. Освободите не менее {size} и повторите попытку.',
+  'settings.edgeChecksumFailed':
+    'Загрузка не прошла проверку целостности и была удалена.',
+  'settings.edgeCellularTitle': 'Скачать через мобильные данные?',
+  'settings.edgeCellularBody':
+    'Размер модели — {size}. Для первой загрузки рекомендуется Wi-Fi.',
+  'settings.edgeActiveDeleted':
+    'Активная модель на устройстве удалена. Выберите или скачайте другую модель.',
+  'settings.edgeNoteQwen08': 'Самый быстрый вариант; лучше всего для устройств с 4 ГБ ОЗУ.',
+  'settings.edgeNoteLfm': 'Хорошо следует инструкциям на телефонах с малым объёмом ОЗУ.',
+  'settings.edgeNoteQwen2':
+    'Лучший баланс точности вызова инструментов и скорости.',
+  'settings.edgeNoteGemma':
+    'Самый крупный вариант. Проверенный файл Q4_K_M занимает 3,11 ГБ, больше исходной цели 1,4–1,6 ГБ; рекомендуется 8 ГБ ОЗУ.',
 };

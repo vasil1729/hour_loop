@@ -14,6 +14,10 @@ import {
   getSetting,
   setSetting,
 } from '../../../database/repositories/settingsRepository';
+import {
+  DEFAULT_EDGE_MODEL_ID,
+  isEdgeModelId,
+} from '../../../constants/edgeModels';
 import type {
   AssistantConfig,
   AssistantProviderId,
@@ -66,6 +70,11 @@ export function normalizeBaseUrl(value: string): string {
 }
 
 export function resolveBaseUrl(config: AssistantConfig): string {
+  if (config.provider === 'on-device') {
+    throw new AssistantConfigError(
+      'On-device models do not use a base URL.'
+    );
+  }
   if (config.provider === 'custom') {
     if (!config.baseUrl) {
       throw new AssistantConfigError('Enter a base URL for the custom provider.');
@@ -77,6 +86,13 @@ export function resolveBaseUrl(config: AssistantConfig): string {
 
 export function validateAssistantConfig(config: AssistantConfig): AssistantConfig {
   const model = config.model.trim();
+  if (
+    config.provider === 'on-device' &&
+    model &&
+    !isEdgeModelId(model)
+  ) {
+    throw new AssistantConfigError('Choose a supported on-device model.');
+  }
   const baseUrl =
     config.provider === 'custom'
       ? normalizeBaseUrl(config.baseUrl ?? '')
@@ -107,7 +123,9 @@ export async function loadAssistantConfig(
       storedModel ||
       (parsedProvider === 'custom'
         ? ''
-        : ASSISTANT_SUGGESTED_MODELS[parsedProvider]),
+        : parsedProvider === 'on-device'
+          ? DEFAULT_EDGE_MODEL_ID
+          : ASSISTANT_SUGGESTED_MODELS[parsedProvider]),
     baseUrl: baseUrl?.trim() || null,
     writesEnabled: parseBoolean(writesEnabled, true),
   };
@@ -136,6 +154,9 @@ export async function saveAssistantConfig(
 
 export function assistantConfigIsUsable(config: AssistantConfig): boolean {
   if (!config.enabled || !config.model.trim()) return false;
+  if (config.provider === 'on-device') {
+    return isEdgeModelId(config.model);
+  }
   if (config.provider === 'custom') {
     try {
       normalizeBaseUrl(config.baseUrl ?? '');

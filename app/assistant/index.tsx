@@ -22,6 +22,8 @@ import { ChatMessage } from '../../src/components/assistant/ChatMessage';
 import { Button } from '../../src/components/common/Button';
 import { Screen } from '../../src/components/common/Screen';
 import { assistantConfigIsUsable, loadAssistantConfig } from '../../src/features/assistant/storage/assistantSettings';
+import { edgeModelManager } from '../../src/features/assistant/edge/edgeModelManager';
+import { releaseOnDeviceModel } from '../../src/features/assistant/providers/onDeviceProvider';
 import { hasAssistantApiKey } from '../../src/features/assistant/storage/credentialStorage';
 import type { AssistantChatMessage, AssistantConfig } from '../../src/features/assistant/assistantTypes';
 import { useTranslation } from '../../src/i18n/I18nProvider';
@@ -59,6 +61,7 @@ export default function AssistantScreen() {
     const subscription = AppState.addEventListener('change', (state) => {
       if (state !== 'active') {
         useAssistantStore.getState().stop();
+        void releaseOnDeviceModel();
       }
     });
     return () => subscription.remove();
@@ -71,7 +74,13 @@ export default function AssistantScreen() {
       void (async () => {
         try {
           const nextConfig = await loadAssistantConfig(db);
-          const keyExists = await hasAssistantApiKey(nextConfig.provider);
+          const keyExists =
+            nextConfig.provider === 'on-device'
+              ? await edgeModelManager
+                  .getDownloadedModelPath(nextConfig.model)
+                  .then(() => true)
+                  .catch(() => false)
+              : await hasAssistantApiKey(nextConfig.provider);
           if (cancelled) return;
           setConfig(nextConfig);
           setHasKey(keyExists);
@@ -87,6 +96,7 @@ export default function AssistantScreen() {
       return () => {
         cancelled = true;
         useAssistantStore.getState().stop();
+        void releaseOnDeviceModel();
       };
     }, [db])
   );
@@ -205,7 +215,11 @@ export default function AssistantScreen() {
                 {t('assistant.setupTitle')}
               </Text>
               <Text style={[styles.setupBody, { color: colors.textSecondary }]}>
-                {t('assistant.setupBody')}
+                {t(
+                  config?.provider === 'on-device'
+                    ? 'assistant.setupOnDeviceBody'
+                    : 'assistant.setupBody'
+                )}
               </Text>
               <Button
                 label={t('assistant.openSettings')}
@@ -225,7 +239,10 @@ export default function AssistantScreen() {
                 messages.length === 0 && styles.emptyContent,
               ]}
               ListEmptyComponent={
-                <AssistantEmptyState onSelectPrompt={dispatchSend} />
+                <AssistantEmptyState
+                  onSelectPrompt={dispatchSend}
+                  onDevice={config?.provider === 'on-device'}
+                />
               }
               ListFooterComponent={renderFooter}
               onContentSizeChange={() => {

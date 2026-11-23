@@ -9,10 +9,12 @@ import { SuggestedPrompts } from './SuggestedPrompts';
 
 type AssistantEmptyStateProps = {
   onSelectPrompt: (text: string) => void;
+  onDevice?: boolean;
 };
 
 export function AssistantEmptyState({
   onSelectPrompt,
+  onDevice = false,
 }: AssistantEmptyStateProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -40,7 +42,11 @@ export function AssistantEmptyState({
       </Text>
       <SuggestedPrompts onSelect={onSelectPrompt} />
       <Text style={[styles.privacy, { color: colors.textSecondary }]}>
-        {t('assistant.privacyNote')}
+        {t(
+          onDevice
+            ? 'assistant.privacyNoteOnDevice'
+            : 'assistant.privacyNote'
+        )}
       </Text>
     </View>
   );
