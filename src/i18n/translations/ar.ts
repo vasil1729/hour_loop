@@ -822,6 +822,13 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
     'يستخدم هذا المزود طبقة توافق مع OpenAI قد تكون تجريبية وتدعم ميزات أقل. إذا فشل استدعاء الأدوات، جرّب مزودًا أو طرازًا آخر.',
   'settings.assistantOpenCodeHint':
     'طرازات الدردشة المجانية من OpenCode تعمل داخل OpenCode فقط. استخدم طرازًا مدفوعًا أو اشتراك Go للوصول عبر API.',
+  'assistant.actionSwitchCapsule': 'نقل التركيز إلى «{text}».',
+  'assistant.resultCapsuleCurrent': 'تم تحديث تركيز الكبسولة.',
+  'assistant.actionSetIntention':
+    'تعيين هدف التركيز {period} إلى {duration}.',
+  'assistant.actionClearIntention': 'مسح هدف التركيز {period}.',
+  'assistant.resultIntentionUpdated': 'تم تحديث هدف التركيز.',
+  'assistant.resultIntentionCleared': 'تم مسح هدف التركيز.',
   'settings.assistantOnDevice': 'على الجهاز (دون اتصال)',
   'settings.assistantOnDeviceHint':
     'نزّل النموذج مرة واحدة ثم شغّله دون اتصال بالكامل. لا يُستخدم مفتاح API للمحادثة على الجهاز.',

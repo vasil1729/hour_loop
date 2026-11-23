@@ -824,6 +824,13 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
     'Этот провайдер использует слой совместимости с OpenAI, который может быть бета-версией и поддерживать меньше возможностей. Если вызов инструментов не работает, попробуйте другого провайдера или модель.',
   'settings.assistantOpenCodeHint':
     'Бесплатные чат-модели OpenCode работают только внутри OpenCode. Для API используйте платную модель или подписку Go.',
+  'assistant.actionSwitchCapsule': 'Перевести фокус на «{text}».',
+  'assistant.resultCapsuleCurrent': 'Фокус капсулы обновлён.',
+  'assistant.actionSetIntention':
+    'Установить цель фокуса на {period} — {duration}.',
+  'assistant.actionClearIntention': 'Очистить цель фокуса на {period}.',
+  'assistant.resultIntentionUpdated': 'Цель фокуса обновлена.',
+  'assistant.resultIntentionCleared': 'Цель фокуса очищена.',
   'settings.assistantOnDevice': 'На устройстве (офлайн)',
   'settings.assistantOnDeviceHint':
     'Скачайте модель один раз и запускайте её полностью офлайн. Для чата на устройстве API-ключ не нужен.',

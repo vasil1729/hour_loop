@@ -693,6 +693,13 @@ export const en = {
   'assistant.resultTaskMoved': 'Task moved.',
   'assistant.resultCapsuleCreated': 'Capsule created.',
   'assistant.resultCapsuleAdded': 'Capsule added.',
+  'assistant.actionSwitchCapsule': 'Move focus to “{text}”.',
+  'assistant.resultCapsuleCurrent': 'Capsule focus updated.',
+  'assistant.actionSetIntention':
+    'Set the {period} focus target to {duration}.',
+  'assistant.actionClearIntention': 'Clear the {period} focus target.',
+  'assistant.resultIntentionUpdated': 'Focus target updated.',
+  'assistant.resultIntentionCleared': 'Focus target cleared.',
 
   'assistant.resultCapsuleCompleted': 'Capsule completed.',
   'assistant.resultLoopStarted':

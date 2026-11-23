@@ -17,6 +17,12 @@ import {
 } from './assistantValidation';
 import { getAssistantFocusStats } from './assistantStatsService';
 import {
+  getIntentionSummary,
+  setIntention,
+} from '../intentions/intentionsService';
+import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
+import { currentDayKey } from '../../domain/shared/dateUtils';
+import {
   cancelLoopNotification,
   syncLoopNotification,
 } from '../../services/notifications/notificationService';
@@ -1162,6 +1168,185 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           summary: t('assistant.resultLoopCompleted', {
             sequence: completed.sequence_number,
           }),
+        };
+      },
+    }),
+
+    defineTool<{ loopId: string; itemId: string }>({
+      name: 'set_current_loop_item',
+      description: 'Move the active focus to a specific capsule in a loop.',
+      risk: 'timer',
+      parameters: {
+        type: 'object',
+        properties: {
+          loopId: { type: 'string' },
+          itemId: { type: 'string' },
+        },
+        required: ['loopId', 'itemId'],
+        additionalProperties: false,
+      },
+      parse: (args) => {
+        const record = requireObject(args);
+        return {
+          loopId: requireString(record, 'loopId', { max: 128 }),
+          itemId: requireString(record, 'itemId', { max: 128 }),
+        };
+      },
+      describe: (args) =>
+        `Move focus to capsule ${args.itemId} in loop ${args.loopId}.`,
+      targetIds: (args) => [args.loopId, args.itemId],
+      prepare: async (context, args) => {
+        await requireLoop(context.db, args.loopId);
+        const item = await getLoopItemById(context.db, args.itemId);
+        if (!item || item.loop_id !== args.loopId || item.done) {
+          throw new AssistantToolError(
+            'not_found',
+            'That unfinished capsule was not found in this loop.'
+          );
+        }
+        return {
+          description: t('assistant.actionSwitchCapsule', {
+            text: item.text,
+          }),
+          targetIds: [args.loopId, args.itemId],
+        };
+      },
+      revalidate: async (context, args) => {
+        await requireLoop(context.db, args.loopId);
+        const item = await getLoopItemById(context.db, args.itemId);
+        if (!item || item.loop_id !== args.loopId || item.done) {
+          throw new AssistantToolError(
+            'stale',
+            'That capsule is no longer available.'
+          );
+        }
+      },
+      execute: async (context, args) => {
+        await loopService.setCurrentLoopItem(
+          context.db,
+          args.loopId,
+          args.itemId
+        );
+        await useLoopStore.getState().refresh(context.db).catch(() => undefined);
+        return { summary: t('assistant.resultCapsuleCurrent') };
+      },
+    }),
+
+    defineTool<{ period: 'day' | 'month'; anchorDate: string }>({
+      name: 'get_intention',
+      description: 'Read the focus target for a day or month.',
+      risk: 'read',
+      parameters: {
+        type: 'object',
+        properties: {
+          period: { type: 'string', enum: ['day', 'month'] },
+          anchorDate: { type: 'string', description: 'YYYY-MM-DD, defaults to today' },
+        },
+        required: ['period'],
+        additionalProperties: false,
+      },
+      parse: (args) => {
+        const record = requireObject(args);
+        const period = requireEnum(record, 'period', ['day', 'month'] as const);
+        const anchorDate = optionalString(record, 'anchorDate', 10) ?? currentDayKey();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            '"anchorDate" must use YYYY-MM-DD.'
+          );
+        }
+        return { period, anchorDate };
+      },
+      describe: (args) => `Read the ${args.period} focus target.`,
+      execute: async (context, args) => {
+        const periodType = args.period === 'day' ? 'daily' : 'monthly';
+        const periodKey =
+          args.period === 'day' ? args.anchorDate : args.anchorDate.slice(0, 7);
+        const summary = await getIntentionSummary(
+          context.db,
+          periodType,
+          periodKey
+        );
+        return {
+          summary: `${formatIntentionDuration(summary.targetSeconds)} target, ${formatIntentionDuration(summary.actualSeconds)} focused.`,
+          data: summary,
+        };
+      },
+    }),
+
+    defineTool<{
+      period: 'day' | 'month';
+      anchorDate: string;
+      targetMinutes: number;
+    }>({
+      name: 'set_intention',
+      description: 'Set or clear the focus target for a day or month.',
+      risk: 'write',
+      parameters: {
+        type: 'object',
+        properties: {
+          period: { type: 'string', enum: ['day', 'month'] },
+          anchorDate: { type: 'string', description: 'YYYY-MM-DD, defaults to today' },
+          targetMinutes: { type: 'integer', minimum: 0, maximum: 1440 },
+        },
+        required: ['period', 'targetMinutes'],
+        additionalProperties: false,
+      },
+      parse: (args) => {
+        const record = requireObject(args);
+        const period = requireEnum(record, 'period', ['day', 'month'] as const);
+        const anchorDate = optionalString(record, 'anchorDate', 10) ?? currentDayKey();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            '"anchorDate" must use YYYY-MM-DD.'
+          );
+        }
+        const targetMinutes = optionalInteger(record, 'targetMinutes', {
+          min: 0,
+          max: 1440,
+        });
+        if (targetMinutes === undefined) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'A target duration is required.'
+          );
+        }
+        return { period, anchorDate, targetMinutes };
+      },
+      describe: (args) =>
+        args.targetMinutes > 0
+          ? `Set the ${args.period} focus target to ${formatIntentionDuration(
+              args.targetMinutes * 60
+            )}.`
+          : `Clear the ${args.period} focus target.`,
+      targetIds: () => [],
+      prepare: async (_context, args) => ({
+        description:
+          args.targetMinutes > 0
+            ? t('assistant.actionSetIntention', {
+                period: args.period,
+                duration: formatIntentionDuration(args.targetMinutes * 60),
+              })
+            : t('assistant.actionClearIntention', { period: args.period }),
+        targetIds: [],
+      }),
+      revalidate: async () => undefined,
+      execute: async (context, args) => {
+        const periodType = args.period === 'day' ? 'daily' : 'monthly';
+        const periodKey =
+          args.period === 'day' ? args.anchorDate : args.anchorDate.slice(0, 7);
+        await setIntention(
+          context.db,
+          periodType,
+          periodKey,
+          args.targetMinutes * 60
+        );
+        return {
+          summary:
+            args.targetMinutes > 0
+              ? t('assistant.resultIntentionUpdated')
+              : t('assistant.resultIntentionCleared'),
         };
       },
     }),
