@@ -1,6 +1,6 @@
 {
   "name": "hour-loop",
-  "version": "1.8.9",
+  "version": "1.9.0",
   "license": "AGPL-3.0-or-later",
   "main": "expo-router/entry",
   "scripts": {
