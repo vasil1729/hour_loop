@@ -233,10 +233,77 @@ without interfering with its owner. Its CPU paths are a strict subset of the
 already-tested baseline (the device has no Hexagon/Adreno hint, so the removed
 DSP variant was never selected there).
 
-### Interpretation
+### Experiment C — generic + ARMv8 baseline + dotprod, no HTP assets
 
-The generic-only configuration meets the <60 MB target with a large margin,
-keeps the mandatory fallback path, and showed no measurable inference
-slowdown on the only available device. It is therefore the leading candidate
-for the final build. Any larger configuration (Experiments B/C) must justify
-its extra bytes with a measured speed benefit, not a theoretical one.
+Variants: `rnllama,rnllama_v8,rnllama_v8_2_dotprod`. Build completed in
+14m41s after retrying with `GRADLE_OPTS=-Dorg.gradle.workers.max=2` (the first
+attempt lost its Gradle daemon; Gradle build succeeded on retry). The
+`build-android-apk.sh` copy step was interrupted by a concurrent edit to the
+script itself, so the APK was recovered from the staging output and checksummed
+manually.
+
+| Metric | Baseline | A (generic) | B (6 variants) | C (3 variants) |
+| --- | --- | --- | --- | --- |
+| APK size | 135.58 MiB | **47.06 MiB** | 113.62 MiB | 73.69 MiB |
+| llama.rn libs | 96.62 MiB | **13.20 MiB** | 79.67 MiB | 39.78 MiB |
+| HTP assets | 4.94 MiB | 0 | 0 | 0 |
+| DEX / JS | 23.60 / 3.20 MiB | unchanged | unchanged | unchanged |
+
+### Final decision
+
+**Generic-only** is the final configuration. It is the only experiment below
+the 60 MB target, keeps the loader's unconditional generic fallback on every
+ARM64 device, and showed no measurable warm-inference regression on the one
+available device (12 s vs 15 s baseline, within measurement noise). B and C
+were not installed on a device: the phone's ADB link dropped and the device is
+shared with its owner, so no unattended UI testing was possible. Their CPU
+paths are strict subsets of the already-tested 7-variant baseline.
+
+## 10. Build instructions and reproducibility
+
+Default `npm run apk:local` now builds arm64 with `rnllamaVariants=rnllama`
+and no HTP assets; no environment variables are needed. To reproduce an
+experiment explicitly:
+
+```bash
+RNLLAMA_VARIANTS=rnllama,rnllama_v8 HEXAGON_ASSETS=remove \
+  APK_NAME_SUFFIX=-my-experiment STAGE_DIR=$HOME/apk-exp/my-experiment \
+  npm run apk:local
+scripts/android/apk-metrics.sh builds/hour-loop-v1.9.2-arm64.apk
+```
+
+`HEXAGON_ASSETS=remove` passes `-I scripts/android-no-hexagon.gradle`, which
+disables llama.rn's `syncRNLlamaHtpAssets` task, and deletes stale staged
+assets. `APK_NAME_SUFFIX` keeps baseline artifacts intact. Other ABIs keep the
+unrestricted variant set and HTP assets (the DSP only exists on ARM64).
+
+## 11. Rollback
+
+To restore the previous 136 MB build behavior, either check out a commit before
+`⚡ perf(android): default arm64 builds to the generic llama.rn variant`, or
+build with explicit overrides:
+
+```bash
+RNLLAMA_VARIANTS="" HEXAGON_ASSETS=keep APK_NAME_SUFFIX=-baseline \
+  npm run apk:local
+```
+
+The previous APKs remain available under `builds/` and are not overwritten.
+
+## 12. Known limitations and remaining opportunities
+
+- Only one ARM64 device was available (MediaTek MT6785, no i8mm). Modern
+  Snapdragon and older non-dotprod ARM64 devices were not tested; generic
+  compatibility follows from the loader source, not from hardware evidence.
+- Warm-prompt timing used 3 s UI polling and variable model answers; it is a
+  coarse comparison, not a tokens/sec benchmark. First-load timing varied
+  greatly with page-cache state (122 s cold vs ~9 s warm).
+- GGUF download was observed to 61% but completion/SHA-256 verification,
+  explicit model-switch unload/reload, and airplane-mode inference were not
+  confirmed on the optimized build (device taken over mid-test).
+- R8/minify and resource shrinking remain disabled; DEX is 23.6 MiB and res/
+  ~4.7 MiB. Enabling them could shrink further but needs React Native keep-rule
+  validation and fresh end-to-end tests.
+- Native library compression (`expo.useLegacyPackaging=true`) would reduce APK
+  size further at the cost of a larger installed footprint and extraction
+  time; not applied because the APK target is already met.
