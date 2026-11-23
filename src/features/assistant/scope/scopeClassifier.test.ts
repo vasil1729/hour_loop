@@ -11,6 +11,8 @@ describe('Hour Loop local scope classifier', () => {
     'Start a loop for learning Python.',
     'show my active loop',
     'what tasks are currently active',
+    'What am I working on?',
+    'What am I doing right now?',
     'create a task called learn rust',
     'add a capsule to my loop',
     'how much did i focus on programming this week',

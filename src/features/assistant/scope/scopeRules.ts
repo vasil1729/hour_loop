@@ -150,6 +150,15 @@ const FILLER_SUFFIX = /\s+(?:please|now)[\s!?.,…]*$/iu;
  */
 const HOUR_LOOP_PATTERN = /hour\s*loop/iu;
 
+/**
+ * The training set labels "what am I working on right now" as IN_SCOPE, but
+ * the compact model can under-score this short phrasing. Keep the recognised
+ * assistant empty-state prompt deterministic so the suggested prompt never
+ * dead-ends at the refusal screen.
+ */
+const ACTIVE_WORK_INTENT_PATTERN =
+  /^(?:what\s+am\s+i\s+(?:working\s+on|doing)(?:\s+right\s+now)?|what(?:'s| is)\s+my\s+(?:current\s+)?(?:loop|task|focus))[\s!?.,…]*$/iu;
+
 const NON_APP_CONTEXT_PATTERN =
   /\b(?:javascript|typescript|java|python|rust|golang|swift|kotlin|ruby|php|sql|html|css|programming|coding|code|algorithms?|compilers?|music|songs?|melodies?|videos?|editing|photoshop|premiere|after effects|davinci|blender|photography|cameras?|physics|biology|circuits?|relays?|interrupts?|medicines?|pharmacy|wardrobe|market research|focus groups?|feedback|for loop|while loop|roller coaster|computers?|cloud storage|phone storage|graph theory|mathematics|math|stories?|novels?|films?|movies?|video game|gaming|unity|unreal|microwaves?|ovens?|alarm clocks?|gmail|outlook|excel|spreadsheets?|pokemon|stock prices?|share prices?|valuations?|fundings?|revenues?|investors?|competitors?)\b|c\+\+|c#/iu;
 
@@ -312,6 +321,14 @@ export function classifyDeterministicScope(
       confidence: 1,
       source: 'rules',
       reason: 'no_intent',
+    };
+  }
+  if (ACTIVE_WORK_INTENT_PATTERN.test(normalizeScopeText(trimmed))) {
+    return {
+      category: 'IN_SCOPE',
+      confidence: 1,
+      source: 'rules',
+      reason: 'app_help',
     };
   }
   return null;
