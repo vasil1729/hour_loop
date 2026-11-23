@@ -212,6 +212,27 @@ Baseline APK was reinstalled and exercised with the same prompt procedure
 before switching back; no app-level regression was observed on either build
 during the verified steps.
 
+### Experiment B — generic + all CPU-feature variants, no HTP assets
+
+Variants: `rnllama,rnllama_v8,rnllama_v8_2,rnllama_v8_2_dotprod,
+rnllama_v8_2_i8mm,rnllama_v8_2_dotprod_i8mm`. Build:
+`builds/hour-loop-v1.9.1-arm64-variant-optimized.apk`. Cold build **32m30s**.
+
+| Metric | Baseline | Experiment A | Experiment B |
+| --- | --- | --- | --- |
+| APK size | 135.58 MiB | **47.06 MiB** | 113.62 MiB |
+| llama.rn libs | 14 / 96.62 MiB | 2 / 13.20 MiB | 12 / 79.67 MiB |
+| HTP assets | 4.94 MiB | 0 | 0 |
+| Native libs total | 113.96 MiB | 30.54 MiB | 97.01 MiB |
+| DEX / JS bundle | 23.60 / 3.20 MiB | unchanged | unchanged |
+
+The six extra CPU-feature variants cost **~66.6 MB** over generic-only while
+leaving DEX/JS unchanged. This build was not installed on a device: the phone's
+ADB connection dropped while the build ran, and the device could not be driven
+without interfering with its owner. Its CPU paths are a strict subset of the
+already-tested baseline (the device has no Hexagon/Adreno hint, so the removed
+DSP variant was never selected there).
+
 ### Interpretation
 
 The generic-only configuration meets the <60 MB target with a large margin,
