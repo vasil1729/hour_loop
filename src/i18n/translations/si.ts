@@ -191,6 +191,11 @@ export const si: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'කැප්සියුලය එක් කළ නොහැක',
   'task.couldNotUpdateCapsule': 'කැප්සියුලය යාවත්කාලීන කළ නොහැක',
   'task.couldNotArchive': 'කාර්යය සංරක්ෂණය කළ නොහැක',
+  'task.archivedCapsules': 'සංරක්ෂිත කැප්සියුල',
+  'task.archivedCapsulesHint': 'ලූපයකින් ඉවත් කළ කැප්සියුල ඔබ ඒවා ස්ථිරව මකන තෙක් මෙහි රැඳේ.',
+  'task.deleteArchivedTitle': 'සංරක්ෂිත කැප්සියුලය මකන්නද?',
+  'task.deleteArchivedMessage': '“{text}” ස්ථිරව මකා දැමේ. මෙය ආපසු හැරවිය නොහැක.',
+  'task.couldNotDeleteArchivedCapsule': 'සංරක්ෂිත කැප්සියුලය මැකීමට නොහැකි විය',
 
   'taskForm.under': '{parent} යටතේ',
   'taskForm.titlePlaceholder': 'කාර්ය මාතෘකාව',
@@ -202,6 +207,7 @@ export const si: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, වත්මන් අවධානය',
   'loopItem.focusA11y': '{text} මත අවධානය',
+  'archivedCapsule.deleteA11y': '{text} ස්ථිරව මකන්න',
   'loopItem.removeA11y': '{text} ඉවත් කරන්න',
   'loopItem.markDone': '{text} අවසන් ලෙස සලකුණු කරන්න',
   'loopItem.markNotDone': '{text} අවසන් නොවූ ලෙස සලකුණු කරන්න',
@@ -252,6 +258,7 @@ export const si: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'දැන්',
   'loopActive.capsules': 'කැප්සියුල',
   'loopActive.hint': 'මාරු වීමට තට්ටු කරන්න · සම්පූර්ණ කිරීමට දකුණට ස්වයිප් කරන්න · මැකීමට වමට ස්වයිප් කරන්න',
+  'loopActive.archiveCapsuleA11y': '{text} සංරක්ෂණය කරන්න',
   'loopActive.focus': 'අවධානය',
   'loopActive.carryIn': 'රැගෙන ආ',
   'loopActive.delete': 'ලූපය මකන්න',

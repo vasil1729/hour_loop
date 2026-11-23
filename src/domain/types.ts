@@ -43,6 +43,7 @@ export type LoopItem = {
   text: string;
   done: boolean;
   current: boolean;
+  archived_at: string | null;
   sort_order: number;
   carried_from_item_id: string | null;
   created_at: string;

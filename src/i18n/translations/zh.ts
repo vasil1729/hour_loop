@@ -182,6 +182,11 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': '无法添加胶囊',
   'task.couldNotUpdateCapsule': '无法更新胶囊',
   'task.couldNotArchive': '无法归档任务',
+  'task.archivedCapsules': '已归档胶囊',
+  'task.archivedCapsulesHint': '从循环中移除的胶囊会保留在这里，直到你永久删除它们。',
+  'task.deleteArchivedTitle': '删除已归档胶囊？',
+  'task.deleteArchivedMessage': '“{text}”将被永久删除。此操作无法撤销。',
+  'task.couldNotDeleteArchivedCapsule': '无法删除已归档胶囊',
 
   'taskForm.under': '位于 {parent} 下',
   'taskForm.titlePlaceholder': '任务标题',
@@ -193,6 +198,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}，当前专注',
   'loopItem.focusA11y': '专注于 {text}',
+  'archivedCapsule.deleteA11y': '永久删除 {text}',
   'loopItem.removeA11y': '移除 {text}',
   'loopItem.markDone': '将 {text} 标记为完成',
   'loopItem.markNotDone': '将 {text} 标记为未完成',
@@ -243,6 +249,7 @@ export const zh: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': '现在',
   'loopActive.capsules': '胶囊',
   'loopActive.hint': '点按胶囊切换 · 右滑完成 · 左滑删除',
+  'loopActive.archiveCapsuleA11y': '归档 {text}',
   'loopActive.focus': '专注',
   'loopActive.carryIn': '带入',
   'loopActive.delete': '删除循环',

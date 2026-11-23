@@ -199,6 +199,11 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Impossible d’ajouter la capsule',
   'task.couldNotUpdateCapsule': 'Impossible de mettre à jour la capsule',
   'task.couldNotArchive': 'Impossible d’archiver la tâche',
+  'task.archivedCapsules': 'Capsules archivées',
+  'task.archivedCapsulesHint': 'Les capsules retirées d’une boucle restent ici jusqu’à leur suppression définitive.',
+  'task.deleteArchivedTitle': 'Supprimer la capsule archivée ?',
+  'task.deleteArchivedMessage': '« {text} » sera définitivement supprimé. Cette action est irréversible.',
+  'task.couldNotDeleteArchivedCapsule': 'Impossible de supprimer la capsule archivée',
 
   'taskForm.under': 'Sous {parent}',
   'taskForm.titlePlaceholder': 'Titre de la tâche',
@@ -210,6 +215,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, concentration actuelle',
   'loopItem.focusA11y': 'Se concentrer sur {text}',
+  'archivedCapsule.deleteA11y': 'Supprimer définitivement {text}',
   'loopItem.removeA11y': 'Supprimer {text}',
   'loopItem.markDone': 'Marquer {text} comme terminée',
   'loopItem.markNotDone': 'Marquer {text} comme non terminée',
@@ -264,6 +270,7 @@ export const fr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.capsules': 'CAPSULES',
   'loopActive.hint':
     'Touchez pour changer · glissez à droite pour terminer · glissez à gauche pour supprimer',
+  'loopActive.archiveCapsuleA11y': 'Archiver {text}',
   'loopActive.focus': 'INTENTION',
   'loopActive.carryIn': 'REPRIS',
   'loopActive.delete': 'Supprimer la boucle',

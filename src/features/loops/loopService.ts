@@ -127,6 +127,7 @@ type IntervalRepositoryPort = {
 };
 
 type LoopItemRepositoryPort = {
+  archiveLoopItem: typeof loopItemsRepository.archiveLoopItem;
   createLoopItem: typeof loopItemsRepository.createLoopItem;
   deleteLoopItem: typeof loopItemsRepository.deleteLoopItem;
   getLoopItemById: typeof loopItemsRepository.getLoopItemById;
@@ -187,7 +188,17 @@ export type LoopService = {
     loopId: string,
     text: string
   ) => Promise<LoopItem>;
+  archiveLoopItem: (
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string
+  ) => Promise<void>;
   deleteLoopItem: (
+    db: SQLiteDatabase,
+    loopId: string,
+    itemId: string
+  ) => Promise<void>;
+  deleteArchivedLoopItem: (
     db: SQLiteDatabase,
     loopId: string,
     itemId: string
@@ -419,6 +430,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
           text,
           done: false,
           current: items.length === 0,
+          archived_at: null,
           sort_order: items.length,
           carried_from_item_id: item.carriedFromItemId ?? null,
           created_at: nowIso,
@@ -575,6 +587,7 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         text: trimmed,
         done: false,
         current: !hasCurrent,
+        archived_at: null,
         sort_order: sortOrder,
         carried_from_item_id: null,
         created_at: nowIso,
@@ -590,6 +603,45 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
         await openItemInterval(db, loopId, item.id, nowIso);
       }
       return item;
+    },
+
+    async archiveLoopItem(db, loopId, itemId) {
+      const loop = await requireLoop(db, loopId);
+      if (loop.status === 'COMPLETED') {
+        throw new InvalidStateTransitionError('This loop is already complete.');
+      }
+      const existing = await deps.items.listLoopItems(db, loopId);
+      const item = existing.find((entry) => entry.id === itemId);
+      if (!item) {
+        throw new LoopItemNotFoundError(itemId);
+      }
+      const nextCurrent = item.current
+        ? existing.find((entry) => entry.id !== itemId && !entry.done) ?? null
+        : null;
+      const nowIso = deps.now().toISOString();
+      await db.withTransactionAsync(async () => {
+        if (item.current) {
+          await deps.itemIntervals.closeOpenLoopItemIntervals(
+            db,
+            loopId,
+            nowIso
+          );
+        }
+        await deps.items.archiveLoopItem(db, itemId, nowIso);
+        if (item.current) {
+          await deps.items.setCurrentLoopItem(
+            db,
+            loopId,
+            nextCurrent?.id ?? null
+          );
+          if (nextCurrent && loop.status === 'ACTIVE') {
+            await openItemInterval(db, loopId, nextCurrent.id, nowIso);
+          }
+        }
+      });
+      if (loop.status === 'ACTIVE') {
+        await reconcileCurrentCapsule(db, loop);
+      }
     },
 
     async deleteLoopItem(db, loopId, itemId) {
@@ -629,6 +681,18 @@ export function createLoopService(overrides: Partial<LoopServiceDeps> = {}): Loo
       if (loop.status === 'ACTIVE') {
         await reconcileCurrentCapsule(db, loop);
       }
+    },
+
+    async deleteArchivedLoopItem(db, loopId, itemId) {
+      const item = await deps.items.getLoopItemById(db, itemId);
+      if (
+        !item ||
+        item.loop_id !== loopId ||
+        item.archived_at === null
+      ) {
+        throw new LoopItemNotFoundError(itemId);
+      }
+      await deps.items.deleteLoopItem(db, itemId);
     },
 
     async setLoopItemDone(db, loopId, itemId, done) {

@@ -198,6 +198,11 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Impossibile aggiungere la capsula',
   'task.couldNotUpdateCapsule': 'Impossibile aggiornare la capsula',
   'task.couldNotArchive': "Impossibile archiviare l'attività",
+  'task.archivedCapsules': 'Capsule archiviate',
+  'task.archivedCapsulesHint': 'Le capsule rimosse da un loop restano qui finché non le elimini definitivamente.',
+  'task.deleteArchivedTitle': 'Eliminare la capsula archiviata?',
+  'task.deleteArchivedMessage': '“{text}” verrà eliminata definitivamente. L’operazione non può essere annullata.',
+  'task.couldNotDeleteArchivedCapsule': 'Impossibile eliminare la capsula archiviata',
 
   'taskForm.under': 'Sotto {parent}',
   'taskForm.titlePlaceholder': 'Titolo attività',
@@ -209,6 +214,7 @@ export const it: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, focus attuale',
   'loopItem.focusA11y': 'Metti a fuoco {text}',
+  'archivedCapsule.deleteA11y': 'Elimina {text} definitivamente',
   'loopItem.removeA11y': 'Rimuovi {text}',
   'loopItem.markDone': 'Segna {text} come completato',
   'loopItem.markNotDone': 'Segna {text} come non completato',
@@ -261,6 +267,7 @@ export const it: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'ORA',
   'loopActive.capsules': 'CAPSULE',
   'loopActive.hint': 'Tocca per cambiare · scorri a destra per completare · scorri a sinistra per eliminare',
+  'loopActive.archiveCapsuleA11y': 'Archivia {text}',
   'loopActive.focus': 'FOCUS',
   'loopActive.carryIn': 'RIPORTATI',
   'loopActive.delete': 'Elimina ciclo',

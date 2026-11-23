@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const TARGET_VERSION = 5;
+const TARGET_VERSION = 6;
 
 const SCHEMA_V1 = `
   CREATE TABLE IF NOT EXISTS tasks (
@@ -131,6 +131,12 @@ const SCHEMA_V5 = `
     ON standalone_capsules(done);
 `;
 
+const SCHEMA_V6 = `
+  ALTER TABLE loop_items ADD COLUMN archived_at TEXT;
+  CREATE INDEX IF NOT EXISTS idx_loop_items_archived
+    ON loop_items(archived_at);
+`;
+
 /**
  * Runs on every database open via SQLiteProvider's onInit.
  * `PRAGMA foreign_keys` is connection-scoped and must never be assumed.
@@ -164,6 +170,10 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
 
   if (version < 5) {
     await db.execAsync(SCHEMA_V5);
+  }
+
+  if (version < 6) {
+    await db.execAsync(SCHEMA_V6);
   }
 
   await db.execAsync(`PRAGMA user_version = ${TARGET_VERSION}`);

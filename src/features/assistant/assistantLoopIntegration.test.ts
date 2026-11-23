@@ -346,6 +346,7 @@ describe('AI loop actions use the existing timer service', () => {
       text: 'Not yours',
       done: false,
       current: false,
+      archived_at: null,
       sort_order: 0,
       carried_from_item_id: null,
       created_at: '2026-11-12T09:00:00.000Z',

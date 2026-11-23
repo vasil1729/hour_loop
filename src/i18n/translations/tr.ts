@@ -184,6 +184,11 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Kapsül eklenemedi',
   'task.couldNotUpdateCapsule': 'Kapsül güncellenemedi',
   'task.couldNotArchive': 'Görev arşivlenemedi',
+  'task.archivedCapsules': 'Arşivlenen kapsüller',
+  'task.archivedCapsulesHint': 'Döngüden kaldırılan kapsüller, kalıcı olarak silene kadar burada kalır.',
+  'task.deleteArchivedTitle': 'Arşivlenen kapsül silinsin mi?',
+  'task.deleteArchivedMessage': '“{text}” kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+  'task.couldNotDeleteArchivedCapsule': 'Arşivlenen kapsül silinemedi',
 
   'taskForm.under': '{parent} altında',
   'taskForm.titlePlaceholder': 'Görev başlığı',
@@ -195,6 +200,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, geçerli odak',
   'loopItem.focusA11y': '{text} öğesine odaklan',
+  'archivedCapsule.deleteA11y': '{text} öğesini kalıcı olarak sil',
   'loopItem.removeA11y': '{text} öğesini kaldır',
   'loopItem.markDone': '{text} öğesini tamamlandı olarak işaretle',
   'loopItem.markNotDone': '{text} öğesini tamamlanmadı olarak işaretle',
@@ -249,6 +255,7 @@ export const tr: Record<TranslationKey, TranslationEntry> = {
   'loopActive.capsules': 'KAPSÜLLER',
   'loopActive.hint':
     'Değiştirmek için dokun · tamamlamak için sağa kaydır · silmek için sola kaydır',
+  'loopActive.archiveCapsuleA11y': '{text} öğesini arşivle',
   'loopActive.focus': 'ODAK',
   'loopActive.carryIn': 'TAŞINAN',
   'loopActive.delete': 'Döngüyü sil',

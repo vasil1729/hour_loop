@@ -190,6 +190,11 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'கேப்சூலைச் சேர்க்க முடியவில்லை',
   'task.couldNotUpdateCapsule': 'கேப்சூலைப் புதுப்பிக்க முடியவில்லை',
   'task.couldNotArchive': 'பணியைக் காப்பகப்படுத்த முடியவில்லை',
+  'task.archivedCapsules': 'காப்பகப்படுத்தப்பட்ட கேப்சூல்கள்',
+  'task.archivedCapsulesHint': 'ஒரு லூப்பிலிருந்து நீக்கப்பட்ட கேப்சூல்கள் நிரந்தரமாக நீக்கும் வரை இங்கே இருக்கும்.',
+  'task.deleteArchivedTitle': 'காப்பகப்படுத்தப்பட்ட கேப்சூலை நீக்கவா?',
+  'task.deleteArchivedMessage': '“{text}” நிரந்தரமாக நீக்கப்படும். இதை மீளச் செய்ய முடியாது.',
+  'task.couldNotDeleteArchivedCapsule': 'காப்பகப்படுத்தப்பட்ட கேப்சூலை நீக்க முடியவில்லை',
 
   'taskForm.under': '{parent} கீழ்',
   'taskForm.titlePlaceholder': 'பணித் தலைப்பு',
@@ -201,6 +206,7 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, தற்போதைய கவனம்',
   'loopItem.focusA11y': '{text} மீது கவனம்',
+  'archivedCapsule.deleteA11y': '{text} நிரந்தரமாக நீக்கு',
   'loopItem.removeA11y': '{text} நீக்கு',
   'loopItem.markDone': '{text} முடிந்ததாகக் குறி',
   'loopItem.markNotDone': '{text} முடியவில்லை எனக் குறி',
@@ -251,6 +257,7 @@ export const ta: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'இப்போது',
   'loopActive.capsules': 'கேப்சூல்கள்',
   'loopActive.hint': 'மாற டேப் செய்யுங்கள் · முடிக்க வலப்புறம் ஸ்வைப் செய்யுங்கள் · நீக்க இடப்புறம் ஸ்வைப் செய்யுங்கள்',
+  'loopActive.archiveCapsuleA11y': '{text} காப்பகப்படுத்து',
   'loopActive.focus': 'கவனம்',
   'loopActive.carryIn': 'எடுத்து வந்தது',
   'loopActive.delete': 'லூப்பை நீக்கு',

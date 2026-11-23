@@ -77,8 +77,8 @@ async function readLoopItems(db: SQLiteDatabase): Promise<BackupLoopItem[]> {
     return [];
   }
   const rows = await db.getAllAsync<LoopItemRow>(`
-    SELECT id, loop_id, text, done, sort_order, carried_from_item_id,
-           created_at, updated_at
+    SELECT id, loop_id, text, done, archived_at, sort_order,
+           carried_from_item_id, created_at, updated_at
     FROM loop_items
     ORDER BY loop_id ASC, sort_order ASC, created_at ASC
   `);
@@ -260,14 +260,15 @@ export async function importBackup(
     for (const item of orderedLoopItems) {
       await db.runAsync(
         `INSERT INTO loop_items (
-           id, loop_id, text, done, sort_order, carried_from_item_id,
-           created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           id, loop_id, text, done, archived_at, sort_order,
+           carried_from_item_id, created_at, updated_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item.id,
           item.loop_id,
           item.text,
           item.done ? 1 : 0,
+          item.archived_at,
           item.sort_order,
           item.carried_from_item_id,
           item.created_at,

@@ -200,6 +200,11 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Не удалось добавить капсулу',
   'task.couldNotUpdateCapsule': 'Не удалось обновить капсулу',
   'task.couldNotArchive': 'Не удалось архивировать задачу',
+  'task.archivedCapsules': 'Архивные капсулы',
+  'task.archivedCapsulesHint': 'Капсулы, убранные из цикла, остаются здесь, пока вы не удалите их навсегда.',
+  'task.deleteArchivedTitle': 'Удалить архивную капсулу?',
+  'task.deleteArchivedMessage': '«{text}» будет удалена навсегда. Это действие нельзя отменить.',
+  'task.couldNotDeleteArchivedCapsule': 'Не удалось удалить архивную капсулу',
 
   'taskForm.under': 'В задаче {parent}',
   'taskForm.titlePlaceholder': 'Название задачи',
@@ -212,6 +217,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, текущий фокус',
   'loopItem.focusA11y': 'Сфокусироваться на «{text}»',
+  'archivedCapsule.deleteA11y': 'Удалить «{text}» навсегда',
   'loopItem.removeA11y': 'Удалить «{text}»',
   'loopItem.markDone': 'Отметить «{text}» выполненной',
   'loopItem.markNotDone': 'Отметить «{text}» невыполненной',
@@ -274,6 +280,7 @@ export const ru: Record<TranslationKey, TranslationEntry> = {
   'loopActive.capsules': 'КАПСУЛЫ',
   'loopActive.hint':
     'Нажмите на капсулу, чтобы переключиться · смахните вправо, чтобы завершить · смахните влево, чтобы удалить',
+  'loopActive.archiveCapsuleA11y': 'Архивировать «{text}»',
   'loopActive.focus': 'ФОКУС',
   'loopActive.carryIn': 'ПЕРЕНОС',
   'loopActive.delete': 'Удалить цикл',

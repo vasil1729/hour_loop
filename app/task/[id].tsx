@@ -10,13 +10,18 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { LoopHistoryRow } from '../../src/components/history/LoopHistoryRow';
+import { ArchivedCapsuleRow } from '../../src/components/loops/ArchivedCapsuleRow';
 import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskRow } from '../../src/components/tasks/TaskRow';
 import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
+import { formatShortDayLabel } from '../../src/domain/shared/dateUtils';
 import { formatDurationCompact } from '../../src/domain/timer/timerEngine';
 import { flattenTree, type FlatTaskNode } from '../../src/domain/tasks/taskDomain';
-import { setCapsuleDone } from '../../src/features/capsules/capsuleService';
+import {
+  deleteArchivedCapsule,
+  setCapsuleDone,
+} from '../../src/features/capsules/capsuleService';
 import {
   createTask,
   getTaskDetail,
@@ -44,6 +49,8 @@ export default function TaskDetailScreen() {
   const [editVisible, setEditVisible] = useState(false);
   const [addSubtaskVisible, setAddSubtaskVisible] = useState(false);
   const [archiveVisible, setArchiveVisible] = useState(false);
+  const [purgeCapsule, setPurgeCapsule] = useState<Capsule | null>(null);
+  const [purging, setPurging] = useState(false);
 
   const reload = useCallback(async () => {
     if (!taskId) {
@@ -176,6 +183,23 @@ export default function TaskDetailScreen() {
     }
   };
 
+  const handleDeleteArchivedCapsule = async () => {
+    if (!purgeCapsule || purging) return;
+    setPurging(true);
+    try {
+      await deleteArchivedCapsule(db, purgeCapsule);
+      setPurgeCapsule(null);
+      await reload();
+    } catch (caught) {
+      Alert.alert(
+        t('task.couldNotDeleteArchivedCapsule'),
+        localizeError(caught)
+      );
+    } finally {
+      setPurging(false);
+    }
+  };
+
   const handleArchive = async () => {
     if (!detail) return;
     setArchiveVisible(false);
@@ -208,8 +232,15 @@ export default function TaskDetailScreen() {
     );
   }
 
-  const { task, progress, loops, capsules, completedCapsules, totalSeconds } =
-    detail;
+  const {
+    task,
+    progress,
+    loops,
+    capsules,
+    completedCapsules,
+    archivedCapsules,
+    totalSeconds,
+  } = detail;
   const completed = task.status === 'COMPLETED';
   const archived = task.status === 'ARCHIVED';
   const isSubtask = task.parent_task_id !== null;
@@ -463,6 +494,35 @@ export default function TaskDetailScreen() {
         </View>
       ) : null}
 
+      {archivedCapsules.length > 0 ? (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('task.archivedCapsules')}
+            </Text>
+            <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
+              {String(archivedCapsules.length)}
+            </Text>
+          </View>
+          <Text style={[styles.muted, { color: colors.textSecondary }]}>
+            {t('task.archivedCapsulesHint')}
+          </Text>
+          <View style={styles.archiveList}>
+            {archivedCapsules.map((capsule) => (
+              <ArchivedCapsuleRow
+                key={capsule.item.id}
+                text={capsule.item.text}
+                meta={`H${capsule.loop.sequence_number} · ${formatShortDayLabel(
+                  capsule.loop.local_date
+                )}`}
+                disabled={purging && purgeCapsule?.item.id === capsule.item.id}
+                onDelete={() => setPurgeCapsule(capsule)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {t('task.loopHistory')}
@@ -519,6 +579,22 @@ export default function TaskDetailScreen() {
           void handleArchive();
         }}
         onCancel={() => setArchiveVisible(false)}
+      />
+
+      <ConfirmDialog
+        visible={purgeCapsule !== null}
+        title={t('task.deleteArchivedTitle')}
+        message={t('task.deleteArchivedMessage', {
+          text: purgeCapsule?.item.text ?? '',
+        })}
+        confirmLabel={purging ? t('common.deleting') : t('common.delete')}
+        destructive
+        onConfirm={() => {
+          void handleDeleteArchivedCapsule();
+        }}
+        onCancel={() => {
+          if (!purging) setPurgeCapsule(null);
+        }}
       />
     </Screen>
   );
@@ -633,6 +709,9 @@ const styles = StyleSheet.create({
   capsuleWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  archiveList: {
     gap: spacing.sm,
   },
   subtasks: {

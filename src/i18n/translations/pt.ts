@@ -198,6 +198,11 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Não foi possível adicionar a cápsula',
   'task.couldNotUpdateCapsule': 'Não foi possível atualizar a cápsula',
   'task.couldNotArchive': 'Não foi possível arquivar a tarefa',
+  'task.archivedCapsules': 'Cápsulas arquivadas',
+  'task.archivedCapsulesHint': 'As cápsulas removidas de um loop ficam aqui até você excluí-las permanentemente.',
+  'task.deleteArchivedTitle': 'Excluir cápsula arquivada?',
+  'task.deleteArchivedMessage': '“{text}” será excluída permanentemente. Isso não pode ser desfeito.',
+  'task.couldNotDeleteArchivedCapsule': 'Não foi possível excluir a cápsula arquivada',
 
   'taskForm.under': 'Dentro de {parent}',
   'taskForm.titlePlaceholder': 'Título da tarefa',
@@ -211,6 +216,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, foco atual',
   'loopItem.focusA11y': 'Focar em {text}',
+  'archivedCapsule.deleteA11y': 'Excluir {text} permanentemente',
   'loopItem.removeA11y': 'Remover {text}',
   'loopItem.markDone': 'Marcar {text} como concluído',
   'loopItem.markNotDone': 'Marcar {text} como pendente',
@@ -265,6 +271,7 @@ export const pt: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'AGORA',
   'loopActive.capsules': 'CÁPSULAS',
   'loopActive.hint': 'Toque para alternar · deslize para a direita para concluir · deslize para a esquerda para excluir',
+  'loopActive.archiveCapsuleA11y': 'Arquivar {text}',
   'loopActive.focus': 'FOCO',
   'loopActive.carryIn': 'TRAZER',
   'loopActive.delete': 'Excluir loop',

@@ -48,6 +48,7 @@ const capsules: LoopItem[] = [
     text: 'Research',
     done: false,
     current: false,
+    archived_at: null,
     sort_order: 0,
     carried_from_item_id: null,
     created_at: '2026-11-22T10:00:00.000Z',

@@ -89,6 +89,7 @@ function makeLoopItem(
   return {
     text: 'Checklist item',
     done: false,
+    archived_at: null,
     sort_order: 0,
     carried_from_item_id: null,
     created_at: CREATED_AT,
@@ -330,6 +331,31 @@ describe('validateBackup', () => {
       'Buy milk',
       'Call bank',
     ]);
+  });
+
+  it('preserves archived loop capsule metadata', () => {
+    const backup = makeBackup({
+      loopItems: [
+        makeLoopItem({
+          id: 'item-1',
+          loop_id: 'loop-1',
+          archived_at: EXPORTED_AT,
+        }),
+      ],
+    });
+
+    const parsed = validateBackup(backup);
+    expect(parsed.data.loopItems[0]?.archived_at).toBe(EXPORTED_AT);
+  });
+
+  it('treats missing archived metadata as an active capsule', () => {
+    const backup = makeBackup();
+    const loopItem = backup.data.loopItems[0];
+    if (!loopItem) throw new Error('Expected a loop item');
+    delete (loopItem as Partial<BackupLoopItem>).archived_at;
+
+    const parsed = validateBackup(backup);
+    expect(parsed.data.loopItems[0]?.archived_at).toBeNull();
   });
 
   it('rejects invalid JSON', () => {

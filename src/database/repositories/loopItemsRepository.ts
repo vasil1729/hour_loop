@@ -21,24 +21,35 @@ type CapsuleRow = Omit<LoopItem, 'done' | 'current'> & {
 };
 
 const SELECT_ITEM = `
-  SELECT id, loop_id, text, done, current, sort_order, carried_from_item_id,
-         created_at, updated_at
+  SELECT id, loop_id, text, done, current, archived_at, sort_order,
+         carried_from_item_id, created_at, updated_at
   FROM loop_items
 `;
 
 const SELECT_CAPSULES = `
-  SELECT li.id, li.loop_id, li.text, li.done, li.current, li.sort_order,
-         li.carried_from_item_id, li.created_at, li.updated_at,
+  SELECT li.id, li.loop_id, li.text, li.done, li.current, li.archived_at,
+         li.sort_order, li.carried_from_item_id, li.created_at, li.updated_at,
          l.task_id, l.sequence_number, l.local_date,
          l.status AS loop_status, l.started_at
   FROM loop_items AS li
   JOIN loops AS l ON l.id = li.loop_id
   WHERE li.done = ?
+    AND li.archived_at IS NULL
     AND NOT EXISTS (
       SELECT 1
       FROM loop_items AS carried
       WHERE carried.carried_from_item_id = li.id
     )
+`;
+
+const SELECT_ARCHIVED_CAPSULES = `
+  SELECT li.id, li.loop_id, li.text, li.done, li.current, li.archived_at,
+         li.sort_order, li.carried_from_item_id, li.created_at, li.updated_at,
+         l.task_id, l.sequence_number, l.local_date,
+         l.status AS loop_status, l.started_at
+  FROM loop_items AS li
+  JOIN loops AS l ON l.id = li.loop_id
+  WHERE li.archived_at IS NOT NULL
 `;
 
 const ORDER_OPEN_CAPSULES = `
@@ -47,6 +58,10 @@ const ORDER_OPEN_CAPSULES = `
 
 const ORDER_COMPLETED_CAPSULES = `
   ORDER BY li.updated_at DESC, l.started_at DESC
+`;
+
+const ORDER_ARCHIVED_CAPSULES = `
+  ORDER BY li.archived_at DESC, l.started_at DESC
 `;
 
 function mapRow(row: LoopItemRow): LoopItem {
@@ -65,6 +80,7 @@ function mapCapsuleRow(row: CapsuleRow): Capsule {
       text: row.text,
       done: row.done === 1,
       current: row.current === 1,
+      archived_at: row.archived_at,
       sort_order: row.sort_order,
       carried_from_item_id: row.carried_from_item_id,
       created_at: row.created_at,
@@ -87,15 +103,16 @@ export async function createLoopItem(
 ): Promise<void> {
   await db.runAsync(
     `INSERT INTO loop_items (
-       id, loop_id, text, done, current, sort_order, carried_from_item_id,
-       created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       id, loop_id, text, done, current, archived_at, sort_order,
+       carried_from_item_id, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       item.id,
       item.loop_id,
       item.text,
       item.done ? 1 : 0,
       item.current ? 1 : 0,
+      item.archived_at,
       item.sort_order,
       item.carried_from_item_id,
       item.created_at,
@@ -120,7 +137,8 @@ export async function listLoopItems(
   loopId: string
 ): Promise<LoopItem[]> {
   const rows = await db.getAllAsync<LoopItemRow>(
-    `${SELECT_ITEM} WHERE loop_id = ? ORDER BY sort_order ASC, created_at ASC`,
+    `${SELECT_ITEM} WHERE loop_id = ? AND archived_at IS NULL
+     ORDER BY sort_order ASC, created_at ASC`,
     [loopId]
   );
   return rows.map(mapRow);
@@ -136,6 +154,7 @@ export async function listLoopItemsForLoops(
   const placeholders = loopIds.map(() => '?').join(', ');
   const rows = await db.getAllAsync<LoopItemRow>(
     `${SELECT_ITEM} WHERE loop_id IN (${placeholders})
+       AND archived_at IS NULL
      ORDER BY sort_order ASC, created_at ASC`,
     loopIds
   );
@@ -216,6 +235,18 @@ export async function listCompletedLooseCapsules(
   return rows.map(mapCapsuleRow);
 }
 
+/** Archived capsules from loops without a subtask, kept for later cleanup. */
+export async function listArchivedLooseCapsules(
+  db: SQLiteDatabase
+): Promise<Capsule[]> {
+  const rows = await db.getAllAsync<CapsuleRow>(
+    `${SELECT_ARCHIVED_CAPSULES}
+       AND l.task_id IS NULL
+     ${ORDER_ARCHIVED_CAPSULES}`
+  );
+  return rows.map(mapCapsuleRow);
+}
+
 /**
  * Open, not-yet-carried capsules from loops attached to the given subtasks.
  * Used by task detail to show the capsules grouped under a task.
@@ -256,6 +287,46 @@ export async function listCompletedCapsulesForTasks(
     [1, ...taskIds]
   );
   return rows.map(mapCapsuleRow);
+}
+
+/**
+ * Archived capsules from loops attached to the given subtasks. They stay out
+ * of open/completed lists until the user deletes them permanently.
+ */
+export async function listArchivedCapsulesForTasks(
+  db: SQLiteDatabase,
+  taskIds: string[]
+): Promise<Capsule[]> {
+  if (taskIds.length === 0) {
+    return [];
+  }
+  const placeholders = taskIds.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<CapsuleRow>(
+    `${SELECT_ARCHIVED_CAPSULES}
+       AND l.task_id IN (${placeholders})
+     ${ORDER_ARCHIVED_CAPSULES}`,
+    taskIds
+  );
+  return rows.map(mapCapsuleRow);
+}
+
+/**
+ * Hide a capsule from active loop and task lists without losing its text.
+ * The row and its time intervals stay in the database for later cleanup.
+ */
+export async function archiveLoopItem(
+  db: SQLiteDatabase,
+  id: string,
+  archivedAt: string
+): Promise<void> {
+  await db.runAsync(
+    `UPDATE loop_items
+     SET archived_at = ?,
+         current = 0,
+         updated_at = ?
+     WHERE id = ?`,
+    [archivedAt, archivedAt, id]
+  );
 }
 
 export async function deleteLoopItem(

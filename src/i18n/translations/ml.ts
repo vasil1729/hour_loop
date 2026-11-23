@@ -188,6 +188,11 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'ക്യാപ്സ്യൂൾ ചേർക്കാനായില്ല',
   'task.couldNotUpdateCapsule': 'ക്യാപ്സ്യൂൾ അപ്ഡേറ്റ് ചെയ്യാനായില്ല',
   'task.couldNotArchive': 'ടാസ്ക് ആർക്കൈവ് ചെയ്യാനായില്ല',
+  'task.archivedCapsules': 'ആർക്കൈവ് ചെയ്ത ക്യാപ്സ്യൂളുകൾ',
+  'task.archivedCapsulesHint': 'ഒരു ലൂപ്പിൽ നിന്ന് നീക്കിയ ക്യാപ്സ്യൂളുകൾ സ്ഥിരമായി ഇല്ലാതാക്കുന്നതുവരെ ഇവിടെ നിലനിൽക്കും.',
+  'task.deleteArchivedTitle': 'ആർക്കൈവ് ചെയ്ത ക്യാപ്സ്യൂൾ ഇല്ലാതാക്കണോ?',
+  'task.deleteArchivedMessage': '“{text}” സ്ഥിരമായി ഇല്ലാതാക്കപ്പെടും. ഇത് പഴയപടിയാക്കാനാകില്ല.',
+  'task.couldNotDeleteArchivedCapsule': 'ആർക്കൈവ് ചെയ്ത ക്യാപ്സ്യൂൾ ഇല്ലാതാക്കാനായില്ല',
 
   'taskForm.under': '{parent}-ന് കീഴിൽ',
   'taskForm.titlePlaceholder': 'ടാസ്ക് ശീർഷകം',
@@ -201,6 +206,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, നിലവിലെ ഫോക്കസ്',
   'loopItem.focusA11y': '{text}-ൽ ഫോക്കസ് ചെയ്യുക',
+  'archivedCapsule.deleteA11y': '{text} സ്ഥിരമായി ഇല്ലാതാക്കുക',
   'loopItem.removeA11y': '{text} നീക്കം ചെയ്യുക',
   'loopItem.markDone': '{text} പൂർത്തിയായതായി അടയാളപ്പെടുത്തുക',
   'loopItem.markNotDone': '{text} പൂർത്തിയാകാത്തതായി അടയാളപ്പെടുത്തുക',
@@ -259,6 +265,7 @@ export const ml: Record<TranslationKey, TranslationEntry> = {
   'loopActive.capsules': 'ക്യാപ്സ്യൂളുകൾ',
   'loopActive.hint':
     'മാറാൻ ടാപ്പ് ചെയ്യുക · പൂർത്തിയാക്കാൻ വലത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക · ഇല്ലാതാക്കാൻ ഇടത്തേക്ക് സ്വൈപ്പ് ചെയ്യുക',
+  'loopActive.archiveCapsuleA11y': '{text} ആർക്കൈവ് ചെയ്യുക',
   'loopActive.focus': 'ഫോക്കസ്',
   'loopActive.carryIn': 'കൊണ്ടുവന്നത്',
   'loopActive.delete': 'ലൂപ്പ് ഇല്ലാതാക്കുക',

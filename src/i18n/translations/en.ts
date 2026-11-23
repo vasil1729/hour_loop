@@ -193,6 +193,11 @@ export const en = {
   'task.couldNotAddCapsule': 'Could not add capsule',
   'task.couldNotUpdateCapsule': 'Could not update capsule',
   'task.couldNotArchive': 'Could not archive task',
+  'task.archivedCapsules': 'Archived capsules',
+  'task.archivedCapsulesHint': 'Capsules removed from a loop stay here until you delete them permanently.',
+  'task.deleteArchivedTitle': 'Delete archived capsule?',
+  'task.deleteArchivedMessage': '“{text}” will be permanently deleted. This cannot be undone.',
+  'task.couldNotDeleteArchivedCapsule': 'Could not delete archived capsule',
 
   'taskForm.under': 'Under {parent}',
   'taskForm.titlePlaceholder': 'Task title',
@@ -204,6 +209,7 @@ export const en = {
 
   'loopItem.currentFocusA11y': '{text}, current focus',
   'loopItem.focusA11y': 'Focus on {text}',
+  'archivedCapsule.deleteA11y': 'Delete {text} permanently',
   'loopItem.removeA11y': 'Remove {text}',
   'loopItem.markDone': 'Mark {text} done',
   'loopItem.markNotDone': 'Mark {text} not done',
@@ -261,6 +267,7 @@ export const en = {
   'loopActive.capsules': 'CAPSULES',
   'loopActive.hint':
     'Tap a capsule to switch · swipe right to complete · swipe left to delete',
+  'loopActive.archiveCapsuleA11y': 'Archive {text}',
   'loopActive.focus': 'FOCUS',
   'loopActive.carryIn': 'CARRY IN',
   'loopActive.delete': 'Delete loop',

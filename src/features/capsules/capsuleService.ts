@@ -18,6 +18,19 @@ export function listCompletedLooseCapsules(
   return loopItemsRepository.listCompletedLooseCapsules(db);
 }
 
+export function listArchivedLooseCapsules(
+  db: SQLiteDatabase
+): Promise<Capsule[]> {
+  return loopItemsRepository.listArchivedLooseCapsules(db);
+}
+
+export function listArchivedCapsulesForTasks(
+  db: SQLiteDatabase,
+  taskIds: string[]
+): Promise<Capsule[]> {
+  return loopItemsRepository.listArchivedCapsulesForTasks(db, taskIds);
+}
+
 export function listStandaloneCapsules(
   db: SQLiteDatabase,
   done: boolean
@@ -64,4 +77,15 @@ export async function setCapsuleDone(
   done: boolean
 ): Promise<void> {
   await loopService.setLoopItemDone(db, capsule.loop.id, capsule.item.id, done);
+}
+
+export async function deleteArchivedCapsule(
+  db: SQLiteDatabase,
+  capsule: Capsule
+): Promise<void> {
+  await loopService.deleteArchivedLoopItem(
+    db,
+    capsule.loop.id,
+    capsule.item.id
+  );
 }

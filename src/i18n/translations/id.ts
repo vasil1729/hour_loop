@@ -195,6 +195,15 @@ export const id: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Tidak dapat menambahkan kapsul',
   'task.couldNotUpdateCapsule': 'Tidak dapat memperbarui kapsul',
   'task.couldNotArchive': 'Tidak dapat mengarsipkan tugas',
+  'task.archivedCapsules': 'Kapsul yang diarsipkan',
+  'task.archivedCapsulesHint':
+    'Kapsul yang dihapus dari loop tetap di sini sampai Anda menghapusnya secara permanen.',
+  'task.deleteArchivedTitle': 'Hapus kapsul yang diarsipkan?',
+  'task.deleteArchivedMessage':
+    '“{text}” akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.',
+  'task.couldNotDeleteArchivedCapsule':
+    'Tidak dapat menghapus kapsul yang diarsipkan',
+
   'taskForm.under': 'Di bawah {parent}',
   'taskForm.titlePlaceholder': 'Judul tugas',
   'taskForm.descriptionPlaceholder': 'Deskripsi (opsional)',
@@ -206,6 +215,7 @@ export const id: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, fokus saat ini',
   'loopItem.focusA11y': 'Fokus pada {text}',
+  'archivedCapsule.deleteA11y': 'Hapus {text} secara permanen',
   'loopItem.removeA11y': 'Hapus {text}',
   'loopItem.markDone': 'Tandai {text} selesai',
   'loopItem.markNotDone': 'Tandai {text} belum selesai',
@@ -261,7 +271,8 @@ export const id: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'SEKARANG',
   'loopActive.capsules': 'KAPSUL',
   'loopActive.hint':
-    'Ketuk kapsul untuk beralih · geser ke kanan untuk menyelesaikan · geser ke kiri untuk menghapus',
+    'Ketuk kapsul untuk beralih · geser kanan untuk selesai · geser kiri untuk menghapus',
+  'loopActive.archiveCapsuleA11y': 'Arsipkan {text}',
   'loopActive.focus': 'FOKUS',
   'loopActive.carryIn': 'BAWA MASUK',
   'loopActive.delete': 'Hapus loop',

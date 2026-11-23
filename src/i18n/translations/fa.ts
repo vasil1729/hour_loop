@@ -197,6 +197,11 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'کپسول افزوده نشد',
   'task.couldNotUpdateCapsule': 'کپسول به‌روزرسانی نشد',
   'task.couldNotArchive': 'بایگانی کار ممکن نشد',
+  'task.archivedCapsules': 'کپسول\u200cهای بایگانی\u200cشده',
+  'task.archivedCapsulesHint': 'کپسول\u200cهایی که از یک حلقه حذف می\u200cشوند تا زمانی که برای همیشه پاکشان نکنید اینجا می\u200cمانند.',
+  'task.deleteArchivedTitle': 'کپسول بایگانی\u200cشده حذف شود؟',
+  'task.deleteArchivedMessage': '«{text}» برای همیشه حذف می\u200cشود. این کار قابل بازگشت نیست.',
+  'task.couldNotDeleteArchivedCapsule': 'حذف کپسول بایگانی\u200cشده ممکن نشد',
 
   'taskForm.under': 'زیر {parent}',
   'taskForm.titlePlaceholder': 'عنوان کار',
@@ -208,6 +213,7 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}، تمرکز فعلی',
   'loopItem.focusA11y': 'تمرکز روی {text}',
+  'archivedCapsule.deleteA11y': 'حذف همیشگی {text}',
   'loopItem.removeA11y': 'حذف {text}',
   'loopItem.markDone': 'علامت‌گذاری {text} به‌عنوان انجام‌شده',
   'loopItem.markNotDone': 'علامت‌گذاری {text} به‌عنوان انجام‌نشده',
@@ -260,6 +266,7 @@ export const fa: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'اکنون',
   'loopActive.capsules': 'کپسول‌ها',
   'loopActive.hint': 'برای تغییر ضربه بزنید · برای تکمیل به راست بکشید · برای حذف به چپ بکشید',
+  'loopActive.archiveCapsuleA11y': 'بایگانی {text}',
   'loopActive.focus': 'تمرکز',
   'loopActive.carryIn': 'انتقال',
   'loopActive.delete': 'حذف حلقه',

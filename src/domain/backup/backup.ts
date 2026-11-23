@@ -57,6 +57,7 @@ export type BackupLoopItem = {
   loop_id: string;
   text: string;
   done: boolean;
+  archived_at: string | null;
   sort_order: number;
   carried_from_item_id: string | null;
   created_at: string;
@@ -357,6 +358,7 @@ function parseLoopItem(value: unknown, index: number): BackupLoopItem {
     loop_id: requireString(record, 'loop_id', path),
     text: requireString(record, 'text', path),
     done,
+    archived_at: optionalTimestamp(record, 'archived_at', path),
     sort_order: requireInteger(record, 'sort_order', path),
     carried_from_item_id: optionalString(record, 'carried_from_item_id', path),
     created_at: requireTimestamp(record, 'created_at', path),

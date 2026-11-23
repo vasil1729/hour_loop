@@ -203,6 +203,11 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'تعذّر إضافة الكبسولة',
   'task.couldNotUpdateCapsule': 'تعذّر تحديث الكبسولة',
   'task.couldNotArchive': 'تعذّر أرشفة المهمة',
+  'task.archivedCapsules': 'كبسولات مؤرشفة',
+  'task.archivedCapsulesHint': 'تبقى الكبسولات التي أُزيلت من حلقة هنا حتى تحذفها نهائيًا.',
+  'task.deleteArchivedTitle': 'حذف الكبسولة المؤرشفة؟',
+  'task.deleteArchivedMessage': 'سيتم حذف «{text}» نهائيًا. لا يمكن التراجع عن هذا الإجراء.',
+  'task.couldNotDeleteArchivedCapsule': 'تعذّر حذف الكبسولة المؤرشفة',
 
   'taskForm.under': 'ضمن {parent}',
   'taskForm.titlePlaceholder': 'عنوان المهمة',
@@ -215,6 +220,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}، التركيز الحالي',
   'loopItem.focusA11y': 'التركيز على {text}',
+  'archivedCapsule.deleteA11y': 'حذف {text} نهائيًا',
   'loopItem.removeA11y': 'إزالة {text}',
   'loopItem.markDone': 'وضع علامة إنجاز على {text}',
   'loopItem.markNotDone': 'إلغاء علامة إنجاز {text}',
@@ -278,6 +284,7 @@ export const ar: Record<TranslationKey, TranslationEntry> = {
   'loopActive.capsules': 'الكبسولات',
   'loopActive.hint':
     'انقر على الكبسولة للتبديل · اسحب لليمين للإكمال · اسحب لليسار للحذف',
+  'loopActive.archiveCapsuleA11y': 'أرشفة {text}',
   'loopActive.focus': 'التركيز',
   'loopActive.carryIn': 'ترحيل',
   'loopActive.delete': 'حذف الحلقة',

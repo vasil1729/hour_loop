@@ -198,6 +198,11 @@ export const de: Record<TranslationKey, TranslationEntry> = {
   'task.couldNotAddCapsule': 'Kapsel konnte nicht hinzugefügt werden',
   'task.couldNotUpdateCapsule': 'Kapsel konnte nicht aktualisiert werden',
   'task.couldNotArchive': 'Aufgabe konnte nicht archiviert werden',
+  'task.archivedCapsules': 'Archivierte Kapseln',
+  'task.archivedCapsulesHint': 'Aus einem Loop entfernte Kapseln bleiben hier, bis du sie endgültig löschst.',
+  'task.deleteArchivedTitle': 'Archivierte Kapsel löschen?',
+  'task.deleteArchivedMessage': '„{text}“ wird endgültig gelöscht. Das kann nicht rückgängig gemacht werden.',
+  'task.couldNotDeleteArchivedCapsule': 'Archivierte Kapsel konnte nicht gelöscht werden',
 
   'taskForm.under': 'Unter {parent}',
   'taskForm.titlePlaceholder': 'Titel der Aufgabe',
@@ -209,6 +214,7 @@ export const de: Record<TranslationKey, TranslationEntry> = {
 
   'loopItem.currentFocusA11y': '{text}, aktueller Fokus',
   'loopItem.focusA11y': 'Fokus auf {text}',
+  'archivedCapsule.deleteA11y': '{text} endgültig löschen',
   'loopItem.removeA11y': '{text} entfernen',
   'loopItem.markDone': '{text} als erledigt markieren',
   'loopItem.markNotDone': '{text} als nicht erledigt markieren',
@@ -261,6 +267,7 @@ export const de: Record<TranslationKey, TranslationEntry> = {
   'loopActive.now': 'JETZT',
   'loopActive.capsules': 'KAPSELN',
   'loopActive.hint': 'Tippen zum Wechseln · nach rechts wischen zum Abschließen · nach links wischen zum Löschen',
+  'loopActive.archiveCapsuleA11y': 'Kapsel {text} archivieren',
   'loopActive.focus': 'FOKUS',
   'loopActive.carryIn': 'ÜBERNOMMEN',
   'loopActive.delete': 'Loop löschen',

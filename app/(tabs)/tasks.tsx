@@ -12,15 +12,20 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { EmptyState } from '../../src/components/common/EmptyState';
+import { ConfirmDialog } from '../../src/components/common/ConfirmDialog';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
+import { ArchivedCapsuleRow } from '../../src/components/loops/ArchivedCapsuleRow';
 import { LoopItemCapsule } from '../../src/components/loops/LoopItemCapsule';
 import { TaskFormModal } from '../../src/components/tasks/TaskFormModal';
 import { TaskTree } from '../../src/components/tasks/TaskTree';
 import type { Capsule } from '../../src/domain/capsules/capsuleDomain';
+import { formatShortDayLabel } from '../../src/domain/shared/dateUtils';
 import type { StandaloneCapsule, Task } from '../../src/domain/types';
 import {
   createStandaloneCapsule,
+  deleteArchivedCapsule,
+  listArchivedLooseCapsules,
   listCompletedLooseCapsules,
   listLooseCapsules,
   listStandaloneCapsules,
@@ -62,12 +67,17 @@ export default function TasksScreen() {
   >([]);
   const [completedStandaloneCapsules, setCompletedStandaloneCapsules] =
     useState<StandaloneCapsule[]>([]);
+  const [archivedLooseCapsules, setArchivedLooseCapsules] = useState<Capsule[]>(
+    []
+  );
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [addVisible, setAddVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newCapsuleText, setNewCapsuleText] = useState('');
   const [addingCapsule, setAddingCapsule] = useState(false);
+  const [purgeCapsule, setPurgeCapsule] = useState<Capsule | null>(null);
+  const [purging, setPurging] = useState(false);
 
   const reload = useCallback(async () => {
     const [
@@ -76,18 +86,21 @@ export default function TasksScreen() {
       openStandaloneCapsules,
       doneLoopCapsules,
       doneStandaloneCapsules,
+      archivedLoopCapsules,
     ] = await Promise.all([
       listTasks(db, filter),
       listLooseCapsules(db),
       listStandaloneCapsules(db, false),
       listCompletedLooseCapsules(db),
       listStandaloneCapsules(db, true),
+      listArchivedLooseCapsules(db),
     ]);
     setTasks(result);
     setLooseCapsules(openLoopCapsules);
     setStandaloneCapsules(openStandaloneCapsules);
     setCompletedLooseCapsules(doneLoopCapsules);
     setCompletedStandaloneCapsules(doneStandaloneCapsules);
+    setArchivedLooseCapsules(archivedLoopCapsules);
     setLoading(false);
   }, [db, filter]);
 
@@ -101,6 +114,7 @@ export default function TasksScreen() {
         listStandaloneCapsules(db, false),
         listCompletedLooseCapsules(db),
         listStandaloneCapsules(db, true),
+        listArchivedLooseCapsules(db),
       ]).then(
         ([
           result,
@@ -108,6 +122,7 @@ export default function TasksScreen() {
           openStandaloneCapsules,
           doneLoopCapsules,
           doneStandaloneCapsules,
+          archivedLoopCapsules,
         ]) => {
           if (!cancelled) {
             setTasks(result);
@@ -115,6 +130,7 @@ export default function TasksScreen() {
             setStandaloneCapsules(openStandaloneCapsules);
             setCompletedLooseCapsules(doneLoopCapsules);
             setCompletedStandaloneCapsules(doneStandaloneCapsules);
+            setArchivedLooseCapsules(archivedLoopCapsules);
             setLoading(false);
           }
         }
@@ -174,6 +190,23 @@ export default function TasksScreen() {
         t('tasks.couldNotUpdateCapsule'),
         localizeError(error)
       );
+    }
+  };
+
+  const handleDeleteArchivedCapsule = async () => {
+    if (!purgeCapsule || purging) return;
+    setPurging(true);
+    try {
+      await deleteArchivedCapsule(db, purgeCapsule);
+      setPurgeCapsule(null);
+      await reload();
+    } catch (error) {
+      Alert.alert(
+        t('task.couldNotDeleteArchivedCapsule'),
+        localizeError(error)
+      );
+    } finally {
+      setPurging(false);
     }
   };
 
@@ -388,6 +421,35 @@ export default function TasksScreen() {
           </View>
         </View>
       ) : null}
+
+      {archivedLooseCapsules.length > 0 ? (
+        <View style={styles.capsuleSection}>
+          <View style={styles.capsuleHeader}>
+            <Text style={[styles.capsuleLabel, { color: colors.textSecondary }]}>
+              {t('task.archivedCapsules')}
+            </Text>
+            <Text style={[styles.capsuleCount, { color: colors.textSecondary }]}>
+              {String(archivedLooseCapsules.length)}
+            </Text>
+          </View>
+          <Text style={[styles.capsuleHint, { color: colors.textSecondary }]}>
+            {t('task.archivedCapsulesHint')}
+          </Text>
+          <View style={styles.archiveList}>
+            {archivedLooseCapsules.map((capsule) => (
+              <ArchivedCapsuleRow
+                key={`archived-${capsule.item.id}`}
+                text={capsule.item.text}
+                meta={`H${capsule.loop.sequence_number} · ${formatShortDayLabel(
+                  capsule.loop.local_date
+                )}`}
+                disabled={purging && purgeCapsule?.item.id === capsule.item.id}
+                onDelete={() => setPurgeCapsule(capsule)}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -434,6 +496,22 @@ export default function TasksScreen() {
           void handleAddTask(values);
         }}
         onClose={() => setAddVisible(false)}
+      />
+
+      <ConfirmDialog
+        visible={purgeCapsule !== null}
+        title={t('task.deleteArchivedTitle')}
+        message={t('task.deleteArchivedMessage', {
+          text: purgeCapsule?.item.text ?? '',
+        })}
+        confirmLabel={purging ? t('common.deleting') : t('common.delete')}
+        destructive
+        onConfirm={() => {
+          void handleDeleteArchivedCapsule();
+        }}
+        onCancel={() => {
+          if (!purging) setPurgeCapsule(null);
+        }}
       />
     </Screen>
   );
@@ -505,6 +583,9 @@ const styles = StyleSheet.create({
   capsuleWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  archiveList: {
     gap: spacing.sm,
   },
   capsuleHint: {
