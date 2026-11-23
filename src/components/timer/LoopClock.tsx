@@ -180,5 +180,7 @@ const styles = StyleSheet.create({
   remaining: {
     fontSize: 13,
     fontWeight: '600',
+    textAlign: 'center',
+    maxWidth: '80%',
   },
 });
