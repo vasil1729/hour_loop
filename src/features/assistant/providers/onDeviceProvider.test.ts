@@ -254,7 +254,7 @@ describe('on-device provider', () => {
       'start_loop',
     ]);
     expect(params.tools[0].function.description).toContain(
-      'Prepare a real focus loop'
+      'Prepare a focus loop'
     );
     expect(params.tools[0].function.description.length).toBeLessThan(90);
     expect(params.tool_choice).toBe('auto');
@@ -431,21 +431,20 @@ describe('on-device provider', () => {
     expect(result.toolCalls).toEqual([]);
   });
 
-  it('streams content deltas', async () => {
+  it('returns the final content without duplicate token streaming', async () => {
     const onTextDelta = jest.fn();
-    context.completion.mockImplementation(async (_params, callback) => {
-      callback?.({ content: 'One ' });
-      callback?.({ content: 'two' });
-      return completionResult({ content: 'One two' });
-    });
+    context.completion.mockResolvedValue(
+      completionResult({ content: 'You have no active tasks.' })
+    );
     const provider = createOnDeviceProvider(MODEL_ID);
 
-    await provider.chat({
+    const result = await provider.chat({
       ...request('Show my stats'),
       onTextDelta,
     });
 
-    expect(onTextDelta.mock.calls).toEqual([['One '], ['two']]);
+    expect(result.content).toBe('You have no active tasks.');
+    expect(onTextDelta).not.toHaveBeenCalled();
   });
 
   it('stops native generation when aborted', async () => {

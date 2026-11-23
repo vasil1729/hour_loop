@@ -352,8 +352,7 @@ export function createOnDeviceProvider(modelId: string): AssistantProvider {
       request.signal?.addEventListener('abort', onAbort, { once: true });
 
       try {
-        const result = await context.completion(
-          {
+        const result = await context.completion({
             messages: toLlamaMessages(
               request.messages,
               jsonToolProtocol ? buildJsonToolPrompt(allowedTools) : ''
@@ -381,12 +380,7 @@ export function createOnDeviceProvider(modelId: string): AssistantProvider {
             top_k: 20,
             top_p: 0.9,
             penalty_repeat: 1.05,
-          },
-          (data) => {
-            if (cancelled) return;
-            if (data.content) request.onTextDelta?.(data.content);
-          }
-        );
+          });
 
         if (cancelled || request.signal?.aborted) {
           throw new AssistantProviderError(
