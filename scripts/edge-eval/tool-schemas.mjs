@@ -191,6 +191,7 @@ export const EVAL_TOOLS = [
         taskId: { type: 'string' },
         items: {
           type: 'array',
+          minItems: 1,
           items: {
             type: 'object',
             properties: { text: { type: 'string' } },
@@ -198,7 +199,7 @@ export const EVAL_TOOLS = [
           },
         },
       },
-      required: ['durationMinutes'],
+      required: ['durationMinutes', 'items'],
       additionalProperties: false,
     },
   },

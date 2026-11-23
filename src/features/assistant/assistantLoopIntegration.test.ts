@@ -136,13 +136,26 @@ describe('AI loop actions use the existing timer service', () => {
     expect(result.summary).toContain('H2');
   });
 
+  it('requires at least one capsule before preparing a start', async () => {
+    loops.getActiveLoop.mockResolvedValue(null);
+    const tool = findTool('start_loop');
+
+    await expect(prepare(tool, { durationMinutes: 25 })).rejects.toThrow(
+      'at least one capsule'
+    );
+    expect(loops.startLoop).not.toHaveBeenCalled();
+  });
+
   it('respects the single active-or-paused loop rule', async () => {
     loops.getActiveLoop.mockResolvedValue(makeLoop({ status: 'PAUSED' }));
     const tool = findTool('start_loop');
 
-    await expect(prepare(tool, { durationMinutes: 25 })).rejects.toThrow(
-      'already paused'
-    );
+    await expect(
+      prepare(tool, {
+        durationMinutes: 25,
+        items: [{ text: 'Focus' }],
+      })
+    ).rejects.toThrow('already paused');
     expect(loops.startLoop).not.toHaveBeenCalled();
   });
 
@@ -219,7 +232,10 @@ describe('AI loop actions use the existing timer service', () => {
     loops.getActiveLoop.mockResolvedValue(null);
     loops.startLoop.mockRejectedValue(new Error('Timer write failed.'));
     const tool = findTool('start_loop');
-    const action = await prepare(tool, { durationMinutes: 25 });
+    const action = await prepare(tool, {
+      durationMinutes: 25,
+      items: [{ text: 'Focus' }],
+    });
 
     await expect(
       executeAssistantAction(context, tool, action, { writesEnabled: true })
@@ -245,6 +261,7 @@ describe('AI loop actions use the existing timer service', () => {
     const action = await prepare(tool, {
       durationMinutes: 25,
       taskId: 'task-1',
+      items: [{ text: 'Focus' }],
     });
 
     await executeAssistantAction(context, tool, action, { writesEnabled: true });
@@ -272,7 +289,11 @@ describe('AI loop actions use the existing timer service', () => {
     const tool = findTool('start_loop');
 
     await expect(
-      prepare(tool, { durationMinutes: 25, taskId: 'task-root' })
+      prepare(tool, {
+        durationMinutes: 25,
+        taskId: 'task-root',
+        items: [{ text: 'Focus' }],
+      })
     ).rejects.toThrow('Loops can only target a subtask.');
   });
 
@@ -282,7 +303,11 @@ describe('AI loop actions use the existing timer service', () => {
     const tool = findTool('start_loop');
 
     await expect(
-      prepare(tool, { durationMinutes: 25, taskId: 'missing' })
+      prepare(tool, {
+        durationMinutes: 25,
+        taskId: 'missing',
+        items: [{ text: 'Focus' }],
+      })
     ).rejects.toThrow('Task not found.');
   });
 

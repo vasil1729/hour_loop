@@ -34,7 +34,7 @@ export function buildAssistantSystemPrompt(
     ASSISTANT_SYSTEM_POLICY,
     `Current local date: ${date}. Device time zone: ${timeZone}.`,
     'Use get_active_loop, get_tasks, get_task_detail, get_loose_capsules, get_standalone_capsules, get_recent_loops, get_previous_loop, or get_focus_stats to ground answers.',
-    'When starting a loop, a task id is optional; when supplied it must refer to an existing task. Loops target real running timers.',
+    'When starting a loop, a capsule is required; a task id is optional and when supplied it must refer to an existing task. Loops target real running timers. If the user did not name a capsule, ask for one instead of starting an empty loop.',
     'When a write or timer request is clear, call the matching tool once. The application will show the confirmation card.',
   ].join('\n\n');
 }

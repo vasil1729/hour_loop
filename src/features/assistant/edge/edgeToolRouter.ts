@@ -91,7 +91,7 @@ export const EDGE_TOOL_INFO: Record<string, EdgeToolInfo> = {
     category: 'capsule',
   },
   start_loop: {
-    summary: 'Prepare a real focus loop with a target duration.',
+    summary: 'Prepare a focus loop with a target duration and a capsule.',
     category: 'loop',
   },
   pause_loop: {

@@ -882,7 +882,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
     }>({
       name: 'start_loop',
       description:
-        'Start a real focus loop. Requires explicit user confirmation before execution.',
+        'Start a real focus loop with at least one capsule. Requires explicit user confirmation before execution.',
       risk: 'timer',
       parameters: {
         type: 'object',
@@ -892,6 +892,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           taskId: { type: 'string' },
           items: {
             type: 'array',
+            minItems: 1,
             items: {
               type: 'object',
               properties: { text: { type: 'string' } },
@@ -899,7 +900,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             },
           },
         },
-        required: ['durationMinutes'],
+        required: ['durationMinutes', 'items'],
         additionalProperties: false,
       },
       parse: (args) => {
@@ -914,11 +915,18 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             'A duration is required.'
           );
         }
+        const items = parseStringItems(record, 'items');
+        if (items.length === 0) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'Add at least one capsule before starting a loop.'
+          );
+        }
         return {
           durationMinutes,
           focus: optionalString(record, 'focus', 280) ?? null,
           taskId: optionalString(record, 'taskId', 128) ?? null,
-          items: parseStringItems(record, 'items'),
+          items,
         };
       },
       describe: (args) =>
