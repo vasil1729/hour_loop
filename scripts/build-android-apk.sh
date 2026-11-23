@@ -129,7 +129,15 @@ echo "Building Hour Loop v$VERSION for $APK_ARCH…"
 mkdir -p "$OUTPUT_DIR"
 APK_NAME="hour-loop-v${VERSION}-${ARCH_LABEL}.apk"
 APK_PATH="$OUTPUT_DIR/$APK_NAME"
-cp "$STAGE_DIR/android/app/build/outputs/apk/release/app-release.apk" "$APK_PATH"
+STAGE_APK="$STAGE_DIR/android/app/build/outputs/apk/release/app-release.apk"
+
+# Local Expo modules can silently disappear from a stale staging copy. The
+# on-device model download depends on this module for SHA-256 verification.
+if ! unzip -p "$STAGE_APK" 'classes*.dex' | grep -a 'HourLoopHash' >/dev/null; then
+  die "The build is missing the HourLoopHash native module."
+fi
+
+cp "$STAGE_APK" "$APK_PATH"
 
 if command -v sha256sum >/dev/null 2>&1; then
   (cd "$OUTPUT_DIR" && sha256sum "$APK_NAME" > "$APK_NAME.sha256")

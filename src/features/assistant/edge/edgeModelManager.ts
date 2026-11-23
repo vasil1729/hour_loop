@@ -416,9 +416,29 @@ export function createEdgeModelManager(deps: EdgeModelManagerDeps) {
       if (options.signal?.aborted) {
         throw new EdgeModelError('cancelled', 'The download was cancelled.');
       }
-      const digest = deps.hashFile
-        ? await deps.hashFile(partial)
-        : await hashFile(partial, model.downloadSizeBytes, options.signal);
+      let digest: string;
+      if (deps.hashFile) {
+        try {
+          digest = await deps.hashFile(partial);
+        } catch (error) {
+          // A missing native module must not crash a completed download.
+          console.warn(
+            '[edge] Native SHA-256 unavailable; using the JavaScript fallback.',
+            error
+          );
+          digest = await hashFile(
+            partial,
+            model.downloadSizeBytes,
+            options.signal
+          );
+        }
+      } else {
+        digest = await hashFile(
+          partial,
+          model.downloadSizeBytes,
+          options.signal
+        );
+      }
       if (options.signal?.aborted) {
         throw new EdgeModelError('cancelled', 'The download was cancelled.');
       }

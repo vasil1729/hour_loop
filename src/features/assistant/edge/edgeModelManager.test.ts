@@ -221,6 +221,20 @@ describe('edge model manager', () => {
     expect(fs.files.get(finalUri)).toEqual(PAYLOAD);
   });
 
+  it('falls back to the JavaScript hash when the native module is missing', async () => {
+    const hashFile = jest.fn(async () => {
+      throw new Error("Cannot find native module 'HourLoopHash'");
+    });
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { fs, manager, finalUri } = setup({ hashFile });
+
+    await manager.downloadModel('tiny');
+
+    expect(hashFile).toHaveBeenCalledTimes(1);
+    expect(fs.files.get(finalUri)).toEqual(PAYLOAD);
+    warn.mockRestore();
+  });
+
   it('hashes through raw byte reads without the base64 bridge', async () => {
     const { fs, manager, finalUri } = setup();
     const readSpy = jest.spyOn(fs, 'readAsStringAsync');
