@@ -158,3 +158,64 @@ Only one physical ARM64 device is currently connected (Redmi Note 8 Pro,
 MT6785, Android 11, no i8mm). The Xiaomi Pad 6 is offline. A modern
 Snapdragon device and an old ARM64 device without `dotprod` are **not**
 available; those gaps will be recorded, not claimed as tested.
+
+## 9. Experiment results
+
+### Experiment A — generic ARM64 only (`-PrnllamaVariants=rnllama`, no HTP assets)
+
+Build: `builds/hour-loop-v1.9.1-arm64-variant-generic.apk`,
+SHA-256 in `.sha256`. Cold build took **14m05s** (first native compile of the
+narrowed variant set; Gradle build cache supplied 153 of 437 tasks).
+
+| Metric | Baseline v1.9.1 | Experiment A |
+| --- | --- | --- |
+| APK file size | 142,170,303 B (135.58 MiB) | **49,346,916 B (47.06 MiB)** |
+| Installed size (phone) | 136 MB | not re-measured after install (same uncompressed layout) |
+| Native libraries | 32 files / 113.96 MiB | **20 files / 30.54 MiB** |
+| llama.rn libraries | 14 files / 96.62 MiB | **2 files / 13.20 MiB** |
+| HTP DSP assets | 5 files / 4.94 MiB | **0 files / 0 MiB** |
+| DEX | 23.60 MiB | 23.60 MiB (unchanged) |
+| JS bundle | 3.20 MiB | 3.20 MiB (unchanged) |
+
+Size reduction: **65.3%** (135.58 → 47.06 MiB). The two retained llama.rn
+libraries are exactly the mandatory generic pair (`librnllama.so` +
+`librnllama_jni.so`); the loader's unconditional `System.loadLibrary("rnllama")`
+therefore still succeeds on every ARM64 device.
+
+### Device functional evidence (Redmi Note 8 Pro / MT6785)
+
+Verified with `builds/hour-loop-v1.9.1-arm64-variant-generic.apk`, model
+**Qwen3.5 0.8B Q4_K_M** (already present in app storage), no API key:
+
+- App launches; Timer, Tasks, History and Settings tabs work; Settings → AI
+  assistant → on-device model list renders correctly with the active model.
+- Prompt "What am I working on?" submitted from the assistant chip; the model
+  loaded and produced a grounded in-scope answer. First load from cold storage
+  took ~122 s; subsequent process launches with warm page cache answered in
+  ~9 s.
+- Warm inference (same prompt, same device, identical UI procedure):
+  **generic-only 12 s** vs **baseline 15 s** (3 s polling granularity and
+  response-length variation; no detectable regression).
+- On-device response completes as one final message; **token-delta streaming
+  is not supported by the current on-device provider** (commit `7d755fc`
+  deliberately removed duplicate streaming). This is unchanged by the build
+  optimization.
+- GGUF download of LFM2.5 1.2B was started on the generic build and progressed
+  from 1% to 61% over ~225 s at ~3 MB/s; completion/SHA-256 verification and
+  the subsequent model-switch (unload/reload) were **not confirmed** because
+  the device was taken over by the user mid-test. These remain unverified on
+  this build.
+- Offline inference with airplane mode was **not** exercised for the same
+  reason; no claim is made here.
+
+Baseline APK was reinstalled and exercised with the same prompt procedure
+before switching back; no app-level regression was observed on either build
+during the verified steps.
+
+### Interpretation
+
+The generic-only configuration meets the <60 MB target with a large margin,
+keeps the mandatory fallback path, and showed no measurable inference
+slowdown on the only available device. It is therefore the leading candidate
+for the final build. Any larger configuration (Experiments B/C) must justify
+its extra bytes with a measured speed benefit, not a theoretical one.
