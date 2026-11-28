@@ -8,7 +8,6 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingScreen } from '../../src/components/common/LoadingScreen';
 import { Screen } from '../../src/components/common/Screen';
 import { DayPickerModal } from '../../src/components/history/DayPickerModal';
-import { DaySummary } from '../../src/components/history/DaySummary';
 import {
   HistoryPeriodSwitcher,
   type HistoryPeriod,
@@ -242,29 +241,6 @@ export default function HistoryScreen() {
         <LoadingScreen />
       ) : period === 'day' && dayHistory ? (
         <>
-          <DaySummary
-            totalSeconds={dayHistory.totalSeconds}
-            loopCount={dayHistory.loopCount}
-            daily={dayHistory.daily}
-          />
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('history.openDayTimeline')}
-            onPress={() =>
-              router.push({
-                pathname: '/day/[date]',
-                params: { date: selectedDay },
-              })
-            }
-            style={styles.timelineLink}
-          >
-            <Text style={[styles.timelineLinkText, { color: colors.accent }]}>
-              {t('history.openDayTimeline')}
-            </Text>
-            <Ionicons name={isRTL ? 'arrow-back' : 'arrow-forward'} size={14} color={colors.accent} />
-          </Pressable>
-
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('history.loops')}
@@ -483,17 +459,6 @@ const styles = StyleSheet.create({
   },
   periodLink: {
     fontSize: 11,
-    fontWeight: '700',
-  },
-  timelineLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.xs,
-  },
-  timelineLinkText: {
-    fontSize: 13,
     fontWeight: '700',
   },
   section: {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { formatIntentionDuration } from '../../domain/intentions/intentionsDomain';
 import { formatDurationCompact } from '../../domain/timer/timerEngine';
@@ -12,21 +13,38 @@ type DaySummaryProps = {
   totalSeconds: number;
   loopCount: number;
   daily: IntentionSummary;
+  title?: string;
+  onPress?: () => void;
 };
 
-export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) {
+export function DaySummary({
+  totalSeconds,
+  loopCount,
+  daily,
+  title,
+  onPress,
+}: DaySummaryProps) {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const hasIntention = daily.targetSeconds > 0;
   const percent = daily.progress.percent;
 
-  return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: colors.surface, borderColor: colors.border },
-      ]}
-    >
+  const body = (
+    <>
+      {title ? (
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.textSecondary }]}>
+            {title}
+          </Text>
+          {onPress ? (
+            <Ionicons
+              name="chevron-forward"
+              size={14}
+              color={colors.accent}
+            />
+          ) : null}
+        </View>
+      ) : null}
       <View style={styles.stats}>
         <View style={styles.stat}>
           <Text style={[styles.statValue, { color: colors.text }]}>
@@ -87,8 +105,31 @@ export function DaySummary({ totalSeconds, loopCount, daily }: DaySummaryProps) 
           {t('daySummary.noIntention')}
         </Text>
       )}
-    </View>
+    </>
   );
+
+  const cardStyle = [
+    styles.card,
+    { backgroundColor: colors.surface, borderColor: colors.border },
+  ];
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        onPress={onPress}
+        style={({ pressed }) => [
+          ...cardStyle,
+          pressed ? styles.pressed : null,
+        ]}
+      >
+        {body}
+      </Pressable>
+    );
+  }
+
+  return <View style={cardStyle}>{body}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -97,6 +138,20 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: spacing.md,
     gap: spacing.md,
+  },
+  pressed: {
+    opacity: 0.75,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  title: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
   },
   stats: {
     flexDirection: 'row',

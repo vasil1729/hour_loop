@@ -16,6 +16,7 @@ import { Button } from '../common/Button';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { LoadingScreen } from '../common/LoadingScreen';
 import { Screen } from '../common/Screen';
+import { DaySummary } from '../history/DaySummary';
 import { LoopItemCapsule } from '../loops/LoopItemCapsule';
 import { LoopClock } from './LoopClock';
 import { LoopControls } from './LoopControls';
@@ -34,6 +35,7 @@ import { getMaxSequenceForDate } from '../../database/repositories/loopsReposito
 import { loopService } from '../../features/loops/loopService';
 import { buildLoopTimeline } from '../../features/loops/loopTimeline';
 import { shouldOpenCompletionJournal } from '../../features/loops/loopTarget';
+import { getDayHistory, type DayHistory } from '../../features/history/historyService';
 import { useActiveLoop } from '../../hooks/useActiveLoop';
 import { useIntentions } from '../../hooks/useIntentions';
 import { localizeError } from '../../i18n';
@@ -59,6 +61,7 @@ export function TimerScreen() {
   );
 
   const [items, setItems] = useState<LoopItem[]>([]);
+  const [todayHistory, setTodayHistory] = useState<DayHistory | null>(null);
   const [nextSequence, setNextSequence] = useState(1);
   const [newCapsuleText, setNewCapsuleText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -96,6 +99,9 @@ export function TimerScreen() {
       let cancelled = false;
 
       const load = async () => {
+        const history = await getDayHistory(db, todayKey).catch(() => null);
+        if (!cancelled) setTodayHistory(history);
+
         if (activeLoopId) {
           await loopService
             .ensureCurrentItemInterval(db, activeLoopId)
@@ -397,42 +403,59 @@ export function TimerScreen() {
         </Text>
       </View>
 
-      <LoopClock
-        elapsedSeconds={activeLoop ? elapsedSeconds : 0}
-        targetSeconds={displayTarget}
-        status={activeLoop?.status ?? 'IDLE'}
-      />
-
-      {activeLoop && currentItem ? (
-        <Text
-          numberOfLines={1}
-          style={[styles.currentCapsule, { color: colors.accent }]}
-        >
-          {currentItem.text}
-        </Text>
+      {todayHistory ? (
+        <DaySummary
+          totalSeconds={todayHistory.totalSeconds}
+          loopCount={todayHistory.loopCount}
+          daily={todayHistory.daily}
+          title={t('timer.taskOverview')}
+          onPress={() =>
+            router.push({
+              pathname: '/day/[date]',
+              params: { date: todayKey },
+            })
+          }
+        />
       ) : null}
 
-      {activeLoop ? (
-        <LoopControls
-          status={activeLoop.status === 'PAUSED' ? 'PAUSED' : 'ACTIVE'}
-          targetReached={reachedTarget}
-          busy={busy}
-          onPause={handlePause}
-          onResume={handleResume}
-          onStop={() => {
-            void handleStop();
-          }}
+      <View style={styles.clockArea}>
+        <LoopClock
+          elapsedSeconds={activeLoop ? elapsedSeconds : 0}
+          targetSeconds={displayTarget}
+          status={activeLoop?.status ?? 'IDLE'}
         />
-      ) : (
-        <Button
-          label={t('loopStart.start')}
-          onPress={() => {
-            void handleStart();
-          }}
-          loading={busy}
-          style={styles.startButton}
-        />
-      )}
+
+        {activeLoop && currentItem ? (
+          <Text
+            numberOfLines={1}
+            style={[styles.currentCapsule, { color: colors.accent }]}
+          >
+            {currentItem.text}
+          </Text>
+        ) : null}
+
+        {activeLoop ? (
+          <LoopControls
+            status={activeLoop.status === 'PAUSED' ? 'PAUSED' : 'ACTIVE'}
+            targetReached={reachedTarget}
+            busy={busy}
+            onPause={handlePause}
+            onResume={handleResume}
+            onStop={() => {
+              void handleStop();
+            }}
+          />
+        ) : (
+          <Button
+            label={t('loopStart.start')}
+            onPress={() => {
+              void handleStart();
+            }}
+            loading={busy}
+            style={styles.startButton}
+          />
+        )}
+      </View>
 
       {activeLoop ? (
         <View style={styles.capsulesSection}>
@@ -597,8 +620,15 @@ export function TimerScreen() {
 
 const styles = StyleSheet.create({
   content: {
+    flexGrow: 1,
     paddingTop: spacing.sm,
     gap: spacing.md,
+  },
+  clockArea: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
   },
   header: {
     gap: 1,

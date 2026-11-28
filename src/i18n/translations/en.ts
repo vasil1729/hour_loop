@@ -62,6 +62,7 @@ export const en = {
   'tabs.history': 'History',
   'tabs.settings': 'Settings',
 
+  'timer.taskOverview': 'TASK OVERVIEW',
   'timer.statusRunning': 'RUNNING',
   'today.eyebrow': 'TODAY',
   'today.daily': 'DAILY',
