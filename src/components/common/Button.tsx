@@ -17,6 +17,7 @@ type ButtonProps = {
   label: string;
   onPress: () => void;
   variant?: ButtonVariant;
+  size?: 'default' | 'compact';
   disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -27,6 +28,7 @@ export function Button({
   label,
   onPress,
   variant = 'primary',
+  size = 'default',
   disabled = false,
   loading = false,
   style,
@@ -34,6 +36,7 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
+  const compact = size === 'compact';
 
   const background =
     variant === 'primary'
@@ -56,6 +59,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
+        compact && styles.compact,
         {
           backgroundColor: background,
           borderColor: variant === 'secondary' ? colors.border : 'transparent',
@@ -68,7 +72,9 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={textColor} />
       ) : (
-        <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+        <Text style={[styles.label, compact && styles.compactLabel, { color: textColor }]}>
+          {label}
+        </Text>
       )}
     </Pressable>
   );
@@ -82,8 +88,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  compact: {
+    minHeight: 38,
+    paddingHorizontal: spacing.md,
+  },
   label: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  compactLabel: {
+    fontSize: 14,
   },
 });

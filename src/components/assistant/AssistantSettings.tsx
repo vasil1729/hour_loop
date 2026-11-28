@@ -510,6 +510,7 @@ export function AssistantSettings({
           }}
           loading={busy}
           disabled={busy || !canSave}
+          size="compact"
           style={styles.button}
         />
         <Button
@@ -524,6 +525,7 @@ export function AssistantSettings({
           }}
           loading={testState === 'testing'}
           disabled={testState === 'testing' || busy || !config}
+          size="compact"
           style={styles.button}
         />
       </View>
@@ -681,6 +683,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   button: {
-    flex: 1,
+    flexShrink: 1,
   },
 });
