@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -44,6 +46,7 @@ export default function CompleteLoopScreen() {
   const params = useLocalSearchParams<{ loopId?: string }>();
   const loopId = typeof params.loopId === 'string' ? params.loopId : undefined;
   const refreshLoop = useLoopStore((state) => state.refresh);
+  const scrollRef = useRef<ScrollView>(null);
 
   const [loop, setLoop] = useState<Loop | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -60,6 +63,8 @@ export default function CompleteLoopScreen() {
   const [done, setDone] = useState('');
   const [rollForward, setRollForward] = useState('');
   const [note, setNote] = useState('');
+  const [newCapsule, setNewCapsule] = useState('');
+  const [addingCapsule, setAddingCapsule] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [rollForwardTaskId, setRollForwardTaskId] = useState<string | null>(null);
   const [taskPickerVisible, setTaskPickerVisible] = useState(false);
@@ -138,6 +143,34 @@ export default function CompleteLoopScreen() {
         localizeError(caught)
       );
     }
+  };
+
+  const addCapsule = async () => {
+    if (!loop || readOnly || addingCapsule) return;
+    const text = newCapsule.trim();
+    if (!text) return;
+    setAddingCapsule(true);
+    try {
+      const item = await loopService.addLoopItem(db, loop.id, text);
+      setItems((previous) => [...previous, item]);
+      setNewCapsule('');
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollToEnd({ animated: true });
+      });
+    } catch (caught) {
+      Alert.alert(
+        t('loopComplete.couldNotUpdateCapsule'),
+        localizeError(caught)
+      );
+    } finally {
+      setAddingCapsule(false);
+    }
+  };
+
+  const revealInput = () => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    });
   };
 
   const handleKeepLooping = async () => {
@@ -239,7 +272,7 @@ export default function CompleteLoopScreen() {
   const targetReached = elapsedSeconds >= loop.target_duration_seconds;
 
   return (
-    <Screen contentContainerStyle={styles.content}>
+    <Screen contentContainerStyle={styles.content} scrollRef={scrollRef}>
       <View style={styles.header}>
         <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>
           {t('loopComplete.eyebrow')}
@@ -290,19 +323,21 @@ export default function CompleteLoopScreen() {
         events={buildLoopTimeline(loop, intervals, { closing: !readOnly })}
       />
 
-      {items.length > 0 ? (
-        <View style={styles.field}>
-          <View style={styles.itemsHeader}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>
-              {t('loopComplete.capsules')}
-            </Text>
+      <View style={styles.field}>
+        <View style={styles.itemsHeader}>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            {t('loopComplete.capsules')}
+          </Text>
+          {items.length > 0 ? (
             <Text style={[styles.itemsCount, { color: colors.textSecondary }]}>
               {t('common.doneCount', {
                 done: items.filter((item) => item.done).length,
                 total: items.length,
               })}
             </Text>
-          </View>
+          ) : null}
+        </View>
+        {items.length > 0 ? (
           <View style={styles.capsuleWrap}>
             {items.map((item) => (
               <LoopItemCapsule
@@ -319,8 +354,55 @@ export default function CompleteLoopScreen() {
               />
             ))}
           </View>
-        </View>
-      ) : (
+        ) : (
+          <Text style={[styles.helper, { color: colors.textSecondary }]}>
+            {t('loopStart.capsulesHelper')}
+          </Text>
+        )}
+        {!readOnly ? (
+          <View style={styles.addRow}>
+            <TextInput
+              value={newCapsule}
+              onChangeText={setNewCapsule}
+              onFocus={revealInput}
+              onSubmitEditing={() => {
+                void addCapsule();
+              }}
+              placeholder={t('loopStart.addPlaceholder')}
+              placeholderTextColor={colors.textSecondary}
+              maxLength={120}
+              returnKeyType="done"
+              style={[
+                styles.addInput,
+                {
+                  color: colors.text,
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('loopStart.addA11y')}
+              disabled={!newCapsule.trim() || addingCapsule}
+              onPress={() => {
+                void addCapsule();
+              }}
+              style={[
+                styles.addButton,
+                {
+                  backgroundColor: colors.accent,
+                  opacity:
+                    newCapsule.trim() && !addingCapsule ? 1 : 0.45,
+                },
+              ]}
+            >
+              <Ionicons name="add" size={22} color="#FFFFFF" />
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+      {items.length === 0 ? (
         <>
           <Field
             label={t('loopComplete.focus')}
@@ -328,6 +410,7 @@ export default function CompleteLoopScreen() {
             onChangeText={setFocus}
             placeholder={t('loopComplete.focusPlaceholder')}
             editable={!readOnly}
+            onFocus={revealInput}
             multiline
           />
           <Field
@@ -336,16 +419,18 @@ export default function CompleteLoopScreen() {
             onChangeText={setCarryIn}
             placeholder={t('loopComplete.carryInPlaceholder')}
             editable={!readOnly}
+            onFocus={revealInput}
             multiline
           />
         </>
-      )}
+      ) : null}
       <Field
         label={t('loopComplete.done')}
         value={done}
         onChangeText={setDone}
         placeholder={t('loopComplete.donePlaceholder')}
         editable={!readOnly}
+        onFocus={revealInput}
         multiline
       />
       <Field
@@ -354,6 +439,7 @@ export default function CompleteLoopScreen() {
         onChangeText={setRollForward}
         placeholder={t('loopComplete.rollForwardPlaceholder')}
         editable={!readOnly}
+        onFocus={revealInput}
         multiline
       />
       <View style={styles.field}>
@@ -392,6 +478,7 @@ export default function CompleteLoopScreen() {
         onChangeText={setNote}
         placeholder={t('loopComplete.notePlaceholder')}
         editable={!readOnly}
+        onFocus={revealInput}
         multiline
       />
 
@@ -472,6 +559,7 @@ type FieldProps = {
   onChangeText: (value: string) => void;
   placeholder: string;
   editable: boolean;
+  onFocus?: () => void;
   multiline?: boolean;
 };
 
@@ -481,6 +569,7 @@ function Field({
   onChangeText,
   placeholder,
   editable,
+  onFocus,
   multiline = false,
 }: FieldProps) {
   const { colors } = useTheme();
@@ -493,6 +582,7 @@ function Field({
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
         editable={editable}
+        onFocus={onFocus}
         multiline={multiline}
         maxLength={2000}
         style={[
@@ -586,6 +676,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+  },
+  helper: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  addInput: {
+    flex: 1,
+    minHeight: 48,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: 15,
+  },
+  addButton: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
     borderWidth: StyleSheet.hairlineWidth,

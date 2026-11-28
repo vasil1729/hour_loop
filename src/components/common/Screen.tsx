@@ -10,6 +10,7 @@ type ScreenProps = {
   scroll?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
   edges?: ('top' | 'bottom' | 'left' | 'right')[];
+  scrollRef?: React.RefObject<ScrollView | null>;
 };
 
 export function Screen({
@@ -17,6 +18,7 @@ export function Screen({
   scroll = true,
   contentContainerStyle,
   edges = ['top'],
+  scrollRef,
 }: ScreenProps) {
   const { colors } = useTheme();
 
@@ -27,8 +29,11 @@ export function Screen({
     >
       {scroll ? (
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={[styles.content, contentContainerStyle]}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
           showsVerticalScrollIndicator={false}
         >
           {children}
