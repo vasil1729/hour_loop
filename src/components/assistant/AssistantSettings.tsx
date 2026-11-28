@@ -15,6 +15,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import {
   ASSISTANT_MAX_KEY_LENGTH,
   ASSISTANT_MODEL_OPTIONS,
+  CLOUD_ONLY_BUILD,
 } from '../../constants/assistant';
 import {
   EDGE_MODELS,
@@ -227,16 +228,18 @@ export function AssistantSettings({
       ...option,
       providerLabel: t(PROVIDER_LABEL_KEYS[option.provider]),
     })),
-    ...EDGE_MODELS.map((model) => ({
-      provider: 'on-device' as const,
-      model: model.id,
-      label: model.displayName,
-      providerLabel: t('settings.assistantOnDevice'),
-      description: `${formatEdgeModelSize(model.downloadSizeBytes)} · ${t(
-        'settings.edgeRam',
-        { ram: model.minRamGb }
-      )}`,
-    })),
+    ...(CLOUD_ONLY_BUILD
+      ? []
+      : EDGE_MODELS.map((model) => ({
+          provider: 'on-device' as const,
+          model: model.id,
+          label: model.displayName,
+          providerLabel: t('settings.assistantOnDevice'),
+          description: `${formatEdgeModelSize(model.downloadSizeBytes)} · ${t(
+            'settings.edgeRam',
+            { ram: model.minRamGb }
+          )}`,
+        }))),
   ];
   const selectedModel =
     modelOptions.find(
@@ -396,19 +399,21 @@ export function AssistantSettings({
         </Text>
       ) : null}
 
-      <EdgeModelSection
-        activeModelId={
-          config?.provider === 'on-device' ? config.model : null
-        }
-        onUseModel={(modelId) => {
-          void handleUseEdgeModel(modelId);
-        }}
-        onActiveModelDeleted={(modelId) => {
-          void handleEdgeModelDeleted(modelId);
-        }}
-      />
+      {CLOUD_ONLY_BUILD ? null : (
+        <EdgeModelSection
+          activeModelId={
+            config?.provider === 'on-device' ? config.model : null
+          }
+          onUseModel={(modelId) => {
+            void handleUseEdgeModel(modelId);
+          }}
+          onActiveModelDeleted={(modelId) => {
+            void handleEdgeModelDeleted(modelId);
+          }}
+        />
+      )}
 
-      {config?.provider === 'on-device' ? (
+      {config?.provider === 'on-device' && !CLOUD_ONLY_BUILD ? (
         <Text style={[styles.hint, { color: colors.textSecondary }]}>
           {t('settings.assistantOnDeviceHint')}
         </Text>

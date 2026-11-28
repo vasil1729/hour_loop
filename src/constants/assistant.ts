@@ -1,5 +1,8 @@
 import type { AssistantProviderId } from '../features/assistant/assistantTypes';
 
+export const CLOUD_ONLY_BUILD =
+  process.env.EXPO_PUBLIC_CLOUD_ONLY === '1';
+
 export const ASSISTANT_SETTING_PREFIX = 'assistant_';
 
 export const ASSISTANT_ENABLED_KEY = 'assistant_enabled';

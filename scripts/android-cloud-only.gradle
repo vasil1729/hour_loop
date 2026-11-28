@@ -1,0 +1,23 @@
+// Gradle init script for the 32-bit cloud-only build.
+//
+// llama.rn has no prebuilt armeabi-v7a libraries and its 32-bit source build
+// takes tens of minutes. The app's on-device UI is disabled for this build, so
+// skip only the module's native compile tasks and keep its Java classes.
+//
+// Usage: ./gradlew -I scripts/android-cloud-only.gradle :app:assembleRelease
+
+gradle.allprojects { project ->
+    if (project.name != 'llama.rn') {
+        return
+    }
+    project.tasks.configureEach { task ->
+        def name = task.name
+        if (
+            name.startsWith('buildCMake') ||
+            name.startsWith('configureCMake') ||
+            name.startsWith('externalNativeBuild')
+        ) {
+            task.enabled = false
+        }
+    }
+}

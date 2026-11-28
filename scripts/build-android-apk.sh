@@ -17,6 +17,15 @@ APK_ARCH="${APK_ARCH:-arm64-v8a}"
 RNLLAMA_VARIANTS="${RNLLAMA_VARIANTS-}"
 HEXAGON_ASSETS="${HEXAGON_ASSETS-}"
 APK_NAME_SUFFIX="${APK_NAME_SUFFIX:-}"
+# CLOUD_ONLY=1 builds a 32-bit APK for devices without 64-bit Android. It
+# skips llama.rn's native compile and hides the on-device model UI.
+CLOUD_ONLY="${CLOUD_ONLY:-0}"
+if [[ "$CLOUD_ONLY" == "1" ]]; then
+  export EXPO_PUBLIC_CLOUD_ONLY=1
+  if [[ -z "$APK_NAME_SUFFIX" ]]; then
+    APK_NAME_SUFFIX="-cloudonly"
+  fi
+fi
 
 die() {
   echo "error: $*" >&2
@@ -153,6 +162,9 @@ echo "Building Hour Loop v$VERSION for $APK_ARCH…"
   fi
   if [[ "$HEXAGON_ASSETS" == "remove" ]]; then
     GRADLE_ARGS+=("-I" "$ROOT_DIR/scripts/android-no-hexagon.gradle")
+  fi
+  if [[ "$CLOUD_ONLY" == "1" ]]; then
+    GRADLE_ARGS+=("-I" "$ROOT_DIR/scripts/android-cloud-only.gradle")
   fi
   if [[ "${CI:-}" == "1" || "${CI:-}" == "true" ]]; then
     GRADLE_ARGS+=(--no-daemon)

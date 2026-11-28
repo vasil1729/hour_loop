@@ -9,6 +9,7 @@ import {
   ASSISTANT_PROVIDER_KEY,
   ASSISTANT_SUGGESTED_MODELS,
   ASSISTANT_WRITES_KEY,
+  CLOUD_ONLY_BUILD,
 } from '../../../constants/assistant';
 import {
   getSetting,
@@ -115,17 +116,24 @@ export async function loadAssistantConfig(
     getSetting(db, ASSISTANT_WRITES_KEY),
   ]);
   const parsedProvider = parseProvider(provider);
-  const storedModel = model?.trim() ?? '';
+  const effectiveProvider =
+    CLOUD_ONLY_BUILD && parsedProvider === 'on-device'
+      ? 'groq'
+      : parsedProvider;
+  const storedModel =
+    CLOUD_ONLY_BUILD && parsedProvider === 'on-device'
+      ? ''
+      : (model?.trim() ?? '');
   return {
     enabled: parseBoolean(enabled, true),
-    provider: parsedProvider,
+    provider: effectiveProvider,
     model:
       storedModel ||
-      (parsedProvider === 'custom'
+      (effectiveProvider === 'custom'
         ? ''
-        : parsedProvider === 'on-device'
+        : effectiveProvider === 'on-device'
           ? DEFAULT_EDGE_MODEL_ID
-          : ASSISTANT_SUGGESTED_MODELS[parsedProvider]),
+          : ASSISTANT_SUGGESTED_MODELS[effectiveProvider]),
     baseUrl: baseUrl?.trim() || null,
     writesEnabled: parseBoolean(writesEnabled, true),
   };
