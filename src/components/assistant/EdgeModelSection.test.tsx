@@ -156,6 +156,24 @@ describe('on-device model section', () => {
     alert.mockRestore();
   });
 
+  it('selects a downloaded model by tapping the model card', async () => {
+    resetStates(['qwen3.5-0.8b', 'lfm2.5-1.2b']);
+    const onUseModel = jest.fn();
+    await render(
+      <EdgeModelSection
+        activeModelId="qwen3.5-0.8b"
+        onUseModel={onUseModel}
+        onActiveModelDeleted={jest.fn()}
+      />
+    );
+
+    await fireEvent.press(
+      await screen.findByLabelText('LFM2.5 1.2B, settings.edgeUse')
+    );
+
+    expect(onUseModel).toHaveBeenCalledWith('lfm2.5-1.2b');
+  });
+
   it('switches to a downloaded model', async () => {
     resetStates(['qwen3.5-0.8b', 'lfm2.5-1.2b']);
     const onUseModel = jest.fn();

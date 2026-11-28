@@ -62,7 +62,17 @@ export function ModelPickerModal({
       onRequestClose={onClose}
     >
       <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessible={false}
+          importantForAccessibility="no"
+        />
+        <Pressable
+          accessible={false}
+          onPress={() => undefined}
+          style={[styles.card, { backgroundColor: colors.surface }]}
+        >
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>
               {t('settings.modelPickerTitle')}
@@ -144,7 +154,7 @@ export function ModelPickerModal({
               );
             }}
           />
-        </View>
+        </Pressable>
       </View>
     </Modal>
   );

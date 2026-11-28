@@ -234,7 +234,21 @@ export function EdgeModelSection({
                       },
                     ]}
                   >
-                    <View style={styles.modelInfo}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        downloaded && !active
+                          ? `${model.displayName}, ${t('settings.edgeUse')}`
+                          : model.displayName
+                      }
+                      accessibilityState={{ selected: active, disabled: !downloaded || active }}
+                      disabled={!downloaded || active}
+                      onPress={() => onUseModel(model.id)}
+                      style={({ pressed }) => [
+                        styles.modelInfo,
+                        pressed && downloaded && !active ? styles.modelInfoPressed : null,
+                      ]}
+                    >
                       <Text style={[styles.modelName, { color: colors.text }]}>
                         {model.displayName}
                       </Text>
@@ -257,7 +271,7 @@ export function EdgeModelSection({
                           {t(model.noteKey)}
                         </Text>
                       ) : null}
-                    </View>
+                    </Pressable>
 
                     {download ? (
                       <View style={styles.actions}>
@@ -275,7 +289,7 @@ export function EdgeModelSection({
                           accessibilityRole="button"
                           accessibilityLabel={t('settings.edgeCancel')}
                           onPress={() => cancelDownload(model.id)}
-                          hitSlop={8}
+                          hitSlop={16}
                           style={styles.actionButton}
                         >
                           <Text style={[styles.actionText, { color: colors.danger }]}>
@@ -294,7 +308,7 @@ export function EdgeModelSection({
                             accessibilityRole="button"
                             accessibilityLabel={`${t('settings.edgeUse')} ${model.displayName}`}
                             onPress={() => onUseModel(model.id)}
-                            hitSlop={8}
+                            hitSlop={16}
                             style={styles.actionButton}
                           >
                             <Text style={[styles.actionText, { color: colors.accent }]}>
@@ -306,7 +320,7 @@ export function EdgeModelSection({
                           accessibilityRole="button"
                           accessibilityLabel={`${t('settings.edgeDelete')} ${model.displayName}`}
                           onPress={() => deleteModel(model)}
-                          hitSlop={8}
+                          hitSlop={16}
                           style={styles.actionButton}
                         >
                           <Text style={[styles.actionText, { color: colors.danger }]}>
@@ -321,7 +335,7 @@ export function EdgeModelSection({
                         onPress={() => {
                           void startDownload(model);
                         }}
-                        hitSlop={8}
+                        hitSlop={16}
                         style={styles.actionButton}
                       >
                         <Text style={[styles.actionText, { color: colors.accent }]}>
@@ -376,6 +390,9 @@ const styles = StyleSheet.create({
   modelInfo: {
     flex: 1,
     gap: 2,
+  },
+  modelInfoPressed: {
+    opacity: 0.65,
   },
   modelName: {
     fontSize: 14,

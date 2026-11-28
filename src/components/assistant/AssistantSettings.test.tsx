@@ -112,6 +112,29 @@ describe('assistant settings UI', () => {
     expect(mockSetKey).not.toHaveBeenCalled();
   });
 
+  it('persists an on-device model chosen from the picker', async () => {
+    await render(<AssistantSettings />);
+
+    await fireEvent.press(
+      await screen.findByLabelText('settings.assistantModel')
+    );
+    await fireEvent.press(
+      await screen.findByLabelText('Qwen3.5 0.8B, settings.assistantOnDevice')
+    );
+
+    await waitFor(() =>
+      expect(mockSaveConfig).toHaveBeenCalledWith(
+        mockDb,
+        expect.objectContaining({
+          provider: 'on-device',
+          model: 'qwen3.5-0.8b',
+          baseUrl: null,
+        })
+      )
+    );
+    expect(screen.getAllByText('Qwen3.5 0.8B').length).toBeGreaterThan(0);
+  });
+
   it('links to the free Groq API key page for the default provider', async () => {
     const openURL = jest
       .spyOn(Linking, 'openURL')

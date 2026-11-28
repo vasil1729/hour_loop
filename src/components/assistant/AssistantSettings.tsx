@@ -581,12 +581,18 @@ export function AssistantSettings({
           setApiKeyDraft('');
           setTestState('idle');
           setStatusMessage(null);
-          updateConfig({
-            provider: option.provider,
-            model: option.model,
-            baseUrl: null,
-          });
           setModelPickerVisible(false);
+          if (option.provider === 'on-device') {
+            // Keep the picker in sync with the per-model "Use" action, which
+            // persists immediately. Cloud models still go through Save.
+            void handleUseEdgeModel(option.model);
+          } else {
+            updateConfig({
+              provider: option.provider,
+              model: option.model,
+              baseUrl: null,
+            });
+          }
         }}
         onClose={() => setModelPickerVisible(false)}
       />
