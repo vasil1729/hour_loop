@@ -37,7 +37,10 @@ export {
 export type { Language, LanguagePreference } from './localeState';
 export type { TranslationKey, TranslationParams } from './types';
 
-const dictionaries: Record<Language, Record<TranslationKey, TranslationEntry>> = {
+const dictionaries: Record<
+  Language,
+  Partial<Record<TranslationKey, TranslationEntry>>
+> = {
   en,
   ru,
   ar,

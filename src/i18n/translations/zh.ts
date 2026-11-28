@@ -1,7 +1,7 @@
 import type { TranslationEntry, TranslationKey } from '../types';
 import { en } from './en';
 
-export const zh: Record<TranslationKey, TranslationEntry> = {
+export const zh: Partial<Record<TranslationKey, TranslationEntry>> = {
   ...en,
   'common.cancel': '取消',
   'common.save': '保存',

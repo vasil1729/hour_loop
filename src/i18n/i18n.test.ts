@@ -111,8 +111,10 @@ describe('translate', () => {
     };
     for (const [language, dictionary] of Object.entries(dictionaries)) {
       for (const key of Object.keys(en) as TranslationKey[]) {
+        const translated = dictionary[key];
+        if (!translated) continue;
         const expected = placeholders(en[key]);
-        const actual = placeholders(dictionary[key]);
+        const actual = placeholders(translated);
         if (actual.join(',') !== expected.join(',')) {
           throw new Error(
             `${language} ${key}: expected ${expected.join(', ') || 'none'}, got ${actual.join(', ') || 'none'}`

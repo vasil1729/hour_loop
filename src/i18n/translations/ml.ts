@@ -1,7 +1,7 @@
 import type { TranslationEntry, TranslationKey } from '../types';
 import { en } from './en';
 
-export const ml: Record<TranslationKey, TranslationEntry> = {
+export const ml: Partial<Record<TranslationKey, TranslationEntry>> = {
   ...en,
   'common.cancel': 'റദ്ദാക്കുക',
   'common.save': 'സംരക്ഷിക്കുക',

@@ -439,6 +439,17 @@ export const en = {
   'settings.earlyWarning': 'Early warning',
   'settings.earlyWarningBody':
     'Notify me before a running loop reaches its target. Off disables only the early alert.',
+  'settings.vibration': 'Vibration',
+  'settings.vibrationBody':
+    'Choose how the phone vibrates when a loop finishes.',
+  'settings.vibrationLong': 'Long',
+  'settings.vibrationShort': 'Short',
+  'settings.sound': 'Alert sound',
+  'settings.soundBody':
+    'Choose the sound for loop alerts. The test button lets you check it now.',
+  'settings.soundDefault': 'Default',
+  'settings.soundChime': 'Chime',
+  'settings.testAlert': 'Test alert',
   'settings.alarmTiming': 'Alarm timing',
   'settings.alarmTimingBody':
     'If loop alerts arrive late, allow “Alarms & reminders” for Hour Loop in Android settings.',
@@ -551,6 +562,9 @@ export const en = {
   'notifications.targetTitle': 'H{sequence} target reached',
   'notifications.targetBody':
     "You've reached your target. Keep going or close the loop.",
+  'notifications.testTitle': 'Hour Loop test alert',
+  'notifications.testBody':
+    'If you can see and hear this, loop alerts are working.',
   'notifications.earlyTitle': 'H{sequence} ending soon',
   'notifications.earlyBody':
     'Only {duration} left. Wrap up or keep going.',

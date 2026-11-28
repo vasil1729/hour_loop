@@ -24,7 +24,13 @@ import {
   secondsToMinutes,
 } from '../../src/constants/durationPresets';
 import { INTENTION_PRESETS_MINUTES } from '../../src/constants/intentions';
-import { EARLY_WARNING_PRESETS_MINUTES } from '../../src/constants/notifications';
+import {
+  EARLY_WARNING_PRESETS_MINUTES,
+  NOTIFICATION_SOUND_PRESETS,
+  NOTIFICATION_VIBRATION_PRESETS,
+  type NotificationSound,
+  type NotificationVibration,
+} from '../../src/constants/notifications';
 import type { HourLoopBackup } from '../../src/domain/backup/backup';
 import { formatIntentionDuration } from '../../src/domain/intentions/intentionsDomain';
 import {
@@ -57,6 +63,7 @@ import {
 import {
   cancelAllLoopNotifications,
   requestNotificationPermission,
+  sendTestNotification,
 } from '../../src/services/notifications/notificationService';
 import {
   useSettingsStore,
@@ -90,6 +97,18 @@ const LANGUAGES: { key: LanguagePreference; labelKey: TranslationKey }[] = [
   { key: 'id', labelKey: 'common.indonesian' },
 ];
 
+const VIBRATION_LABELS: Record<NotificationVibration, TranslationKey> = {
+  long: 'settings.vibrationLong',
+  short: 'settings.vibrationShort',
+  off: 'common.off',
+};
+
+const SOUND_LABELS: Record<NotificationSound, TranslationKey> = {
+  default: 'settings.soundDefault',
+  chime: 'settings.soundChime',
+  off: 'common.off',
+};
+
 export default function SettingsScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
@@ -114,6 +133,12 @@ export default function SettingsScreen() {
   const earlyWarningMinutes = useSettingsStore(
     (state) => state.earlyWarningMinutes
   );
+  const notificationVibration = useSettingsStore(
+    (state) => state.notificationVibration
+  );
+  const notificationSound = useSettingsStore(
+    (state) => state.notificationSound
+  );
   const setDefaultDuration = useSettingsStore((state) => state.setDefaultDuration);
   const setDefaultDailyIntention = useSettingsStore(
     (state) => state.setDefaultDailyIntention
@@ -130,6 +155,12 @@ export default function SettingsScreen() {
   );
   const setEarlyWarningMinutes = useSettingsStore(
     (state) => state.setEarlyWarningMinutes
+  );
+  const setNotificationVibration = useSettingsStore(
+    (state) => state.setNotificationVibration
+  );
+  const setNotificationSound = useSettingsStore(
+    (state) => state.setNotificationSound
   );
   const loadSettings = useSettingsStore((state) => state.load);
   const {
@@ -275,6 +306,42 @@ export default function SettingsScreen() {
         t('settings.couldNotUpdateWarning'),
         localizeError(error)
       );
+    }
+  };
+
+  const handleVibration = async (value: NotificationVibration) => {
+    try {
+      await setNotificationVibration(db, value);
+      if (notificationsEnabled) {
+        await recoverAppState(db, { requestPermission: true });
+      }
+    } catch (error) {
+      Alert.alert(t('settings.couldNotUpdateNotifications'), localizeError(error));
+    }
+  };
+
+  const handleSound = async (value: NotificationSound) => {
+    try {
+      await setNotificationSound(db, value);
+      if (notificationsEnabled) {
+        await recoverAppState(db, { requestPermission: true });
+      }
+    } catch (error) {
+      Alert.alert(t('settings.couldNotUpdateNotifications'), localizeError(error));
+    }
+  };
+
+  const handleTestAlert = async () => {
+    try {
+      const sent = await sendTestNotification(db);
+      if (!sent) {
+        Alert.alert(
+          t('settings.notificationsBlocked'),
+          t('settings.notificationsBlockedBody')
+        );
+      }
+    } catch (error) {
+      Alert.alert(t('settings.couldNotUpdateNotifications'), localizeError(error));
     }
   };
 
@@ -807,6 +874,104 @@ export default function SettingsScreen() {
             );
           })}
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('settings.vibration')}
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          {t('settings.vibrationBody')}
+        </Text>
+        <View style={styles.chips}>
+          {NOTIFICATION_VIBRATION_PRESETS.map((value) => {
+            const selected = notificationVibration === value;
+            return (
+              <Pressable
+                key={value}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected,
+                  disabled: !notificationsEnabled,
+                }}
+                disabled={!notificationsEnabled}
+                onPress={() => {
+                  void handleVibration(value);
+                }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? colors.accent : colors.surface,
+                    borderColor: selected ? colors.accent : colors.border,
+                    opacity: notificationsEnabled ? 1 : 0.45,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    { color: selected ? '#FFFFFF' : colors.text },
+                  ]}
+                >
+                  {t(VIBRATION_LABELS[value])}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {t('settings.sound')}
+        </Text>
+        <Text style={[styles.sectionBody, { color: colors.textSecondary }]}>
+          {t('settings.soundBody')}
+        </Text>
+        <View style={styles.chips}>
+          {NOTIFICATION_SOUND_PRESETS.map((value) => {
+            const selected = notificationSound === value;
+            return (
+              <Pressable
+                key={value}
+                accessibilityRole="button"
+                accessibilityState={{
+                  selected,
+                  disabled: !notificationsEnabled,
+                }}
+                disabled={!notificationsEnabled}
+                onPress={() => {
+                  void handleSound(value);
+                }}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: selected ? colors.accent : colors.surface,
+                    borderColor: selected ? colors.accent : colors.border,
+                    opacity: notificationsEnabled ? 1 : 0.45,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    { color: selected ? '#FFFFFF' : colors.text },
+                  ]}
+                >
+                  {t(SOUND_LABELS[value])}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Button
+          label={t('settings.testAlert')}
+          variant="secondary"
+          onPress={() => {
+            void handleTestAlert();
+          }}
+          disabled={!notificationsEnabled}
+        />
       </View>
 
       {supportsExactAlarmSettings() ? (

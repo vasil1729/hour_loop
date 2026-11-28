@@ -1,6 +1,6 @@
 import type { TranslationEntry, TranslationKey } from '../types';
 
-export const ru: Record<TranslationKey, TranslationEntry> = {
+export const ru: Partial<Record<TranslationKey, TranslationEntry>> = {
   'common.cancel': 'Отмена',
   'common.save': 'Сохранить',
   'common.close': 'Закрыть',

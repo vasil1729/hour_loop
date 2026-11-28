@@ -8,8 +8,16 @@ import {
 } from '../constants/intentions';
 import {
   DEFAULT_EARLY_WARNING_MINUTES,
+  DEFAULT_NOTIFICATION_SOUND,
+  DEFAULT_NOTIFICATION_VIBRATION,
   EARLY_WARNING_SETTING_KEY,
+  NOTIFICATION_SOUND_SETTING_KEY,
+  NOTIFICATION_VIBRATION_SETTING_KEY,
   parseEarlyWarningMinutes,
+  parseNotificationSound,
+  parseNotificationVibration,
+  type NotificationSound,
+  type NotificationVibration,
 } from '../constants/notifications';
 import { getSetting, setSetting } from '../database/repositories/settingsRepository';
 import {
@@ -29,6 +37,8 @@ type SettingsStore = {
   defaultDailyIntentionSeconds: number;
   defaultMonthlyIntentionSeconds: number;
   earlyWarningMinutes: number;
+  notificationVibration: NotificationVibration;
+  notificationSound: NotificationSound;
   themePreference: ThemePreference;
   languagePreference: LanguagePreference;
   notificationsEnabled: boolean;
@@ -38,6 +48,14 @@ type SettingsStore = {
   setDefaultDailyIntention: (db: SQLiteDatabase, seconds: number) => Promise<void>;
   setDefaultMonthlyIntention: (db: SQLiteDatabase, seconds: number) => Promise<void>;
   setEarlyWarningMinutes: (db: SQLiteDatabase, minutes: number) => Promise<void>;
+  setNotificationVibration: (
+    db: SQLiteDatabase,
+    value: NotificationVibration
+  ) => Promise<void>;
+  setNotificationSound: (
+    db: SQLiteDatabase,
+    value: NotificationSound
+  ) => Promise<void>;
   setThemePreference: (db: SQLiteDatabase, preference: ThemePreference) => Promise<void>;
   setLanguagePreference: (
     db: SQLiteDatabase,
@@ -62,6 +80,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
   defaultDailyIntentionSeconds: DEFAULT_DAILY_INTENTION_SECONDS,
   defaultMonthlyIntentionSeconds: DEFAULT_MONTHLY_INTENTION_SECONDS,
   earlyWarningMinutes: DEFAULT_EARLY_WARNING_MINUTES,
+  notificationVibration: DEFAULT_NOTIFICATION_VIBRATION,
+  notificationSound: DEFAULT_NOTIFICATION_SOUND,
   themePreference: 'system',
   languagePreference: 'system',
   notificationsEnabled: true,
@@ -73,6 +93,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       dailyIntention,
       monthlyIntention,
       earlyWarning,
+      vibration,
+      sound,
       theme,
       language,
       notifications,
@@ -81,6 +103,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       getDefaultIntentionSeconds(db, 'daily'),
       getDefaultIntentionSeconds(db, 'monthly'),
       getSetting(db, EARLY_WARNING_SETTING_KEY),
+      getSetting(db, NOTIFICATION_VIBRATION_SETTING_KEY),
+      getSetting(db, NOTIFICATION_SOUND_SETTING_KEY),
       getSetting(db, 'theme'),
       getSetting(db, 'language'),
       getSetting(db, 'notifications_enabled'),
@@ -94,6 +118,8 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       defaultDailyIntentionSeconds: dailyIntention,
       defaultMonthlyIntentionSeconds: monthlyIntention,
       earlyWarningMinutes: parseEarlyWarningMinutes(earlyWarning),
+      notificationVibration: parseNotificationVibration(vibration),
+      notificationSound: parseNotificationSound(sound),
       themePreference: parseTheme(theme),
       languagePreference: parseLanguage(language),
       notificationsEnabled: notifications !== 'false',
@@ -120,6 +146,16 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
     const normalized = Math.max(0, Math.round(minutes));
     await setSetting(db, EARLY_WARNING_SETTING_KEY, String(normalized));
     set({ earlyWarningMinutes: normalized });
+  },
+
+  setNotificationVibration: async (db, value) => {
+    await setSetting(db, NOTIFICATION_VIBRATION_SETTING_KEY, value);
+    set({ notificationVibration: value });
+  },
+
+  setNotificationSound: async (db, value) => {
+    await setSetting(db, NOTIFICATION_SOUND_SETTING_KEY, value);
+    set({ notificationSound: value });
   },
 
   setThemePreference: async (db, preference) => {

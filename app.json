@@ -43,7 +43,10 @@
       [
         "expo-notifications",
         {
-          "color": "#7B6EF6"
+          "color": "#7B6EF6",
+          "sounds": [
+            "./assets/sounds/loop_chime.wav"
+          ]
         }
       ],
       [
