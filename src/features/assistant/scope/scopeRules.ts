@@ -160,13 +160,19 @@ const ACTIVE_WORK_INTENT_PATTERN =
   /^(?:what\s+am\s+i\s+(?:working\s+on|doing)(?:\s+right\s+now)?|what(?:'s| is)\s+my\s+(?:current\s+)?(?:loop|task|focus))[\s!?.,…]*$/iu;
 
 const NON_APP_CONTEXT_PATTERN =
-  /\b(?:javascript|typescript|java|python|rust|golang|swift|kotlin|ruby|php|sql|html|css|programming|coding|code|algorithms?|compilers?|music|songs?|melodies?|videos?|editing|photoshop|premiere|after effects|davinci|blender|photography|cameras?|physics|biology|circuits?|relays?|interrupts?|medicines?|pharmacy|wardrobe|market research|focus groups?|feedback|for loop|while loop|roller coaster|computers?|cloud storage|phone storage|graph theory|mathematics|math|stories?|novels?|films?|movies?|video game|gaming|unity|unreal|microwaves?|ovens?|alarm clocks?|gmail|outlook|excel|spreadsheets?|pokemon|stock prices?|share prices?|valuations?|fundings?|revenues?|investors?|competitors?)\b|c\+\+|c#/iu;
+  /\b(?:javascript|typescript|java|python|rust|golang|swift|kotlin|ruby|php|sql|html|css|programming|coding|code|algorithms?|compilers?|music|songs?|melodies?|videos?|editing|photoshop|premiere|after effects|davinci|blender|photography|cameras?|physics|biology|circuits?|relays?|interrupts?|medicines?|pharmacy|wardrobe|market research|focus groups?|feedback|for loop|while loop|roller coaster|computers?|cloud storage|phone storage|graph theory|mathematics|math|stories?|novels?|films?|movies?|video game|gaming|unity|unreal|microwaves?|ovens?|alarm clocks?|gmail|outlook|excel|spreadsheets?|pokemon|stock prices?|share prices?|valuations?|fundings?|revenues?|investors?|competitors?|task management|project management|management theory)\b|c\+\+|c#/iu;
 
 const NON_APP_CONTENT_INTENT_PATTERN =
   /\b(?:jokes?|poems?|raps?|lyrics|essays?|recipes?|weather|news|capitals?|presidents?|translat(?:e|ion)|history|stock market|bitcoin|fun fact|facts? about|memes?)\b/iu;
 
 const APP_NOUN_PATTERN =
-  /\b(?:loops?|timers?|intervals?|capsules?|focus sessions?|backups?|checklists?)\b/iu;
+  /\b(?:loops?|timers?|intervals?|capsules?|focus sessions?|focus (?:stats?|statistics|time)|subtasks?|tasks?|intentions?|focus targets?|backups?|checklists?)\b/iu;
+
+const DEFINITION_PATTERN =
+  /^(?:what(?:'s| is| are)|what does|what do|define|explain|meaning of|tell me about)\b/iu;
+
+const DEFINITION_APP_NOUN_PATTERN =
+  /\b(?:capsules?|subtasks?|intentions?|focus targets?|focus sessions?|hour loop)\b/iu;
 
 const APP_ACTION_PATTERN =
   /\b(?:create|edit|rename|delete|pause|resume|start|stop|configure|change|make|add|remove|move|restore|backup|work|explain|set|duration|view|show|see|track)\b/iu;
@@ -239,6 +245,18 @@ export function isExplicitAppHelp(text: string): boolean {
   }
 
   if (ANAPHORIC_APP_HELP_PATTERN.test(normalized)) return true;
+
+  const definesAppNoun =
+    DEFINITION_APP_NOUN_PATTERN.test(normalized) ||
+    (HOUR_LOOP_PATTERN.test(normalized) &&
+      /\b(?:tasks?|loops?)\b/iu.test(normalized));
+  if (
+    DEFINITION_PATTERN.test(normalized) &&
+    definesAppNoun &&
+    !NON_APP_CONTENT_INTENT_PATTERN.test(normalized)
+  ) {
+    return true;
+  }
 
   return (
     APP_NOUN_PATTERN.test(normalized) &&
@@ -347,11 +365,47 @@ function isPureFillerClause(text: string): boolean {
   return PURE_FILLER_PATTERN.test(text.trim());
 }
 
+const LIST_ITEM_VERB =
+  /^(?:tell|show|explain|write|recommend|give|make|create|start|pause|resume|complete|finish|play|find|book|order|buy|translate|schedule|remind)\b/iu;
+
+/**
+ * Protect "with capsules X and Y" lists from mixed-intent splitting. The
+ * trailing conjunction is only folded into the list when it looks like a
+ * short noun item, not a new request ("... and tell me a joke").
+ */
+function protectListConjunctions(text: string): string {
+  const marker = /\b(?:with|using)\s+(?:the\s+)?(?:capsules?|items?)\b/iu.exec(text);
+  if (!marker) return text;
+  const head = text.slice(0, marker.index);
+  const tail = text.slice(marker.index);
+  const parts = tail.split(/\s+and\s+/iu);
+  if (parts.length <= 1) return text;
+  const kept = [parts[0] ?? ''];
+  for (const part of parts.slice(1)) {
+    const trimmed = part.trim();
+    const words = trimmed.split(/\s+/).filter(Boolean);
+    const looksLikeItem =
+      words.length > 0 &&
+      words.length <= 3 &&
+      !LIST_ITEM_VERB.test(trimmed) &&
+      !NON_APP_CONTENT_INTENT_PATTERN.test(trimmed) &&
+      !NON_APP_EXTERNAL_ACTION_PATTERN.test(trimmed);
+    if (!looksLikeItem) break;
+    kept.push(part);
+  }
+  const remaining = parts.slice(kept.length);
+  return (
+    head +
+    kept.join(', ') +
+    (remaining.length ? ` and ${remaining.join(' and ')}` : '')
+  );
+}
+
 export function splitScopeClauses(text: string): string[] {
   // Sentence boundaries are treated as clause boundaries for mixed-intent
   // detection: "How do I create a loop? Write me a poem." must not be accepted
   // as a single in-scope app-help request.
-  const prepared = text
+  const prepared = protectListConjunctions(text)
     .replace(/\r?\n+/g, '; ')
     .replace(/([!?]+)\s+/g, '$1; ')
     .replace(/\.\s+([A-Z])/g, '.; $1');

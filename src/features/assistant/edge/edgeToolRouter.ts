@@ -187,6 +187,16 @@ export function selectEdgeToolNames(
     'create a capsule',
     'new capsule',
   ]);
+  const standaloneCapsuleIntent = hasAny(message, [
+    'standalone capsule',
+    'standalone capsules',
+  ]);
+  const createStandaloneCapsuleIntent =
+    standaloneCapsuleIntent &&
+    hasAny(message, ['create', 'add', 'new', 'make']);
+  const completeStandaloneCapsuleIntent =
+    standaloneCapsuleIntent &&
+    hasAny(message, ['complete', 'finish', 'done', 'mark']);
   const completeCapsuleIntent = hasAny(message, [
     'complete the capsule',
     'complete this capsule',
@@ -194,6 +204,9 @@ export function selectEdgeToolNames(
     'finish the capsule',
     'finish this capsule',
   ]);
+  const markCapsuleDoneIntent =
+    /\bmark\b[^\n]{0,80}\b(?:done|complete|completed)\b/iu.test(message) ||
+    hasAny(message, ['mark as done', 'mark done']);
   const previousLoopIntent = hasAny(message, [
     'previous loop',
     'last loop',
@@ -282,7 +295,15 @@ export function selectEdgeToolNames(
     add('get_active_loop');
     add('add_loop_item');
   }
-  if (completeCapsuleIntent) {
+  if (createStandaloneCapsuleIntent) {
+    add('get_standalone_capsules');
+    add('create_standalone_capsule');
+  }
+  if (completeStandaloneCapsuleIntent) {
+    add('get_standalone_capsules');
+    add('complete_standalone_capsule');
+  }
+  if (completeCapsuleIntent || markCapsuleDoneIntent) {
     add('get_loop_items');
     add('complete_loop_item');
   }
@@ -311,7 +332,6 @@ export function selectEdgeToolNames(
   if (loopDetailIntent) add('get_loop');
   if (loopItemsIntent) add('get_loop_items');
   if (taskDetailIntent) {
-    add('get_tasks');
     add('get_task_detail');
   }
   if (looseCapsulesIntent) add('get_loose_capsules');

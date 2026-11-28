@@ -7,8 +7,9 @@ import type { AssistantTool, AssistantToolContext } from './assistantTypes';
 import { loopService } from '../loops/loopService';
 import { syncLoopNotification, cancelLoopNotification } from '../../services/notifications/notificationService';
 import { getLoopItemById } from '../../database/repositories/loopItemsRepository';
+import { listAllLoops } from '../../database/repositories/loopsRepository';
 import { getTaskById } from '../../database/repositories/tasksRepository';
-import { updateTaskDetails } from '../tasks/taskService';
+import { listTasks, updateTaskDetails } from '../tasks/taskService';
 
 jest.mock('../loops/loopService', () => ({
   loopService: {
@@ -47,6 +48,11 @@ jest.mock('../../database/repositories/loopItemsRepository', () => ({
   getLoopItemById: jest.fn(),
 }));
 
+jest.mock('../../database/repositories/loopsRepository', () => ({
+  listAllLoops: jest.fn(),
+  listRecentLoops: jest.fn(),
+}));
+
 jest.mock('../../database/repositories/tasksRepository', () => ({
   getTaskById: jest.fn(),
 }));
@@ -69,7 +75,11 @@ const notifications = {
 };
 const items = jest.mocked(getLoopItemById);
 const tasks = jest.mocked(getTaskById);
-const taskService = { updateTaskDetails: jest.mocked(updateTaskDetails) };
+const taskService = {
+  listTasks: jest.mocked(listTasks),
+  updateTaskDetails: jest.mocked(updateTaskDetails),
+};
+const loopsRepo = { listAllLoops: jest.mocked(listAllLoops) };
 
 function makeLoop(overrides: Partial<Loop> = {}): Loop {
   return {
@@ -327,6 +337,91 @@ describe('AI loop actions use the existing timer service', () => {
       note: null,
       rollForwardTaskId: null,
     });
+  });
+
+  it('drops an invented description for a bare task request', async () => {
+    const tool = findTool('create_task');
+    const args = tool.parse({
+      title: 'Launch report',
+      description: 'Create a launch report for the application.',
+    }) as { description?: string | null };
+
+    await tool.prepare!(
+      { db, userText: 'Create a task called Launch report' },
+      args
+    );
+
+    expect(args.description).toBeNull();
+  });
+
+  it('resolves a task title for updates instead of requiring an id', async () => {
+    const task = {
+      id: 'task-1',
+      parent_task_id: null,
+      title: 'Launch report',
+      description: null,
+      status: 'NOT_STARTED' as const,
+      sort_order: 0,
+      created_at: '2026-11-12T08:00:00.000Z',
+      updated_at: '2026-11-12T08:00:00.000Z',
+      completed_at: null,
+      archived_at: null,
+    };
+    taskService.listTasks.mockResolvedValue([task]);
+    tasks.mockResolvedValue(task);
+    const tool = findTool('update_task');
+    const action = await prepare(tool, {
+      taskName: 'Launch report',
+      title: 'Final report',
+    });
+
+    expect(action.targetIds).toEqual(['task-1']);
+
+    await executeAssistantAction(context, tool, action, { writesEnabled: true });
+
+    expect(taskService.updateTaskDetails).toHaveBeenCalledWith(db, 'task-1', {
+      title: 'Final report',
+      description: undefined,
+    });
+  });
+
+  it('resolves a loop number for capsule actions', async () => {
+    const loop = makeLoop({
+      id: 'loop-1',
+      sequence_number: 2,
+      status: 'PAUSED',
+    });
+    loopsRepo.listAllLoops.mockResolvedValue([loop]);
+    loops.getLoopWithElapsed.mockResolvedValue({
+      loop,
+      elapsedSeconds: 0,
+    } as never);
+    const item = {
+      id: 'item-1',
+      loop_id: 'loop-1',
+      text: 'Review',
+      done: false,
+      current: false,
+      archived_at: null,
+      sort_order: 0,
+      carried_from_item_id: null,
+      created_at: '2026-11-12T09:00:00.000Z',
+      updated_at: '2026-11-12T09:00:00.000Z',
+    };
+    loops.addLoopItem.mockResolvedValue(item as never);
+    items.mockResolvedValue(item);
+
+    const tool = findTool('add_loop_item');
+    const action = await prepare(tool, {
+      loopSequence: 2,
+      text: 'Review',
+    });
+
+    expect(action.targetIds).toEqual(['loop-1']);
+
+    await executeAssistantAction(context, tool, action, { writesEnabled: true });
+
+    expect(loops.addLoopItem).toHaveBeenCalledWith(db, 'loop-1', 'Review');
   });
 
   it('does not report success if the task disappears during update', async () => {

@@ -190,6 +190,45 @@ describe('assistant conversation tool loop', () => {
     expect(result.content).toBe('You are on H2.');
   });
 
+  it('keeps action tools available after an on-device read', async () => {
+    const readTool = makeTool('get_status', 'read', {
+      execute: jest.fn(async () => ({ summary: 'Active loop H2.' })),
+    });
+    const actionTool = makeTool('pause_loop', 'timer');
+    const provider = scriptedProvider([
+      {
+        content: '',
+        toolCalls: [toolCall('call-1', 'get_status', {})],
+        finishReason: 'tool_calls',
+      },
+      {
+        content: '',
+        toolCalls: [toolCall('call-2', 'pause_loop', {})],
+        finishReason: 'tool_calls',
+      },
+    ]);
+    provider.id = 'on-device';
+
+    const result = await runAssistantTurn({
+      db,
+      config: config({ provider: 'on-device', model: 'qwen3.5-0.8b' }),
+      apiKey: '',
+      history: [],
+      text: 'Pause my loop',
+      provider,
+      tools: [readTool, actionTool],
+    });
+
+    expect(provider.requests[0]?.tools.map((tool) => tool.function.name)).toEqual([
+      'get_status',
+      'pause_loop',
+    ]);
+    expect(provider.requests[1]?.tools.map((tool) => tool.function.name)).toEqual([
+      'pause_loop',
+    ]);
+    expect(result.pendingAction?.toolName).toBe('pause_loop');
+  });
+
   it('rejects an unknown tool without executing anything', async () => {
     const provider = scriptedProvider([
       {

@@ -71,6 +71,8 @@ export type AssistantRisk = 'read' | 'write' | 'timer';
 export type AssistantToolContext = {
   db: SQLiteDatabase;
   signal?: AbortSignal;
+  /** Original user text for this turn, used to suppress invented fields. */
+  userText?: string;
 };
 
 export type AssistantToolResult = {

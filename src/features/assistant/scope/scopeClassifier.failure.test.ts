@@ -12,17 +12,24 @@ jest.mock('./scopeModel', () => ({
 import { classifyScope } from './scopeClassifier';
 
 describe('scope classifier fail-closed behavior', () => {
+  it('allows obvious app queries without the model', () => {
+    expect(classifyScope('show my focus stats').category).toBe('IN_SCOPE');
+    expect(classifyScope('show my tasks').category).toBe('IN_SCOPE');
+  });
+
   it('returns local clarification when model inference fails', () => {
-    const decision = classifyScope('show my focus stats');
+    const decision = classifyScope('tell me about the roman empire');
     expect(decision.category).toBe('AMBIGUOUS');
     expect(decision.source).toBe('fallback');
     expect(decision.reason).toBe('model_error');
   });
 
-  it('never returns IN_SCOPE when the model is unavailable', () => {
+  it('never returns IN_SCOPE for unrecognized text when the model is unavailable', () => {
     expect(classifyScope('explain quantum mechanics').category).not.toBe(
       'IN_SCOPE'
     );
-    expect(classifyScope('show my tasks').category).not.toBe('IN_SCOPE');
+    expect(classifyScope('tell me about the roman empire').category).not.toBe(
+      'IN_SCOPE'
+    );
   });
 });

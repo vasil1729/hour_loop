@@ -110,6 +110,10 @@ export async function runAssistantTurn(
   const tools = input.tools ?? createAssistantTools(input.db);
   const toolMap = new Map(tools.map((tool) => [tool.name, tool]));
   const providerTools = toProviderTools(tools, input.config.writesEnabled);
+  const actionProviderTools = toProviderTools(
+    tools.filter((tool) => tool.risk !== 'read'),
+    input.config.writesEnabled
+  );
   const now = input.now ?? Date.now;
 
   const messages: ProviderMessage[] = [
@@ -137,7 +141,8 @@ export async function runAssistantTurn(
 
     const response = await provider.chat({
       messages,
-      tools: onDevice && readToolExecuted ? [] : providerTools,
+      tools:
+        onDevice && readToolExecuted ? actionProviderTools : providerTools,
       signal: input.signal,
       onTextDelta: (delta) => {
         streamedThisIteration = true;
@@ -206,7 +211,7 @@ export async function runAssistantTurn(
         }
         try {
           const result = await tool.execute(
-            { db: input.db, signal: input.signal },
+            { db: input.db, signal: input.signal, userText: input.text },
             args
           );
           readToolExecuted = true;
@@ -253,7 +258,10 @@ export async function runAssistantTurn(
 
       try {
         const preview = tool.prepare
-          ? await tool.prepare({ db: input.db, signal: input.signal }, args)
+          ? await tool.prepare(
+              { db: input.db, signal: input.signal, userText: input.text },
+              args
+            )
           : {
               description: tool.describe(args),
               targetIds: tool.targetIds(args),

@@ -65,17 +65,46 @@ function toLlamaMessages(
   });
 }
 
-function toolParameterNames(tool: ProviderTool): string {
+function formatSchemaType(schema: unknown, depth = 0): string {
+  if (!schema || typeof schema !== 'object' || depth > 4) return 'any';
+  const value = schema as Record<string, unknown>;
+  if (Array.isArray(value.enum)) {
+    return value.enum.map((entry) => JSON.stringify(entry)).join('|');
+  }
+  if (value.type === 'array') {
+    return `${formatSchemaType(value.items, depth + 1)}[]`;
+  }
+  if (value.type === 'object') {
+    const properties = (value.properties ?? {}) as Record<string, unknown>;
+    const required = new Set((value.required as string[] | undefined) ?? []);
+    const entries = Object.entries(properties).map(
+      ([name, property]) =>
+        `${name}${required.has(name) ? '' : '?'}:${formatSchemaType(
+          property,
+          depth + 1
+        )}`
+    );
+    return `{${entries.join(',')}}`;
+  }
+  if (value.type === 'integer') return 'integer';
+  if (value.type === 'number') return 'number';
+  if (value.type === 'boolean') return 'boolean';
+  if (value.type === 'string') return 'string';
+  return 'any';
+}
+
+function toolSignature(tool: ProviderTool): string {
   const parameters = tool.function.parameters as {
     properties?: Record<string, unknown>;
     required?: string[];
   };
-  const names = Object.keys(parameters.properties ?? {});
-  if (names.length === 0) return '()';
+  const properties = parameters.properties ?? {};
   const required = new Set(parameters.required ?? []);
-  return `(${names
-    .map((name) => (required.has(name) ? name : `${name}?`))
-    .join(', ')})`;
+  const entries = Object.entries(properties).map(
+    ([name, schema]) =>
+      `${name}${required.has(name) ? '' : '?'}:${formatSchemaType(schema)}`
+  );
+  return `(${entries.join(', ')})`;
 }
 
 function buildJsonToolPrompt(tools: readonly ProviderTool[]): string {
@@ -85,13 +114,34 @@ function buildJsonToolPrompt(tools: readonly ProviderTool[]): string {
     'To answer without a tool, return {"tool":"none","answer":"<your answer>"}.',
     'Use a tool whenever the user asks about live Hour Loop data.',
     'If the user asks for an action (start, pause, resume, complete, add, create, rename, move, or set), you must call the matching tool. Never answer an action request with tool "none".',
+    'Use the exact enum values and object shapes shown in the tool signatures.',
+    'Map today/yesterday to period "day"; this/last week to "week"; this/last month to "month". Never ask for a period the user already stated.',
+    'For start_loop, items must be an array of objects like [{"text":"Write tests"}].',
+    'When the user gives a task title, loop number (H3), or capsule text, use taskTitle, loopSequence, itemText, or capsuleText. Do not invent IDs.',
+    'For the current or active loop, omit loopId and loopSequence; the app resolves the active loop.',
+    'For update_task, taskName identifies the existing task and title is the new title.',
+    'To clear a focus target, call set_intention with targetMinutes 0.',
+    'If the user asks to start a loop but did not name a capsule, ask for one; do not call start_loop without items.',
+    'If a tool returns invalid arguments, correct it once or ask a short question. Never repeat the same call.',
+    'Omit optional fields the user did not provide. Never invent descriptions, journal text, IDs, or capsules.',
     'Examples:',
     '{"tool":"get_tasks","arguments":{}}',
-    '{"tool":"start_loop","arguments":{"durationMinutes":25}}',
+    '{"tool":"get_focus_stats","arguments":{"period":"day"}}',
+    '{"tool":"get_intention","arguments":{"period":"month"}}',
+    '{"tool":"set_intention","arguments":{"period":"day","targetMinutes":0}}',
+    '{"tool":"start_loop","arguments":{"durationMinutes":25,"items":[{"text":"Write tests"}]}}',
+    '{"tool":"complete_loop","arguments":{}}',
+    '{"tool":"add_loop_item","arguments":{"text":"Review"}}',
+    '{"tool":"complete_loop_item","arguments":{"itemText":"Write tests"}}',
+    '{"tool":"get_task_detail","arguments":{"taskTitle":"Launch report"}}',
+    '{"tool":"update_task","arguments":{"taskName":"Launch report","title":"Final report"}}',
+    '{"tool":"create_standalone_capsule","arguments":{"text":"Buy milk"}}',
+    '{"tool":"complete_standalone_capsule","arguments":{"capsuleText":"Buy milk"}}',
+    '{"tool":"create_task","arguments":{"title":"Launch report"}}',
     'Available tools:',
     ...tools.map(
       (tool) =>
-        `- ${tool.function.name}${toolParameterNames(tool)}: ${tool.function.description}`
+        `- ${tool.function.name}${toolSignature(tool)}: ${tool.function.description}`
     ),
   ].join('\n');
 }

@@ -14,7 +14,10 @@ describe('Hour Loop local scope classifier', () => {
     'What am I working on?',
     'What am I doing right now?',
     'create a task called learn rust',
+    'create a subtask draft under launch report',
+    'what is a capsule',
     'add a capsule to my loop',
+    'start a 25 minute loop with capsules write tests and review',
     'how much did i focus on programming this week',
   ])('allows in-scope English: %s', (text) => {
     expect(classifyScope(text).category).toBe('IN_SCOPE');
@@ -72,6 +75,11 @@ describe('Hour Loop local scope classifier', () => {
     ).toBe('MIXED');
     expect(
       classifyScope('Pause my loop and explain quantum mechanics').category
+    ).toBe('MIXED');
+    expect(
+      classifyScope(
+        'Start a 25 minute loop with capsules Write tests and tell me a joke'
+      ).category
     ).toBe('MIXED');
     expect(
       classifyScope('Mera focus stats dikhao aur joke sunao').category

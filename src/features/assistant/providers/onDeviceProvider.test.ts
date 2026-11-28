@@ -262,6 +262,62 @@ describe('on-device provider', () => {
     expect(params.n_predict).toBe(MODEL.maxOutputTokens);
   });
 
+  it('includes enums and nested shapes in the JSON tool prompt', async () => {
+    context.model.chatTemplates.jinja.toolUse = false;
+    context.completion.mockResolvedValue(
+      completionResult({ content: '{"tool":"none","answer":"ok"}' })
+    );
+    const focusTool: ProviderTool = {
+      type: 'function',
+      function: {
+        name: 'get_focus_stats',
+        description: 'Read focus stats.',
+        parameters: {
+          type: 'object',
+          properties: {
+            period: { type: 'string', enum: ['day', 'week', 'month'] },
+          },
+          required: ['period'],
+        },
+      },
+    };
+    const startTool: ProviderTool = {
+      type: 'function',
+      function: {
+        name: 'start_loop',
+        description: 'Start a loop.',
+        parameters: {
+          type: 'object',
+          properties: {
+            durationMinutes: { type: 'integer' },
+            items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: { text: { type: 'string' } },
+                required: ['text'],
+              },
+            },
+          },
+          required: ['durationMinutes', 'items'],
+        },
+      },
+    };
+    const provider = createOnDeviceProvider(MODEL_ID);
+
+    await provider.chat(
+      request('Start a 25 minute loop and show my focus stats', [
+        focusTool,
+        startTool,
+      ])
+    );
+
+    const prompt = context.completion.mock.calls[0]?.[0].messages[0].content;
+    expect(prompt).toContain('period:"day"|"week"|"month"');
+    expect(prompt).toContain('items:{text:string}[]');
+    expect(prompt).toContain('Never ask for a period the user already stated');
+  });
+
   it('omits tools when the request has none', async () => {
     const provider = createOnDeviceProvider(MODEL_ID);
     await provider.chat(request('Hello'));

@@ -8,13 +8,20 @@ import type {
 } from './assistantTypes';
 import {
   AssistantToolError,
-  optionalArray,
   optionalInteger,
   optionalString,
   requireEnum,
   requireObject,
   requireString,
 } from './assistantValidation';
+import {
+  optionalIntegerLike,
+  optionalJournalText,
+  optionalSequence,
+  optionalTitle,
+  parsePeriodRequest,
+  parseStringItems,
+} from './assistantToolArgs';
 import { getAssistantFocusStats } from './assistantStatsService';
 import {
   getIntentionSummary,
@@ -47,7 +54,10 @@ import {
 import {
   getLoopItemById,
 } from '../../database/repositories/loopItemsRepository';
-import { listRecentLoops } from '../../database/repositories/loopsRepository';
+import {
+  listAllLoops,
+  listRecentLoops,
+} from '../../database/repositories/loopsRepository';
 import { getStandaloneCapsuleById } from '../../database/repositories/standaloneCapsulesRepository';
 import { getTaskById } from '../../database/repositories/tasksRepository';
 import { useLoopStore } from '../../store/loopStore';
@@ -94,17 +104,6 @@ function defineTool<TArgs>(config: {
   };
 }
 
-function parseStringItems(
-  record: Record<string, unknown>,
-  key: string
-): { text: string }[] {
-  const raw = optionalArray(record, key, 10) ?? [];
-  return raw.map((entry) => {
-    const item = requireObject(entry);
-    return { text: requireString(item, 'text', { max: 200 }) };
-  });
-}
-
 async function requireTask(
   db: SQLiteDatabase,
   taskId: string | null | undefined
@@ -131,6 +130,183 @@ async function requireLoop(db: SQLiteDatabase, loopId: string) {
   } catch {
     throw new AssistantToolError('not_found', 'Loop not found.');
   }
+}
+
+type TaskRefArgs = {
+  taskId?: string | null;
+  taskTitle?: string | null;
+};
+
+async function resolveTaskRef(
+  db: SQLiteDatabase,
+  args: TaskRefArgs,
+  required: boolean
+): Promise<string | null> {
+  if (args.taskId) return args.taskId;
+  const title = args.taskTitle?.trim();
+  if (!title) {
+    if (required) {
+      throw new AssistantToolError(
+        'invalid_arguments',
+        'Provide a task id or task title.'
+      );
+    }
+    return null;
+  }
+  const tasks = await listTasks(db, 'all');
+  let matches = tasks.filter(
+    (task) => task.title.trim().toLowerCase() === title.toLowerCase()
+  );
+  if (matches.length === 0) {
+    matches = tasks.filter((task) =>
+      task.title.trim().toLowerCase().includes(title.toLowerCase())
+    );
+  }
+  if (matches.length === 1) return matches[0]?.id ?? null;
+  if (matches.length === 0) {
+    throw new AssistantToolError('not_found', `Task “${title}” was not found.`);
+  }
+  throw new AssistantToolError(
+    'invalid_arguments',
+    `Multiple tasks match “${title}”. Use the task id.`
+  );
+}
+
+type LoopRefArgs = {
+  loopId?: string | null;
+  loopSequence?: number;
+};
+
+async function resolveLoopRef(
+  db: SQLiteDatabase,
+  args: LoopRefArgs,
+  options: { required?: boolean; allowActive?: boolean } = {}
+): Promise<string | null> {
+  if (args.loopId) return args.loopId;
+  if (args.loopSequence !== undefined) {
+    const loops = await listAllLoops(db);
+    const match = loops.find(
+      (loop) => loop.sequence_number === args.loopSequence
+    );
+    if (match) return match.id;
+    throw new AssistantToolError(
+      'not_found',
+      `Loop H${args.loopSequence} was not found.`
+    );
+  }
+  if (options.allowActive) {
+    const active = await loopService.getActiveLoop(db);
+    if (active) return active.id;
+  }
+  if (options.required) {
+    throw new AssistantToolError(
+      'invalid_arguments',
+      'Provide a loop id or loop number.'
+    );
+  }
+  return null;
+}
+
+type LoopItemRefArgs = {
+  itemId?: string | null;
+  itemText?: string | null;
+};
+
+async function resolveLoopItemRef(
+  db: SQLiteDatabase,
+  loopId: string,
+  args: LoopItemRefArgs,
+  options: { unfinishedOnly?: boolean } = {}
+): Promise<{ id: string; text: string }> {
+  if (args.itemId) {
+    const item = await getLoopItemById(db, args.itemId);
+    if (!item || item.loop_id !== loopId) {
+      throw new AssistantToolError('not_found', 'Capsule not found.');
+    }
+    if (options.unfinishedOnly && item.done) {
+      throw new AssistantToolError('not_found', 'That capsule is already done.');
+    }
+    return { id: item.id, text: item.text };
+  }
+  const text = args.itemText?.trim();
+  if (!text) {
+    throw new AssistantToolError(
+      'invalid_arguments',
+      'Provide a capsule id or capsule text.'
+    );
+  }
+  const items = await loopService.getLoopItems(db, loopId);
+  let matches = items.filter(
+    (item) =>
+      item.text.trim().toLowerCase() === text.toLowerCase() &&
+      (!options.unfinishedOnly || !item.done)
+  );
+  if (matches.length === 0) {
+    matches = items.filter(
+      (item) =>
+        item.text.trim().toLowerCase().includes(text.toLowerCase()) &&
+        (!options.unfinishedOnly || !item.done)
+    );
+  }
+  if (matches.length === 1 && matches[0]) {
+    return { id: matches[0].id, text: matches[0].text };
+  }
+  if (matches.length === 0) {
+    throw new AssistantToolError(
+      'not_found',
+      `Capsule “${text}” was not found in this loop.`
+    );
+  }
+  throw new AssistantToolError(
+    'invalid_arguments',
+    `Multiple capsules match “${text}”. Use the capsule id.`
+  );
+}
+
+async function resolveStandaloneCapsule(
+  db: SQLiteDatabase,
+  args: { capsuleId?: string | null; capsuleText?: string | null }
+): Promise<{ id: string; text: string }> {
+  if (args.capsuleId) {
+    const capsule = await getStandaloneCapsuleById(db, args.capsuleId);
+    if (!capsule) {
+      throw new AssistantToolError('not_found', 'Capsule not found.');
+    }
+    return { id: capsule.id, text: capsule.text };
+  }
+  const text = args.capsuleText?.trim();
+  if (!text) {
+    throw new AssistantToolError(
+      'invalid_arguments',
+      'Provide a capsule id or capsule text.'
+    );
+  }
+  const open = await listStandaloneCapsules(db, false);
+  const all = [
+    ...open,
+    ...(await listStandaloneCapsules(db, true)),
+  ];
+  let matches = all.filter(
+    (capsule) => capsule.text.trim().toLowerCase() === text.toLowerCase()
+  );
+  if (matches.length === 0) {
+    matches = all.filter((capsule) =>
+      capsule.text.trim().toLowerCase().includes(text.toLowerCase())
+    );
+  }
+  if (matches.length === 1 && matches[0]) {
+    return { id: matches[0].id, text: matches[0].text };
+  }
+  if (matches.length === 0) {
+    throw new AssistantToolError(
+      'not_found',
+      `Standalone capsule “${text}” was not found.`
+    );
+  }
+  throw new AssistantToolError(
+    'invalid_arguments',
+    `Multiple standalone capsules match “${text}”. Use the capsule id.`
+  );
 }
 
 function loopSummary(
@@ -180,24 +356,36 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ loopId: string }>({
+    defineTool<{ loopId?: string | null; loopSequence?: number }>({
       name: 'get_loop',
-      description: 'Read a specific loop and its capsules by loop id.',
+      description:
+        'Read a specific loop and its capsules by loop id or loop number (H3).',
       risk: 'read',
       parameters: {
         type: 'object',
-        properties: { loopId: { type: 'string' } },
-        required: ['loopId'],
+        properties: {
+          loopId: { type: 'string' },
+          loopSequence: { type: 'integer' },
+        },
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
-        return { loopId: requireString(record, 'loopId', { max: 128 }) };
+        return {
+          loopId: optionalString(record, 'loopId', 128) ?? undefined,
+          loopSequence: optionalSequence(record, 'loopSequence'),
+        };
       },
-      describe: (args) => `Read loop ${args.loopId}.`,
+      describe: (args) =>
+        args.loopId
+          ? `Read loop ${args.loopId}.`
+          : `Read loop H${args.loopSequence}.`,
       execute: async (context, args) => {
-        const result = await requireLoop(context.db, args.loopId);
-        const items = await loopService.getLoopItems(context.db, args.loopId);
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+        });
+        const result = await requireLoop(context.db, loopId as string);
+        const items = await loopService.getLoopItems(context.db, loopId as string);
         return {
           summary: `Loop H${result.loop.sequence_number} ${result.loop.status.toLowerCase()}.`,
           data: loopSummary(result.loop, result.elapsedSeconds, items),
@@ -205,24 +393,36 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ loopId: string }>({
+    defineTool<{ loopId?: string | null; loopSequence?: number }>({
       name: 'get_loop_items',
-      description: 'Read the capsules belonging to a loop.',
+      description:
+        'Read the capsules belonging to a loop by loop id or loop number (H3).',
       risk: 'read',
       parameters: {
         type: 'object',
-        properties: { loopId: { type: 'string' } },
-        required: ['loopId'],
+        properties: {
+          loopId: { type: 'string' },
+          loopSequence: { type: 'integer' },
+        },
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
-        return { loopId: requireString(record, 'loopId', { max: 128 }) };
+        return {
+          loopId: optionalString(record, 'loopId', 128) ?? undefined,
+          loopSequence: optionalSequence(record, 'loopSequence'),
+        };
       },
-      describe: (args) => `Read capsules for loop ${args.loopId}.`,
+      describe: (args) =>
+        args.loopId
+          ? `Read capsules for loop ${args.loopId}.`
+          : `Read capsules for loop H${args.loopSequence}.`,
       execute: async (context, args) => {
-        await requireLoop(context.db, args.loopId);
-        const items = await loopService.getLoopItems(context.db, args.loopId);
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+        });
+        await requireLoop(context.db, loopId as string);
+        const items = await loopService.getLoopItems(context.db, loopId as string);
         return {
           summary: `${items.length} capsules.`,
           data: items.map((item) => ({
@@ -308,24 +508,36 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ taskId: string }>({
+    defineTool<{ taskId?: string | null; taskTitle?: string | null }>({
       name: 'get_task_detail',
       description:
-        'Read one task, its child capsules, open capsules, and total focused time.',
+        'Read one task, its child capsules, open capsules, and total focused time by task id or title.',
       risk: 'read',
       parameters: {
         type: 'object',
-        properties: { taskId: { type: 'string' } },
-        required: ['taskId'],
+        properties: {
+          taskId: { type: 'string' },
+          taskTitle: { type: 'string' },
+        },
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
-        return { taskId: requireString(record, 'taskId', { max: 128 }) };
+        const taskId = optionalString(record, 'taskId', 128) ?? undefined;
+        const taskTitle = optionalTitle(record, 'taskTitle', 200) ?? undefined;
+        if (!taskId && !taskTitle) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'Provide a task id or task title.'
+          );
+        }
+        return { taskId, taskTitle };
       },
-      describe: (args) => `Read task ${args.taskId}.`,
+      describe: (args) =>
+        args.taskId ? `Read task ${args.taskId}.` : `Read task ${args.taskTitle}.`,
       execute: async (context, args) => {
-        const detail = await getTaskDetail(context.db, args.taskId);
+        const taskId = await resolveTaskRef(context.db, args, true);
+        const detail = await getTaskDetail(context.db, taskId as string);
         if (!detail) {
           throw new AssistantToolError('not_found', 'Task not found.');
         }
@@ -431,39 +643,48 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       period: 'day' | 'week' | 'month';
       anchorDate?: string;
       taskId?: string;
+      taskTitle?: string;
     }>({
       name: 'get_focus_stats',
       description:
-        'Read focused-time totals for a day, week, or month, optionally limited to a task and its descendants.',
+        'Read focused-time totals for a day, week, or month, optionally limited to a task and its descendants. Use day for today/yesterday, week for this/last week, month for this/last month.',
       risk: 'read',
       parameters: {
         type: 'object',
         properties: {
-          period: { type: 'string', enum: ['day', 'week', 'month'] },
+          period: {
+            type: 'string',
+            enum: ['day', 'week', 'month'],
+            description: 'day = today/yesterday, week = this/last week, month = this/last month',
+          },
           anchorDate: { type: 'string', description: 'YYYY-MM-DD, defaults to today' },
           taskId: { type: 'string' },
+          taskTitle: { type: 'string' },
         },
         required: ['period'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
-        const anchorDate = optionalString(record, 'anchorDate', 10) ?? undefined;
-        if (anchorDate && !/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
-          throw new AssistantToolError(
-            'invalid_arguments',
-            '"anchorDate" must use YYYY-MM-DD.'
-          );
-        }
+        const period = parsePeriodRequest(
+          record.period,
+          record.anchorDate,
+          ['day', 'week', 'month'] as const
+        );
         return {
-          period: requireEnum(record, 'period', ['day', 'week', 'month'] as const),
-          anchorDate,
+          ...period,
           taskId: optionalString(record, 'taskId', 128) ?? undefined,
+          taskTitle: optionalTitle(record, 'taskTitle', 200) ?? undefined,
         };
       },
       describe: (args) => `Read ${args.period} focus stats.`,
       execute: async (context, args) => {
-        const stats = await getAssistantFocusStats(context.db, args);
+        const taskId = await resolveTaskRef(context.db, args, false);
+        const stats = await getAssistantFocusStats(context.db, {
+          period: args.period,
+          anchorDate: args.anchorDate,
+          taskId: taskId ?? undefined,
+        });
         return {
           summary: `${stats.totalSeconds} focused seconds across ${stats.activeDays} active days.`,
           data: stats,
@@ -498,10 +719,11 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       title: string;
       description?: string | null;
       parentTaskId?: string | null;
+      parentTaskTitle?: string | null;
     }>({
       name: 'create_task',
       description:
-        'Create a task container or capsule. Parent is optional; only subtasks can be loop targets.',
+        'Create a task container or subtask. Parent is optional; only subtasks can be loop targets. Omit description unless the user provided one.',
       risk: 'write',
       parameters: {
         type: 'object',
@@ -509,6 +731,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           title: { type: 'string' },
           description: { type: 'string' },
           parentTaskId: { type: 'string' },
+          parentTaskTitle: { type: 'string' },
         },
         required: ['title'],
         additionalProperties: false,
@@ -519,12 +742,28 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           title: requireString(record, 'title', { max: 120 }),
           description: optionalString(record, 'description', 1000) ?? null,
           parentTaskId: optionalString(record, 'parentTaskId', 128) ?? null,
+          parentTaskTitle:
+            optionalTitle(record, 'parentTaskTitle', 200) ?? null,
         };
       },
       describe: (args) => `Create task “${args.title}”.`,
       targetIds: (args) => (args.parentTaskId ? [args.parentTaskId] : []),
       prepare: async (context, args) => {
-        const parentTitle = await requireTaskTitle(context.db, args.parentTaskId);
+        const userText = context.userText?.toLowerCase() ?? '';
+        if (
+          args.description &&
+          !userText.includes('description') &&
+          !userText.includes(args.description.toLowerCase())
+        ) {
+          // Models often invent a plausible description for a bare title.
+          args.description = null;
+        }
+        const parentTaskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.parentTaskId, taskTitle: args.parentTaskTitle },
+          false
+        );
+        const parentTitle = await requireTaskTitle(context.db, parentTaskId);
         return {
           description: parentTitle
             ? t('assistant.actionCreateSubtask', {
@@ -532,7 +771,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
                 parent: parentTitle,
               })
             : t('assistant.actionCreateTask', { title: args.title }),
-          targetIds: args.parentTaskId ? [args.parentTaskId] : [],
+          targetIds: parentTaskId ? [parentTaskId] : [],
           details: [
             { key: 'title', value: args.title },
             ...(args.description
@@ -550,10 +789,15 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
         };
       },
       execute: async (context, args) => {
+        const parentTaskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.parentTaskId, taskTitle: args.parentTaskTitle },
+          false
+        );
         const task = await createTask(context.db, {
           title: args.title,
           description: args.description,
-          parentTaskId: args.parentTaskId,
+          parentTaskId,
         });
         const created = await getTaskById(context.db, task.id);
         if (!created) {
@@ -566,24 +810,41 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ taskId: string; title?: string; description?: string | null }>({
+    defineTool<{
+      taskId?: string | null;
+      taskName?: string | null;
+      title?: string;
+      description?: string | null;
+    }>({
       name: 'update_task',
-      description: 'Update a task title or description.',
+      description:
+        'Update a task title or description by task id or task name. taskName identifies the existing task; title is the new title.',
       risk: 'write',
       parameters: {
         type: 'object',
         properties: {
           taskId: { type: 'string' },
-          title: { type: 'string' },
+          taskName: { type: 'string', description: 'Existing task name' },
+          title: { type: 'string', description: 'New title' },
           description: { type: 'string' },
         },
-        required: ['taskId'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
+        const taskId = optionalString(record, 'taskId', 128) ?? undefined;
+        const taskName =
+          optionalTitle(record, 'taskName', 200) ??
+          optionalTitle(record, 'taskTitle', 200) ??
+          undefined;
         const title = optionalString(record, 'title', 120);
         const description = optionalString(record, 'description', 1000);
+        if (!taskId && !taskName) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'Provide a task id or task name.'
+          );
+        }
         if (title == null && description === undefined) {
           throw new AssistantToolError(
             'invalid_arguments',
@@ -591,20 +852,27 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           );
         }
         return {
-          taskId: requireString(record, 'taskId', { max: 128 }),
+          taskId,
+          taskName,
           title: title ?? undefined,
           description,
         };
       },
-      describe: (args) => `Update task ${args.taskId}.`,
-      targetIds: (args) => [args.taskId],
+      describe: (args) =>
+        args.taskId ? `Update task ${args.taskId}.` : `Update task ${args.taskName}.`,
+      targetIds: (args) => (args.taskId ? [args.taskId] : []),
       prepare: async (context, args) => {
-        const title = await requireTaskTitle(context.db, args.taskId);
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        const title = await requireTaskTitle(context.db, taskId as string);
         return {
           description: t('assistant.actionUpdateTask', {
-            title: title ?? args.taskId,
+            title: title ?? taskId ?? 'task',
           }),
-          targetIds: [args.taskId],
+          targetIds: taskId ? [taskId] : [],
           details: [
             ...(args.title
               ? [{ key: 'title' as const, value: args.title }]
@@ -621,14 +889,24 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
         };
       },
       revalidate: async (context, args) => {
-        await requireTaskTitle(context.db, args.taskId);
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        await requireTaskTitle(context.db, taskId);
       },
       execute: async (context, args) => {
-        await updateTaskDetails(context.db, args.taskId, {
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        await updateTaskDetails(context.db, taskId as string, {
           title: args.title,
           description: args.description,
         });
-        const updated = await getTaskById(context.db, args.taskId);
+        const updated = await getTaskById(context.db, taskId as string);
         if (!updated) {
           throw new AssistantToolError('stale', 'Task no longer exists.');
         }
@@ -636,51 +914,106 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ taskId: string; newParentId: string | null }>({
+    defineTool<{
+      taskId?: string | null;
+      taskName?: string | null;
+      newParentId?: string | null;
+      newParentTitle?: string | null;
+    }>({
       name: 'move_task',
-      description: 'Move a task under another task, or to the root.',
+      description:
+        'Move a task under another task by id or name, or to the root. taskName identifies the task being moved.',
       risk: 'write',
       parameters: {
         type: 'object',
         properties: {
           taskId: { type: 'string' },
+          taskName: { type: 'string', description: 'Existing task name' },
           newParentId: { type: 'string' },
+          newParentTitle: { type: 'string' },
         },
-        required: ['taskId'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
+        const taskId = optionalString(record, 'taskId', 128) ?? undefined;
+        const taskName =
+          optionalTitle(record, 'taskName', 200) ??
+          optionalTitle(record, 'taskTitle', 200) ??
+          undefined;
+        if (!taskId && !taskName) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'Provide a task id or task name.'
+          );
+        }
         return {
-          taskId: requireString(record, 'taskId', { max: 128 }),
-          newParentId: optionalString(record, 'newParentId', 128) ?? null,
+          taskId,
+          taskName,
+          newParentId: optionalString(record, 'newParentId', 128) ?? undefined,
+          newParentTitle:
+            optionalTitle(record, 'newParentTitle', 200) ?? undefined,
         };
       },
-      describe: (args) => `Move task ${args.taskId}.`,
-      targetIds: (args) => [args.taskId, ...(args.newParentId ? [args.newParentId] : [])],
+      describe: (args) =>
+        args.taskId ? `Move task ${args.taskId}.` : `Move task ${args.taskName}.`,
+      targetIds: (args) =>
+        args.taskId
+          ? [args.taskId, ...(args.newParentId ? [args.newParentId] : [])]
+          : [],
       prepare: async (context, args) => {
-        const title = await requireTaskTitle(context.db, args.taskId);
-        const parentTitle = await requireTaskTitle(context.db, args.newParentId);
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        const newParentId = await resolveTaskRef(
+          context.db,
+          { taskId: args.newParentId, taskTitle: args.newParentTitle },
+          false
+        );
+        const title = await requireTaskTitle(context.db, taskId as string);
+        const parentTitle = await requireTaskTitle(context.db, newParentId);
         return {
           description: parentTitle
             ? t('assistant.actionMoveTask', {
-                title: title ?? args.taskId,
+                title: title ?? taskId ?? 'task',
                 parent: parentTitle,
               })
             : t('assistant.actionMoveTaskRoot', {
-                title: title ?? args.taskId,
+                title: title ?? taskId ?? 'task',
               }),
-          targetIds: [args.taskId],
+          targetIds: taskId ? [taskId] : [],
         };
       },
       revalidate: async (context, args) => {
-        await requireTaskTitle(context.db, args.taskId);
-        await requireTaskTitle(context.db, args.newParentId);
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        await requireTaskTitle(context.db, taskId);
+        const newParentId = await resolveTaskRef(
+          context.db,
+          { taskId: args.newParentId, taskTitle: args.newParentTitle },
+          false
+        );
+        await requireTaskTitle(context.db, newParentId);
       },
       execute: async (context, args) => {
-        await moveTask(context.db, args.taskId, args.newParentId);
-        const moved = await getTaskById(context.db, args.taskId);
-        if (!moved || moved.parent_task_id !== args.newParentId) {
+        const taskId = await resolveTaskRef(
+          context.db,
+          { taskId: args.taskId, taskTitle: args.taskName },
+          true
+        );
+        const newParentId = await resolveTaskRef(
+          context.db,
+          { taskId: args.newParentId, taskTitle: args.newParentTitle },
+          false
+        );
+        await moveTask(context.db, taskId as string, newParentId);
+        const moved = await getTaskById(context.db, taskId as string);
+        if (!moved || moved.parent_task_id !== newParentId) {
           throw new AssistantToolError('stale', 'Task no longer exists.');
         }
         return { summary: t('assistant.resultTaskMoved') };
@@ -715,30 +1048,41 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ loopId: string; text: string }>({
+    defineTool<{
+      loopId?: string | null;
+      loopSequence?: number;
+      text: string;
+    }>({
       name: 'add_loop_item',
-      description: 'Add a capsule to an active or paused loop.',
+      description:
+        'Add a capsule to the active or paused loop, or to a loop by id/number.',
       risk: 'write',
       parameters: {
         type: 'object',
         properties: {
           loopId: { type: 'string' },
+          loopSequence: { type: 'integer' },
           text: { type: 'string' },
         },
-        required: ['loopId', 'text'],
+        required: ['text'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
         return {
-          loopId: requireString(record, 'loopId', { max: 128 }),
+          loopId: optionalString(record, 'loopId', 128) ?? undefined,
+          loopSequence: optionalSequence(record, 'loopSequence'),
           text: requireString(record, 'text', { max: 200 }),
         };
       },
-      describe: (args) => `Add capsule “${args.text}” to loop ${args.loopId}.`,
-      targetIds: (args) => [args.loopId],
+      describe: (args) => `Add capsule “${args.text}” to the loop.`,
+      targetIds: (args) => (args.loopId ? [args.loopId] : []),
       prepare: async (context, args) => {
-        const loop = await requireLoop(context.db, args.loopId);
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        const loop = await requireLoop(context.db, loopId as string);
         if (loop.loop.status === 'COMPLETED') {
           throw new AssistantToolError('stale', 'That loop is already complete.');
         }
@@ -747,20 +1091,28 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             text: args.text,
             sequence: loop.loop.sequence_number,
           }),
-          targetIds: [args.loopId],
+          targetIds: [loopId as string],
         };
       },
       revalidate: async (context, args) => {
-        await requireLoop(context.db, args.loopId);
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        await requireLoop(context.db, loopId as string);
       },
       execute: async (context, args) => {
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
         const item = await loopService.addLoopItem(
           context.db,
-          args.loopId,
+          loopId as string,
           args.text
         );
         const added = await getLoopItemById(context.db, item.id);
-        if (!added || added.loop_id !== args.loopId) {
+        if (!added || added.loop_id !== loopId) {
           throw new AssistantToolError('stale', 'The capsule was not saved.');
         }
         return {
@@ -770,50 +1122,60 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ capsuleId: string }>({
+    defineTool<{
+      capsuleId?: string | null;
+      capsuleText?: string | null;
+    }>({
       name: 'complete_standalone_capsule',
-      description: 'Mark a standalone capsule completed.',
+      description:
+        'Mark a standalone capsule completed by id or capsule text.',
       risk: 'write',
       parameters: {
         type: 'object',
-        properties: { capsuleId: { type: 'string' } },
-        required: ['capsuleId'],
+        properties: {
+          capsuleId: { type: 'string' },
+          capsuleText: { type: 'string' },
+        },
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
-        return { capsuleId: requireString(record, 'capsuleId', { max: 128 }) };
-      },
-      describe: (args) => `Complete standalone capsule ${args.capsuleId}.`,
-      targetIds: (args) => [args.capsuleId],
-      prepare: async (context, args) => {
-        const capsule = await getStandaloneCapsuleById(context.db, args.capsuleId);
-        if (!capsule) {
-          throw new AssistantToolError('not_found', 'Capsule not found.');
+        const capsuleId = optionalString(record, 'capsuleId', 128) ?? undefined;
+        const capsuleText =
+          optionalTitle(record, 'capsuleText', 200) ?? undefined;
+        if (!capsuleId && !capsuleText) {
+          throw new AssistantToolError(
+            'invalid_arguments',
+            'Provide a capsule id or capsule text.'
+          );
         }
+        return { capsuleId, capsuleText };
+      },
+      describe: (args) =>
+        args.capsuleId
+          ? `Complete standalone capsule ${args.capsuleId}.`
+          : `Complete standalone capsule “${args.capsuleText}”.`,
+      targetIds: (args) => (args.capsuleId ? [args.capsuleId] : []),
+      prepare: async (context, args) => {
+        const capsule = await resolveStandaloneCapsule(context.db, args);
         return {
           description: t('assistant.actionCompleteCapsule', {
             text: capsule.text,
           }),
-          targetIds: [args.capsuleId],
+          targetIds: [capsule.id],
         };
       },
       revalidate: async (context, args) => {
-        const capsule = await getStandaloneCapsuleById(context.db, args.capsuleId);
-        if (!capsule) {
-          throw new AssistantToolError('stale', 'That capsule no longer exists.');
-        }
+        await resolveStandaloneCapsule(context.db, args);
       },
       execute: async (context, args) => {
-        const capsule = await getStandaloneCapsuleById(context.db, args.capsuleId);
+        const ref = await resolveStandaloneCapsule(context.db, args);
+        const capsule = await getStandaloneCapsuleById(context.db, ref.id);
         if (!capsule) {
           throw new AssistantToolError('stale', 'That capsule no longer exists.');
         }
         await setStandaloneCapsuleDone(context.db, capsule, true);
-        const updated = await getStandaloneCapsuleById(
-          context.db,
-          args.capsuleId
-        );
+        const updated = await getStandaloneCapsuleById(context.db, ref.id);
         if (!updated) {
           throw new AssistantToolError('stale', 'That capsule no longer exists.');
         }
@@ -821,53 +1183,81 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ loopId: string; itemId: string }>({
+    defineTool<{
+      loopId?: string | null;
+      loopSequence?: number;
+      itemId?: string | null;
+      itemText?: string | null;
+    }>({
       name: 'complete_loop_item',
-      description: 'Mark a capsule in a loop completed.',
+      description:
+        'Mark a capsule in the active loop or a specific loop completed, by capsule id or text.',
       risk: 'write',
       parameters: {
         type: 'object',
         properties: {
           loopId: { type: 'string' },
+          loopSequence: { type: 'integer' },
           itemId: { type: 'string' },
+          itemText: { type: 'string' },
         },
-        required: ['loopId', 'itemId'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
         return {
-          loopId: requireString(record, 'loopId', { max: 128 }),
-          itemId: requireString(record, 'itemId', { max: 128 }),
+          loopId: optionalString(record, 'loopId', 128) ?? undefined,
+          loopSequence: optionalSequence(record, 'loopSequence'),
+          itemId: optionalString(record, 'itemId', 128) ?? undefined,
+          itemText: optionalTitle(record, 'itemText', 200) ?? undefined,
         };
       },
-      describe: (args) => `Complete loop capsule ${args.itemId}.`,
-      targetIds: (args) => [args.loopId, args.itemId],
+      describe: (args) =>
+        args.itemId
+          ? `Complete loop capsule ${args.itemId}.`
+          : `Complete loop capsule “${args.itemText}”.`,
+      targetIds: (args) =>
+        args.loopId ? [args.loopId, ...(args.itemId ? [args.itemId] : [])] : [],
       prepare: async (context, args) => {
-        const item = await getLoopItemById(context.db, args.itemId);
-        if (!item || item.loop_id !== args.loopId) {
-          throw new AssistantToolError('not_found', 'Capsule not found.');
-        }
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        const item = await resolveLoopItemRef(
+          context.db,
+          loopId as string,
+          args
+        );
         return {
           description: t('assistant.actionCompleteCapsule', { text: item.text }),
-          targetIds: [args.loopId, args.itemId],
+          targetIds: [loopId as string, item.id],
         };
       },
       revalidate: async (context, args) => {
-        const item = await getLoopItemById(context.db, args.itemId);
-        if (!item || item.loop_id !== args.loopId) {
-          throw new AssistantToolError('stale', 'That capsule no longer exists.');
-        }
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        await resolveLoopItemRef(context.db, loopId as string, args);
       },
       execute: async (context, args) => {
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        const item = await resolveLoopItemRef(
+          context.db,
+          loopId as string,
+          args
+        );
         await loopService.setLoopItemDone(
           context.db,
-          args.loopId,
-          args.itemId,
+          loopId as string,
+          item.id,
           true
         );
-        const updatedItem = await getLoopItemById(context.db, args.itemId);
-        if (!updatedItem || updatedItem.loop_id !== args.loopId) {
+        const updatedItem = await getLoopItemById(context.db, item.id);
+        if (!updatedItem || updatedItem.loop_id !== loopId) {
           throw new AssistantToolError('stale', 'That capsule no longer exists.');
         }
         return { summary: t('assistant.resultCapsuleCompleted') };
@@ -878,6 +1268,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       durationMinutes: number;
       focus?: string | null;
       taskId?: string | null;
+      taskTitle?: string | null;
       items: { text: string }[];
     }>({
       name: 'start_loop',
@@ -890,6 +1281,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           durationMinutes: { type: 'integer', minimum: 1, maximum: 1440 },
           focus: { type: 'string' },
           taskId: { type: 'string' },
+          taskTitle: { type: 'string' },
           items: {
             type: 'array',
             minItems: 1,
@@ -905,7 +1297,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
       parse: (args) => {
         const record = requireObject(args);
-        const durationMinutes = optionalInteger(record, 'durationMinutes', {
+        const durationMinutes = optionalIntegerLike(record, 'durationMinutes', {
           min: 1,
           max: 1440,
         });
@@ -926,6 +1318,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           durationMinutes,
           focus: optionalString(record, 'focus', 280) ?? null,
           taskId: optionalString(record, 'taskId', 128) ?? null,
+          taskTitle: optionalTitle(record, 'taskTitle', 200) ?? null,
           items,
         };
       },
@@ -942,7 +1335,8 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             `Loop H${existing.sequence_number} is already ${existing.status.toLowerCase()}.`
           );
         }
-        const task = await requireTask(context.db, args.taskId);
+        const taskId = await resolveTaskRef(context.db, args, false);
+        const task = await requireTask(context.db, taskId);
         const taskTitle = task?.title ?? null;
         if (task && task.parent_task_id === null) {
           throw new AssistantToolError(
@@ -959,7 +1353,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             : t('assistant.actionStartLoop', {
                 duration: args.durationMinutes,
               }),
-          targetIds: args.taskId ? [args.taskId] : [],
+          targetIds: taskId ? [taskId] : [],
           details: [
             { key: 'duration', value: String(args.durationMinutes) },
             ...(args.focus ? [{ key: 'focus' as const, value: args.focus }] : []),
@@ -983,20 +1377,22 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             'Another loop is already active or paused.'
           );
         }
-        await requireTaskTitle(context.db, args.taskId);
+        const taskId = await resolveTaskRef(context.db, args, false);
+        await requireTaskTitle(context.db, taskId);
       },
       execute: async (context, args) => {
+        const taskId = await resolveTaskRef(context.db, args, false);
         const loop = await loopService.startLoop(context.db, {
           focus: args.focus,
-          taskId: args.taskId,
+          taskId,
           targetDurationSeconds: args.durationMinutes * 60,
           items: args.items,
         });
         await syncLoopNotification(context.db, loop, {
           requestPermission: true,
         }).catch(() => undefined);
-        if (args.taskId) {
-          await markTaskInProgress(context.db, args.taskId).catch(() => undefined);
+        if (taskId) {
+          await markTaskInProgress(context.db, taskId).catch(() => undefined);
         }
         await useLoopStore.getState().refresh(context.db).catch(() => undefined);
         return {
@@ -1098,6 +1494,7 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       rollForward?: string | null;
       note?: string | null;
       rollForwardTaskId?: string | null;
+      rollForwardTaskTitle?: string | null;
     }>({
       name: 'complete_loop',
       description: 'Complete the current loop and save optional journal fields.',
@@ -1109,17 +1506,20 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
           rollForward: { type: 'string' },
           note: { type: 'string' },
           rollForwardTaskId: { type: 'string' },
+          rollForwardTaskTitle: { type: 'string' },
         },
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
         return {
-          done: optionalString(record, 'done', 2000) ?? null,
-          rollForward: optionalString(record, 'rollForward', 2000) ?? null,
-          note: optionalString(record, 'note', 2000) ?? null,
+          done: optionalJournalText(record, 'done', 2000) ?? null,
+          rollForward: optionalJournalText(record, 'rollForward', 2000) ?? null,
+          note: optionalJournalText(record, 'note', 2000) ?? null,
           rollForwardTaskId:
             optionalString(record, 'rollForwardTaskId', 128) ?? null,
+          rollForwardTaskTitle:
+            optionalTitle(record, 'rollForwardTaskTitle', 200) ?? null,
         };
       },
       describe: () => 'Complete the current loop.',
@@ -1128,16 +1528,21 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
         if (!loop) {
           throw new AssistantToolError('stale', 'There is no active or paused loop.');
         }
-        if (args.rollForwardTaskId) {
-          await requireTask(context.db, args.rollForwardTaskId);
-        }
+        const rollForwardTaskId = await resolveTaskRef(
+          context.db,
+          {
+            taskId: args.rollForwardTaskId,
+            taskTitle: args.rollForwardTaskTitle,
+          },
+          false
+        );
         return {
           description: t('assistant.actionCompleteLoop', {
             sequence: loop.sequence_number,
           }),
           targetIds: [
             loop.id,
-            ...(args.rollForwardTaskId ? [args.rollForwardTaskId] : []),
+            ...(rollForwardTaskId ? [rollForwardTaskId] : []),
           ],
           details: [
             ...(args.done
@@ -1155,20 +1560,33 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
         if (!loop) {
           throw new AssistantToolError('stale', 'There is no active or paused loop.');
         }
-        if (args.rollForwardTaskId) {
-          await requireTask(context.db, args.rollForwardTaskId);
-        }
+        await resolveTaskRef(
+          context.db,
+          {
+            taskId: args.rollForwardTaskId,
+            taskTitle: args.rollForwardTaskTitle,
+          },
+          false
+        );
       },
       execute: async (context, args) => {
         const loop = await loopService.getActiveLoop(context.db);
         if (!loop) {
           throw new AssistantToolError('stale', 'There is no active or paused loop.');
         }
+        const rollForwardTaskId = await resolveTaskRef(
+          context.db,
+          {
+            taskId: args.rollForwardTaskId,
+            taskTitle: args.rollForwardTaskTitle,
+          },
+          false
+        );
         const completed = await loopService.completeLoop(context.db, loop.id, {
           done: args.done,
           rollForward: args.rollForward,
           note: args.note,
-          rollForwardTaskId: args.rollForwardTaskId,
+          rollForwardTaskId,
         });
         await cancelLoopNotification(context.db, completed.id).catch(() => undefined);
         await useLoopStore.getState().refresh(context.db).catch(() => undefined);
@@ -1180,60 +1598,85 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
     }),
 
-    defineTool<{ loopId: string; itemId: string }>({
+    defineTool<{
+      loopId?: string | null;
+      loopSequence?: number;
+      itemId?: string | null;
+      itemText?: string | null;
+    }>({
       name: 'set_current_loop_item',
-      description: 'Move the active focus to a specific capsule in a loop.',
+      description:
+        'Move the active focus to a specific unfinished capsule by capsule id or text.',
       risk: 'timer',
       parameters: {
         type: 'object',
         properties: {
           loopId: { type: 'string' },
+          loopSequence: { type: 'integer' },
           itemId: { type: 'string' },
+          itemText: { type: 'string' },
         },
-        required: ['loopId', 'itemId'],
         additionalProperties: false,
       },
       parse: (args) => {
         const record = requireObject(args);
         return {
-          loopId: requireString(record, 'loopId', { max: 128 }),
-          itemId: requireString(record, 'itemId', { max: 128 }),
+          loopId: optionalString(record, 'loopId', 128) ?? undefined,
+          loopSequence: optionalSequence(record, 'loopSequence'),
+          itemId: optionalString(record, 'itemId', 128) ?? undefined,
+          itemText: optionalTitle(record, 'itemText', 200) ?? undefined,
         };
       },
       describe: (args) =>
-        `Move focus to capsule ${args.itemId} in loop ${args.loopId}.`,
-      targetIds: (args) => [args.loopId, args.itemId],
+        args.itemId
+          ? `Move focus to capsule ${args.itemId}.`
+          : `Move focus to capsule “${args.itemText}”.`,
+      targetIds: (args) =>
+        args.loopId ? [args.loopId, ...(args.itemId ? [args.itemId] : [])] : [],
       prepare: async (context, args) => {
-        await requireLoop(context.db, args.loopId);
-        const item = await getLoopItemById(context.db, args.itemId);
-        if (!item || item.loop_id !== args.loopId || item.done) {
-          throw new AssistantToolError(
-            'not_found',
-            'That unfinished capsule was not found in this loop.'
-          );
-        }
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        await requireLoop(context.db, loopId as string);
+        const item = await resolveLoopItemRef(
+          context.db,
+          loopId as string,
+          args,
+          { unfinishedOnly: true }
+        );
         return {
           description: t('assistant.actionSwitchCapsule', {
             text: item.text,
           }),
-          targetIds: [args.loopId, args.itemId],
+          targetIds: [loopId as string, item.id],
         };
       },
       revalidate: async (context, args) => {
-        await requireLoop(context.db, args.loopId);
-        const item = await getLoopItemById(context.db, args.itemId);
-        if (!item || item.loop_id !== args.loopId || item.done) {
-          throw new AssistantToolError(
-            'stale',
-            'That capsule is no longer available.'
-          );
-        }
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        await requireLoop(context.db, loopId as string);
+        await resolveLoopItemRef(context.db, loopId as string, args, {
+          unfinishedOnly: true,
+        });
       },
       execute: async (context, args) => {
+        const loopId = await resolveLoopRef(context.db, args, {
+          required: true,
+          allowActive: true,
+        });
+        const item = await resolveLoopItemRef(
+          context.db,
+          loopId as string,
+          args,
+          { unfinishedOnly: true }
+        );
         await loopService.setCurrentLoopItem(
           context.db,
-          args.loopId,
-          args.itemId
+          loopId as string,
+          item.id
         );
         await useLoopStore.getState().refresh(context.db).catch(() => undefined);
         return { summary: t('assistant.resultCapsuleCurrent') };
@@ -1242,12 +1685,17 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
 
     defineTool<{ period: 'day' | 'month'; anchorDate: string }>({
       name: 'get_intention',
-      description: 'Read the focus target for a day or month.',
+      description:
+        'Read the focus target for a day or month. Use day for today/daily and month for monthly.',
       risk: 'read',
       parameters: {
         type: 'object',
         properties: {
-          period: { type: 'string', enum: ['day', 'month'] },
+          period: {
+            type: 'string',
+            enum: ['day', 'month'],
+            description: 'day = today/daily, month = this month/monthly',
+          },
           anchorDate: { type: 'string', description: 'YYYY-MM-DD, defaults to today' },
         },
         required: ['period'],
@@ -1255,15 +1703,15 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
       parse: (args) => {
         const record = requireObject(args);
-        const period = requireEnum(record, 'period', ['day', 'month'] as const);
-        const anchorDate = optionalString(record, 'anchorDate', 10) ?? currentDayKey();
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
-          throw new AssistantToolError(
-            'invalid_arguments',
-            '"anchorDate" must use YYYY-MM-DD.'
-          );
-        }
-        return { period, anchorDate };
+        const period = parsePeriodRequest(
+          record.period,
+          record.anchorDate,
+          ['day', 'month'] as const
+        );
+        return {
+          period: period.period,
+          anchorDate: period.anchorDate ?? currentDayKey(),
+        };
       },
       describe: (args) => `Read the ${args.period} focus target.`,
       execute: async (context, args) => {
@@ -1288,12 +1736,17 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       targetMinutes: number;
     }>({
       name: 'set_intention',
-      description: 'Set or clear the focus target for a day or month.',
+      description:
+        'Set or clear the focus target for a day or month. targetMinutes 0 clears it.',
       risk: 'write',
       parameters: {
         type: 'object',
         properties: {
-          period: { type: 'string', enum: ['day', 'month'] },
+          period: {
+            type: 'string',
+            enum: ['day', 'month'],
+            description: 'day = today/daily, month = this month/monthly',
+          },
           anchorDate: { type: 'string', description: 'YYYY-MM-DD, defaults to today' },
           targetMinutes: { type: 'integer', minimum: 0, maximum: 1440 },
         },
@@ -1302,15 +1755,12 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
       },
       parse: (args) => {
         const record = requireObject(args);
-        const period = requireEnum(record, 'period', ['day', 'month'] as const);
-        const anchorDate = optionalString(record, 'anchorDate', 10) ?? currentDayKey();
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(anchorDate)) {
-          throw new AssistantToolError(
-            'invalid_arguments',
-            '"anchorDate" must use YYYY-MM-DD.'
-          );
-        }
-        const targetMinutes = optionalInteger(record, 'targetMinutes', {
+        const period = parsePeriodRequest(
+          record.period,
+          record.anchorDate,
+          ['day', 'month'] as const
+        );
+        const targetMinutes = optionalIntegerLike(record, 'targetMinutes', {
           min: 0,
           max: 1440,
         });
@@ -1320,7 +1770,11 @@ export function createAssistantTools(db: SQLiteDatabase): AssistantTool[] {
             'A target duration is required.'
           );
         }
-        return { period, anchorDate, targetMinutes };
+        return {
+          period: period.period,
+          anchorDate: period.anchorDate ?? currentDayKey(),
+          targetMinutes,
+        };
       },
       describe: (args) =>
         args.targetMinutes > 0

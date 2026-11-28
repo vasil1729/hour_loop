@@ -88,7 +88,7 @@ describe('assistant store fails closed when the semantic model fails', () => {
   it('keeps an unknown request local when inference throws', async () => {
     await useAssistantStore
       .getState()
-      .send(guardedDb, config, 'Show my focus stats');
+      .send(guardedDb, config, 'Explain the Roman Empire');
 
     isolation.failClosedRequestsTested += 1;
     isolation.apiKeyLookups += key.mock.calls.length;
