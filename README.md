@@ -12,6 +12,20 @@ A **Loop** is a timestamped focus session that can be paused, resumed, and close
 
 Everything is stored in local SQLite. No account is required. The focus timer and your data work fully offline; the optional AI assistant and any ad-supported Play Store build use the network.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/timer.png" alt="Timer with a paused loop, progress ring and capsules" width="205" />
+  <img src="docs/screenshots/tasks.png" alt="Task pool with loose capsules" width="205" />
+  <img src="docs/screenshots/history-week.png" alt="Weekly focus history with daily bars" width="205" />
+  <img src="docs/screenshots/history-month.png" alt="Monthly focus history with a daily map" width="205" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Preferences, intentions and theme settings" width="205" />
+  <img src="docs/screenshots/assistant-settings.png" alt="Optional AI assistant settings" width="205" />
+</p>
+
 ## Features
 
 - **Loops** — start, pause, resume, and stop focus sessions with crash-safe persisted timing, a live progress bar and quick controls on the Timer tab, and a local-time session log. When the target is reached, the loop pauses and opens the completion journal automatically.
